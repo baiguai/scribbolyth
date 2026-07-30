@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(<<TARGET_NAME>> VERSION 1.0.0 LANGUAGES CXX)
+project(scribbolyth VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -12,18 +12,25 @@ FetchContent_Declare(ftxui
 FetchContent_MakeAvailable(ftxui)
 
 # Create executable
-add_executable(<<TARGET_NAME>>
-<<SOURCES>>
+add_executable(scribbolyth
+    src/main.cpp
+    src/editor/editor.cpp
+    src/treeview/treeview.cpp
+    src/keyboard/keymap.cpp
+    src/keyboard/default_keymaps.cpp
 )
 
 # FTXUI is terminal-only, no extra platform libs needed
 
 # Compiler-specific options
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(<<TARGET_NAME>> PRIVATE -Wall -Wextra -O2)
+    target_compile_options(scribbolyth PRIVATE -Wall -Wextra -O2)
 endif()
 
 # Set output directory
-set_target_properties(<<TARGET_NAME>> PROPERTIES
+set_target_properties(scribbolyth PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
+target_link_libraries(scribbolyth PRIVATE ftxui::screen)
+target_link_libraries(scribbolyth PRIVATE ftxui::dom)
+target_link_libraries(scribbolyth PRIVATE ftxui::component)

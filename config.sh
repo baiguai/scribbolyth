@@ -2,18 +2,18 @@
 
 # Central configuration - edit values here, all scripts pick them up
 
-APP_NAME="App"
+APP_NAME="scribbolyth"
 
 SOURCES=(
     "src/main.cpp"
-    "src/utils.cpp"
+    "src/editor/editor.cpp"
+    "src/treeview/treeview.cpp"
+    "src/keyboard/keymap.cpp"
+    "src/keyboard/default_keymaps.cpp"
 )
 
 LIBS=(
-    "libs/raylib/libraylib.a"
-)
-
-HEADERS=(
-    "src/main.h"
-    "src/utils.h"
+    "ftxui::screen"
+    "ftxui::dom"
+    "ftxui::component"
 )

@@ -5,70 +5,45 @@
 
 source ./config.sh
 
-# Windows build script for your app
-# Compiles your code into a Windows executable using MinGW-w64
-
 set -e
 
 echo "Building $APP_NAME for Windows..."
 
-# Determine build type
-BUILD_TYPE_FLAGS=""
-BUILD_MESSAGE="DEBUG"
+BUILD_TYPE="Debug"
 if [ "$1" == "r" ]; then
-    BUILD_TYPE_FLAGS="-s" # Strip all symbol tables
-    BUILD_MESSAGE="RELEASE"
+    BUILD_TYPE="Release"
 fi
-echo "Performing $BUILD_MESSAGE build."
+echo "Performing $BUILD_TYPE build."
 
+TOOLCHAIN="$(dirname "$0")/cmake/mingw-x86_64.cmake"
 
-# Check if source files exist - you can add or remove whichever files you like
-for f in "${SOURCES[@]}" "${HEADERS[@]}"; do
-    if [ ! -f "$f" ]; then
-        echo "Error: $f not found"
-        exit 1
+mkdir -p build-windows
+
+# Generate CMakeLists.txt from template
+cp CMakeLists.txt.in CMakeLists.txt
+sed -i "s/<<TARGET_NAME>>/$APP_NAME/g" CMakeLists.txt
+SOURCES_TMP=$(mktemp)
+for s in "${SOURCES[@]}"; do
+    echo "    $s" >> "$SOURCES_TMP"
+done
+sed -i "/^<<SOURCES>>$/{
+    r $SOURCES_TMP
+    d
+}" CMakeLists.txt
+rm -f "$SOURCES_TMP"
+for lib in "${LIBS[@]}"; do
+    if [[ "$lib" == *::* ]]; then
+        echo "target_link_libraries($APP_NAME PRIVATE $lib)" >> CMakeLists.txt
+    else
+        echo "target_link_libraries($APP_NAME PRIVATE \${CMAKE_SOURCE_DIR}/$lib)" >> CMakeLists.txt
     fi
 done
 
-# Check for MinGW-w64 compiler
-if ! command -v x86_64-w64-mingw32-g++ &> /dev/null; then
-    echo "Error: MinGW-w64 compiler not found"
-    echo "Install with: sudo apt install mingw-w64"
-    exit 1
-fi
+cmake -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN" \
+      -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+      -B build-windows \
+      -S .
 
-# Create build directory
-mkdir -p build-windows
+cmake --build build-windows
 
-# Compile with MinGW-w64 for Windows
-echo "Compiling with MinGW-w64..."
-x86_64-w64-mingw32-g++ -std=c++20 \
-    -O2 \
-    -Wall \
-    -Wextra \
-    -D_WIN32 \
-    -static-libgcc \
-    -static-libstdc++ \
-    -static \
-    $BUILD_TYPE_FLAGS \
-    -mwindows \
-    -o "build-windows/$APP_NAME.exe" \
-    "${SOURCES[@]}" \
-    "${LIBS[@]}" \
-    -luser32 \
-    -lgdi32 \
-    -lkernel32 \
-    -lwinmm
-
-
-
-
-# Add any custom cp's or other actions here
-# mkdir -p "./build-windows/data/themes"
-# cp -r ./themes/* "./build-windows/data/themes/" 2>/dev/null || true
-
-
-
-
-echo "Build complete: build-windows/$APP_NAME.exe"
-echo "Executable size: $(du -h "build-windows/$APP_NAME.exe" | cut -f1)"
+echo "Build complete: build-windows/bin/$APP_NAME.exe"

@@ -46,7 +46,11 @@ rm -f "$SOURCES_TMP"
 
 # Inject library files
 for lib in "${LIBS[@]}"; do
-    echo "target_link_libraries($APP_NAME PRIVATE \${CMAKE_SOURCE_DIR}/$lib)" >> ../CMakeLists.txt
+    if [[ "$lib" == *::* ]]; then
+        echo "target_link_libraries($APP_NAME PRIVATE $lib)" >> ../CMakeLists.txt
+    else
+        echo "target_link_libraries($APP_NAME PRIVATE \${CMAKE_SOURCE_DIR}/$lib)" >> ../CMakeLists.txt
+    fi
 done
 
 # Configure with CMake
