@@ -6,7 +6,7 @@
 #include "../keyboard/default_keymaps.hpp"
 
 struct EditorState {
-    Mode mode = Mode::NORMAL;
+    Mode mode = Mode::TREE;
     std::string command_buffer;
     int command_cursor = 0;
     int* active_child = nullptr;

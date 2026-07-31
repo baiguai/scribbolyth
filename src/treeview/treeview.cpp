@@ -25,6 +25,8 @@ namespace scribbolyth::treeview
             void ExpandSelected();
             void CollapseSelected();
             void OpenSelected();
+            void ExpandAll();
+            void CollapseAll();
 
             std::shared_ptr<EditorState> state_;
             TreeNode root_ = MakeRootFolder();
@@ -95,6 +97,18 @@ namespace scribbolyth::treeview
             {
                 CollectVisible(child, out);
             }
+        }
+    }
+
+    void SetAllExpanded(TreeNode& node, bool expanded, bool skip_root)
+    {
+        if (node.is_folder && !skip_root)
+        {
+            node.expanded = expanded;
+        }
+        for (auto& child : node.children)
+        {
+            SetAllExpanded(child, expanded, false);
         }
     }
 
@@ -197,6 +211,21 @@ namespace scribbolyth::treeview
         }
     }
 
+    void TreeView::ExpandAll()
+    {
+        SetAllExpanded(root_, true, false);
+    }
+
+    void TreeView::CollapseAll()
+    {
+        SetAllExpanded(root_, false, true);
+        auto visible = VisibleNodes();
+        if (std::find(visible.begin(), visible.end(), selected_) == visible.end())
+        {
+            selected_ = &root_;
+        }
+    }
+
     bool TreeView::OnEvent(ftxui::Event event)
     {
         if (state_->mode != Mode::TREE)
@@ -258,6 +287,12 @@ namespace scribbolyth::treeview
                 return true;
             case Action::TreeOpen:
                 OpenSelected();
+                return true;
+            case Action::TreeExpandAll:
+                ExpandAll();
+                return true;
+            case Action::TreeCollapseAll:
+                CollapseAll();
                 return true;
             case Action::EnterNormal:
                 state_->mode = Mode::NORMAL;
