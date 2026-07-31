@@ -27,6 +27,7 @@ namespace scribbolyth::treeview
             void OpenSelected();
             void ExpandAll();
             void CollapseAll();
+            void NewFolder();
 
             std::shared_ptr<EditorState> state_;
             TreeNode root_ = MakeRootFolder();
@@ -226,6 +227,60 @@ namespace scribbolyth::treeview
         }
     }
 
+    void TreeView::NewFolder()
+    {
+        auto make_folder = [](std::string name) {
+            TreeNode node;
+            node.name = std::move(name);
+            node.is_folder = true;
+            node.expanded = false;
+            return node;
+        };
+
+        auto next_name = [](const std::vector<TreeNode>& siblings) {
+            std::string base = "New Folder";
+            std::size_t n = 1;
+            while (true)
+            {
+                std::string candidate = (n == 1) ? base : base + " " + std::to_string(n);
+                bool taken = false;
+                for (const auto& s : siblings)
+                {
+                    if (s.name == candidate)
+                    {
+                        taken = true;
+                        break;
+                    }
+                }
+                if (!taken)
+                {
+                    return candidate;
+                }
+                ++n;
+            }
+        };
+
+        if (root_.children.empty() || selected_ == &root_)
+        {
+            root_.children.push_back(make_folder(next_name(root_.children)));
+            selected_ = &root_.children.back();
+            return;
+        }
+
+        if (TreeNode* parent = FindParent(root_, selected_))
+        {
+            for (auto it = parent->children.begin(); it != parent->children.end(); ++it)
+            {
+                if (&*it == selected_)
+                {
+                    auto inserted = parent->children.insert(it + 1, make_folder(next_name(parent->children)));
+                    selected_ = &*inserted;
+                    return;
+                }
+            }
+        }
+    }
+
     bool TreeView::OnEvent(ftxui::Event event)
     {
         if (state_->mode != Mode::TREE)
@@ -293,6 +348,9 @@ namespace scribbolyth::treeview
                 return true;
             case Action::TreeCollapseAll:
                 CollapseAll();
+                return true;
+            case Action::TreeNewFolder:
+                NewFolder();
                 return true;
             case Action::EnterNormal:
                 state_->mode = Mode::NORMAL;
