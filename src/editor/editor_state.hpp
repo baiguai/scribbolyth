@@ -7,6 +7,7 @@
 struct EditorState {
     Mode mode = Mode::NORMAL;
     std::string command_buffer;
+    int command_cursor = 0;
     int* active_child = nullptr;
 
     Keymap normal_keymap;

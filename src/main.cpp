@@ -14,7 +14,19 @@ int main() {
     int left_size = 30;
     auto main_split = ResizableSplitLeft(editor_wrap, treeview_wrap, &left_size);
 
-    auto command_input = Input(&state->command_buffer, ":");
+    auto screen = ScreenInteractive::Fullscreen();
+    auto quit = screen.ExitLoopClosure();
+
+    InputOption command_option;
+    command_option.transform = [](InputState state)
+    {
+        state.element |= bgcolor(Color::Black) | color(Color::White);
+        if (state.is_placeholder)
+                state.element |= dim;
+        return state.element;
+    };
+    command_option.cursor_position = &state->command_cursor;
+    auto command_input = Input(&state->command_buffer, ":", command_option);
 
     auto command_wrapper = Renderer(command_input, [state, command_input] {
         if (state->mode != Mode::COMMAND)
@@ -22,15 +34,15 @@ int main() {
         return command_input->Render();
     });
 
-    auto command_handler = CatchEvent(command_wrapper, [state](Event event) {
-        if (event == Event::Escape) {
+    auto command_handler = CatchEvent(command_wrapper, [state, quit](Event event) {
+        if (event == Event::Escape || event == Event::Return) {
+            if (event == Event::Return && state->command_buffer == ":q")
+                quit();
             state->mode = Mode::NORMAL;
             state->command_buffer.clear();
-            return true;
-        }
-        if (event == Event::Return) {
-            state->mode = Mode::NORMAL;
-            state->command_buffer.clear();
+            state->command_cursor = 0;
+            if (state->active_child)
+                *state->active_child = 0;
             return true;
         }
         return false;
@@ -54,7 +66,6 @@ int main() {
         status_bar,
     }, &active_child);
 
-    auto screen = ScreenInteractive::Fullscreen();
     screen.Loop(container);
 
     return 0;

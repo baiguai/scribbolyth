@@ -12,6 +12,10 @@ namespace scribbolyth::editor
             {
                 return ftxui::text("Editor") | ftxui::center;
             }
+            bool Focusable() const override
+            {
+                return true;
+            }
             bool OnEvent(ftxui::Event event) override
             {
                 Action action = state_->ActiveKeymap().Handle(event).action;
@@ -20,6 +24,7 @@ namespace scribbolyth::editor
                     case Action::EnterCommand:
                         state_->mode = Mode::COMMAND;
                         state_->command_buffer = ":";
+                        state_->command_cursor = 1;
                         if (state_->active_child)
                             *state_->active_child = 1;
                         return true;
