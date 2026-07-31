@@ -18,7 +18,10 @@ namespace scribbolyth::editor
             }
             bool OnEvent(ftxui::Event event) override
             {
-                Action action = state_->ActiveKeymap().Handle(event).action;
+                auto result = state_->ActiveKeymap().Handle(event);
+                if (result.pending)
+                    return true;
+                Action action = result.action;
                 switch (action)
                 {
                     case Action::EnterCommand:
@@ -40,8 +43,13 @@ namespace scribbolyth::editor
                     case Action::EnterVisualLine:
                         state_->mode = Mode::VISUAL_LINE;
                         return true;
+                    case Action::EnterTree:
+                        state_->mode = Mode::TREE;
+                        if (state_->focus_treeview)
+                            state_->focus_treeview();
+                        return true;
                     default:
-                        return false;
+                        return action != Action::None;
                 }
             }
 

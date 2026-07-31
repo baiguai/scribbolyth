@@ -8,11 +8,14 @@ int main() {
     auto editor_comp = scribbolyth::editor::MakeEditor(state);
     auto treeview_comp = scribbolyth::treeview::MakeTreeView(state);
 
+    state->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };
+    state->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };
+
     auto treeview_wrap = treeview_comp;
     auto editor_wrap = editor_comp;
 
     int left_size = 30;
-    auto main_split = ResizableSplitLeft(editor_wrap, treeview_wrap, &left_size);
+    auto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &left_size);
 
     auto screen = ScreenInteractive::Fullscreen();
     auto quit = screen.ExitLoopClosure();
@@ -43,6 +46,8 @@ int main() {
             state->command_cursor = 0;
             if (state->active_child)
                 *state->active_child = 0;
+            if (state->focus_editor)
+                state->focus_editor();
             return true;
         }
         return false;
