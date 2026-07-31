@@ -36,7 +36,7 @@ Keymap MakeNormalKeymap() {
     km.Bind({Event::Character('g'), Event::Character('g')}, Action::MoveFileStart);
     km.Bind({Event::Character('d'), Event::Character('d')}, Action::DeleteLine);
 
-    km.Bind(Event::Escape,        Action::EnterNormal);
+    km.Bind(Event::Escape,        Action::EnterTree);
     km.Bind(Event::Character(':'), Action::EnterCommand);
     km.Bind(Event::Backspace,     Action::BackspaceChar);
 
@@ -76,11 +76,15 @@ Keymap MakeTreeKeymap() {
     km.Bind(Event::ArrowDown,     Action::MoveDown);
     km.Bind(Event::Character('k'), Action::MoveUp);
     km.Bind(Event::Character('j'), Action::MoveDown);
+    km.Bind(Event::Character('G'), Action::MoveFileEnd);
+    km.Bind({Event::Character('g'), Event::Character('g')}, Action::MoveFileStart);
     km.Bind(Event::Return,        Action::TreeOpen);
     km.Bind(Event::Character('h'), Action::TreeCollapse);
     km.Bind(Event::Character('l'), Action::TreeExpand);
-    km.Bind(Event::Character('i'), Action::EnterInsert);
+    km.Bind(Event::Character('E'), Action::TreeExpandAll);
+    km.Bind(Event::Character('C'), Action::TreeCollapseAll);
+    km.Bind(Event::Character('i'), Action::EnterNormal);
+    km.Bind(Event::Character('I'), Action::EnterInsert);
     km.Bind(Event::Character(':'), Action::EnterCommand);
-    km.Bind(Event::Escape,        Action::EnterNormal);
     return km;
 }
