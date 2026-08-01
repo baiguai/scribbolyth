@@ -25,6 +25,7 @@ namespace scribbolyth::editor
                 switch (action)
                 {
                     case Action::EnterCommand:
+                        state_->mode_before_command = state_->mode;
                         state_->mode = Mode::COMMAND;
                         state_->command_buffer = ":";
                         state_->command_cursor = 1;

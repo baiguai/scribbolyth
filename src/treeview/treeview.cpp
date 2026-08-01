@@ -15,6 +15,14 @@ namespace scribbolyth::treeview
                 {
                     if (!name.empty()) selected_->name = name;
                 };
+                state_->new_folder = [this](const std::string& name)
+                {
+                    if (!name.empty()) InsertFolder(name);
+                };
+                state_->new_note = [this](const std::string& name)
+                {
+                    if (!name.empty()) InsertNote(name);
+                };
             }
             bool Focusable() const override
             {
@@ -34,6 +42,9 @@ namespace scribbolyth::treeview
             void ExpandAll();
             void CollapseAll();
             void NewFolder();
+            void InsertFolder(const std::string& name);
+            void NewNote();
+            void InsertNote(const std::string& name);
             void RenameNode();
 
             std::shared_ptr<EditorState> state_;
@@ -236,7 +247,17 @@ namespace scribbolyth::treeview
 
     void TreeView::NewFolder()
     {
-        auto make_folder = [](std::string name) {
+        state_->mode_before_command = state_->mode;
+        state_->mode = Mode::COMMAND;
+        state_->command_buffer = ":create_folder ";
+        state_->command_cursor = 15;
+        if (state_->active_child) *state_->active_child = 1;
+    }
+
+    void TreeView::InsertFolder(const std::string& name)
+    {
+        auto make_folder = [](std::string name)
+        {
             TreeNode node;
             node.name = std::move(name);
             node.is_folder = true;
@@ -244,33 +265,11 @@ namespace scribbolyth::treeview
             return node;
         };
 
-        auto next_name = [](const std::vector<TreeNode>& siblings) {
-            std::string base = "New Folder";
-            std::size_t n = 1;
-            while (true)
-            {
-                std::string candidate = (n == 1) ? base : base + " " + std::to_string(n);
-                bool taken = false;
-                for (const auto& s : siblings)
-                {
-                    if (s.name == candidate)
-                    {
-                        taken = true;
-                        break;
-                    }
-                }
-                if (!taken)
-                {
-                    return candidate;
-                }
-                ++n;
-            }
-        };
-
-        if (root_.children.empty() || selected_ == &root_)
+        if (selected_->is_folder)
         {
-            root_.children.push_back(make_folder(next_name(root_.children)));
-            selected_ = &root_.children.back();
+            selected_->expanded = true;
+            selected_->children.push_back(make_folder(name));
+            selected_ = &selected_->children.back();
             return;
         }
 
@@ -280,7 +279,49 @@ namespace scribbolyth::treeview
             {
                 if (&*it == selected_)
                 {
-                    auto inserted = parent->children.insert(it + 1, make_folder(next_name(parent->children)));
+                    auto inserted = parent->children.insert(it + 1, make_folder(name));
+                    selected_ = &*inserted;
+                    return;
+                }
+            }
+        }
+    }
+
+    void TreeView::NewNote()
+    {
+        state_->mode_before_command = state_->mode;
+        state_->mode = Mode::COMMAND;
+        state_->command_buffer = ":create_note ";
+        state_->command_cursor = 13;
+        if (state_->active_child) *state_->active_child = 1;
+    }
+
+    void TreeView::InsertNote(const std::string& name)
+    {
+        auto make_note = [](std::string name)
+        {
+            TreeNode node;
+            node.name = std::move(name);
+            node.is_folder = false;
+            node.expanded = false;
+            return node;
+        };
+
+        if (selected_->is_folder)
+        {
+            selected_->expanded = true;
+            selected_->children.push_back(make_note(name));
+            selected_ = &selected_->children.back();
+            return;
+        }
+
+        if (TreeNode* parent = FindParent(root_, selected_))
+        {
+            for (auto it = parent->children.begin(); it != parent->children.end(); ++it)
+            {
+                if (&*it == selected_)
+                {
+                    auto inserted = parent->children.insert(it + 1, make_note(name));
                     selected_ = &*inserted;
                     return;
                 }
@@ -290,6 +331,7 @@ namespace scribbolyth::treeview
 
     void TreeView::RenameNode()
     {
+        state_->mode_before_command = state_->mode;
         state_->mode = Mode::COMMAND;
         state_->command_buffer = ":rename ";
         state_->command_cursor = 8;
@@ -319,6 +361,7 @@ namespace scribbolyth::treeview
                         state_->focus_editor();
                     return true;
                 case Action::EnterCommand:
+                    state_->mode_before_command = state_->mode;
                     state_->mode = Mode::COMMAND;
                     state_->command_buffer = ":";
                     state_->command_cursor = 1;
@@ -370,6 +413,9 @@ namespace scribbolyth::treeview
             case Action::TreeNewFolder:
                 NewFolder();
                 return true;
+            case Action::TreeNewNote:
+                NewNote();
+                return true;
             case Action::TreeRenameNode:
                 RenameNode();
                 return true;
@@ -384,6 +430,7 @@ namespace scribbolyth::treeview
                     state_->focus_editor();
                 return true;
             case Action::EnterCommand:
+                state_->mode_before_command = state_->mode;
                 state_->mode = Mode::COMMAND;
                 state_->command_buffer = ":";
                 state_->command_cursor = 1;

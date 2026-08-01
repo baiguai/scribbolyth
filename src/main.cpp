@@ -49,8 +49,15 @@ int main() {
                 *state->active_child = 0;
             if (!handled)
             {
-                state->mode = Mode::NORMAL;
-                if (state->focus_editor) state->focus_editor();
+                state->mode = state->mode_before_command;
+                if (state->mode == Mode::TREE)
+                {
+                    if (state->focus_treeview) state->focus_treeview();
+                }
+                else
+                {
+                    if (state->focus_editor) state->focus_editor();
+                }
             }
             return true;
         }

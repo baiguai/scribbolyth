@@ -13,6 +13,6 @@ enum class Action {
     Yank, DeleteLine, Paste,
     Undo, Redo,
     Save, Quit, SearchForward, SearchBackward,
-    TreeOpen, TreeCollapse, TreeExpand, TreeExpandAll, TreeCollapseAll, TreeNewFolder, TreeRenameNode,
+    TreeOpen, TreeCollapse, TreeExpand, TreeExpandAll, TreeCollapseAll, TreeNewFolder, TreeNewNote, TreeRenameNode,
     None,
 };
