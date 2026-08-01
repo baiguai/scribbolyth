@@ -41,13 +41,17 @@ int main() {
         if (event == Event::Escape || event == Event::Return) {
             if (event == Event::Return && state->command_buffer == ":q")
                 quit();
-            state->mode = Mode::NORMAL;
+            bool handled = event == Event::Return &&
+                scribbolyth::command::Execute(state->command_buffer, state);
             state->command_buffer.clear();
             state->command_cursor = 0;
             if (state->active_child)
                 *state->active_child = 0;
-            if (state->focus_editor)
-                state->focus_editor();
+            if (!handled)
+            {
+                state->mode = Mode::NORMAL;
+                if (state->focus_editor) state->focus_editor();
+            }
             return true;
         }
         return false;
