@@ -12,14 +12,23 @@ namespace scribbolyth::editor
             {
                 return ftxui::text("Editor") | ftxui::center;
             }
+            bool Focusable() const override
+            {
+                return true;
+            }
             bool OnEvent(ftxui::Event event) override
             {
-                Action action = state_->ActiveKeymap().Handle(event).action;
+                auto result = state_->ActiveKeymap().Handle(event);
+                if (result.pending)
+                    return true;
+                Action action = result.action;
                 switch (action)
                 {
                     case Action::EnterCommand:
+                        state_->mode_before_command = state_->mode;
                         state_->mode = Mode::COMMAND;
                         state_->command_buffer = ":";
+                        state_->command_cursor = 1;
                         if (state_->active_child)
                             *state_->active_child = 1;
                         return true;
@@ -35,8 +44,13 @@ namespace scribbolyth::editor
                     case Action::EnterVisualLine:
                         state_->mode = Mode::VISUAL_LINE;
                         return true;
+                    case Action::EnterTree:
+                        state_->mode = Mode::TREE;
+                        if (state_->focus_treeview)
+                            state_->focus_treeview();
+                        return true;
                     default:
-                        return false;
+                        return action != Action::None;
                 }
             }
 

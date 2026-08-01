@@ -1,13 +1,22 @@
 #pragma once
 
+#include <functional>
 #include <string>
 #include "../mode/mode.hpp"
 #include "../keyboard/default_keymaps.hpp"
 
 struct EditorState {
-    Mode mode = Mode::NORMAL;
+    Mode mode = Mode::TREE;
     std::string command_buffer;
+    int command_cursor = 0;
     int* active_child = nullptr;
+    Mode mode_before_command = Mode::TREE;
+
+    std::function<void()> focus_editor;
+    std::function<void()> focus_treeview;
+    std::function<void(const std::string&)> rename_node;
+    std::function<void(const std::string&)> new_folder;
+    std::function<void(const std::string&)> new_note;
 
     Keymap normal_keymap;
     Keymap insert_keymap;

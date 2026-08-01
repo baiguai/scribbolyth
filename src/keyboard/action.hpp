@@ -9,9 +9,10 @@ enum class Action {
     InsertNewline, InsertTab,
     DeleteChar, BackspaceChar,
     EnterInsert, EnterNormal, EnterVisual, EnterVisualLine, EnterCommand,
+    EnterTree,
     Yank, DeleteLine, Paste,
     Undo, Redo,
     Save, Quit, SearchForward, SearchBackward,
-    TreeOpen, TreeCollapse, TreeExpand,
+    TreeOpen, TreeCollapse, TreeExpand, TreeExpandAll, TreeCollapseAll, TreeNewFolder, TreeNewNote, TreeRenameNode,
     None,
 };
