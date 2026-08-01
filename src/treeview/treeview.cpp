@@ -9,7 +9,13 @@ namespace scribbolyth::treeview
     class TreeView : public ftxui::ComponentBase
     {
         public:
-            TreeView(std::shared_ptr<EditorState> state) : state_(std::move(state)) {}
+            TreeView(std::shared_ptr<EditorState> state) : state_(std::move(state))
+            {
+                state_->rename_node = [this](const std::string& name)
+                {
+                    if (!name.empty()) selected_->name = name;
+                };
+            }
             bool Focusable() const override
             {
                 return true;
@@ -28,6 +34,7 @@ namespace scribbolyth::treeview
             void ExpandAll();
             void CollapseAll();
             void NewFolder();
+            void RenameNode();
 
             std::shared_ptr<EditorState> state_;
             TreeNode root_ = MakeRootFolder();
@@ -281,6 +288,14 @@ namespace scribbolyth::treeview
         }
     }
 
+    void TreeView::RenameNode()
+    {
+        state_->mode = Mode::COMMAND;
+        state_->command_buffer = ":rename ";
+        state_->command_cursor = 8;
+        if (state_->active_child) *state_->active_child = 1;
+    }
+
     bool TreeView::OnEvent(ftxui::Event event)
     {
         if (state_->mode != Mode::TREE)
@@ -323,10 +338,10 @@ namespace scribbolyth::treeview
         switch (result.action)
         {
             case Action::MoveDown:
-                MoveSelection(1);
+                MoveSelection(result.count);
                 return true;
             case Action::MoveUp:
-                MoveSelection(-1);
+                MoveSelection(-result.count);
                 return true;
             case Action::MoveFileStart:
                 MoveToStart();
@@ -335,13 +350,16 @@ namespace scribbolyth::treeview
                 MoveToEnd();
                 return true;
             case Action::TreeExpand:
-                ExpandSelected();
+                for (int i = 0; i < result.count; ++i)
+                    ExpandSelected();
                 return true;
             case Action::TreeCollapse:
-                CollapseSelected();
+                for (int i = 0; i < result.count; ++i)
+                    CollapseSelected();
                 return true;
             case Action::TreeOpen:
-                OpenSelected();
+                for (int i = 0; i < result.count; ++i)
+                    OpenSelected();
                 return true;
             case Action::TreeExpandAll:
                 ExpandAll();
@@ -351,6 +369,9 @@ namespace scribbolyth::treeview
                 return true;
             case Action::TreeNewFolder:
                 NewFolder();
+                return true;
+            case Action::TreeRenameNode:
+                RenameNode();
                 return true;
             case Action::EnterNormal:
                 state_->mode = Mode::NORMAL;

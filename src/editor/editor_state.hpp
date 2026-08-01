@@ -13,6 +13,7 @@ struct EditorState {
 
     std::function<void()> focus_editor;
     std::function<void()> focus_treeview;
+    std::function<void(const std::string&)> rename_node;
 
     Keymap normal_keymap;
     Keymap insert_keymap;

@@ -10,6 +10,7 @@ SOURCES=(
     "src/treeview/treeview.cpp"
     "src/keyboard/keymap.cpp"
     "src/keyboard/default_keymaps.cpp"
+    "src/command/command.cpp"
 )
 
 LIBS=(

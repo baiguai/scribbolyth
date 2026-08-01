@@ -72,6 +72,7 @@ Keymap MakeVisualKeymap() {
 
 Keymap MakeTreeKeymap() {
     Keymap km;
+    km.EnableCounts();
     km.Bind(Event::ArrowUp,       Action::MoveUp);
     km.Bind(Event::ArrowDown,     Action::MoveDown);
     km.Bind(Event::Character('k'), Action::MoveUp);
@@ -84,6 +85,7 @@ Keymap MakeTreeKeymap() {
     km.Bind(Event::Character('E'), Action::TreeExpandAll);
     km.Bind(Event::Character('C'), Action::TreeCollapseAll);
     km.Bind(Event::Character('f'), Action::TreeNewFolder);
+    km.Bind(Event::Character('R'), Action::TreeRenameNode);
     km.Bind(Event::Character('i'), Action::EnterNormal);
     km.Bind(Event::Character('I'), Action::EnterInsert);
     km.Bind(Event::Character(':'), Action::EnterCommand);
