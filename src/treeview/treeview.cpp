@@ -28,6 +28,7 @@ namespace scribbolyth::treeview
             void ExpandAll();
             void CollapseAll();
             void NewFolder();
+            void RenameNode();
 
             std::shared_ptr<EditorState> state_;
             TreeNode root_ = MakeRootFolder();
@@ -281,6 +282,11 @@ namespace scribbolyth::treeview
         }
     }
 
+    void TreeView::RenameNode()
+    {
+        // Implement the folder / note node renaming
+    }
+
     bool TreeView::OnEvent(ftxui::Event event)
     {
         if (state_->mode != Mode::TREE)
@@ -354,6 +360,9 @@ namespace scribbolyth::treeview
                 return true;
             case Action::TreeNewFolder:
                 NewFolder();
+                return true;
+            case Action::TreeRenameNode:
+                RenameNode();
                 return true;
             case Action::EnterNormal:
                 state_->mode = Mode::NORMAL;
