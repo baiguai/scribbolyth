@@ -323,10 +323,10 @@ namespace scribbolyth::treeview
         switch (result.action)
         {
             case Action::MoveDown:
-                MoveSelection(1);
+                MoveSelection(result.count);
                 return true;
             case Action::MoveUp:
-                MoveSelection(-1);
+                MoveSelection(-result.count);
                 return true;
             case Action::MoveFileStart:
                 MoveToStart();
@@ -335,13 +335,16 @@ namespace scribbolyth::treeview
                 MoveToEnd();
                 return true;
             case Action::TreeExpand:
-                ExpandSelected();
+                for (int i = 0; i < result.count; ++i)
+                    ExpandSelected();
                 return true;
             case Action::TreeCollapse:
-                CollapseSelected();
+                for (int i = 0; i < result.count; ++i)
+                    CollapseSelected();
                 return true;
             case Action::TreeOpen:
-                OpenSelected();
+                for (int i = 0; i < result.count; ++i)
+                    OpenSelected();
                 return true;
             case Action::TreeExpandAll:
                 ExpandAll();

@@ -72,6 +72,7 @@ Keymap MakeVisualKeymap() {
 
 Keymap MakeTreeKeymap() {
     Keymap km;
+    km.EnableCounts();
     km.Bind(Event::ArrowUp,       Action::MoveUp);
     km.Bind(Event::ArrowDown,     Action::MoveDown);
     km.Bind(Event::Character('k'), Action::MoveUp);
