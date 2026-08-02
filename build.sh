@@ -64,15 +64,17 @@ make
 # Check if build was successful
 if [ -f "bin/$APP_NAME" ]; then
 
-
-
-
-    # Add any custom cp's or other actions here
-    # mkdir -p "./bin/data/themes"
-    # cp -r ../themes/* "./bin/data/themes/" 2>/dev/null || true
-
-
-
+    # Copy the config file alongside the app (the app looks for it next to the executable)
+    if [ -f "../config/commands.conf" ]; then
+        cp "../config/commands.conf" "bin/"
+        echo "Config copied to: $(pwd)/bin/commands.conf"
+    else
+        echo "Warning: config/commands.conf not found - config not copied"
+    fi
+    if [ -d "../build-windows/bin" ]; then
+        cp "../config/commands.conf" "../build-windows/bin/" 2>/dev/null || \
+            echo "Warning: could not copy config to build-windows/bin/"
+    fi
 
     echo "-- Build successful --"
     echo "Executable: $(pwd)/bin/$APP_NAME"
