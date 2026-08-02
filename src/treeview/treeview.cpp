@@ -60,6 +60,23 @@ namespace scribbolyth::treeview
                     if (!name.empty()) selected_->name = name;
                 };
 
+                state_->operations["move_node_up"] = [this](const std::string&, int count)
+                {
+                    if (state_->mode == Mode::TREE) for (int i = 0; i < count; ++i) MoveNode(-1);
+                };
+                state_->operations["move_node_down"] = [this](const std::string&, int count)
+                {
+                    if (state_->mode == Mode::TREE) for (int i = 0; i < count; ++i) MoveNode(+1);
+                };
+                state_->operations["move_parent_up"] = [this](const std::string&, int count)
+                {
+                    if (state_->mode == Mode::TREE) for (int i = 0; i < count; ++i) MoveParent(-1);
+                };
+                state_->operations["move_parent_down"] = [this](const std::string&, int count)
+                {
+                    if (state_->mode == Mode::TREE) for (int i = 0; i < count; ++i) MoveParent(+1);
+                };
+
                 state_->operations["enter_normal"] = [this](const std::string&, int)
                 {
                     state_->mode = Mode::NORMAL;
@@ -107,6 +124,10 @@ namespace scribbolyth::treeview
             void CollapseAll();
             void InsertFolder(const std::string& name);
             void InsertNote(const std::string& name);
+            void MoveNode(int dir);
+            void MoveParent(int dir);
+            bool IsAncestor(TreeNode& ancestor, TreeNode* node);
+            void CollectVisibleDepth(TreeNode& node, int depth, std::vector<TreeNode*>& nodes, std::vector<int>& depths);
 
             std::shared_ptr<EditorState> state_;
             TreeNode root_ = MakeRootFolder();
@@ -215,6 +236,33 @@ namespace scribbolyth::treeview
         return out;
     }
 
+    bool TreeView::IsAncestor(TreeNode& ancestor, TreeNode* node)
+    {
+        for (TreeNode* cur = node; cur; cur = (cur == &root_) ? nullptr : FindParent(root_, cur))
+        {
+            if (cur == &ancestor)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void TreeView::CollectVisibleDepth(TreeNode& node, int depth,
+                                       std::vector<TreeNode*>& nodes,
+                                       std::vector<int>& depths)
+    {
+        nodes.push_back(&node);
+        depths.push_back(depth);
+        if (node.is_folder && node.expanded)
+        {
+            for (auto& child : node.children)
+            {
+                CollectVisibleDepth(child, depth + 1, nodes, depths);
+            }
+        }
+    }
+
     void TreeView::MoveSelection(int dir)
     {
         auto visible = VisibleNodes();
@@ -233,6 +281,90 @@ namespace scribbolyth::treeview
             }
         }
         selected_ = visible.front();
+    }
+
+    void TreeView::MoveNode(int dir)
+    {
+        if (selected_ == &root_) return;
+        TreeNode* parent = FindParent(root_, selected_);
+        if (!parent) return;
+
+        auto& children = parent->children;
+        for (std::size_t i = 0; i < children.size(); ++i)
+        {
+            if (&children[i] != selected_) continue;
+            std::size_t j = static_cast<std::size_t>(static_cast<int>(i) + dir);
+            if (j >= children.size()) return;
+            std::swap(children[i], children[j]);
+            selected_ = &children[j];
+            return;
+        }
+    }
+
+    void TreeView::MoveParent(int dir)
+    {
+        if (selected_ == &root_) return;
+        TreeNode* parent = FindParent(root_, selected_);
+        if (!parent) return;
+
+        std::size_t si = 0;
+        auto& children = parent->children;
+        while (si < children.size() && &children[si] != selected_) ++si;
+        if (si >= children.size()) return;
+
+        if (dir < 0)
+        {
+            if (parent == &root_) return;
+            TreeNode* grand = FindParent(root_, parent);
+            if (!grand) return;
+
+            TreeNode moved = std::move(children[si]);
+            children.erase(children.begin() + static_cast<std::ptrdiff_t>(si));
+
+            auto& gc = grand->children;
+            std::size_t pi = 0;
+            while (pi < gc.size() && &gc[pi] != parent) ++pi;
+            if (pi >= gc.size()) return;
+
+            auto it = gc.insert(gc.begin() + static_cast<std::ptrdiff_t>(pi) + 1, std::move(moved));
+            selected_ = &*it;
+        }
+        else
+        {
+            std::vector<TreeNode*> visible;
+            std::vector<int> depth;
+            CollectVisibleDepth(root_, 0, visible, depth);
+
+            std::size_t si = 0;
+            while (si < visible.size() && visible[si] != selected_) ++si;
+            if (si >= visible.size()) return;
+
+            TreeNode* target = nullptr;
+            int best = -1;
+            for (std::size_t i = si; i-- > 0;)
+            {
+                TreeNode* n = visible[i];
+                if (!n->is_folder) continue;
+                if (IsAncestor(*n, selected_)) continue;
+                if (depth[i] > best)
+                {
+                    best = depth[i];
+                    target = n;
+                }
+            }
+            if (!target) return;
+
+            std::size_t pi = 0;
+            while (pi < children.size() && &children[pi] != selected_) ++pi;
+            if (pi >= children.size()) return;
+
+            TreeNode moved = std::move(children[pi]);
+            children.erase(children.begin() + static_cast<std::ptrdiff_t>(pi));
+
+            target->expanded = true;
+            target->children.insert(target->children.begin(), std::move(moved));
+            selected_ = &target->children.front();
+        }
     }
 
     void TreeView::MoveToStart()
