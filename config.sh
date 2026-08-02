@@ -12,6 +12,7 @@ SOURCES=(
     "src/keyboard/default_keymaps.cpp"
     "src/command/command.cpp"
     "src/op/op.cpp"
+    "src/config/config.cpp"
 )
 
 LIBS=(
