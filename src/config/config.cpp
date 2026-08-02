@@ -97,9 +97,10 @@ namespace scribbolyth::config
 
             bool can_repeat = (repeat == "yes");
 
+            if (command != "-") state->commands[command] = op;
+
             if (mode == "GLOBAL")
             {
-                if (command != "-") state->commands[command] = op;
                 continue;
             }
 

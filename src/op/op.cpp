@@ -34,4 +34,34 @@ namespace scribbolyth::op
         op_it->second(args, 1);
         return true;
     }
+
+    Keymap::Result Resolve(std::shared_ptr<EditorState> state, ftxui::Event event)
+    {
+        return state->ActiveKeymap().Handle(event);
+    }
+
+    bool Dispatch(std::shared_ptr<EditorState> state, const Keymap::Result& result)
+    {
+        if (result.pending)
+            return true;
+        if (result.op.empty())
+            return false;
+
+        if (result.args == "prompt" && !result.command.empty() && result.command != "-")
+        {
+            OpenCommandLine(state, result.command);
+            return true;
+        }
+
+        auto it = state->operations.find(result.op);
+        if (it == state->operations.end())
+            return false;
+        it->second((result.args == "-") ? "" : result.args, result.count);
+        return true;
+    }
+
+    bool HandleKey(std::shared_ptr<EditorState> state, ftxui::Event event)
+    {
+        return Dispatch(state, Resolve(state, event));
+    }
 }

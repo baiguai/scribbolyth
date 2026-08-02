@@ -9,8 +9,6 @@ SOURCES=(
     "src/editor/editor.cpp"
     "src/treeview/treeview.cpp"
     "src/keyboard/keymap.cpp"
-    "src/keyboard/default_keymaps.cpp"
-    "src/command/command.cpp"
     "src/op/op.cpp"
     "src/config/config.cpp"
 )

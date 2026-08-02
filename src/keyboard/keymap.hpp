@@ -5,7 +5,6 @@
 #include <utility>
 #include <vector>
 #include <string>
-#include "action.hpp"
 
 struct Binding
 {
@@ -18,14 +17,11 @@ struct Binding
 class Keymap
 {
     public:
-        void Bind(ftxui::Event event, Action action);
-        void Bind(std::vector<ftxui::Event> sequence, Action action);
         void Bind(ftxui::Event event, Binding binding);
         void Bind(std::vector<ftxui::Event> sequence, Binding binding);
 
         struct Result
         {
-            Action action = Action::None;
             std::string op;
             std::string command;
             std::string args;
@@ -40,8 +36,6 @@ class Keymap
     private:
         std::map<std::string, Binding> single_bindings_;
         std::map<std::vector<std::string>, Binding> sequence_bindings_;
-        std::map<std::string, Action> singles_;
-        std::map<std::vector<std::string>, Action> sequences_;
         std::vector<std::string> pending_;
         bool enable_count_ = false;
         int count_ = 0;

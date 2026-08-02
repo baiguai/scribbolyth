@@ -11,17 +11,81 @@ namespace scribbolyth::treeview
         public:
             TreeView(std::shared_ptr<EditorState> state) : state_(std::move(state))
             {
-                state_->rename_node = [this](const std::string& name)
+                state_->operations["move_up"] = [this](const std::string&, int count)
                 {
-                    if (!name.empty()) selected_->name = name;
+                    if (state_->mode == Mode::TREE) MoveSelection(-count);
                 };
-                state_->new_folder = [this](const std::string& name)
+                state_->operations["move_down"] = [this](const std::string&, int count)
+                {
+                    if (state_->mode == Mode::TREE) MoveSelection(count);
+                };
+                state_->operations["move_file_start"] = [this](const std::string&, int)
+                {
+                    if (state_->mode == Mode::TREE) MoveToStart();
+                };
+                state_->operations["move_file_end"] = [this](const std::string&, int)
+                {
+                    if (state_->mode == Mode::TREE) MoveToEnd();
+                };
+                state_->operations["tree_open"] = [this](const std::string&, int count)
+                {
+                    if (state_->mode == Mode::TREE) for (int i = 0; i < count; ++i) OpenSelected();
+                };
+                state_->operations["tree_collapse"] = [this](const std::string&, int count)
+                {
+                    if (state_->mode == Mode::TREE) for (int i = 0; i < count; ++i) CollapseSelected();
+                };
+                state_->operations["tree_expand"] = [this](const std::string&, int count)
+                {
+                    if (state_->mode == Mode::TREE) for (int i = 0; i < count; ++i) ExpandSelected();
+                };
+                state_->operations["expand_all"] = [this](const std::string&, int)
+                {
+                    if (state_->mode == Mode::TREE) ExpandAll();
+                };
+                state_->operations["collapse_all"] = [this](const std::string&, int)
+                {
+                    if (state_->mode == Mode::TREE) CollapseAll();
+                };
+                state_->operations["new_folder"] = [this](const std::string& name, int)
                 {
                     if (!name.empty()) InsertFolder(name);
                 };
-                state_->new_note = [this](const std::string& name)
+                state_->operations["new_note"] = [this](const std::string& name, int)
                 {
                     if (!name.empty()) InsertNote(name);
+                };
+                state_->operations["rename_node"] = [this](const std::string& name, int)
+                {
+                    if (!name.empty()) selected_->name = name;
+                };
+
+                state_->operations["enter_normal"] = [this](const std::string&, int)
+                {
+                    state_->mode = Mode::NORMAL;
+                    if (state_->focus_editor) state_->focus_editor();
+                };
+                state_->operations["enter_insert"] = [this](const std::string&, int)
+                {
+                    state_->mode = Mode::INSERT;
+                    if (state_->focus_editor) state_->focus_editor();
+                };
+                state_->operations["enter_tree"] = [this](const std::string&, int)
+                {
+                    state_->mode = Mode::TREE;
+                    if (state_->focus_treeview) state_->focus_treeview();
+                };
+                state_->operations["enter_visual"] = [this](const std::string&, int)
+                {
+                    state_->mode = Mode::VISUAL;
+                };
+                state_->operations["enter_visual_line"] = [this](const std::string&, int)
+                {
+                    state_->mode = Mode::VISUAL_LINE;
+                };
+                state_->operations["enter_command"] = [this](const std::string&, int)
+                {
+                    scribbolyth::op::OpenCommandLine(state_, "");
                 };
             }
             bool Focusable() const override
@@ -41,11 +105,8 @@ namespace scribbolyth::treeview
             void OpenSelected();
             void ExpandAll();
             void CollapseAll();
-            void NewFolder();
             void InsertFolder(const std::string& name);
-            void NewNote();
             void InsertNote(const std::string& name);
-            void RenameNode();
 
             std::shared_ptr<EditorState> state_;
             TreeNode root_ = MakeRootFolder();
@@ -245,15 +306,6 @@ namespace scribbolyth::treeview
         }
     }
 
-    void TreeView::NewFolder()
-    {
-        state_->mode_before_command = state_->mode;
-        state_->mode = Mode::COMMAND;
-        state_->command_buffer = ":create_folder ";
-        state_->command_cursor = 15;
-        if (state_->active_child) *state_->active_child = 1;
-    }
-
     void TreeView::InsertFolder(const std::string& name)
     {
         auto make_folder = [](std::string name)
@@ -285,15 +337,6 @@ namespace scribbolyth::treeview
                 }
             }
         }
-    }
-
-    void TreeView::NewNote()
-    {
-        state_->mode_before_command = state_->mode;
-        state_->mode = Mode::COMMAND;
-        state_->command_buffer = ":create_note ";
-        state_->command_cursor = 13;
-        if (state_->active_child) *state_->active_child = 1;
     }
 
     void TreeView::InsertNote(const std::string& name)
@@ -329,117 +372,9 @@ namespace scribbolyth::treeview
         }
     }
 
-    void TreeView::RenameNode()
-    {
-        state_->mode_before_command = state_->mode;
-        state_->mode = Mode::COMMAND;
-        state_->command_buffer = ":rename ";
-        state_->command_cursor = 8;
-        if (state_->active_child) *state_->active_child = 1;
-    }
-
     bool TreeView::OnEvent(ftxui::Event event)
     {
-        if (state_->mode != Mode::TREE)
-        {
-            auto result = state_->ActiveKeymap().Handle(event);
-            if (result.pending)
-            {
-                return true;
-            }
-            switch (result.action)
-            {
-                case Action::EnterTree:
-                    state_->mode = Mode::TREE;
-                    return true;
-                case Action::EnterNormal:
-                    state_->mode = Mode::NORMAL;
-                    return true;
-                case Action::EnterInsert:
-                    state_->mode = Mode::INSERT;
-                    if (state_->focus_editor)
-                        state_->focus_editor();
-                    return true;
-                case Action::EnterCommand:
-                    state_->mode_before_command = state_->mode;
-                    state_->mode = Mode::COMMAND;
-                    state_->command_buffer = ":";
-                    state_->command_cursor = 1;
-                    if (state_->active_child)
-                        *state_->active_child = 1;
-                    return true;
-                default:
-                    return result.action != Action::None;
-            }
-        }
-
-        auto result = state_->ActiveKeymap().Handle(event);
-        if (result.pending)
-        {
-            return true;
-        }
-        switch (result.action)
-        {
-            case Action::MoveDown:
-                MoveSelection(result.count);
-                return true;
-            case Action::MoveUp:
-                MoveSelection(-result.count);
-                return true;
-            case Action::MoveFileStart:
-                MoveToStart();
-                return true;
-            case Action::MoveFileEnd:
-                MoveToEnd();
-                return true;
-            case Action::TreeExpand:
-                for (int i = 0; i < result.count; ++i)
-                    ExpandSelected();
-                return true;
-            case Action::TreeCollapse:
-                for (int i = 0; i < result.count; ++i)
-                    CollapseSelected();
-                return true;
-            case Action::TreeOpen:
-                for (int i = 0; i < result.count; ++i)
-                    OpenSelected();
-                return true;
-            case Action::TreeExpandAll:
-                ExpandAll();
-                return true;
-            case Action::TreeCollapseAll:
-                CollapseAll();
-                return true;
-            case Action::TreeNewFolder:
-                NewFolder();
-                return true;
-            case Action::TreeNewNote:
-                NewNote();
-                return true;
-            case Action::TreeRenameNode:
-                RenameNode();
-                return true;
-            case Action::EnterNormal:
-                state_->mode = Mode::NORMAL;
-                if (state_->focus_editor)
-                    state_->focus_editor();
-                return true;
-            case Action::EnterInsert:
-                state_->mode = Mode::INSERT;
-                if (state_->focus_editor)
-                    state_->focus_editor();
-                return true;
-            case Action::EnterCommand:
-                state_->mode_before_command = state_->mode;
-                state_->mode = Mode::COMMAND;
-                state_->command_buffer = ":";
-                state_->command_cursor = 1;
-                if (state_->active_child)
-                    *state_->active_child = 1;
-                return true;
-            default:
-                return false;
-        }
+        return scribbolyth::op::HandleKey(state_, event);
     }
 
     void RenderNode(const TreeNode& node, int depth, const TreeNode* selected, ftxui::Elements& rows)

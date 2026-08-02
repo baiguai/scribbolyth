@@ -1,8 +1,14 @@
 #include "main.hpp"
 
+#include <filesystem>
+#include <iostream>
+
+#include "config/config.hpp"
+#include "op/op.hpp"
+
 using namespace ftxui;
 
-int main() {
+int main(int, char** argv) {
     auto state = std::make_shared<EditorState>();
 
     auto editor_comp = scribbolyth::editor::MakeEditor(state);
@@ -19,6 +25,21 @@ int main() {
 
     auto screen = ScreenInteractive::Fullscreen();
     auto quit = screen.ExitLoopClosure();
+
+    state->operations["quit"] = [quit](const std::string&, int) { quit(); };
+    state->commands["qa"] = "quit";
+
+    namespace fs = std::filesystem;
+    fs::path config_path = fs::path(argv[0]).parent_path() / "commands.conf";
+    if (!fs::exists(config_path))
+    {
+        config_path = "commands.conf";
+    }
+    if (!scribbolyth::config::LoadConfig(config_path.string(), state))
+    {
+        std::cerr << "Warning: could not load config from " << config_path.string() << "\n";
+        std::cerr << "Only the built-in ':qa' command is available.\n";
+    }
 
     InputOption command_option;
     command_option.transform = [](InputState state)
@@ -37,27 +58,22 @@ int main() {
         return command_input->Render();
     });
 
-    auto command_handler = CatchEvent(command_wrapper, [state, quit](Event event) {
+    auto command_handler = CatchEvent(command_wrapper, [state](Event event) {
         if (event == Event::Escape || event == Event::Return) {
-            if (event == Event::Return && state->command_buffer == ":q")
-                quit();
-            bool handled = event == Event::Return &&
-                scribbolyth::command::Execute(state->command_buffer, state);
+            if (event == Event::Return)
+                scribbolyth::op::ExecuteCommand(state, state->command_buffer);
             state->command_buffer.clear();
             state->command_cursor = 0;
             if (state->active_child)
                 *state->active_child = 0;
-            if (!handled)
+            state->mode = state->mode_before_command;
+            if (state->mode == Mode::TREE)
             {
-                state->mode = state->mode_before_command;
-                if (state->mode == Mode::TREE)
-                {
-                    if (state->focus_treeview) state->focus_treeview();
-                }
-                else
-                {
-                    if (state->focus_editor) state->focus_editor();
-                }
+                if (state->focus_treeview) state->focus_treeview();
+            }
+            else
+            {
+                if (state->focus_editor) state->focus_editor();
             }
             return true;
         }
