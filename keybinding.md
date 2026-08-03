@@ -95,11 +95,11 @@ Examples — the same op bound four ways:
     GLOBAL   -   -   sort_nodes   -   sort_nodes   SortNodes()
 
     # key that prompts for an argument before running
-    TREE   a   no   create_note   prompt   new_note   InsertNote(name)
+    TREE   a   no   create_node   prompt   new_node   InsertNode(name)
 
-For the last one: press `a` → the command line opens with `:create_note `
-prefilled → type a name → `Enter` creates the note. The same op is also
-reachable directly as `:create_note Name`. (With nothing selected, `a`
+For the last one: press `a` → the command line opens with `:create_node `
+prefilled → type a name → `Enter` creates the node. The same op is also
+reachable directly as `:create_node Name`. (With nothing selected, `a`
 adds a new top-level node; `A` uses `:create_child` / `InsertChild` to add
 a child of the selected node, or a top-level node when nothing is selected.)
 

@@ -14,86 +14,93 @@ namespace scribbolyth::treeview
                 state_->operations["deselect_node"] = [this](const std::string&, int)
                 {
                     if (state_->mode == Mode::TREE) selected_ = nullptr;
-                    RefreshActiveNote();
+                    RefreshActiveNode();
                 };
                 state_->operations["move_up"] = [this](const std::string&, int count)
                 {
                     if (state_->mode == Mode::TREE) MoveSelection(-count);
-                    RefreshActiveNote();
+                    RefreshActiveNode();
                 };
                 state_->operations["move_down"] = [this](const std::string&, int count)
                 {
                     if (state_->mode == Mode::TREE) MoveSelection(count);
-                    RefreshActiveNote();
+                    RefreshActiveNode();
                 };
                 state_->operations["move_file_start"] = [this](const std::string&, int)
                 {
                     if (state_->mode == Mode::TREE) MoveToStart();
-                    RefreshActiveNote();
+                    RefreshActiveNode();
                 };
                 state_->operations["move_file_end"] = [this](const std::string&, int)
                 {
                     if (state_->mode == Mode::TREE) MoveToEnd();
-                    RefreshActiveNote();
+                    RefreshActiveNode();
                 };
                 state_->operations["tree_open"] = [this](const std::string&, int count)
                 {
                     if (state_->mode == Mode::TREE) for (int i = 0; i < count; ++i) OpenSelected();
+                    RefreshActiveNode();
                 };
                 state_->operations["tree_collapse"] = [this](const std::string&, int count)
                 {
                     if (state_->mode == Mode::TREE) for (int i = 0; i < count; ++i) CollapseSelected();
+                    RefreshActiveNode();
                 };
                 state_->operations["tree_expand"] = [this](const std::string&, int count)
                 {
                     if (state_->mode == Mode::TREE) for (int i = 0; i < count; ++i) ExpandSelected();
+                    RefreshActiveNode();
                 };
                 state_->operations["expand_all"] = [this](const std::string&, int)
                 {
                     if (state_->mode == Mode::TREE) ExpandAll();
+                    RefreshActiveNode();
                 };
                 state_->operations["collapse_all"] = [this](const std::string&, int)
                 {
                     if (state_->mode == Mode::TREE) CollapseAll();
-                    RefreshActiveNote();
+                    RefreshActiveNode();
                 };
-                state_->operations["new_note"] = [this](const std::string& name, int)
+                state_->operations["new_node"] = [this](const std::string& name, int)
                 {
-                    if (!name.empty()) InsertNote(name);
-                    RefreshActiveNote();
+                    if (!name.empty()) InsertNode(name);
+                    RefreshActiveNode();
                 };
                 state_->operations["new_child"] = [this](const std::string& name, int)
                 {
                     if (!name.empty()) InsertChild(name);
-                    RefreshActiveNote();
+                    RefreshActiveNode();
                 };
                 state_->operations["rename_node"] = [this](const std::string& name, int)
                 {
                     if (selected_ && !name.empty()) selected_->name = name;
-                    RefreshActiveNote();
+                    RefreshActiveNode();
                 };
-
+                state_->operations["delete_node"] = [this](const std::string&, int)
+                {
+                    DeleteNode();
+                    RefreshActiveNode();
+                };
                 state_->operations["move_node_up"] = [this](const std::string&, int count)
                 {
                     if (state_->mode == Mode::TREE) for (int i = 0; i < count; ++i) MoveNode(-1);
-                    RefreshActiveNote();
+                    RefreshActiveNode();
                 };
                 state_->operations["move_node_down"] = [this](const std::string&, int count)
                 {
                     if (state_->mode == Mode::TREE) for (int i = 0; i < count; ++i) MoveNode(+1);
-                    RefreshActiveNote();
+                    RefreshActiveNode();
                 };
                 state_->operations["move_parent_up"] = [this](const std::string&, int count)
                 {
                     if (state_->mode == Mode::TREE) for (int i = 0; i < count; ++i) MoveParent(-1);
-                    RefreshActiveNote();
+                    RefreshActiveNode();
                 };
                 state_->operations["move_parent_down"] = [this](const std::string&, int count)
                 {
                     if (state_->mode == Mode::TREE) for (int i = 0; i < count; ++i) MoveParent(+1);
-                    RefreshActiveNote();
+                    RefreshActiveNode();
                 };
-
                 state_->operations["enter_normal"] = [this](const std::string&, int)
                 {
                     state_->mode = Mode::NORMAL;
@@ -122,7 +129,7 @@ namespace scribbolyth::treeview
                     scribbolyth::op::OpenCommandLine(state_, "");
                 };
 
-                RefreshActiveNote();
+                RefreshActiveNode();
             }
             bool Focusable() const override
             {
@@ -143,10 +150,11 @@ namespace scribbolyth::treeview
             void ExpandAll();
             void CollapseAll();
             void InsertChild(const std::string& name);
-            void InsertNote(const std::string& name);
+            void InsertNode(const std::string& name);
+            void DeleteNode();
             void MoveNode(int dir);
             void MoveParent(int dir);
-            void RefreshActiveNote();
+            void RefreshActiveNode();
             bool IsAncestor(TreeNode& ancestor, TreeNode* node);
             void CollectVisibleDepth(TreeNode& node, int depth, std::vector<TreeNode*>& nodes, std::vector<int>& depths);
 
@@ -162,7 +170,7 @@ namespace scribbolyth::treeview
 
     std::vector<TreeNode> MakeRootNodes()
     {
-        auto note = [](std::string name, std::string text) {
+        auto node = [](std::string name, std::string text) {
             TreeNode node;
             node.name = std::move(name);
             node.text = std::move(text);
@@ -177,29 +185,29 @@ namespace scribbolyth::treeview
         };
 
         TreeNode treeview = folder("treeview", false, {
-            note("treeview.cpp", ""),
-            note("treeview.hpp", ""),
+            node("treeview.cpp", ""),
+            node("treeview.hpp", ""),
         });
         TreeNode editor = folder("editor", false, {
-            note("editor.cpp", ""),
-            note("editor.hpp", ""),
+            node("editor.cpp", ""),
+            node("editor.hpp", ""),
         });
         TreeNode api = folder("api", false, {
-            note("design.md", ""),
+            node("design.md", ""),
         });
 
         std::vector<TreeNode> roots;
-        roots.push_back(note("Read Me", "Welcome to scribbolyth!\n\nSelect any note and press i to edit."));
+        roots.push_back(node("Read Me", "Welcome to scribbolyth!\n\nSelect any node and press i to edit."));
         roots.push_back(folder("docs", true, {
-            note("README.md", ""),
+            node("README.md", ""),
             std::move(api),
         }));
         roots.push_back(folder("src", true, {
             std::move(treeview),
             std::move(editor),
         }));
-        roots.push_back(folder("notes", false, {
-            note("idea.txt", ""),
+        roots.push_back(folder("nodes", false, {
+            node("idea.txt", ""),
         }));
 
         return roots;
@@ -395,16 +403,9 @@ namespace scribbolyth::treeview
         }
     }
 
-    void TreeView::RefreshActiveNote()
+    void TreeView::RefreshActiveNode()
     {
-        if (selected_ == nullptr || !selected_->children.empty())
-        {
-            state_->active_note = nullptr;
-        }
-        else
-        {
-            state_->active_note = selected_;
-        }
+        state_->active_node = selected_;
     }
 
     void TreeView::MoveToStart()
@@ -473,7 +474,7 @@ namespace scribbolyth::treeview
         }
     }
 
-    TreeNode new_note(std::string name)
+    TreeNode new_node(std::string name)
     {
         TreeNode node;
         node.name = std::move(name);
@@ -484,20 +485,20 @@ namespace scribbolyth::treeview
     {
         if (selected_ == nullptr)
         {
-            roots_.push_back(new_note(name));
+            roots_.push_back(new_node(name));
             selected_ = &roots_.back();
             return;
         }
         selected_->expanded = true;
-        auto inserted = selected_->children.insert(selected_->children.begin(), new_note(name));
+        auto inserted = selected_->children.insert(selected_->children.begin(), new_node(name));
         selected_ = &*inserted;
     }
 
-    void TreeView::InsertNote(const std::string& name)
+    void TreeView::InsertNode(const std::string& name)
     {
         if (selected_ == nullptr)
         {
-            roots_.push_back(new_note(name));
+            roots_.push_back(new_node(name));
             selected_ = &roots_.back();
             return;
         }
@@ -506,10 +507,34 @@ namespace scribbolyth::treeview
         {
             if (&*it == selected_)
             {
-                auto inserted = children.insert(it + 1, new_note(name));
+                auto inserted = children.insert(it + 1, new_node(name));
                 selected_ = &*inserted;
                 return;
             }
+        }
+    }
+
+    void TreeView::DeleteNode()
+    {
+        if (selected_ == nullptr) return;
+        TreeNode* parent = FindParent(roots_, selected_);
+        auto& children = ContainerOf(selected_);
+        for (std::size_t i = 0; i < children.size(); ++i)
+        {
+            if (&children[i] != selected_) continue;
+
+            children.erase(children.begin() + static_cast<std::ptrdiff_t>(i));
+
+            if (!children.empty())
+            {
+                std::size_t next = std::min(i, children.size() -1);
+                selected_ = &children[next];
+            }
+            else
+            {
+                selected_ = parent;
+            }
+            return;
         }
     }
 

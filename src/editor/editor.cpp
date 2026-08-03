@@ -129,7 +129,7 @@ namespace scribbolyth::editor
                 LoadIfChanged();
                 if (active_ == nullptr)
                 {
-                    return ftxui::text("Select a note to edit") | ftxui::dim | ftxui::center;
+                    return ftxui::text("Select a node to edit") | ftxui::dim | ftxui::center;
                 }
 
                 ftxui::Elements rows;
@@ -190,8 +190,8 @@ namespace scribbolyth::editor
 
             void LoadIfChanged()
             {
-                if (active_ == state_->active_note) return;
-                active_ = state_->active_note;
+                if (active_ == state_->active_node) return;
+                active_ = state_->active_node;
                 if (active_ == nullptr)
                 {
                     lines_.clear();
