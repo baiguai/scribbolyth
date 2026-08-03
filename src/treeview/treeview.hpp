@@ -12,6 +12,6 @@ namespace scribbolyth::treeview
 
     ftxui::Component MakeTreeView(std::shared_ptr<EditorState> state);
 
-    TreeNode MakeRootFolder();
+    std::vector<TreeNode> MakeRootNodes();
 
 }
