@@ -14,18 +14,22 @@ namespace scribbolyth::treeview
                 state_->operations["move_up"] = [this](const std::string&, int count)
                 {
                     if (state_->mode == Mode::TREE) MoveSelection(-count);
+                    RefreshActiveNote();
                 };
                 state_->operations["move_down"] = [this](const std::string&, int count)
                 {
                     if (state_->mode == Mode::TREE) MoveSelection(count);
+                    RefreshActiveNote();
                 };
                 state_->operations["move_file_start"] = [this](const std::string&, int)
                 {
                     if (state_->mode == Mode::TREE) MoveToStart();
+                    RefreshActiveNote();
                 };
                 state_->operations["move_file_end"] = [this](const std::string&, int)
                 {
                     if (state_->mode == Mode::TREE) MoveToEnd();
+                    RefreshActiveNote();
                 };
                 state_->operations["tree_open"] = [this](const std::string&, int count)
                 {
@@ -46,35 +50,43 @@ namespace scribbolyth::treeview
                 state_->operations["collapse_all"] = [this](const std::string&, int)
                 {
                     if (state_->mode == Mode::TREE) CollapseAll();
+                    RefreshActiveNote();
                 };
                 state_->operations["new_folder"] = [this](const std::string& name, int)
                 {
                     if (!name.empty()) InsertFolder(name);
+                    RefreshActiveNote();
                 };
                 state_->operations["new_note"] = [this](const std::string& name, int)
                 {
                     if (!name.empty()) InsertNote(name);
+                    RefreshActiveNote();
                 };
                 state_->operations["rename_node"] = [this](const std::string& name, int)
                 {
                     if (!name.empty()) selected_->name = name;
+                    RefreshActiveNote();
                 };
 
                 state_->operations["move_node_up"] = [this](const std::string&, int count)
                 {
                     if (state_->mode == Mode::TREE) for (int i = 0; i < count; ++i) MoveNode(-1);
+                    RefreshActiveNote();
                 };
                 state_->operations["move_node_down"] = [this](const std::string&, int count)
                 {
                     if (state_->mode == Mode::TREE) for (int i = 0; i < count; ++i) MoveNode(+1);
+                    RefreshActiveNote();
                 };
                 state_->operations["move_parent_up"] = [this](const std::string&, int count)
                 {
                     if (state_->mode == Mode::TREE) for (int i = 0; i < count; ++i) MoveParent(-1);
+                    RefreshActiveNote();
                 };
                 state_->operations["move_parent_down"] = [this](const std::string&, int count)
                 {
                     if (state_->mode == Mode::TREE) for (int i = 0; i < count; ++i) MoveParent(+1);
+                    RefreshActiveNote();
                 };
 
                 state_->operations["enter_normal"] = [this](const std::string&, int)
@@ -126,6 +138,7 @@ namespace scribbolyth::treeview
             void InsertNote(const std::string& name);
             void MoveNode(int dir);
             void MoveParent(int dir);
+            void RefreshActiveNote();
             bool IsAncestor(TreeNode& ancestor, TreeNode* node);
             void CollectVisibleDepth(TreeNode& node, int depth, std::vector<TreeNode*>& nodes, std::vector<int>& depths);
 
@@ -145,6 +158,13 @@ namespace scribbolyth::treeview
             TreeNode node;
             node.name = std::move(name);
             node.is_folder = false;
+            return node;
+        };
+        auto note = [](std::string name, std::string text) {
+            TreeNode node;
+            node.name = std::move(name);
+            node.is_folder = false;
+            node.text = std::move(text);
             return node;
         };
         auto folder = [](std::string name, bool expanded, std::vector<TreeNode> children) {
@@ -173,7 +193,7 @@ namespace scribbolyth::treeview
             file("design.md"),
         });
 
-        root.children.push_back(file("Read Me"));
+        root.children.push_back(note("Read Me", "Welcome to scribbolyth!\n\nSelect any note and press i to edit."));
         root.children.push_back(folder("docs", true, {
             file("README.md"),
             std::move(api),
@@ -306,7 +326,6 @@ namespace scribbolyth::treeview
         if (selected_ == &root_) return;
         TreeNode* parent = FindParent(root_, selected_);
         if (!parent) return;
-
         std::size_t si = 0;
         auto& children = parent->children;
         while (si < children.size() && &children[si] != selected_) ++si;
@@ -364,6 +383,18 @@ namespace scribbolyth::treeview
             target->expanded = true;
             target->children.insert(target->children.begin(), std::move(moved));
             selected_ = &target->children.front();
+        }
+    }
+
+    void TreeView::RefreshActiveNote()
+    {
+        if (selected_ == nullptr || selected_->is_folder)
+        {
+            state_->active_note = nullptr;
+        }
+        else
+        {
+            state_->active_note = selected_;
         }
     }
 

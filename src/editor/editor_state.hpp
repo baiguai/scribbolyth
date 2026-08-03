@@ -6,6 +6,7 @@
 #include "../mode/mode.hpp"
 #include "../keyboard/keymap.hpp"
 #include "../op/op.hpp"
+#include "../treeview/tree_node.hpp"
 
 struct EditorState {
     Mode mode = Mode::TREE;
@@ -13,6 +14,8 @@ struct EditorState {
     int command_cursor = 0;
     int* active_child = nullptr;
     Mode mode_before_command = Mode::TREE;
+
+    scribbolyth::treeview::TreeNode* active_note = nullptr;
 
     std::function<void()> focus_editor;
     std::function<void()> focus_treeview;
