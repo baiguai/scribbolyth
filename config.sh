@@ -12,6 +12,7 @@ SOURCES=(
     "src/op/op.cpp"
     "src/config/config.cpp"
     "src/io/serialize.cpp"
+    "src/html/convert.cpp"
 )
 
 LIBS=(

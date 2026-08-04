@@ -12,7 +12,7 @@ int main(int, char** argv) {
     auto state = std::make_shared<EditorState>();
 
     auto editor_comp = scribbolyth::editor::MakeEditor(state);
-    auto treeview_comp = scribbolyth::treeview::MakeTreeView(state, "scribbolyth.json");
+    auto treeview_comp = scribbolyth::treeview::MakeTreeView(state);
 
     state->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };
     state->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };

@@ -13,8 +13,8 @@ namespace scribbolyth::treeview
     class TreeView : public ftxui::ComponentBase
     {
         public:
-            TreeView(std::shared_ptr<EditorState> state, std::string default_file)
-                : state_(std::move(state)), default_file_(std::move(default_file))
+            TreeView(std::shared_ptr<EditorState> state)
+                : state_(std::move(state))
             {
                 state_->operations["deselect_node"] = [this](const std::string&, int)
                 {
@@ -135,13 +135,12 @@ namespace scribbolyth::treeview
                 };
                 state_->operations["save"] = [this](const std::string&, int)
                 {
-                    std::string path = current_file_.empty() ? default_file_ : current_file_;
-                    if (path.empty())
+                    if (current_file_.empty())
                     {
-                        state_->status = "No file to save to (use S to pick a path)";
+                        state_->status = "No file path set - use :saveas to save";
                         return;
                     }
-                    SaveTo(path);
+                    SaveTo(current_file_);
                 };
                 state_->operations["saveas"] = [this](const std::string& path, int)
                 {
@@ -161,26 +160,14 @@ namespace scribbolyth::treeview
                     }
                     LoadFrom(path);
                 };
-
-                if (!default_file_.empty())
+                state_->operations["new_document"] = [this](const std::string&, int)
                 {
-                    std::string content;
-                    if (scribbolyth::io::ReadFile(default_file_, content))
-                    {
-                        std::vector<TreeNode> loaded;
-                        if (scribbolyth::io::Deserialize(content, loaded))
-                        {
-                            roots_ = std::move(loaded);
-                            current_file_ = default_file_;
-                            state_->status = "Loaded " + std::to_string(CountNodes(roots_))
-                                             + " nodes from " + default_file_;
-                        }
-                        else
-                        {
-                            state_->status = "Could not parse " + default_file_ + "; starting fresh";
-                        }
-                    }
-                }
+                    roots_.clear();
+                    current_file_.clear();
+                    selected_ = nullptr;
+                    RefreshActiveNode();
+                    state_->status = "New document - no file path";
+                };
 
                 RefreshActiveNode();
             }
@@ -214,60 +201,14 @@ namespace scribbolyth::treeview
             void CollectVisibleDepth(TreeNode& node, int depth, std::vector<TreeNode*>& nodes, std::vector<int>& depths);
 
             std::shared_ptr<EditorState> state_;
-            std::vector<TreeNode> roots_ = MakeRootNodes();
+            std::vector<TreeNode> roots_;
             TreeNode* selected_ = nullptr;
-            std::string default_file_;
             std::string current_file_;
     };
 
-    ftxui::Component MakeTreeView(std::shared_ptr<EditorState> state, const std::string& default_file)
+    ftxui::Component MakeTreeView(std::shared_ptr<EditorState> state)
     {
-        return ftxui::Make<TreeView>(std::move(state), default_file);
-    }
-
-    std::vector<TreeNode> MakeRootNodes()
-    {
-        auto node = [](std::string name, std::string text) {
-            TreeNode node;
-            node.name = std::move(name);
-            node.text = std::move(text);
-            return node;
-        };
-        auto folder = [](std::string name, bool expanded, std::vector<TreeNode> children) {
-            TreeNode node;
-            node.name = std::move(name);
-            node.expanded = expanded;
-            node.children = std::move(children);
-            return node;
-        };
-
-        TreeNode treeview = folder("treeview", false, {
-            node("treeview.cpp", ""),
-            node("treeview.hpp", ""),
-        });
-        TreeNode editor = folder("editor", false, {
-            node("editor.cpp", ""),
-            node("editor.hpp", ""),
-        });
-        TreeNode api = folder("api", false, {
-            node("design.md", ""),
-        });
-
-        std::vector<TreeNode> roots;
-        roots.push_back(node("Read Me", "Welcome to scribbolyth!\n\nSelect any node and press i to edit."));
-        roots.push_back(folder("docs", true, {
-            node("README.md", ""),
-            std::move(api),
-        }));
-        roots.push_back(folder("src", true, {
-            std::move(treeview),
-            std::move(editor),
-        }));
-        roots.push_back(folder("nodes", false, {
-            node("idea.txt", ""),
-        }));
-
-        return roots;
+        return ftxui::Make<TreeView>(std::move(state));
     }
 
     void CollectVisible(TreeNode& node, std::vector<TreeNode*>& out)
