@@ -14,6 +14,9 @@ namespace scribbolyth::op
     void OpenCommandLine(std::shared_ptr<EditorState> state, const std::string& command);
     bool ExecuteCommand(std::shared_ptr<EditorState> state, const std::string& input);
 
+    // Tab-complete the pending command line (command name or file path).
+    void CompleteCommand(std::shared_ptr<EditorState> state);
+
     // Resolve a key event through the active keymap without dispatching.
     Keymap::Result Resolve(std::shared_ptr<EditorState> state, ftxui::Event event);
 

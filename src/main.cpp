@@ -59,6 +59,11 @@ int main(int, char** argv) {
     });
 
     auto command_handler = CatchEvent(command_wrapper, [state](Event event) {
+        if (event == Event::Tab)
+        {
+            scribbolyth::op::CompleteCommand(state);
+            return true;
+        }
         if (event == Event::Escape || event == Event::Return) {
             if (event == Event::Return)
                 scribbolyth::op::ExecuteCommand(state, state->command_buffer);
