@@ -16,6 +16,7 @@ struct EditorState {
     Mode mode_before_command = Mode::TREE;
 
     scribbolyth::treeview::TreeNode* active_node = nullptr;
+    std::string status;
 
     std::function<void()> focus_editor;
     std::function<void()> focus_treeview;

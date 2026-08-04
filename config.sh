@@ -11,6 +11,7 @@ SOURCES=(
     "src/keyboard/keymap.cpp"
     "src/op/op.cpp"
     "src/config/config.cpp"
+    "src/io/serialize.cpp"
 )
 
 LIBS=(

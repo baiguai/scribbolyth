@@ -3,13 +3,18 @@
 #include <algorithm>
 #include <cstddef>
 
+#include "../io/serialize.hpp"
+
 namespace scribbolyth::treeview
 {
+
+    int CountNodes(const std::vector<TreeNode>& nodes);
 
     class TreeView : public ftxui::ComponentBase
     {
         public:
-            TreeView(std::shared_ptr<EditorState> state) : state_(std::move(state))
+            TreeView(std::shared_ptr<EditorState> state, std::string default_file)
+                : state_(std::move(state)), default_file_(std::move(default_file))
             {
                 state_->operations["deselect_node"] = [this](const std::string&, int)
                 {
@@ -128,6 +133,54 @@ namespace scribbolyth::treeview
                 {
                     scribbolyth::op::OpenCommandLine(state_, "");
                 };
+                state_->operations["save"] = [this](const std::string&, int)
+                {
+                    std::string path = current_file_.empty() ? default_file_ : current_file_;
+                    if (path.empty())
+                    {
+                        state_->status = "No file to save to (use S to pick a path)";
+                        return;
+                    }
+                    SaveTo(path);
+                };
+                state_->operations["saveas"] = [this](const std::string& path, int)
+                {
+                    if (path.empty())
+                    {
+                        state_->status = "Save as requires a path";
+                        return;
+                    }
+                    SaveTo(path);
+                };
+                state_->operations["open"] = [this](const std::string& path, int)
+                {
+                    if (path.empty())
+                    {
+                        state_->status = "Open requires a path";
+                        return;
+                    }
+                    LoadFrom(path);
+                };
+
+                if (!default_file_.empty())
+                {
+                    std::string content;
+                    if (scribbolyth::io::ReadFile(default_file_, content))
+                    {
+                        std::vector<TreeNode> loaded;
+                        if (scribbolyth::io::Deserialize(content, loaded))
+                        {
+                            roots_ = std::move(loaded);
+                            current_file_ = default_file_;
+                            state_->status = "Loaded " + std::to_string(CountNodes(roots_))
+                                             + " nodes from " + default_file_;
+                        }
+                        else
+                        {
+                            state_->status = "Could not parse " + default_file_ + "; starting fresh";
+                        }
+                    }
+                }
 
                 RefreshActiveNode();
             }
@@ -155,17 +208,21 @@ namespace scribbolyth::treeview
             void MoveNode(int dir);
             void MoveParent(int dir);
             void RefreshActiveNode();
+            void SaveTo(const std::string& path);
+            void LoadFrom(const std::string& path);
             bool IsAncestor(TreeNode& ancestor, TreeNode* node);
             void CollectVisibleDepth(TreeNode& node, int depth, std::vector<TreeNode*>& nodes, std::vector<int>& depths);
 
             std::shared_ptr<EditorState> state_;
             std::vector<TreeNode> roots_ = MakeRootNodes();
             TreeNode* selected_ = nullptr;
+            std::string default_file_;
+            std::string current_file_;
     };
 
-    ftxui::Component MakeTreeView(std::shared_ptr<EditorState> state)
+    ftxui::Component MakeTreeView(std::shared_ptr<EditorState> state, const std::string& default_file)
     {
-        return ftxui::Make<TreeView>(std::move(state));
+        return ftxui::Make<TreeView>(std::move(state), default_file);
     }
 
     std::vector<TreeNode> MakeRootNodes()
@@ -263,6 +320,17 @@ namespace scribbolyth::treeview
             }
         }
         return nullptr;
+    }
+
+    int CountNodes(const std::vector<TreeNode>& nodes)
+    {
+        int total = 0;
+        for (const auto& node : nodes)
+        {
+            ++total;
+            total += CountNodes(node.children);
+        }
+        return total;
     }
 
     std::vector<TreeNode>& TreeView::ContainerOf(TreeNode* node)
@@ -406,6 +474,39 @@ namespace scribbolyth::treeview
     void TreeView::RefreshActiveNode()
     {
         state_->active_node = selected_;
+    }
+
+    void TreeView::SaveTo(const std::string& path)
+    {
+        std::string json = scribbolyth::io::Serialize(roots_);
+        if (!scribbolyth::io::WriteFile(path, json))
+        {
+            state_->status = "Error: could not write " + path;
+            return;
+        }
+        current_file_ = path;
+        state_->status = "Saved " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
+    }
+
+    void TreeView::LoadFrom(const std::string& path)
+    {
+        std::string content;
+        if (!scribbolyth::io::ReadFile(path, content))
+        {
+            state_->status = "Error: could not open " + path;
+            return;
+        }
+        std::vector<TreeNode> loaded;
+        if (!scribbolyth::io::Deserialize(content, loaded))
+        {
+            state_->status = "Error: could not parse " + path;
+            return;
+        }
+        roots_ = std::move(loaded);
+        current_file_ = path;
+        selected_ = nullptr;
+        RefreshActiveNode();
+        state_->status = "Loaded " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
     }
 
     void TreeView::MoveToStart()

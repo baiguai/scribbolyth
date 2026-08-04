@@ -12,7 +12,7 @@ int main(int, char** argv) {
     auto state = std::make_shared<EditorState>();
 
     auto editor_comp = scribbolyth::editor::MakeEditor(state);
-    auto treeview_comp = scribbolyth::treeview::MakeTreeView(state);
+    auto treeview_comp = scribbolyth::treeview::MakeTreeView(state, "scribbolyth.json");
 
     state->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };
     state->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };
@@ -82,11 +82,17 @@ int main(int, char** argv) {
 
     auto status_bar = Renderer([state]
     {
-        return hbox({
+        ftxui::Elements parts = {
             text(ModeName(state->mode)) | bold,
             separator(),
             text(" scribbolyth ") | dim,
-        }) | bgcolor(Color::Blue);
+        };
+        if (!state->status.empty())
+        {
+            parts.push_back(separator());
+            parts.push_back(text(" " + state->status + " ") | dim);
+        }
+        return hbox(std::move(parts)) | bgcolor(Color::Blue);
     });
 
     int active_child = 0;
