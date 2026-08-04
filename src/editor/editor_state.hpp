@@ -17,6 +17,7 @@ struct EditorState {
 
     scribbolyth::treeview::TreeNode* active_node = nullptr;
     std::string status;
+    std::string template_path;
 
     std::function<void()> focus_editor;
     std::function<void()> focus_treeview;

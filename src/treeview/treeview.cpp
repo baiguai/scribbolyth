@@ -4,6 +4,7 @@
 #include <cstddef>
 
 #include "../io/serialize.hpp"
+#include "../html/convert.hpp"
 
 namespace scribbolyth::treeview
 {
@@ -167,6 +168,44 @@ namespace scribbolyth::treeview
                     selected_ = nullptr;
                     RefreshActiveNode();
                     state_->status = "New document - no file path";
+                };
+                state_->operations["import_html"] = [this](const std::string& path, int)
+                {
+                    if (path.empty())
+                    {
+                        state_->status = "Import requires a path";
+                        return;
+                    }
+                    std::vector<TreeNode> loaded;
+                    if (!scribbolyth::html::ImportHtmlFile(path, loaded))
+                    {
+                        state_->status = "Error: could not import " + path;
+                        return;
+                    }
+                    roots_ = std::move(loaded);
+                    current_file_.clear();
+                    selected_ = nullptr;
+                    RefreshActiveNode();
+                    state_->status = "Imported " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
+                };
+                state_->operations["export_html"] = [this](const std::string& path, int)
+                {
+                    if (path.empty())
+                    {
+                        state_->status = "Export requires a path";
+                        return;
+                    }
+                    if (state_->template_path.empty())
+                    {
+                        state_->status = "Error: scribboleth.html template not found";
+                        return;
+                    }
+                    if (!scribbolyth::html::ExportHtmlFile(state_->template_path, path, roots_))
+                    {
+                        state_->status = "Error: could not export " + path;
+                        return;
+                    }
+                    state_->status = "Exported " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
                 };
 
                 RefreshActiveNode();

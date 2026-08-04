@@ -41,6 +41,13 @@ int main(int, char** argv) {
         std::cerr << "Only the built-in ':qa' command is available.\n";
     }
 
+    fs::path template_path = fs::path(argv[0]).parent_path() / "scribboleth.html";
+    if (!fs::exists(template_path))
+    {
+        template_path = "scribboleth.html";
+    }
+    state->template_path = template_path.string();
+
     InputOption command_option;
     command_option.transform = [](InputState state)
     {
