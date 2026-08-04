@@ -65,7 +65,7 @@ namespace scribbolyth::io
             public:
                 explicit Parser(const std::string& s) : s_(s) {}
 
-                bool Deserialize(std::vector<TreeNode>& roots)
+                bool Deserialize(std::vector<TreeNode>& roots, int* tree_width)
                 {
                     SkipWs();
                     if (!Consume('{')) return false;
@@ -73,6 +73,8 @@ namespace scribbolyth::io
 
                     std::vector<TreeNode> result;
                     bool have_roots = false;
+                    bool have_width = false;
+                    int width = 0;
                     int version = -1;
 
                     if (!Consume('}'))
@@ -95,6 +97,11 @@ namespace scribbolyth::io
                                 if (!ParseArray(result)) return false;
                                 have_roots = true;
                             }
+                            else if (key == "tree_width")
+                            {
+                                if (!ParseNumber(width)) return false;
+                                have_width = true;
+                            }
                             else
                             {
                                 if (!SkipValue()) return false;
@@ -113,6 +120,7 @@ namespace scribbolyth::io
                     if (!have_roots) return false;
 
                     roots = std::move(result);
+                    if (have_width && tree_width) *tree_width = width;
                     return true;
                 }
 
@@ -310,9 +318,10 @@ namespace scribbolyth::io
         return Escape(s);
     }
 
-    std::string Serialize(const std::vector<TreeNode>& roots)
+    std::string Serialize(const std::vector<TreeNode>& roots, int tree_width)
     {
-        std::string out = "{\n  \"version\": 1,\n  \"roots\": [\n";
+        std::string out = "{\n  \"version\": 1,\n  \"tree_width\": " +
+                          std::to_string(tree_width) + ",\n  \"roots\": [\n";
         for (std::size_t i = 0; i < roots.size(); ++i)
         {
             AppendNode(out, roots[i], 1);
@@ -322,10 +331,10 @@ namespace scribbolyth::io
         return out;
     }
 
-    bool Deserialize(const std::string& json, std::vector<TreeNode>& roots)
+    bool Deserialize(const std::string& json, std::vector<TreeNode>& roots, int* tree_width)
     {
         Parser parser(json);
-        return parser.Deserialize(roots);
+        return parser.Deserialize(roots, tree_width);
     }
 
     bool WriteFile(const std::string& path, const std::string& content)

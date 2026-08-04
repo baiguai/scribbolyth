@@ -22,8 +22,7 @@ int main(int, char** argv) {
     auto treeview_wrap = treeview_comp;
     auto editor_wrap = editor_comp;
 
-    int left_size = 30;
-    auto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &left_size);
+    auto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);
 
     auto screen = ScreenInteractive::Fullscreen();
     auto quit = screen.ExitLoopClosure();

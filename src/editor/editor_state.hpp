@@ -9,12 +9,18 @@
 #include "../op/op.hpp"
 #include "../treeview/tree_node.hpp"
 
+inline constexpr int kDefaultTreeviewWidth = 30;
+inline constexpr int kMinTreeviewWidth = 10;
+inline constexpr int kMaxTreeviewWidth = 200;
+
 struct EditorState {
     Mode mode = Mode::TREE;
     std::string command_buffer;
     int command_cursor = 0;
     int* active_child = nullptr;
     Mode mode_before_command = Mode::TREE;
+
+    int treeview_width = kDefaultTreeviewWidth;
 
     scribbolyth::treeview::TreeNode* active_node = nullptr;
     std::string status;

@@ -169,6 +169,7 @@ namespace scribbolyth::treeview
                     roots_.clear();
                     current_file_.clear();
                     selected_ = nullptr;
+                    state_->treeview_width = kDefaultTreeviewWidth;
                     RefreshActiveNode();
                     state_->status = "New document - no file path";
                 };
@@ -209,6 +210,16 @@ namespace scribbolyth::treeview
                         return;
                     }
                     state_->status = "Exported " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
+                };
+                state_->operations["treeview_width_increase"] = [this](const std::string&, int count)
+                {
+                    state_->treeview_width = std::min(kMaxTreeviewWidth,
+                        state_->treeview_width + std::max(1, count));
+                };
+                state_->operations["treeview_width_decrease"] = [this](const std::string&, int count)
+                {
+                    state_->treeview_width = std::max(kMinTreeviewWidth,
+                        state_->treeview_width - std::max(1, count));
                 };
 
                 state_->collect_all_nodes = [this]
@@ -490,7 +501,7 @@ namespace scribbolyth::treeview
 
     void TreeView::SaveTo(const std::string& path)
     {
-        std::string json = scribbolyth::io::Serialize(roots_);
+        std::string json = scribbolyth::io::Serialize(roots_, state_->treeview_width);
         if (!scribbolyth::io::WriteFile(path, json))
         {
             state_->status = "Error: could not write " + path;
@@ -509,11 +520,13 @@ namespace scribbolyth::treeview
             return;
         }
         std::vector<TreeNode> loaded;
-        if (!scribbolyth::io::Deserialize(content, loaded))
+        int loaded_width = state_->treeview_width;
+        if (!scribbolyth::io::Deserialize(content, loaded, &loaded_width))
         {
             state_->status = "Error: could not parse " + path;
             return;
         }
+        state_->treeview_width = loaded_width;
         roots_ = std::move(loaded);
         current_file_ = path;
         selected_ = nullptr;
@@ -664,6 +677,7 @@ namespace scribbolyth::treeview
         if (&node == selected)
         {
             row |= ftxui::inverted;
+            row |= ftxui::focus;
         }
         rows.push_back(row);
 
@@ -684,7 +698,7 @@ namespace scribbolyth::treeview
         {
             RenderNode(root, 0, selected_, rows);
         }
-        return ftxui::vbox(std::move(rows)) | ftxui::flex;
+        return ftxui::vbox(std::move(rows)) | ftxui::frame | ftxui::flex;
     }
 
 }
