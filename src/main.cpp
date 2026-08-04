@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "config/config.hpp"
+#include "help/help.hpp"
 #include "op/op.hpp"
 
 using namespace ftxui;
@@ -28,6 +29,9 @@ int main(int, char** argv) {
 
     state->operations["quit"] = [quit](const std::string&, int) { quit(); };
     state->commands["qa"] = "quit";
+
+    bool show_help = false;
+    state->operations["show_help"] = [&show_help](const std::string&, int) { show_help = true; };
 
     namespace fs = std::filesystem;
     fs::path config_path = fs::path(argv[0]).parent_path() / "commands.conf";
@@ -116,7 +120,10 @@ int main(int, char** argv) {
         status_bar,
     }, &active_child);
 
-    screen.Loop(container);
+    auto help_comp = scribbolyth::help::MakeHelpDialog(state, config_path.string(), &show_help);
+    auto root = Modal(container, help_comp, &show_help);
+
+    screen.Loop(root);
 
     return 0;
 }
