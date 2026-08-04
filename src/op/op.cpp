@@ -55,7 +55,7 @@ namespace scribbolyth::op
 
                 std::error_code ec2;
                 bool is_dir = it->is_directory(ec2);
-                std::string full = dir.empty() ? entry : (dir + "/" + entry);
+                std::string full = (dir.empty() || dir == "/") ? (dir + entry) : (dir + "/" + entry);
                 if (is_dir) full += "/";
                 matches.push_back(std::move(full));
             }
