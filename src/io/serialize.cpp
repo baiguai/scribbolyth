@@ -305,6 +305,11 @@ namespace scribbolyth::io
         };
     }
 
+    std::string JsonEscape(const std::string& s)
+    {
+        return Escape(s);
+    }
+
     std::string Serialize(const std::vector<TreeNode>& roots)
     {
         std::string out = "{\n  \"version\": 1,\n  \"roots\": [\n";

@@ -80,6 +80,8 @@ if [ -f "bin/$APP_NAME" ]; then
     if [ -d "../build-windows/bin" ]; then
         cp "../config/commands.conf" "../build-windows/bin/" 2>/dev/null || \
             echo "Warning: could not copy config to build-windows/bin/"
+        cp "../config/scribboleth.html" "../build-windows/bin/" 2>/dev/null || \
+            echo "Warning: could not copy template to build-windows/bin/"
     fi
 
     echo "-- Build successful --"

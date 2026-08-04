@@ -12,6 +12,8 @@ namespace scribbolyth::io
     std::string Serialize(const std::vector<TreeNode>& roots);
     bool Deserialize(const std::string& json, std::vector<TreeNode>& roots);
 
+    std::string JsonEscape(const std::string& s);
+
     bool WriteFile(const std::string& path, const std::string& content);
     bool ReadFile(const std::string& path, std::string& content);
 }

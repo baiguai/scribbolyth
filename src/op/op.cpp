@@ -14,7 +14,8 @@ namespace scribbolyth::op
     {
         bool IsPathCommand(const std::string& name)
         {
-            return name == "open" || name == "o" || name == "saveas";
+            return name == "open" || name == "o" || name == "saveas"
+                || name == "U" || name == "X";
         }
 
         void CollectPathMatches(const std::string& arg, std::vector<std::string>& matches)
