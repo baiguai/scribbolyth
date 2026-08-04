@@ -6,6 +6,7 @@
 #include "config/config.hpp"
 #include "help/help.hpp"
 #include "op/op.hpp"
+#include "search/search.hpp"
 
 using namespace ftxui;
 
@@ -32,6 +33,9 @@ int main(int, char** argv) {
 
     bool show_help = false;
     state->operations["show_help"] = [&show_help](const std::string&, int) { show_help = true; };
+
+    bool show_search = false;
+    state->operations["search_start"] = [&show_search](const std::string&, int) { show_search = true; };
 
     namespace fs = std::filesystem;
     fs::path config_path = fs::path(argv[0]).parent_path() / "commands.conf";
@@ -121,7 +125,8 @@ int main(int, char** argv) {
     }, &active_child);
 
     auto help_comp = scribbolyth::help::MakeHelpDialog(state, config_path.string(), &show_help);
-    auto root = Modal(container, help_comp, &show_help);
+    auto search_comp = scribbolyth::search::MakeSearchDialog(state, &show_search);
+    auto root = Modal(Modal(container, help_comp, &show_help), search_comp, &show_search);
 
     screen.Loop(root);
 

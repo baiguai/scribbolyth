@@ -14,6 +14,8 @@ SOURCES=(
     "src/io/serialize.cpp"
     "src/html/convert.cpp"
     "src/help/help.cpp"
+    "src/search/search.cpp"
+    "src/search/search.cpp"
 )
 
 LIBS=(
