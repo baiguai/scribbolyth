@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <utility>
 
 #include "../io/serialize.hpp"
 #include "../html/convert.hpp"
@@ -10,6 +11,8 @@ namespace scribbolyth::treeview
 {
 
     int CountNodes(const std::vector<TreeNode>& nodes);
+    TreeNode* FindParent(std::vector<TreeNode>& roots, TreeNode* child);
+    void CollectAllDepth(TreeNode& node, int depth, std::vector<std::pair<TreeNode*, int>>& out);
 
     class TreeView : public ftxui::ComponentBase
     {
@@ -208,6 +211,26 @@ namespace scribbolyth::treeview
                     state_->status = "Exported " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
                 };
 
+                state_->collect_all_nodes = [this]
+                {
+                    std::vector<std::pair<TreeNode*, int>> out;
+                    for (auto& root : roots_)
+                    {
+                        CollectAllDepth(root, 0, out);
+                    }
+                    return out;
+                };
+                state_->reveal_node = [this](TreeNode* target)
+                {
+                    if (!target) return;
+                    for (TreeNode* cur = target; cur; cur = FindParent(roots_, cur))
+                    {
+                        if (cur != target) cur->expanded = true;
+                    }
+                    selected_ = target;
+                    RefreshActiveNode();
+                };
+
                 RefreshActiveNode();
             }
             bool Focusable() const override
@@ -259,6 +282,15 @@ namespace scribbolyth::treeview
             {
                 CollectVisible(child, out);
             }
+        }
+    }
+
+    void CollectAllDepth(TreeNode& node, int depth, std::vector<std::pair<TreeNode*, int>>& out)
+    {
+        out.push_back({&node, depth});
+        for (auto& child : node.children)
+        {
+            CollectAllDepth(child, depth + 1, out);
         }
     }
 
