@@ -95,6 +95,10 @@ namespace scribbolyth::help
             : state_(std::move(state)), show_(show)
         {
             ParseEntries(path, entries_);
+            for (const auto& e : entries_)
+            {
+                content_width_ = std::max(content_width_, static_cast<int>(e.line.size()));
+            }
         }
 
         bool Focusable() const override { return true; }
@@ -144,28 +148,31 @@ namespace scribbolyth::help
             const int count = std::min(kVisibleRows, std::max(0, total - top));
 
             ftxui::Elements rows;
+            const int row_width = content_width_ + 2;
             if (total == 0)
             {
-                rows.push_back(ftxui::text(filter_.empty()
-                                               ? "  No bindings loaded (commands.conf missing?)"
-                                               : "  No bindings match the filter") |
+                rows.push_back(ftxui::text(PadRight(
+                    filter_.empty() ? "  No bindings loaded (commands.conf missing?)"
+                                    : "  No bindings match the filter",
+                    row_width)) |
                                ftxui::dim);
             }
             else
             {
                 for (int i = 0; i < count; ++i)
                 {
-                    ftxui::Element row = ftxui::text(" " + entries_[filtered[top + i]].line + " ");
+                    ftxui::Element row = ftxui::text(" " + PadRight(entries_[filtered[top + i]].line, content_width_) + " ");
                     if (i == 0) row = row | ftxui::inverted;
                     rows.push_back(row);
                 }
             }
 
-            // Keep the dialog a fixed height even when few rows match: pad the
-            // rows area out to kVisibleRows so the window never shrinks.
+            // Keep the dialog a fixed size even when few rows match: pad the
+            // rows area out to kVisibleRows and every row out to a fixed
+            // width, so the window never shrinks.
             while (static_cast<int>(rows.size()) < kVisibleRows)
             {
-                rows.push_back(ftxui::text(""));
+                rows.push_back(ftxui::text(PadRight("", row_width)));
             }
 
             const std::string footer =
@@ -182,7 +189,7 @@ namespace scribbolyth::help
                                     ftxui::separator(),
                                     ftxui::vbox(std::move(rows)),
                                     ftxui::separator(),
-                                    ftxui::text(footer) | ftxui::dim,
+                                    ftxui::text(PadRight(footer, row_width)) | ftxui::dim,
                                 })) |
                    ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
@@ -222,6 +229,7 @@ namespace scribbolyth::help
         std::vector<HelpEntry> entries_;
         std::string filter_;
         int scroll_ = 0;
+        int content_width_ = 72;
         static constexpr int kVisibleRows = 18;
     };
 
