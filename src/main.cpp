@@ -59,6 +59,11 @@ int main(int, char** argv) {
     });
 
     auto command_handler = CatchEvent(command_wrapper, [state](Event event) {
+        if (event == Event::Tab)
+        {
+            scribbolyth::op::CompleteCommand(state);
+            return true;
+        }
         if (event == Event::Escape || event == Event::Return) {
             if (event == Event::Return)
                 scribbolyth::op::ExecuteCommand(state, state->command_buffer);
@@ -82,11 +87,17 @@ int main(int, char** argv) {
 
     auto status_bar = Renderer([state]
     {
-        return hbox({
+        ftxui::Elements parts = {
             text(ModeName(state->mode)) | bold,
             separator(),
             text(" scribbolyth ") | dim,
-        }) | bgcolor(Color::Blue);
+        };
+        if (!state->status.empty())
+        {
+            parts.push_back(separator());
+            parts.push_back(text(" " + state->status + " ") | dim);
+        }
+        return hbox(std::move(parts)) | bgcolor(Color::Blue);
     });
 
     int active_child = 0;
