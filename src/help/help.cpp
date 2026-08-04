@@ -69,7 +69,6 @@ namespace scribbolyth::help
 
                 auto fields = SplitFields(line);
                 if (fields.size() != 7) continue;
-                if (fields[0] == "GLOBAL") continue;
 
                 HelpEntry entry;
                 entry.mode     = fields[0];
