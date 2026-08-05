@@ -29,6 +29,12 @@ struct EditorState {
     std::string template_path;
     std::vector<scribbolyth::bookmark::Bookmark> bookmarks;
 
+    // Viewed-node history: node ids of every selected node that has text,
+    // most recent last, deduplicated, capped at kHistoryMax. Populated by
+    // the treeview; the history dialog resolves ids to live nodes.
+    std::vector<std::string> history;
+    static constexpr std::size_t kHistoryMax = 30;
+
     std::function<void()> focus_editor;
     std::function<void()> focus_treeview;
 

@@ -18,6 +18,7 @@ SOURCES=(
     "src/bookmark/bookmark.cpp"
     "src/bookmarks/bookmarks.cpp"
     "src/links/links.cpp"
+    "src/history/history.cpp"
 )
 
 LIBS=(

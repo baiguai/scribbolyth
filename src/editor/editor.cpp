@@ -7,6 +7,7 @@
 #include <ftxui/dom/elements.hpp>
 
 #include "../bookmark/bookmark.hpp"
+#include "../history/history.hpp"
 
 namespace scribbolyth::editor
 {
@@ -266,6 +267,10 @@ namespace scribbolyth::editor
                     joined += lines_[i];
                 }
                 active_->text = std::move(joined);
+                if (!active_->text.empty())
+                {
+                    scribbolyth::history::Record(*state_, active_->id);
+                }
             }
 
             static std::vector<std::string> SplitLines(const std::string& text)

@@ -132,8 +132,9 @@ The config is copied next to the binary automatically — no extra step.
 # Adding a New Dialog — Worked Example: a "Todos" dialog
 
 A **dialog** is a modal overlay drawn on top of the app. The real ones are
-`help` (`Esc`), `search` (`/`), `bookmarks` (`` ` ``) and `links` (`#`);
-they live in `src/help/`, `src/search/`, `src/bookmarks/`, `src/links/`.
+`help` (`Esc`), `search` (`/`), `bookmarks` (`` ` ``), `links` (`#`) and
+`history` (`<`); they live in `src/help/`, `src/search/`, `src/bookmarks/`,
+`src/links/`, `src/history/`.
 Below we build a small new one end to end: pressing `t` in TREE mode lists
 every `TODO:` line in the active node's text; `j`/`k` move, `Enter` jumps to
 the line, `Esc` cancels.
