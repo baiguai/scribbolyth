@@ -6,6 +6,8 @@
 #include "config/config.hpp"
 #include "bookmarks/bookmarks.hpp"
 #include "help/help.hpp"
+#include "history/history.hpp"
+#include "links/links.hpp"
 #include "op/op.hpp"
 #include "search/search.hpp"
 
@@ -40,6 +42,13 @@ int main(int, char** argv) {
     bool show_bookmarks = false;
     state->operations["bookmarks"] = [&show_bookmarks](const std::string&, int) { show_bookmarks = true; };
     state->commands["bookmarks"] = "bookmarks";
+
+    bool show_links = false;
+    state->operations["links"] = [&show_links](const std::string&, int) { show_links = true; };
+    state->commands["links"] = "links";
+
+    bool show_history = false;
+    state->operations["history"] = [&show_history](const std::string&, int) { show_history = true; };
 
     namespace fs = std::filesystem;
     fs::path config_path = fs::path(argv[0]).parent_path() / "commands.conf";
@@ -131,8 +140,13 @@ int main(int, char** argv) {
     auto help_comp = scribbolyth::help::MakeHelpDialog(state, config_path.string(), &show_help);
     auto search_comp = scribbolyth::search::MakeSearchDialog(state, &show_search);
     auto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);
-    auto root = Modal(Modal(Modal(container, help_comp, &show_help), search_comp, &show_search),
-                      bookmarks_comp, &show_bookmarks);
+    auto links_comp = scribbolyth::links::MakeLinksDialog(state, &show_links);
+    auto history_comp = scribbolyth::history::MakeHistoryDialog(state, &show_history);
+    auto root = Modal(Modal(Modal(Modal(Modal(container, help_comp, &show_help),
+                                          search_comp, &show_search),
+                                  bookmarks_comp, &show_bookmarks),
+                            links_comp, &show_links),
+                      history_comp, &show_history);
 
     screen.Loop(root);
 
