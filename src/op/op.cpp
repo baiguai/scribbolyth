@@ -50,7 +50,19 @@ namespace scribbolyth::op
 
                 std::error_code ec2;
                 bool is_dir = it->is_directory(ec2);
-                std::string full = parent.empty() ? entry : (parent + sep + entry);
+                std::string full;
+                if (parent.empty())
+                {
+                    full = entry;
+                }
+                else if (parent.back() == '/' || parent.back() == '\\')
+                {
+                    full = parent + entry;   // parent is already a root ("/", "C:\")
+                }
+                else
+                {
+                    full = parent + sep + entry;
+                }
                 if (is_dir) full += sep;
                 matches.push_back(std::move(full));
             }

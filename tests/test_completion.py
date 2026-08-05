@@ -29,6 +29,13 @@ try:
     s.require(':open final.json',
               'Tab should complete a relative filename')
 
+    # absolute path from the root: `:o /tm` + Tab -> `:o /tmp/`
+    s.send(b'\x1b')
+    s.send(b':o /tm')
+    s.send(b'\t')
+    s.require(':o /tmp/',
+              'Tab should not double the root separator (/tm -> /tmp/)')
+
     # directory completion: `:open subd` + Tab -> `:open subdir/`
     s.send(b'\x1b')
     s.send(b':open subd')
