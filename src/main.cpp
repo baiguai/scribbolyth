@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "config/config.hpp"
+#include "bookmarks/bookmarks.hpp"
 #include "help/help.hpp"
 #include "op/op.hpp"
 #include "search/search.hpp"
@@ -35,6 +36,10 @@ int main(int, char** argv) {
 
     bool show_search = false;
     state->operations["search_start"] = [&show_search](const std::string&, int) { show_search = true; };
+
+    bool show_bookmarks = false;
+    state->operations["bookmarks"] = [&show_bookmarks](const std::string&, int) { show_bookmarks = true; };
+    state->commands["bookmarks"] = "bookmarks";
 
     namespace fs = std::filesystem;
     fs::path config_path = fs::path(argv[0]).parent_path() / "commands.conf";
@@ -125,7 +130,9 @@ int main(int, char** argv) {
 
     auto help_comp = scribbolyth::help::MakeHelpDialog(state, config_path.string(), &show_help);
     auto search_comp = scribbolyth::search::MakeSearchDialog(state, &show_search);
-    auto root = Modal(Modal(container, help_comp, &show_help), search_comp, &show_search);
+    auto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);
+    auto root = Modal(Modal(Modal(container, help_comp, &show_help), search_comp, &show_search),
+                      bookmarks_comp, &show_bookmarks);
 
     screen.Loop(root);
 

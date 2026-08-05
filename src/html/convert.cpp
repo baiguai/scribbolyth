@@ -1,6 +1,5 @@
 #include "convert.hpp"
 
-#include <random>
 #include <string>
 #include <utility>
 #include <vector>
@@ -30,6 +29,58 @@ namespace scribbolyth::html
                         SkipWs();
                         if (Consume(',')) continue;
                         if (Consume(']')) return true;
+                        return false;
+                    }
+                }
+
+                bool ParseBookmarks(std::vector<bookmark::Bookmark>& marks)
+                {
+                    if (!Consume('[')) return false;
+                    SkipWs();
+                    if (Consume(']')) return true;
+                    while (true)
+                    {
+                        SkipWs();
+                        bookmark::Bookmark mark{};
+                        if (!ParseBookmark(mark)) return false;
+                        marks.push_back(std::move(mark));
+                        SkipWs();
+                        if (Consume(',')) continue;
+                        if (Consume(']')) return true;
+                        return false;
+                    }
+                }
+
+                bool ParseBookmark(bookmark::Bookmark& mark)
+                {
+                    if (!Consume('{')) return false;
+                    SkipWs();
+                    if (Consume('}')) return true;
+                    while (true)
+                    {
+                        SkipWs();
+                        std::string key;
+                        if (!ParseString(key)) return false;
+                        SkipWs();
+                        if (!Consume(':')) return false;
+                        SkipWs();
+
+                        if (key == "id")
+                        {
+                            if (!ParseString(mark.id)) return false;
+                        }
+                        else if (key == "line")
+                        {
+                            if (!ParseNumber(mark.line)) return false;
+                        }
+                        else
+                        {
+                            if (!SkipValue()) return false;
+                        }
+
+                        SkipWs();
+                        if (Consume(',')) continue;
+                        if (Consume('}')) return true;
                         return false;
                     }
                 }
@@ -190,7 +241,8 @@ namespace scribbolyth::html
                         if (!Consume(':')) return false;
                         SkipWs();
 
-                        if (key == "title")        { if (!ParseString(node.name)) return false; }
+                        if (key == "id")         { if (!ParseString(node.id)) return false; }
+                        else if (key == "title") { if (!ParseString(node.name)) return false; }
                         else if (key == "content") { if (!ParseString(node.text)) return false; }
                         else if (key == "expanded"){ if (!ParseBool(node.expanded)) return false; }
                         else if (key == "children"){ if (!ParseArray(node.children)) return false; }
@@ -204,14 +256,30 @@ namespace scribbolyth::html
                 }
         };
 
-        // Locate the '[' that opens the `let treeData = [ ... ];` array and the
-        // index of its matching ']' (string- and nesting-aware).
-        bool FindTreeDataArray(const std::string& html, std::size_t& open, std::size_t& close)
+        // Locate the '[' that opens the `let <keyword> = [ ... ];` array and the
+        // index of its matching ']' (string- and nesting-aware). The keyword is
+        // matched as a JS variable declaration so mentions of it in comments or
+        // help text never confuse the search.
+        bool FindJsArray(const std::string& html, const std::string& keyword,
+                         std::size_t& open, std::size_t& close)
         {
-            std::size_t kw = html.find("treeData");
-            if (kw == std::string::npos) return false;
-            open = html.find('[', kw);
-            if (open == std::string::npos) return false;
+            std::size_t pos = 0;
+            for (;;)
+            {
+                std::size_t lt = html.find("let", pos);
+                if (lt == std::string::npos) return false;
+                std::size_t i = lt + 3;
+                while (i < html.size() && (html[i] == ' ' || html[i] == '\t')) ++i;
+                if (html.compare(i, keyword.size(), keyword) != 0) { pos = lt + 3; continue; }
+                i += keyword.size();
+                while (i < html.size() && (html[i] == ' ' || html[i] == '\t')) ++i;
+                if (i >= html.size() || html[i] != '=') { pos = lt + 3; continue; }
+                ++i;
+                while (i < html.size() && (html[i] == ' ' || html[i] == '\t')) ++i;
+                if (i >= html.size() || html[i] != '[') { pos = lt + 3; continue; }
+                open = i;
+                break;
+            }
 
             bool in_string = false;
             bool escaped = false;
@@ -237,24 +305,14 @@ namespace scribbolyth::html
             return false;
         }
 
-        std::string RandomId()
-        {
-            static const char alphabet[] = "abcdefghijklmnopqrstuvwxyz0123456789";
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_int_distribution<int> dist(0, static_cast<int>(sizeof(alphabet)) - 2);
-            std::string id;
-            for (int i = 0; i < 8; ++i) id += alphabet[dist(gen)];
-            return id;
-        }
-
         void AppendNode(std::string& out, const TreeNode& node, int depth)
         {
             std::string pad(depth * 2, ' ');
             std::string pad2((depth + 1) * 2, ' ');
 
+            std::string id = node.id.empty() ? scribbolyth::bookmark::NewId() : node.id;
             out += pad + "{\n";
-            out += pad2 + "\"id\": \"" + RandomId() + "\",\n";
+            out += pad2 + "\"id\": \"" + id + "\",\n";
             out += pad2 + "\"title\": " + scribbolyth::io::JsonEscape(node.name) + ",\n";
             out += pad2 + "\"content\": " + scribbolyth::io::JsonEscape(node.text) + ",\n";
             if (node.children.empty())
@@ -275,16 +333,21 @@ namespace scribbolyth::html
             out += pad + "}";
         }
 
-        bool ReplaceTreeData(std::string& html, const std::vector<TreeNode>& roots)
+        void ReplaceArray(std::string& html, std::size_t open, std::size_t close,
+                          const std::string& json)
         {
-            std::size_t open = 0;
-            std::size_t close = 0;
-            if (!FindTreeDataArray(html, open, close)) return false;
-
             std::size_t end = close + 1;
             while (end < html.size() && (html[end] == ' ' || html[end] == '\t'
                    || html[end] == '\n' || html[end] == '\r')) ++end;
             if (end < html.size() && html[end] == ';') ++end;
+            html.replace(open, end - open, json + ";");
+        }
+
+        bool ReplaceTreeData(std::string& html, const std::vector<TreeNode>& roots)
+        {
+            std::size_t open = 0;
+            std::size_t close = 0;
+            if (!FindJsArray(html, "treeData", open, close)) return false;
 
             std::string json;
             if (roots.empty())
@@ -301,35 +364,133 @@ namespace scribbolyth::html
                 }
                 json += "]";
             }
-            html.replace(open, end - open, json + ";");
+            ReplaceArray(html, open, close, json);
+            return true;
+        }
+
+        const TreeNode* FindNodeById(const std::vector<TreeNode>& nodes,
+                                     const std::string& id,
+                                     std::vector<std::string>& path)
+        {
+            for (const auto& node : nodes)
+            {
+                if (node.id == id)
+                {
+                    path.push_back(node.name);
+                    return &node;
+                }
+                path.push_back(node.name);
+                if (const TreeNode* found = FindNodeById(node.children, id, path))
+                {
+                    return found;
+                }
+                path.pop_back();
+            }
+            return nullptr;
+        }
+
+        std::string JoinPath(const std::vector<std::string>& path)
+        {
+            std::string out;
+            for (std::size_t i = 0; i < path.size(); ++i)
+            {
+                if (i != 0) out += " / ";
+                out += path[i];
+            }
+            return out;
+        }
+
+        // Serialize bookmarks into the HTML app's format:
+        //   { "id", "caption", "path", "line"? }  with `line` being 1-based.
+        // Bookmarks whose target node no longer exists are skipped.
+        void AppendBookmarksJson(std::string& out,
+                                 const std::vector<bookmark::Bookmark>& bookmarks,
+                                 const std::vector<TreeNode>& roots)
+        {
+            out += "[\n";
+            std::size_t written = 0;
+            for (const auto& mark : bookmarks)
+            {
+                std::vector<std::string> path;
+                const TreeNode* node = FindNodeById(roots, mark.id, path);
+                if (!node) continue;
+
+                if (written != 0) out += ",\n";
+                out += "  {\"id\": \"" + mark.id + "\",\n";
+                out += "   \"caption\": " + scribbolyth::io::JsonEscape(node->name) + ",\n";
+                out += "   \"path\": " + scribbolyth::io::JsonEscape(JoinPath(path)) + "";
+                if (mark.line >= 0)
+                {
+                    out += ",\n   \"line\": " + std::to_string(mark.line + 1);
+                }
+                out += "\n  }";
+                ++written;
+            }
+            out += "\n]";
+        }
+
+        bool ReplaceBookmarks(std::string& html,
+                              const std::vector<bookmark::Bookmark>& bookmarks,
+                              const std::vector<TreeNode>& roots)
+        {
+            if (bookmarks.empty()) return true;  // keep the template's block as-is
+
+            std::size_t open = 0;
+            std::size_t close = 0;
+            if (!FindJsArray(html, "bookmarks", open, close)) return false;
+
+            std::string json;
+            AppendBookmarksJson(json, bookmarks, roots);
+            ReplaceArray(html, open, close, json);
             return true;
         }
     }
 
-    bool ImportHtmlFile(const std::string& path, std::vector<TreeNode>& roots)
+    bool ImportHtmlFile(const std::string& path, std::vector<TreeNode>& roots,
+                        std::vector<bookmark::Bookmark>* bookmarks)
     {
         std::string content;
         if (!scribbolyth::io::ReadFile(path, content)) return false;
 
         std::size_t open = 0;
         std::size_t close = 0;
-        if (!FindTreeDataArray(content, open, close)) return false;
+        if (!FindJsArray(content, "treeData", open, close)) return false;
 
         std::string array = content.substr(open, close - open + 1);
         Parser parser(array);
         std::vector<TreeNode> result;
         if (!parser.ParseArray(result)) return false;
 
+        if (bookmarks)
+        {
+            std::vector<bookmark::Bookmark> marks;
+            std::size_t bm_open = 0;
+            std::size_t bm_close = 0;
+            if (FindJsArray(content, "bookmarks", bm_open, bm_close))
+            {
+                std::string bm_array = content.substr(bm_open, bm_close - bm_open + 1);
+                Parser bm_parser(bm_array);
+                if (!bm_parser.ParseBookmarks(marks)) return false;
+            }
+            for (auto& mark : marks)
+            {
+                if (mark.line > 0) mark.line -= 1;  // HTML uses 1-based lines
+            }
+            *bookmarks = std::move(marks);
+        }
+
         roots = std::move(result);
         return true;
     }
 
     bool ExportHtmlFile(const std::string& template_path, const std::string& out_path,
-                        const std::vector<TreeNode>& roots)
+                        const std::vector<TreeNode>& roots,
+                        const std::vector<bookmark::Bookmark>& bookmarks)
     {
         std::string content;
         if (!scribbolyth::io::ReadFile(template_path, content)) return false;
         if (!ReplaceTreeData(content, roots)) return false;
+        if (!ReplaceBookmarks(content, bookmarks, roots)) return false;
         return scribbolyth::io::WriteFile(out_path, content);
     }
 }

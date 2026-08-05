@@ -4,6 +4,8 @@
 #include <string>
 #include <map>
 #include <utility>
+#include <vector>
+#include "../bookmark/bookmark.hpp"
 #include "../mode/mode.hpp"
 #include "../keyboard/keymap.hpp"
 #include "../op/op.hpp"
@@ -25,6 +27,7 @@ struct EditorState {
     scribbolyth::treeview::TreeNode* active_node = nullptr;
     std::string status;
     std::string template_path;
+    std::vector<scribbolyth::bookmark::Bookmark> bookmarks;
 
     std::function<void()> focus_editor;
     std::function<void()> focus_treeview;
@@ -36,6 +39,10 @@ struct EditorState {
     // Select `node` in the tree, expanding every ancestor so it is visible.
     // Set by the treeview.
     std::function<void(scribbolyth::treeview::TreeNode*)> reveal_node;
+
+    // Position the editor cursor on a 0-based line of the currently active
+    // node. Set by the editor.
+    std::function<void(int)> reveal_line;
 
     std::map<std::string, scribbolyth::op::Operation> operations;
     std::map<std::string, std::string> commands;

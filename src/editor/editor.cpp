@@ -6,8 +6,22 @@
 
 #include <ftxui/dom/elements.hpp>
 
+#include "../bookmark/bookmark.hpp"
+
 namespace scribbolyth::editor
 {
+
+    namespace
+    {
+        bool IsBlank(const std::string& s)
+        {
+            for (char c : s)
+            {
+                if (c != ' ' && c != '\t' && c != '\n' && c != '\r') return false;
+            }
+            return true;
+        }
+    }
 
     class Editor : public ftxui::ComponentBase
     {
@@ -123,6 +137,42 @@ namespace scribbolyth::editor
                 state_->operations["undo"] = [](const std::string&, int) {};
                 state_->operations["yank"] = [](const std::string&, int) {};
                 state_->operations["paste"] = [](const std::string&, int) {};
+
+                state_->reveal_line = [this](int line)
+                {
+                    LoadIfChanged();
+                    if (active_ == nullptr) return;
+                    row_ = std::max(0, std::min(line, static_cast<int>(lines_.size()) - 1));
+                    col_ = 0;
+                    last_col_ = 0;
+                };
+
+                state_->operations["bookmark"] = [this](const std::string& args, int)
+                {
+                    if (state_->active_node == nullptr) return;
+                    if (state_->active_node->id.empty())
+                    {
+                        state_->active_node->id = scribbolyth::bookmark::NewId();
+                    }
+
+                    scribbolyth::bookmark::Bookmark mark;
+                    mark.id = state_->active_node->id;
+                    if (args == "cursor" && !IsBlank(state_->active_node->text))
+                    {
+                        mark.line = row_;
+                    }
+
+                    state_->bookmarks.push_back(std::move(mark));
+                    if (mark.line >= 0)
+                    {
+                        state_->status = "Bookmarked: " + state_->active_node->name
+                            + " (line " + std::to_string(row_ + 1) + ")";
+                    }
+                    else
+                    {
+                        state_->status = "Bookmarked: " + state_->active_node->name;
+                    }
+                };
             }
             ftxui::Element Render() override
             {
