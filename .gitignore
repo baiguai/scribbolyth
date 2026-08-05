@@ -59,6 +59,9 @@ compile_commands.json
 *.bak
 *.swp
 
+# Runtime persistence artifact (auto-loaded/saved from the working directory)
+scribbolyth.json
+
 # vcpkg
 vcpkg_installed/
 

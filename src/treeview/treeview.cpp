@@ -2,14 +2,25 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <utility>
+
+#include "../bookmark/bookmark.hpp"
+#include "../io/serialize.hpp"
+#include "../html/convert.hpp"
 
 namespace scribbolyth::treeview
 {
 
+    int CountNodes(const std::vector<TreeNode>& nodes);
+    TreeNode* FindParent(std::vector<TreeNode>& roots, TreeNode* child);
+    void CollectAllDepth(TreeNode& node, int depth, std::vector<std::pair<TreeNode*, int>>& out);
+    void EnsureIds(std::vector<TreeNode>& nodes);
+
     class TreeView : public ftxui::ComponentBase
     {
         public:
-            TreeView(std::shared_ptr<EditorState> state) : state_(std::move(state))
+            TreeView(std::shared_ptr<EditorState> state)
+                : state_(std::move(state))
             {
                 state_->operations["deselect_node"] = [this](const std::string&, int)
                 {
@@ -128,6 +139,115 @@ namespace scribbolyth::treeview
                 {
                     scribbolyth::op::OpenCommandLine(state_, "");
                 };
+                state_->operations["save"] = [this](const std::string&, int)
+                {
+                    if (current_file_.empty())
+                    {
+                        state_->status = "No file path set - use :saveas to save";
+                        return;
+                    }
+                    SaveTo(current_file_);
+                };
+                state_->operations["saveas"] = [this](const std::string& path, int)
+                {
+                    if (path.empty())
+                    {
+                        state_->status = "Save as requires a path";
+                        return;
+                    }
+                    SaveTo(path);
+                };
+                state_->operations["open"] = [this](const std::string& path, int)
+                {
+                    if (path.empty())
+                    {
+                        state_->status = "Open requires a path";
+                        return;
+                    }
+                    LoadFrom(path);
+                };
+                state_->operations["new_document"] = [this](const std::string&, int)
+                {
+                    roots_.clear();
+                    current_file_.clear();
+                    selected_ = nullptr;
+                    state_->treeview_width = kDefaultTreeviewWidth;
+                    state_->bookmarks.clear();
+                    RefreshActiveNode();
+                    state_->status = "New document - no file path";
+                };
+                state_->operations["import_html"] = [this](const std::string& path, int)
+                {
+                    if (path.empty())
+                    {
+                        state_->status = "Import requires a path";
+                        return;
+                    }
+                    std::vector<TreeNode> loaded;
+                    std::vector<scribbolyth::bookmark::Bookmark> loaded_marks;
+                    if (!scribbolyth::html::ImportHtmlFile(path, loaded, &loaded_marks))
+                    {
+                        state_->status = "Error: could not import " + path;
+                        return;
+                    }
+                    EnsureIds(loaded);
+                    state_->bookmarks = std::move(loaded_marks);
+                    roots_ = std::move(loaded);
+                    current_file_.clear();
+                    selected_ = nullptr;
+                    RefreshActiveNode();
+                    state_->status = "Imported " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
+                };
+                state_->operations["export_html"] = [this](const std::string& path, int)
+                {
+                    if (path.empty())
+                    {
+                        state_->status = "Export requires a path";
+                        return;
+                    }
+                    if (state_->template_path.empty())
+                    {
+                        state_->status = "Error: scribboleth.html template not found";
+                        return;
+                    }
+                    if (!scribbolyth::html::ExportHtmlFile(state_->template_path, path,
+                                                           roots_, state_->bookmarks))
+                    {
+                        state_->status = "Error: could not export " + path;
+                        return;
+                    }
+                    state_->status = "Exported " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
+                };
+                state_->operations["treeview_width_increase"] = [this](const std::string&, int count)
+                {
+                    state_->treeview_width = std::min(kMaxTreeviewWidth,
+                        state_->treeview_width + std::max(1, count));
+                };
+                state_->operations["treeview_width_decrease"] = [this](const std::string&, int count)
+                {
+                    state_->treeview_width = std::max(kMinTreeviewWidth,
+                        state_->treeview_width - std::max(1, count));
+                };
+
+                state_->collect_all_nodes = [this]
+                {
+                    std::vector<std::pair<TreeNode*, int>> out;
+                    for (auto& root : roots_)
+                    {
+                        CollectAllDepth(root, 0, out);
+                    }
+                    return out;
+                };
+                state_->reveal_node = [this](TreeNode* target)
+                {
+                    if (!target) return;
+                    for (TreeNode* cur = target; cur; cur = FindParent(roots_, cur))
+                    {
+                        if (cur != target) cur->expanded = true;
+                    }
+                    selected_ = target;
+                    RefreshActiveNode();
+                };
 
                 RefreshActiveNode();
             }
@@ -155,62 +275,20 @@ namespace scribbolyth::treeview
             void MoveNode(int dir);
             void MoveParent(int dir);
             void RefreshActiveNode();
+            void SaveTo(const std::string& path);
+            void LoadFrom(const std::string& path);
             bool IsAncestor(TreeNode& ancestor, TreeNode* node);
             void CollectVisibleDepth(TreeNode& node, int depth, std::vector<TreeNode*>& nodes, std::vector<int>& depths);
 
             std::shared_ptr<EditorState> state_;
-            std::vector<TreeNode> roots_ = MakeRootNodes();
+            std::vector<TreeNode> roots_;
             TreeNode* selected_ = nullptr;
+            std::string current_file_;
     };
 
     ftxui::Component MakeTreeView(std::shared_ptr<EditorState> state)
     {
         return ftxui::Make<TreeView>(std::move(state));
-    }
-
-    std::vector<TreeNode> MakeRootNodes()
-    {
-        auto node = [](std::string name, std::string text) {
-            TreeNode node;
-            node.name = std::move(name);
-            node.text = std::move(text);
-            return node;
-        };
-        auto folder = [](std::string name, bool expanded, std::vector<TreeNode> children) {
-            TreeNode node;
-            node.name = std::move(name);
-            node.expanded = expanded;
-            node.children = std::move(children);
-            return node;
-        };
-
-        TreeNode treeview = folder("treeview", false, {
-            node("treeview.cpp", ""),
-            node("treeview.hpp", ""),
-        });
-        TreeNode editor = folder("editor", false, {
-            node("editor.cpp", ""),
-            node("editor.hpp", ""),
-        });
-        TreeNode api = folder("api", false, {
-            node("design.md", ""),
-        });
-
-        std::vector<TreeNode> roots;
-        roots.push_back(node("Read Me", "Welcome to scribbolyth!\n\nSelect any node and press i to edit."));
-        roots.push_back(folder("docs", true, {
-            node("README.md", ""),
-            std::move(api),
-        }));
-        roots.push_back(folder("src", true, {
-            std::move(treeview),
-            std::move(editor),
-        }));
-        roots.push_back(folder("nodes", false, {
-            node("idea.txt", ""),
-        }));
-
-        return roots;
     }
 
     void CollectVisible(TreeNode& node, std::vector<TreeNode*>& out)
@@ -222,6 +300,15 @@ namespace scribbolyth::treeview
             {
                 CollectVisible(child, out);
             }
+        }
+    }
+
+    void CollectAllDepth(TreeNode& node, int depth, std::vector<std::pair<TreeNode*, int>>& out)
+    {
+        out.push_back({&node, depth});
+        for (auto& child : node.children)
+        {
+            CollectAllDepth(child, depth + 1, out);
         }
     }
 
@@ -263,6 +350,17 @@ namespace scribbolyth::treeview
             }
         }
         return nullptr;
+    }
+
+    int CountNodes(const std::vector<TreeNode>& nodes)
+    {
+        int total = 0;
+        for (const auto& node : nodes)
+        {
+            ++total;
+            total += CountNodes(node.children);
+        }
+        return total;
     }
 
     std::vector<TreeNode>& TreeView::ContainerOf(TreeNode* node)
@@ -408,6 +506,45 @@ namespace scribbolyth::treeview
         state_->active_node = selected_;
     }
 
+    void TreeView::SaveTo(const std::string& path)
+    {
+        std::string json = scribbolyth::io::Serialize(roots_, state_->treeview_width,
+                                                      state_->bookmarks);
+        if (!scribbolyth::io::WriteFile(path, json))
+        {
+            state_->status = "Error: could not write " + path;
+            return;
+        }
+        current_file_ = path;
+        state_->status = "Saved " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
+    }
+
+    void TreeView::LoadFrom(const std::string& path)
+    {
+        std::string content;
+        if (!scribbolyth::io::ReadFile(path, content))
+        {
+            state_->status = "Error: could not open " + path;
+            return;
+        }
+        std::vector<TreeNode> loaded;
+        int loaded_width = state_->treeview_width;
+        std::vector<scribbolyth::bookmark::Bookmark> loaded_marks;
+        if (!scribbolyth::io::Deserialize(content, loaded, &loaded_width, &loaded_marks))
+        {
+            state_->status = "Error: could not parse " + path;
+            return;
+        }
+        state_->treeview_width = loaded_width;
+        state_->bookmarks = std::move(loaded_marks);
+        EnsureIds(loaded);
+        roots_ = std::move(loaded);
+        current_file_ = path;
+        selected_ = nullptr;
+        RefreshActiveNode();
+        state_->status = "Loaded " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
+    }
+
     void TreeView::MoveToStart()
     {
         auto visible = VisibleNodes();
@@ -477,8 +614,18 @@ namespace scribbolyth::treeview
     TreeNode new_node(std::string name)
     {
         TreeNode node;
+        node.id = scribbolyth::bookmark::NewId();
         node.name = std::move(name);
         return node;
+    }
+
+    void EnsureIds(std::vector<TreeNode>& nodes)
+    {
+        for (auto& node : nodes)
+        {
+            if (node.id.empty()) node.id = scribbolyth::bookmark::NewId();
+            EnsureIds(node.children);
+        }
     }
 
     void TreeView::InsertChild(const std::string& name)
@@ -551,6 +698,7 @@ namespace scribbolyth::treeview
         if (&node == selected)
         {
             row |= ftxui::inverted;
+            row |= ftxui::focus;
         }
         rows.push_back(row);
 
@@ -571,7 +719,7 @@ namespace scribbolyth::treeview
         {
             RenderNode(root, 0, selected_, rows);
         }
-        return ftxui::vbox(std::move(rows)) | ftxui::flex;
+        return ftxui::vbox(std::move(rows)) | ftxui::frame | ftxui::flex;
     }
 
 }

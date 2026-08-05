@@ -11,6 +11,12 @@ SOURCES=(
     "src/keyboard/keymap.cpp"
     "src/op/op.cpp"
     "src/config/config.cpp"
+    "src/io/serialize.cpp"
+    "src/html/convert.cpp"
+    "src/help/help.cpp"
+    "src/search/search.cpp"
+    "src/bookmark/bookmark.cpp"
+    "src/bookmarks/bookmarks.cpp"
 )
 
 LIBS=(

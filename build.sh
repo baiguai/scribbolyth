@@ -71,9 +71,17 @@ if [ -f "bin/$APP_NAME" ]; then
     else
         echo "Warning: config/commands.conf not found - config not copied"
     fi
+    if [ -f "../config/scribboleth.html" ]; then
+        cp "../config/scribboleth.html" "bin/"
+        echo "Template .html copied to: $(pwd)/bin/scribboleth.html"
+    else
+        echo "Warning: config/scribboleth.html not found - template not copied"
+    fi
     if [ -d "../build-windows/bin" ]; then
         cp "../config/commands.conf" "../build-windows/bin/" 2>/dev/null || \
             echo "Warning: could not copy config to build-windows/bin/"
+        cp "../config/scribboleth.html" "../build-windows/bin/" 2>/dev/null || \
+            echo "Warning: could not copy template to build-windows/bin/"
     fi
 
     echo "-- Build successful --"

@@ -4,7 +4,10 @@
 #include <iostream>
 
 #include "config/config.hpp"
+#include "bookmarks/bookmarks.hpp"
+#include "help/help.hpp"
 #include "op/op.hpp"
+#include "search/search.hpp"
 
 using namespace ftxui;
 
@@ -20,14 +23,23 @@ int main(int, char** argv) {
     auto treeview_wrap = treeview_comp;
     auto editor_wrap = editor_comp;
 
-    int left_size = 30;
-    auto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &left_size);
+    auto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);
 
     auto screen = ScreenInteractive::Fullscreen();
     auto quit = screen.ExitLoopClosure();
 
     state->operations["quit"] = [quit](const std::string&, int) { quit(); };
     state->commands["qa"] = "quit";
+
+    bool show_help = false;
+    state->operations["show_help"] = [&show_help](const std::string&, int) { show_help = true; };
+
+    bool show_search = false;
+    state->operations["search_start"] = [&show_search](const std::string&, int) { show_search = true; };
+
+    bool show_bookmarks = false;
+    state->operations["bookmarks"] = [&show_bookmarks](const std::string&, int) { show_bookmarks = true; };
+    state->commands["bookmarks"] = "bookmarks";
 
     namespace fs = std::filesystem;
     fs::path config_path = fs::path(argv[0]).parent_path() / "commands.conf";
@@ -40,6 +52,13 @@ int main(int, char** argv) {
         std::cerr << "Warning: could not load config from " << config_path.string() << "\n";
         std::cerr << "Only the built-in ':qa' command is available.\n";
     }
+
+    fs::path template_path = fs::path(argv[0]).parent_path() / "scribboleth.html";
+    if (!fs::exists(template_path))
+    {
+        template_path = "scribboleth.html";
+    }
+    state->template_path = template_path.string();
 
     InputOption command_option;
     command_option.transform = [](InputState state)
@@ -59,6 +78,11 @@ int main(int, char** argv) {
     });
 
     auto command_handler = CatchEvent(command_wrapper, [state](Event event) {
+        if (event == Event::Tab)
+        {
+            scribbolyth::op::CompleteCommand(state);
+            return true;
+        }
         if (event == Event::Escape || event == Event::Return) {
             if (event == Event::Return)
                 scribbolyth::op::ExecuteCommand(state, state->command_buffer);
@@ -82,11 +106,17 @@ int main(int, char** argv) {
 
     auto status_bar = Renderer([state]
     {
-        return hbox({
+        ftxui::Elements parts = {
             text(ModeName(state->mode)) | bold,
             separator(),
             text(" scribbolyth ") | dim,
-        }) | bgcolor(Color::Blue);
+        };
+        if (!state->status.empty())
+        {
+            parts.push_back(separator());
+            parts.push_back(text(" " + state->status + " ") | dim);
+        }
+        return hbox(std::move(parts)) | bgcolor(Color::Blue);
     });
 
     int active_child = 0;
@@ -98,7 +128,13 @@ int main(int, char** argv) {
         status_bar,
     }, &active_child);
 
-    screen.Loop(container);
+    auto help_comp = scribbolyth::help::MakeHelpDialog(state, config_path.string(), &show_help);
+    auto search_comp = scribbolyth::search::MakeSearchDialog(state, &show_search);
+    auto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);
+    auto root = Modal(Modal(Modal(container, help_comp, &show_help), search_comp, &show_search),
+                      bookmarks_comp, &show_bookmarks);
+
+    screen.Loop(root);
 
     return 0;
 }

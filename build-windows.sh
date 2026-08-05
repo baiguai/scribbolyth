@@ -47,3 +47,18 @@ cmake -DCMAKE_TOOLCHAIN_FILE="$TOOLCHAIN" \
 cmake --build build-windows
 
 echo "Build complete: build-windows/bin/$APP_NAME.exe"
+
+# The cross-compiled exe depends on the MinGW-w64 runtime DLLs, which are not
+# present on a stock Windows machine. Resolve each DLL through the compiler
+# driver and copy it next to the exe.
+MINGW_CC="${MINGW_CC:-x86_64-w64-mingw32-gcc}"
+DEST="build-windows/bin"
+for dll in libstdc++-6.dll libgcc_s_seh-1.dll libwinpthread-1.dll; do
+    src="$("$MINGW_CC" -print-file-name="$dll")"
+    if [ -f "$src" ] && [ "$src" != "$dll" ]; then
+        cp -f "$src" "$DEST/"
+        echo "Copied $dll next to $APP_NAME.exe"
+    else
+        echo "Warning: could not locate $dll (got: $src) - $APP_NAME.exe may not run on a clean Windows machine" >&2
+    fi
+done
