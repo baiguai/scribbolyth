@@ -40,6 +40,10 @@ struct EditorState {
     // Set by the treeview.
     std::function<void(scribbolyth::treeview::TreeNode*)> reveal_node;
 
+    // Position the editor cursor on a 0-based line of the currently active
+    // node. Set by the editor.
+    std::function<void(int)> reveal_line;
+
     std::map<std::string, scribbolyth::op::Operation> operations;
     std::map<std::string, std::string> commands;
 

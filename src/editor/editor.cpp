@@ -138,6 +138,15 @@ namespace scribbolyth::editor
                 state_->operations["yank"] = [](const std::string&, int) {};
                 state_->operations["paste"] = [](const std::string&, int) {};
 
+                state_->reveal_line = [this](int line)
+                {
+                    LoadIfChanged();
+                    if (active_ == nullptr) return;
+                    row_ = std::max(0, std::min(line, static_cast<int>(lines_.size()) - 1));
+                    col_ = 0;
+                    last_col_ = 0;
+                };
+
                 state_->operations["bookmark"] = [this](const std::string& args, int)
                 {
                     if (state_->active_node == nullptr) return;
