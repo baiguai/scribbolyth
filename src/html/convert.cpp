@@ -257,14 +257,29 @@ namespace scribbolyth::html
         };
 
         // Locate the '[' that opens the `let <keyword> = [ ... ];` array and the
-        // index of its matching ']' (string- and nesting-aware).
+        // index of its matching ']' (string- and nesting-aware). The keyword is
+        // matched as a JS variable declaration so mentions of it in comments or
+        // help text never confuse the search.
         bool FindJsArray(const std::string& html, const std::string& keyword,
                          std::size_t& open, std::size_t& close)
         {
-            std::size_t kw = html.find(keyword);
-            if (kw == std::string::npos) return false;
-            open = html.find('[', kw);
-            if (open == std::string::npos) return false;
+            std::size_t pos = 0;
+            for (;;)
+            {
+                std::size_t lt = html.find("let", pos);
+                if (lt == std::string::npos) return false;
+                std::size_t i = lt + 3;
+                while (i < html.size() && (html[i] == ' ' || html[i] == '\t')) ++i;
+                if (html.compare(i, keyword.size(), keyword) != 0) { pos = lt + 3; continue; }
+                i += keyword.size();
+                while (i < html.size() && (html[i] == ' ' || html[i] == '\t')) ++i;
+                if (i >= html.size() || html[i] != '=') { pos = lt + 3; continue; }
+                ++i;
+                while (i < html.size() && (html[i] == ' ' || html[i] == '\t')) ++i;
+                if (i >= html.size() || html[i] != '[') { pos = lt + 3; continue; }
+                open = i;
+                break;
+            }
 
             bool in_string = false;
             bool escaped = false;
