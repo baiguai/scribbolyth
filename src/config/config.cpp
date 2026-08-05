@@ -80,8 +80,8 @@ namespace scribbolyth::config
         std::string line;
         while (std::getline(file, line))
         {
-            std::size_t hash = line.find('#');
-            if (hash != std::string::npos) line = line.substr(0, hash);
+            std::size_t hash = line.find_first_not_of(" \t");
+            if (hash != std::string::npos && line[hash] == '#') line = line.substr(0, hash);
             auto fields = SplitFields(line);
             if (fields.empty()) continue;
             if (fields.size() != 7) return false;
