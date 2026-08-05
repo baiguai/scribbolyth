@@ -5,6 +5,7 @@
 #include <utility>
 
 #include "../bookmark/bookmark.hpp"
+#include "../history/history.hpp"
 #include "../io/serialize.hpp"
 #include "../html/convert.hpp"
 
@@ -504,6 +505,10 @@ namespace scribbolyth::treeview
     void TreeView::RefreshActiveNode()
     {
         state_->active_node = selected_;
+        if (selected_ != nullptr && !selected_->text.empty())
+        {
+            scribbolyth::history::Record(*state_, selected_->id);
+        }
     }
 
     void TreeView::SaveTo(const std::string& path)
@@ -681,6 +686,7 @@ namespace scribbolyth::treeview
             {
                 selected_ = parent;
             }
+            RefreshActiveNode();
             return;
         }
     }
