@@ -4,6 +4,8 @@
 #include <string>
 #include <map>
 #include <utility>
+#include <vector>
+#include "../bookmark/bookmark.hpp"
 #include "../mode/mode.hpp"
 #include "../keyboard/keymap.hpp"
 #include "../op/op.hpp"
@@ -25,6 +27,7 @@ struct EditorState {
     scribbolyth::treeview::TreeNode* active_node = nullptr;
     std::string status;
     std::string template_path;
+    std::vector<scribbolyth::bookmark::Bookmark> bookmarks;
 
     std::function<void()> focus_editor;
     std::function<void()> focus_treeview;

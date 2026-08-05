@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <utility>
 
+#include "../bookmark/bookmark.hpp"
 #include "../io/serialize.hpp"
 #include "../html/convert.hpp"
 
@@ -13,6 +14,7 @@ namespace scribbolyth::treeview
     int CountNodes(const std::vector<TreeNode>& nodes);
     TreeNode* FindParent(std::vector<TreeNode>& roots, TreeNode* child);
     void CollectAllDepth(TreeNode& node, int depth, std::vector<std::pair<TreeNode*, int>>& out);
+    void EnsureIds(std::vector<TreeNode>& nodes);
 
     class TreeView : public ftxui::ComponentBase
     {
@@ -170,6 +172,7 @@ namespace scribbolyth::treeview
                     current_file_.clear();
                     selected_ = nullptr;
                     state_->treeview_width = kDefaultTreeviewWidth;
+                    state_->bookmarks.clear();
                     RefreshActiveNode();
                     state_->status = "New document - no file path";
                 };
@@ -181,11 +184,14 @@ namespace scribbolyth::treeview
                         return;
                     }
                     std::vector<TreeNode> loaded;
-                    if (!scribbolyth::html::ImportHtmlFile(path, loaded))
+                    std::vector<scribbolyth::bookmark::Bookmark> loaded_marks;
+                    if (!scribbolyth::html::ImportHtmlFile(path, loaded, &loaded_marks))
                     {
                         state_->status = "Error: could not import " + path;
                         return;
                     }
+                    EnsureIds(loaded);
+                    state_->bookmarks = std::move(loaded_marks);
                     roots_ = std::move(loaded);
                     current_file_.clear();
                     selected_ = nullptr;
@@ -204,7 +210,8 @@ namespace scribbolyth::treeview
                         state_->status = "Error: scribboleth.html template not found";
                         return;
                     }
-                    if (!scribbolyth::html::ExportHtmlFile(state_->template_path, path, roots_))
+                    if (!scribbolyth::html::ExportHtmlFile(state_->template_path, path,
+                                                           roots_, state_->bookmarks))
                     {
                         state_->status = "Error: could not export " + path;
                         return;
@@ -501,7 +508,8 @@ namespace scribbolyth::treeview
 
     void TreeView::SaveTo(const std::string& path)
     {
-        std::string json = scribbolyth::io::Serialize(roots_, state_->treeview_width);
+        std::string json = scribbolyth::io::Serialize(roots_, state_->treeview_width,
+                                                      state_->bookmarks);
         if (!scribbolyth::io::WriteFile(path, json))
         {
             state_->status = "Error: could not write " + path;
@@ -521,12 +529,15 @@ namespace scribbolyth::treeview
         }
         std::vector<TreeNode> loaded;
         int loaded_width = state_->treeview_width;
-        if (!scribbolyth::io::Deserialize(content, loaded, &loaded_width))
+        std::vector<scribbolyth::bookmark::Bookmark> loaded_marks;
+        if (!scribbolyth::io::Deserialize(content, loaded, &loaded_width, &loaded_marks))
         {
             state_->status = "Error: could not parse " + path;
             return;
         }
         state_->treeview_width = loaded_width;
+        state_->bookmarks = std::move(loaded_marks);
+        EnsureIds(loaded);
         roots_ = std::move(loaded);
         current_file_ = path;
         selected_ = nullptr;
@@ -603,8 +614,18 @@ namespace scribbolyth::treeview
     TreeNode new_node(std::string name)
     {
         TreeNode node;
+        node.id = scribbolyth::bookmark::NewId();
         node.name = std::move(name);
         return node;
+    }
+
+    void EnsureIds(std::vector<TreeNode>& nodes)
+    {
+        for (auto& node : nodes)
+        {
+            if (node.id.empty()) node.id = scribbolyth::bookmark::NewId();
+            EnsureIds(node.children);
+        }
     }
 
     void TreeView::InsertChild(const std::string& name)

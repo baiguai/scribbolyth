@@ -15,7 +15,7 @@ SOURCES=(
     "src/html/convert.cpp"
     "src/help/help.cpp"
     "src/search/search.cpp"
-    "src/search/search.cpp"
+    "src/bookmark/bookmark.cpp"
 )
 
 LIBS=(
