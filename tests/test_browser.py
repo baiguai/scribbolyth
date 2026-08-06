@@ -129,7 +129,10 @@ try:
     # 'o' matches info.txt, notes.md and tree.json (not nested/ or ../).
     s.send(b'o')
     s.require('1/3 (of 5)', "'o' should narrow the list to 3 of 5 entries")
-    s.forbid('nested/', 'nested/ does not contain o')
+    # The last row is the status bar, which still shows the earlier
+    # "Error: could not parse .../nested/deep.txt" message; the dialog
+    # itself (rows above it) must not list nested/.
+    s.forbid('nested/', 'nested/ does not contain o', rows=range(s.rows - 1))
 
     # 'j' while typing goes into the filter ('oj' matches nothing).
     s.send(b'j')
