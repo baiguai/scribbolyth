@@ -12,6 +12,7 @@
 #include "../history/history.hpp"
 #include "../io/serialize.hpp"
 #include "../html/convert.hpp"
+#include "../undo/undo.hpp"
 
 namespace scribbolyth::treeview
 {
@@ -89,7 +90,11 @@ namespace scribbolyth::treeview
                 };
                 state_->operations["rename_node"] = [this](const std::string& name, int)
                 {
-                    if (selected_ && !name.empty()) selected_->name = name;
+                    if (selected_ && !name.empty())
+                    {
+                        SnapshotUndo();
+                        selected_->name = name;
+                    }
                     RefreshActiveNode();
                 };
                 state_->operations["delete_node"] = [this](const std::string&, int)
@@ -195,6 +200,7 @@ namespace scribbolyth::treeview
                     state_->treeview_width = kDefaultTreeviewWidth;
                     state_->bookmarks.clear();
                     state_->history.clear();
+                    ClearUndo();
                     PersistLastFile();
                     RefreshActiveNode();
                     state_->status = "New document - no file path";
@@ -264,6 +270,10 @@ namespace scribbolyth::treeview
                     RefreshActiveNode();
                 };
 
+                state_->snapshot_undo = [this] { SnapshotUndo(); };
+                state_->apply_undo = [this](std::size_t index) { ApplyUndo(index); };
+                state_->clear_undo = [this] { ClearUndo(); };
+
                 RefreshActiveNode();
             }
             bool Focusable() const override
@@ -296,6 +306,9 @@ namespace scribbolyth::treeview
             void ExportTo(const std::string& path);
             void PersistLastFile();
             void PushRecentFile(const std::string& path);
+            void SnapshotUndo();
+            void ApplyUndo(std::size_t index);
+            void ClearUndo();
             bool IsDirectory(const std::string& path);
             void BrowseFor(const std::string& dir, const std::string& command,
                            std::function<void(const std::string&)> on_pick);
@@ -451,6 +464,7 @@ namespace scribbolyth::treeview
     void TreeView::MoveNode(int dir)
     {
         if (selected_ == nullptr) return;
+        SnapshotUndo();
         auto& children = ContainerOf(selected_);
         for (std::size_t i = 0; i < children.size(); ++i)
         {
@@ -466,6 +480,7 @@ namespace scribbolyth::treeview
     void TreeView::MoveParent(int dir)
     {
         if (selected_ == nullptr) return;
+        SnapshotUndo();
         auto& children = ContainerOf(selected_);
         std::size_t si = 0;
         while (si < children.size() && &children[si] != selected_) ++si;
@@ -573,6 +588,7 @@ namespace scribbolyth::treeview
         roots_ = std::move(loaded);
         current_file_ = path;
         selected_ = nullptr;
+        ClearUndo();
         RefreshActiveNode();
         state_->status = "Loaded " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
         PushRecentFile(path);
@@ -595,6 +611,7 @@ namespace scribbolyth::treeview
         roots_ = std::move(loaded);
         current_file_.clear();
         selected_ = nullptr;
+        ClearUndo();
         RefreshActiveNode();
         state_->status = "Imported " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
         // PushRecentFile(path);
@@ -640,6 +657,72 @@ namespace scribbolyth::treeview
         {
             recent.resize(EditorState::kRecentMax);
         }
+    }
+
+    void TreeView::SnapshotUndo()
+    {
+        std::string json = scribbolyth::io::Serialize(roots_, state_->treeview_width,
+                                                      state_->bookmarks,
+                                                      state_->history);
+        auto& stack = state_->undo_stack;
+        if (!stack.empty() && stack.back().json == json) return;
+        UndoState st;
+        st.json = std::move(json);
+        st.preview = scribbolyth::undo::FirstLine(roots_);
+        stack.push_back(std::move(st));
+        state_->redo_stack.clear();
+        if (stack.size() > EditorState::kUndoMax)
+        {
+            stack.erase(stack.begin());
+        }
+    }
+
+    void TreeView::ApplyUndo(std::size_t index)
+    {
+        auto& stack = state_->undo_stack;
+        if (index >= stack.size()) return;
+        const std::size_t stack_index = stack.size() - 1 - index;
+
+        UndoState current;
+        current.json = scribbolyth::io::Serialize(roots_, state_->treeview_width,
+                                                  state_->bookmarks, state_->history);
+        current.preview = scribbolyth::undo::FirstLine(roots_);
+        state_->redo_stack.push_back(std::move(current));
+        for (std::size_t i = stack.size(); i-- > stack_index + 1;)
+        {
+            state_->redo_stack.push_back(stack[i]);
+        }
+        if (state_->redo_stack.size() > EditorState::kUndoMax)
+        {
+            state_->redo_stack.erase(
+                state_->redo_stack.begin(),
+                state_->redo_stack.begin() +
+                    static_cast<std::ptrdiff_t>(state_->redo_stack.size() - EditorState::kUndoMax));
+        }
+
+        const UndoState& target = stack[stack_index];
+        std::vector<TreeNode> loaded;
+        int width = state_->treeview_width;
+        std::vector<bookmark::Bookmark> marks;
+        std::vector<std::string> hist;
+        if (!scribbolyth::io::Deserialize(target.json, loaded, &width, &marks, &hist))
+        {
+            state_->status = "Undo failed: stored state unreadable";
+            return;
+        }
+        roots_ = std::move(loaded);
+        state_->treeview_width = width;
+        state_->bookmarks = std::move(marks);
+        state_->history = std::move(hist);
+        selected_ = nullptr;
+        stack.resize(stack_index);
+        RefreshActiveNode();
+    }
+
+    void TreeView::ClearUndo()
+    {
+        state_->undo_stack.clear();
+        state_->redo_stack.clear();
     }
 
     void TreeView::BrowseFor(const std::string& dir, const std::string& command,
@@ -737,6 +820,7 @@ namespace scribbolyth::treeview
 
     void TreeView::InsertChild(const std::string& name)
     {
+        SnapshotUndo();
         if (selected_ == nullptr)
         {
             roots_.push_back(new_node(name));
@@ -750,6 +834,7 @@ namespace scribbolyth::treeview
 
     void TreeView::InsertNode(const std::string& name)
     {
+        SnapshotUndo();
         if (selected_ == nullptr)
         {
             roots_.push_back(new_node(name));
@@ -771,6 +856,7 @@ namespace scribbolyth::treeview
     void TreeView::DeleteNode()
     {
         if (selected_ == nullptr) return;
+        SnapshotUndo();
         TreeNode* parent = FindParent(roots_, selected_);
         auto& children = ContainerOf(selected_);
         for (std::size_t i = 0; i < children.size(); ++i)

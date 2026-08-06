@@ -201,10 +201,8 @@ namespace scribbolyth::editor
                     DeleteSelection();
                 };
 
-                state_->operations["undo"] = [](const std::string&, int) {};
                 state_->operations["yank"] = [](const std::string&, int) {};
                 state_->operations["paste"] = [](const std::string&, int) {};
-
                 state_->operations["format_table"] = [this](const std::string&, int)
                 {
                     FormatTable();
@@ -349,6 +347,7 @@ namespace scribbolyth::editor
             void Save()
             {
                 if (active_ == nullptr) return;
+                if (state_->snapshot_undo) state_->snapshot_undo();
                 std::string joined;
                 for (std::size_t i = 0; i < lines_.size(); ++i)
                 {
