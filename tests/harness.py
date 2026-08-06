@@ -146,10 +146,14 @@ class Session:
 
     # -- assertions --------------------------------------------------------
 
-    def find(self, substring):
-        """All (row, col) positions where `substring` appears on screen."""
+    def find(self, substring, rows=None):
+        """All (row, col) positions where `substring` appears on screen.
+
+        `rows` (optional) restricts the search to a subset of screen rows;
+        by default the whole screen is searched."""
         hits = []
-        for r in range(self.rows):
+        row_indices = range(self.rows) if rows is None else rows
+        for r in row_indices:
             row = self._row_text(r)
             idx = row.find(substring)
             if idx >= 0:
@@ -163,9 +167,12 @@ class Session:
             self.dump()
             raise SystemExit(1)
 
-    def forbid(self, substring, msg=None):
-        """Fail (dump + exit 1) if `substring` is visible."""
-        if self.find(substring):
+    def forbid(self, substring, msg=None, rows=None):
+        """Fail (dump + exit 1) if `substring` is visible.
+
+        `rows` (optional) restricts the search to a subset of screen rows;
+        by default the whole screen is searched."""
+        if self.find(substring, rows=rows):
             print('FAIL: ' + (msg or 'unexpected %r on screen' % substring))
             self.dump()
             raise SystemExit(1)
