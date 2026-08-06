@@ -597,11 +597,20 @@ namespace scribbolyth::editor
             void InsertNewline()
             {
                 std::string& line = lines_[row_];
+                std::size_t ws = 0;
+                while (ws < line.size() && (line[ws] == ' ' || line[ws] == '\t')) ++ws;
+
                 std::string rest = line.substr(static_cast<std::size_t>(col_));
                 line = line.substr(0, static_cast<std::size_t>(col_));
+
+                // Carry the current line's leading whitespace over to the new
+                // line so an indented block keeps its shape (block indent on
+                // Enter); the cursor lands right after the indentation.
+                rest.insert(0, line.substr(0, ws));
+
                 lines_.insert(lines_.begin() + row_ + 1, rest);
                 ++row_;
-                col_ = 0;
+                col_ = static_cast<int>(ws);
             }
 
             void Backspace()
