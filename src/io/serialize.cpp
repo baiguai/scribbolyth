@@ -67,7 +67,8 @@ namespace scribbolyth::io
                 explicit Parser(const std::string& s) : s_(s) {}
 
                 bool Deserialize(std::vector<TreeNode>& roots, int* tree_width,
-                                 std::vector<bookmark::Bookmark>* bookmarks)
+                                 std::vector<bookmark::Bookmark>* bookmarks,
+                                 std::vector<std::string>* history)
                 {
                     SkipWs();
                     if (!Consume('{')) return false;
@@ -79,6 +80,8 @@ namespace scribbolyth::io
                     int width = 0;
                     std::vector<bookmark::Bookmark> marks;
                     bool have_marks = false;
+                    std::vector<std::string> hist;
+                    bool have_history = false;
                     int version = -1;
 
                     if (!Consume('}'))
@@ -111,6 +114,11 @@ namespace scribbolyth::io
                                 if (!ParseBookmarks(marks)) return false;
                                 have_marks = true;
                             }
+                            else if (key == "history")
+                            {
+                                if (!ParseHistory(hist)) return false;
+                                have_history = true;
+                            }
                             else
                             {
                                 if (!SkipValue()) return false;
@@ -131,6 +139,7 @@ namespace scribbolyth::io
                     roots = std::move(result);
                     if (have_width && tree_width) *tree_width = width;
                     if (have_marks && bookmarks) *bookmarks = std::move(marks);
+                    if (have_history && history) *history = std::move(hist);
                     return true;
                 }
 
@@ -262,6 +271,24 @@ namespace scribbolyth::io
                     }
                 }
 
+                bool ParseHistory(std::vector<std::string>& ids)
+                {
+                    if (!Consume('[')) return false;
+                    SkipWs();
+                    if (Consume(']')) return true;
+                    while (true)
+                    {
+                        SkipWs();
+                        std::string id;
+                        if (!ParseString(id)) return false;
+                        ids.push_back(std::move(id));
+                        SkipWs();
+                        if (Consume(',')) continue;
+                        if (Consume(']')) return true;
+                        return false;
+                    }
+                }
+
                 bool ParseBookmark(bookmark::Bookmark& mark)
                 {
                     if (!Consume('{')) return false;
@@ -373,7 +400,8 @@ namespace scribbolyth::io
     }
 
     std::string Serialize(const std::vector<TreeNode>& roots, int tree_width,
-                          const std::vector<bookmark::Bookmark>& bookmarks)
+                          const std::vector<bookmark::Bookmark>& bookmarks,
+                          const std::vector<std::string>& history)
     {
         std::string out = "{\n  \"version\": 1,\n  \"tree_width\": " +
                           std::to_string(tree_width) + ",\n  \"bookmarks\": [\n";
@@ -388,6 +416,12 @@ namespace scribbolyth::io
             out += "}";
             out += (i + 1 < bookmarks.size()) ? ",\n" : "\n";
         }
+        out += "  ],\n  \"history\": [\n";
+        for (std::size_t i = 0; i < history.size(); ++i)
+        {
+            out += "    " + Escape(history[i]);
+            out += (i + 1 < history.size()) ? ",\n" : "\n";
+        }
         out += "  ],\n  \"roots\": [\n";
         for (std::size_t i = 0; i < roots.size(); ++i)
         {
@@ -399,10 +433,11 @@ namespace scribbolyth::io
     }
 
     bool Deserialize(const std::string& json, std::vector<TreeNode>& roots,
-                     int* tree_width, std::vector<bookmark::Bookmark>* bookmarks)
+                     int* tree_width, std::vector<bookmark::Bookmark>* bookmarks,
+                     std::vector<std::string>* history)
     {
         Parser parser(json);
-        return parser.Deserialize(roots, tree_width, bookmarks);
+        return parser.Deserialize(roots, tree_width, bookmarks, history);
     }
 
     bool WriteFile(const std::string& path, const std::string& content)

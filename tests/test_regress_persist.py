@@ -44,7 +44,8 @@ try:
     with open(path, encoding='utf-8') as f:
         content = f.read()
     for fragment in ('"version": 1', '"name": "Read Me"',
-                     'second line é', '\\"world\\"', '\\\\ back'):
+                     'second line é', '\\"world\\"', '\\\\ back',
+                     '"history"'):
         if fragment not in content:
             print('FAIL: %r missing from saved JSON' % fragment)
             s.dump()
@@ -57,6 +58,11 @@ try:
     s.send(b':open ' + path.encode())
     s.send(b'\r')
     s.require('Read Me', ':open should load the saved tree')
+    # the saved history should have come back with the file
+    s.send(b'<')                  # open the history dialog
+    s.require(' < History ', 'history dialog should open')
+    s.require('1/1', 'the loaded file should carry its history (1 entry)')
+    s.send(b'\x1b')
     s.send(b'j')              # select the node so the editor shows its text
     s.require('Hello', 'edited text should survive reload')
     s.require('second line', 'second line should survive reload')
