@@ -104,6 +104,18 @@ try:
     s.send(b'\x1b')
     s.forbid(' File Browser ')
 
+    # For open/import, Enter on a folder still navigates into it.
+    s.send(b':open docs')
+    s.send(b'\r')
+    s.require(' File Browser ')
+    s.send(b'j')                        # onto nested/
+    s.send(b'\r')                       # Enter navigates (open mode)
+    s.require('deep.txt', 'Enter on a folder should navigate in open mode')
+    s.require('1/2', 'inside nested/ there are 2 entries')
+    s.forbid(':open ', 'open mode must not reopen the command line')
+    s.send(b'\x1b')
+    s.forbid(' File Browser ')
+
     # --- / filter ---------------------------------------------------------
     # `/` opens a filter field; typed keys go to the filter, not navigation.
     s.send(b':open docs')
@@ -193,6 +205,37 @@ try:
     s.send(b'\x1b')
     s.forbid(' File Browser ')
 
+    # The dialog keeps a constant size across all filter states.
+    def dialog_size():
+        lines = s.screen()
+        top = next(r for r, line in enumerate(lines) if '\u256d' in line)
+        bottom = next(r for r, line in enumerate(lines) if '\u2570' in line)
+        return len(lines[bottom].rstrip()), bottom - top + 1
+
+    def require_size(msg):
+        size = dialog_size()
+        if size != base_size:
+            print('FAIL: %s (got %r, want %r)' % (msg, size, base_size))
+            s.dump()
+            raise SystemExit(1)
+
+    s.send(b':open docs')
+    s.send(b'\r')
+    s.require(' File Browser ')
+    base_size = dialog_size()
+    s.send(b'/')                      # open the filter field
+    require_size('opening the filter field must not resize the dialog')
+    s.send(b'o')                      # type a filter (field open)
+    require_size('typing a filter must not resize the dialog')
+    s.send(b'\r')                     # keep the filter (field closed)
+    require_size('keeping the filter must not resize the dialog')
+    s.send(b'j')                      # move within the filtered list
+    require_size('moving the selection must not resize the dialog')
+    s.send(b'\x1b')                   # clear the filter
+    require_size('clearing the filter must not resize the dialog')
+    s.send(b'\x1b')
+    s.forbid(' File Browser ')
+
     # :saveas with a directory also opens the browser; the pick saves there.
     s.send(b':saveas docs')
     s.send(b'\r')
@@ -201,6 +244,54 @@ try:
     s.require('5/5')
     s.send(b'\r')
     s.require('Saved 1 nodes to', 'the pick should be saved via :saveas')
+
+    # Save/export: Enter on a folder closes the browser and reopens the
+    # command line prefilled with that folder, so a filename can be typed.
+    s.send(b':saveas docs')
+    s.send(b'\r')
+    s.require(' File Browser ')
+    s.send(b'j')                        # onto nested/
+    s.send(b'\r')                       # Enter exits to the command line
+    s.forbid(' File Browser ', 'Enter on a folder should close the browser')
+    s.require(':saveas ', 'Enter on a folder should reopen :saveas')
+    s.require('nested/', 'the command line should be prefilled with the folder')
+    s.send(b'out.json')
+    s.send(b'\r')
+    s.require('Saved 1 nodes to',
+              'typing a name should save into the chosen folder')
+    if not os.path.exists(os.path.join(s.workdir, 'docs', 'nested', 'out.json')):
+        print('FAIL: out.json was not written into docs/nested')
+        s.dump()
+        raise SystemExit(1)
+
+    # `l` still navigates inside the browser for save/export ops.
+    s.send(b':saveas docs')
+    s.send(b'\r')
+    s.require(' File Browser ')
+    s.send(b'j')                        # onto nested/
+    s.send(b'l')                        # navigates (not exit-to-command)
+    s.require('deep.txt', 'l should still navigate inside save mode')
+    s.require('1/3', 'inside nested/ there are 3 entries (../, deep.txt, out.json)')
+    s.forbid(':saveas ', 'l on a folder must not reopen the command line')
+    s.send(b'\x1b')
+    s.forbid(' File Browser ')
+
+    # Export: Enter on a folder reopens :X so a filename can be typed.
+    s.send(b':X docs')
+    s.send(b'\r')
+    s.require(' File Browser ', 'a dir arg to :X should open the browser')
+    s.send(b'j')                        # onto nested/
+    s.send(b'\r')
+    s.forbid(' File Browser ')
+    s.require(':X ', 'Enter on a folder should reopen :X')
+    s.send(b'site.html')
+    s.send(b'\r')
+    s.require('Exported 1 nodes to',
+              'typing a name should export into the chosen folder')
+    if not os.path.exists(os.path.join(s.workdir, 'docs', 'nested', 'site.html')):
+        print('FAIL: site.html was not exported into docs/nested')
+        s.dump()
+        raise SystemExit(1)
 finally:
     s.quit()
 

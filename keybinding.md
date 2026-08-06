@@ -142,7 +142,10 @@ picks the selected file, `gg`/`G` jump to the first/last row, `/` opens a
 case-insensitive filter field that narrows the list as you type (`Enter` keeps
 the filtered list and hides the field, `Esc` in the field clears it), and `Esc`
 clears an applied filter before cancelling the dialog. The picked file's path
-is handed back to the invoking operation.
+is handed back to the invoking operation. For the save/export-style commands
+(`saveas`/`export_html`) pressing `Enter` on a directory closes the browser and
+reopens the command line prefilled with `:command <folder>/` so a filename can
+be typed; `l` still navigates into the directory.
 Below we build a small new one end to end: pressing `t` in TREE mode lists
 every `TODO:` line in the active node's text; `j`/`k` move, `Enter` jumps to
 the line, `Esc` cancels.
@@ -399,7 +402,7 @@ exposes everything a dialog needs, set up by the tree/editor before the
 | `state_->status`         | A message shown in the status bar (`"Copied: x"`).  |
 | `state_->mode`           | Current `Mode`; set it to switch (e.g. `Mode::NORMAL`). |
 | `state_->bookmarks`      | The bookmark list (see `bookmarks.cpp`).            |
-| `state_->show_file_browser` / `browser_start_dir` / `browser_pick` | Pointer to the Modal flag, the starting directory, and a `std::function<void(const std::string&)>` invoked with the picked file's path (see `browser.cpp`). |
+| `state_->show_file_browser` / `browser_start_dir` / `browser_pick` / `browser_command` | Pointer to the Modal flag, the starting directory, and a `std::function<void(const std::string&)>` invoked with the picked file's path (see `browser.cpp`). `browser_command` is the invoking save/export command name (`"saveas"`/`"X"`), empty for open/import. |
 
 **Jumping.** For a node jump call `reveal_node(node)` and leave the mode as
 is. For a text jump call `reveal_line(line)` (0-based), switch to

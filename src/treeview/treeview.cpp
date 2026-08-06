@@ -161,7 +161,7 @@ namespace scribbolyth::treeview
                     }
                     if (IsDirectory(path))
                     {
-                        BrowseFor(path, [this](const std::string& chosen)
+                        BrowseFor(path, "saveas", [this](const std::string& chosen)
                                   {
                                       SaveTo(chosen);
                                   });
@@ -178,7 +178,7 @@ namespace scribbolyth::treeview
                     }
                     if (IsDirectory(path))
                     {
-                        BrowseFor(path, [this](const std::string& chosen)
+                        BrowseFor(path, "", [this](const std::string& chosen)
                                   {
                                       LoadFrom(chosen);
                                   });
@@ -205,7 +205,7 @@ namespace scribbolyth::treeview
                     }
                     if (IsDirectory(path))
                     {
-                        BrowseFor(path, [this](const std::string& chosen)
+                        BrowseFor(path, "", [this](const std::string& chosen)
                                   {
                                       ImportFrom(chosen);
                                   });
@@ -222,7 +222,7 @@ namespace scribbolyth::treeview
                     }
                     if (IsDirectory(path))
                     {
-                        BrowseFor(path, [this](const std::string& chosen)
+                        BrowseFor(path, "X", [this](const std::string& chosen)
                                   {
                                       ExportTo(chosen);
                                   });
@@ -292,7 +292,7 @@ namespace scribbolyth::treeview
             void ImportFrom(const std::string& path);
             void ExportTo(const std::string& path);
             bool IsDirectory(const std::string& path);
-            void BrowseFor(const std::string& dir,
+            void BrowseFor(const std::string& dir, const std::string& command,
                            std::function<void(const std::string&)> on_pick);
             bool IsAncestor(TreeNode& ancestor, TreeNode* node);
             void CollectVisibleDepth(TreeNode& node, int depth, std::vector<TreeNode*>& nodes, std::vector<int>& depths);
@@ -606,11 +606,12 @@ namespace scribbolyth::treeview
         return std::filesystem::is_directory(path, ec);
     }
 
-    void TreeView::BrowseFor(const std::string& dir,
+    void TreeView::BrowseFor(const std::string& dir, const std::string& command,
                              std::function<void(const std::string&)> on_pick)
     {
         if (!state_->show_file_browser) return;
         state_->browser_start_dir = dir;
+        state_->browser_command = command;
         state_->browser_pick = std::move(on_pick);
         *state_->show_file_browser = true;
     }

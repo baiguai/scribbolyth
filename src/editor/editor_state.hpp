@@ -38,8 +38,14 @@ struct EditorState {
     // File browser dialog. `show_file_browser` is the Modal visibility flag;
     // `browser_start_dir` is the directory to open in; `browser_pick` is
     // invoked with the chosen file's path when the user presses Enter.
+    // `browser_command` is the `:command` name of the invoking op for
+    // save/export-style ops: when non-empty, Enter on a folder closes the
+    // dialog and reopens the command line prefilled with that folder so the
+    // user can type a filename (open/import-style ops leave it empty and
+    // Enter on a folder simply navigates into it).
     bool* show_file_browser = nullptr;
     std::string browser_start_dir;
+    std::string browser_command;
     std::function<void(const std::string&)> browser_pick;
 
     std::function<void()> focus_editor;

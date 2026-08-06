@@ -11,6 +11,7 @@
 #include <ftxui/screen/box.hpp>
 
 #include "../editor/editor_state.hpp"
+#include "../op/op.hpp"
 
 namespace fs = std::filesystem;
 
@@ -22,6 +23,12 @@ namespace scribbolyth::browser
         {
             if (s.size() >= width) return s;
             return s + std::string(width - s.size(), ' ');
+        }
+
+        std::string Tail(const std::string& s, std::size_t width)
+        {
+            if (s.size() <= width) return s;
+            return s.substr(s.size() - width);
         }
 
         std::string Lower(const std::string& s)
@@ -129,13 +136,15 @@ namespace scribbolyth::browser
             const int sel = std::min(selection_, std::max(0, total - 1));
             const int top = ComputeTop(sel, total);
             const int count = std::min(kVisibleRows, std::max(0, total - top));
+            const int dlg_width { 90 };
 
             const std::size_t row_width = static_cast<std::size_t>(content_width_ + 2);
 
             ftxui::Elements rows;
             if (filter_active_)
             {
-                rows.push_back(ftxui::text(PadRight("  / " + filter_ + "_  ", content_width_ + 2))
+                rows.push_back(ftxui::text(
+                    PadRight(Tail("  / " + filter_ + "_  ", content_width_ + 2), content_width_ + 2))
                                | ftxui::inverted);
             }
             rows.push_back(ftxui::text(PadRight("  " + dir_, content_width_ + 2)) | ftxui::dim);
@@ -160,11 +169,17 @@ namespace scribbolyth::browser
                     rows.push_back(row);
                 }
             }
-            const int pad_to = kVisibleRows + 2 + (filter_active_ ? 1 : 0);
+            const int pad_to = kVisibleRows + 3;
             while (static_cast<int>(rows.size()) < pad_to)
             {
                 rows.push_back(ftxui::text(PadRight("", row_width)));
             }
+
+            const std::string help_move =
+                "    j/k move  h up  l enter  gg/G  Enter pick  / filter  Esc cancel  ";
+            const std::string help_clear =
+                "    Esc clear  j/k move  h up  l enter  Enter pick  / filter  ";
+            const std::string help_type = "    type to filter  Enter keep  Esc clear  ";
 
             std::string footer = "  " + std::to_string(total == 0 ? 0 : sel + 1) + "/"
                                  + std::to_string(total);
@@ -174,23 +189,22 @@ namespace scribbolyth::browser
             }
             if (filter_active_)
             {
-                footer += "    type to filter  Enter keep  Esc clear  ";
+                footer += help_type;
             }
             else if (filter_.empty())
             {
-                footer +=
-                    "    j/k move  h up  l enter  gg/G  Enter pick  / filter  Esc cancel  ";
+                footer += help_move;
             }
             else
             {
-                footer += "    Esc clear  j/k move  h up  l enter  Enter pick  / filter  ";
+                footer += help_clear;
             }
 
             return ftxui::window(ftxui::text(" File Browser "),
                                  ftxui::vbox({
                                      ftxui::vbox(std::move(rows)),
                                      ftxui::separator(),
-                                     ftxui::text(PadRight(footer, row_width)) | ftxui::dim,
+                                     ftxui::text(PadRight(footer, dlg_width)) | ftxui::dim,
                                  })) |
                    ftxui::reflect(box_) |
                    ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |
@@ -215,6 +229,7 @@ namespace scribbolyth::browser
             pending_g_ = false;
             filter_.clear();
             filter_active_ = false;
+            state_->browser_command.clear();
             start_dir_.clear();
             needs_refresh_ = true;
         }
@@ -268,8 +283,20 @@ namespace scribbolyth::browser
             const Entry& entry = entries_[visible_[static_cast<std::size_t>(sel)]];
             if (entry.is_dir)
             {
-                SetDir(entry.path);
-                ClearFilter();
+                // `l` always navigates into the folder. For save/export-style
+                // ops (`browser_command` set) Enter instead hands the folder
+                // back to the command line so the user can type a filename.
+                if (!pick_file || state_->browser_command.empty())
+                {
+                    SetDir(entry.path);
+                    ClearFilter();
+                    return;
+                }
+                const std::string command = std::move(state_->browser_command);
+                state_->browser_command.clear();
+                const std::string target = (fs::path(entry.path) / "").string();
+                Close();
+                scribbolyth::op::OpenCommandLineWithArgs(state_, command, target);
                 return;
             }
             if (!pick_file) return;

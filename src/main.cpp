@@ -121,8 +121,8 @@ int main(int, char** argv) {
     {
         ftxui::Elements parts = {
             text(ModeName(state->mode)) | bold,
-            separator(),
-            text(" scribbolyth ") | dim,
+            // separator(),
+            // text(" scribbolyth ") | dim,
         };
         if (!state->status.empty())
         {

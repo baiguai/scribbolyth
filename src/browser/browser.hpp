@@ -23,5 +23,11 @@ namespace scribbolyth::browser
     // filter applied (field hidden) clears the filter; only Escape with no
     // filter cancels the dialog. Picking a file invokes
     // `state->browser_pick` with its full path and closes the dialog.
+    // For save/export-style commands the treeview also sets
+    // `state->browser_command` to the invoking command name ("saveas"/"X");
+    // then Enter on a directory closes the dialog and reopens the command
+    // line prefilled with `:command <folder>/` so a filename can be typed
+    // (l still navigates into the directory). For open/import-style commands
+    // the field stays empty and Enter on a directory navigates as usual.
     ftxui::Component MakeFileBrowserDialog(std::shared_ptr<EditorState> state, bool* show);
 }
