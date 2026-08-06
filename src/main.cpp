@@ -5,6 +5,7 @@
 
 #include "config/config.hpp"
 #include "bookmarks/bookmarks.hpp"
+#include "browser/browser.hpp"
 #include "help/help.hpp"
 #include "history/history.hpp"
 #include "links/links.hpp"
@@ -49,6 +50,9 @@ int main(int, char** argv) {
 
     bool show_history = false;
     state->operations["history"] = [&show_history](const std::string&, int) { show_history = true; };
+
+    bool show_file_browser = false;
+    state->show_file_browser = &show_file_browser;
 
     namespace fs = std::filesystem;
     fs::path config_path = fs::path(argv[0]).parent_path() / "commands.conf";
@@ -117,8 +121,8 @@ int main(int, char** argv) {
     {
         ftxui::Elements parts = {
             text(ModeName(state->mode)) | bold,
-            separator(),
-            text(" scribbolyth ") | dim,
+            // separator(),
+            // text(" scribbolyth ") | dim,
         };
         if (!state->status.empty())
         {
@@ -142,11 +146,13 @@ int main(int, char** argv) {
     auto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);
     auto links_comp = scribbolyth::links::MakeLinksDialog(state, &show_links);
     auto history_comp = scribbolyth::history::MakeHistoryDialog(state, &show_history);
-    auto root = Modal(Modal(Modal(Modal(Modal(container, help_comp, &show_help),
-                                          search_comp, &show_search),
-                                  bookmarks_comp, &show_bookmarks),
-                            links_comp, &show_links),
-                      history_comp, &show_history);
+    auto browser_comp = scribbolyth::browser::MakeFileBrowserDialog(state, &show_file_browser);
+    auto root = Modal(Modal(Modal(Modal(Modal(Modal(container, help_comp, &show_help),
+                                                  search_comp, &show_search),
+                                          bookmarks_comp, &show_bookmarks),
+                                  links_comp, &show_links),
+                          history_comp, &show_history),
+                  browser_comp, &show_file_browser);
 
     screen.Loop(root);
 

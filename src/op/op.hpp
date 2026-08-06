@@ -12,6 +12,10 @@ namespace scribbolyth::op
 {
     using Operation = std::function<void(const std::string& args, int count)>;
     void OpenCommandLine(std::shared_ptr<EditorState> state, const std::string& command);
+    // Like OpenCommandLine, but with pre-filled arguments (e.g. a directory
+    // path the user is meant to extend with a filename).
+    void OpenCommandLineWithArgs(std::shared_ptr<EditorState> state,
+                                 const std::string& command, const std::string& args);
     bool ExecuteCommand(std::shared_ptr<EditorState> state, const std::string& input);
 
     // Tab-complete the pending command line (command name or file path).

@@ -2,6 +2,9 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <filesystem>
+#include <functional>
+#include <string>
 #include <utility>
 
 #include "../bookmark/bookmark.hpp"
@@ -156,6 +159,14 @@ namespace scribbolyth::treeview
                         state_->status = "Save as requires a path";
                         return;
                     }
+                    if (IsDirectory(path))
+                    {
+                        BrowseFor(path, "saveas", [this](const std::string& chosen)
+                                  {
+                                      SaveTo(chosen);
+                                  });
+                        return;
+                    }
                     SaveTo(path);
                 };
                 state_->operations["open"] = [this](const std::string& path, int)
@@ -163,6 +174,14 @@ namespace scribbolyth::treeview
                     if (path.empty())
                     {
                         state_->status = "Open requires a path";
+                        return;
+                    }
+                    if (IsDirectory(path))
+                    {
+                        BrowseFor(path, "", [this](const std::string& chosen)
+                                  {
+                                      LoadFrom(chosen);
+                                  });
                         return;
                     }
                     LoadFrom(path);
@@ -184,20 +203,15 @@ namespace scribbolyth::treeview
                         state_->status = "Import requires a path";
                         return;
                     }
-                    std::vector<TreeNode> loaded;
-                    std::vector<scribbolyth::bookmark::Bookmark> loaded_marks;
-                    if (!scribbolyth::html::ImportHtmlFile(path, loaded, &loaded_marks))
+                    if (IsDirectory(path))
                     {
-                        state_->status = "Error: could not import " + path;
+                        BrowseFor(path, "", [this](const std::string& chosen)
+                                  {
+                                      ImportFrom(chosen);
+                                  });
                         return;
                     }
-                    EnsureIds(loaded);
-                    state_->bookmarks = std::move(loaded_marks);
-                    roots_ = std::move(loaded);
-                    current_file_.clear();
-                    selected_ = nullptr;
-                    RefreshActiveNode();
-                    state_->status = "Imported " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
+                    ImportFrom(path);
                 };
                 state_->operations["export_html"] = [this](const std::string& path, int)
                 {
@@ -206,18 +220,15 @@ namespace scribbolyth::treeview
                         state_->status = "Export requires a path";
                         return;
                     }
-                    if (state_->template_path.empty())
+                    if (IsDirectory(path))
                     {
-                        state_->status = "Error: scribboleth.html template not found";
+                        BrowseFor(path, "X", [this](const std::string& chosen)
+                                  {
+                                      ExportTo(chosen);
+                                  });
                         return;
                     }
-                    if (!scribbolyth::html::ExportHtmlFile(state_->template_path, path,
-                                                           roots_, state_->bookmarks))
-                    {
-                        state_->status = "Error: could not export " + path;
-                        return;
-                    }
-                    state_->status = "Exported " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
+                    ExportTo(path);
                 };
                 state_->operations["treeview_width_increase"] = [this](const std::string&, int count)
                 {
@@ -278,6 +289,11 @@ namespace scribbolyth::treeview
             void RefreshActiveNode();
             void SaveTo(const std::string& path);
             void LoadFrom(const std::string& path);
+            void ImportFrom(const std::string& path);
+            void ExportTo(const std::string& path);
+            bool IsDirectory(const std::string& path);
+            void BrowseFor(const std::string& dir, const std::string& command,
+                           std::function<void(const std::string&)> on_pick);
             bool IsAncestor(TreeNode& ancestor, TreeNode* node);
             void CollectVisibleDepth(TreeNode& node, int depth, std::vector<TreeNode*>& nodes, std::vector<int>& depths);
 
@@ -548,6 +564,56 @@ namespace scribbolyth::treeview
         selected_ = nullptr;
         RefreshActiveNode();
         state_->status = "Loaded " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
+    }
+
+    void TreeView::ImportFrom(const std::string& path)
+    {
+        std::vector<TreeNode> loaded;
+        std::vector<scribbolyth::bookmark::Bookmark> loaded_marks;
+        if (!scribbolyth::html::ImportHtmlFile(path, loaded, &loaded_marks))
+        {
+            state_->status = "Error: could not import " + path;
+            return;
+        }
+        EnsureIds(loaded);
+        state_->bookmarks = std::move(loaded_marks);
+        roots_ = std::move(loaded);
+        current_file_.clear();
+        selected_ = nullptr;
+        RefreshActiveNode();
+        state_->status = "Imported " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
+    }
+
+    void TreeView::ExportTo(const std::string& path)
+    {
+        if (state_->template_path.empty())
+        {
+            state_->status = "Error: scribboleth.html template not found";
+            return;
+        }
+        if (!scribbolyth::html::ExportHtmlFile(state_->template_path, path,
+                                               roots_, state_->bookmarks))
+        {
+            state_->status = "Error: could not export " + path;
+            return;
+        }
+        state_->status = "Exported " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
+    }
+
+    bool TreeView::IsDirectory(const std::string& path)
+    {
+        std::error_code ec;
+        return std::filesystem::is_directory(path, ec);
+    }
+
+    void TreeView::BrowseFor(const std::string& dir, const std::string& command,
+                             std::function<void(const std::string&)> on_pick)
+    {
+        if (!state_->show_file_browser) return;
+        state_->browser_start_dir = dir;
+        state_->browser_command = command;
+        state_->browser_pick = std::move(on_pick);
+        *state_->show_file_browser = true;
     }
 
     void TreeView::MoveToStart()

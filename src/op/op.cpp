@@ -163,6 +163,16 @@ namespace scribbolyth::op
         if (state->active_child) *state->active_child = 1;
     }
 
+    void OpenCommandLineWithArgs(std::shared_ptr<EditorState> state,
+                                 const std::string& command, const std::string& args)
+    {
+        state->mode_before_command = state->mode;
+        state->mode = Mode::COMMAND;
+        state->command_buffer = ":" + command + (args.empty() ? "" : " " + args);
+        state->command_cursor = static_cast<int>(state->command_buffer.size());
+        if (state->active_child) *state->active_child = 1;
+    }
+
     bool ExecuteCommand(std::shared_ptr<EditorState> state, const std::string& input)
     {
         std::string cmd = input;
