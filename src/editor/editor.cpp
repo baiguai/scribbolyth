@@ -22,6 +22,68 @@ namespace scribbolyth::editor
             }
             return true;
         }
+
+        bool IsVisualMode(Mode m)
+        {
+            return m == Mode::VISUAL || m == Mode::VISUAL_LINE;
+        }
+
+        std::string TrimBoth(const std::string& s)
+        {
+            std::size_t start = 0;
+            while (start < s.size() && (s[start] == ' ' || s[start] == '\t')) ++start;
+            std::size_t end = s.size();
+            while (end > start && (s[end - 1] == ' ' || s[end - 1] == '\t')) --end;
+            return s.substr(start, end - start);
+        }
+
+        // A markdown table separator row: "| --- | --- |", "+-----+-----+" or
+        // a bare "----" (the web app's dividerPattern).
+        bool IsDividerLine(const std::string& s)
+        {
+            std::string t;
+            t.reserve(s.size());
+            for (char c : s)
+            {
+                if (c != ' ' && c != '\t') t += c;
+            }
+            if (t.empty()) return false;
+            std::size_t i = 0;
+            if (t[0] == '|' || t[0] == '+')
+            {
+                const char left = t[0];
+                while (i < t.size() && (t[i] == '|' || t[i] == '+' || t[i] == '-')) ++i;
+                return i == t.size() && t.back() == left;
+            }
+            while (i < t.size() && t[i] == '-') ++i;
+            return i == t.size();
+        }
+
+        std::vector<std::string> SplitCells(const std::string& line)
+        {
+            std::vector<std::string> cells;
+            std::size_t start = 0;
+            while (true)
+            {
+                std::size_t bar = line.find('|', start);
+                if (bar == std::string::npos)
+                {
+                    cells.push_back(line.substr(start));
+                    break;
+                }
+                cells.push_back(line.substr(start, bar - start));
+                start = bar + 1;
+            }
+            while (!cells.empty() && TrimBoth(cells.front()).empty())
+            {
+                cells.erase(cells.begin());
+            }
+            while (!cells.empty() && TrimBoth(cells.back()).empty())
+            {
+                cells.pop_back();
+            }
+            return cells;
+        }
     }
 
     class Editor : public ftxui::ComponentBase
@@ -134,10 +196,19 @@ namespace scribbolyth::editor
                     Clamp();
                     Save();
                 };
+                state_->operations["delete_selection"] = [this](const std::string&, int)
+                {
+                    DeleteSelection();
+                };
 
                 state_->operations["undo"] = [](const std::string&, int) {};
                 state_->operations["yank"] = [](const std::string&, int) {};
                 state_->operations["paste"] = [](const std::string&, int) {};
+
+                state_->operations["format_table"] = [this](const std::string&, int)
+                {
+                    FormatTable();
+                };
 
                 state_->reveal_line = [this](int line)
                 {
@@ -184,8 +255,12 @@ namespace scribbolyth::editor
                 }
 
                 ftxui::Elements rows;
+                const bool sel_active = IsVisualMode(state_->mode) && visual_row_ >= 0;
+                const int lo = sel_active ? std::min(visual_row_, row_) : 0;
+                const int hi = sel_active ? std::max(visual_row_, row_) : -1;
                 for (int r = 0; r < static_cast<int>(lines_.size()); ++r)
                 {
+                    const bool selected = r >= lo && r <= hi;
                     if (r == row_)
                     {
                         int c = std::max(0, col_);
@@ -197,10 +272,14 @@ namespace scribbolyth::editor
                                                ? lines_[r].substr(static_cast<std::size_t>(c) + 1)
                                                : "";
                         rows.push_back(ftxui::hbox({
-                            ftxui::text(pre),
+                            ftxui::text(pre) | (selected ? ftxui::inverted : ftxui::nothing),
                             ftxui::text(at) | ftxui::inverted | ftxui::focus,
-                            ftxui::text(post),
+                            ftxui::text(post) | (selected ? ftxui::inverted : ftxui::nothing),
                         }));
+                    }
+                    else if (selected)
+                    {
+                        rows.push_back(ftxui::text(lines_[r]) | ftxui::inverted);
                     }
                     else
                     {
@@ -215,8 +294,17 @@ namespace scribbolyth::editor
             }
             bool OnEvent(ftxui::Event event) override
             {
+                const bool visual_before = IsVisualMode(state_->mode);
                 if (scribbolyth::op::HandleKey(state_, event))
                 {
+                    if (!visual_before && IsVisualMode(state_->mode))
+                    {
+                        visual_row_ = row_;
+                    }
+                    if (visual_before && !IsVisualMode(state_->mode))
+                    {
+                        visual_row_ = -1;
+                    }
                     return true;
                 }
                 if (state_->mode == Mode::INSERT && event.is_character())
@@ -243,6 +331,7 @@ namespace scribbolyth::editor
             {
                 if (active_ == state_->active_node) return;
                 active_ = state_->active_node;
+                visual_row_ = -1;
                 if (active_ == nullptr)
                 {
                     lines_.clear();
@@ -271,6 +360,132 @@ namespace scribbolyth::editor
                 {
                     scribbolyth::history::Record(*state_, active_->id);
                 }
+            }
+
+            // Rebuild the selected rows (or the current line when no VISUAL
+            // selection is active) into a padded markdown table with a
+            // "+---+" separator, mirroring the web app's formatMarkdownTable.
+            void FormatTable()
+            {
+                if (active_ == nullptr) return;
+                LoadIfChanged();
+                if (lines_.empty()) lines_.push_back("");
+
+                int a = (visual_row_ >= 0) ? std::min(visual_row_, row_) : row_;
+                int b = (visual_row_ >= 0) ? std::max(visual_row_, row_) : row_;
+                if (a > b) std::swap(a, b);
+
+                // Line-based analog of the web app's sel.trim(): drop blank
+                // lines hugging the selection edges.
+                while (a <= b && IsBlank(lines_[a])) ++a;
+                while (b >= a && IsBlank(lines_[b])) --b;
+                if (a > b)
+                {
+                    state_->status = "No table detected";
+                    return;
+                }
+
+                bool has_pipe = false;
+                for (int r = a; r <= b; ++r)
+                {
+                    if (lines_[r].find('|') != std::string::npos)
+                    {
+                        has_pipe = true;
+                        break;
+                    }
+                }
+                if (!has_pipe)
+                {
+                    state_->status = "No table detected";
+                    return;
+                }
+
+                bool has_divider = false;
+                std::vector<std::vector<std::string>> table;
+                table.reserve(static_cast<std::size_t>(b - a + 1));
+                for (int r = a; r <= b; ++r)
+                {
+                    if (IsDividerLine(lines_[r]))
+                    {
+                        has_divider = true;
+                        continue;
+                    }
+                    table.push_back(SplitCells(lines_[r]));
+                }
+                if (table.empty())
+                {
+                    state_->status = "No table detected";
+                    return;
+                }
+
+                std::vector<int> widths;
+                for (const auto& row : table)
+                {
+                    for (std::size_t i = 0; i < row.size(); ++i)
+                    {
+                        const int w = static_cast<int>(TrimBoth(row[i]).size());
+                        if (i >= widths.size()) widths.resize(i + 1, 0);
+                        if (w > widths[i]) widths[i] = w;
+                    }
+                }
+
+                std::string sep = "+";
+                for (const int w : widths)
+                {
+                    sep += std::string(static_cast<std::size_t>(w) + 2, '-') + "+";
+                }
+
+                std::vector<std::string> padded;
+                padded.reserve(table.size());
+                for (const auto& row : table)
+                {
+                    std::string out = "|";
+                    for (std::size_t i = 0; i < row.size(); ++i)
+                    {
+                        if (i != 0) out += "|";
+                        const std::string t = TrimBoth(row[i]);
+                        const int pad = (i < widths.size())
+                                            ? widths[i] - static_cast<int>(t.size())
+                                            : 0;
+                        out += " " + t
+                            + std::string(static_cast<std::size_t>(pad > 0 ? pad : 0), ' ')
+                            + " ";
+                    }
+                    out += "|";
+                    padded.push_back(std::move(out));
+                }
+
+                std::vector<std::string> final_rows;
+                if (!has_divider)
+                {
+                    final_rows = padded;
+                }
+                else
+                {
+                    final_rows.reserve(padded.size() + 1);
+                    std::size_t row_index = 0;
+                    for (int r = a; r <= b; ++r)
+                    {
+                        if (IsDividerLine(lines_[r]))
+                        {
+                            final_rows.push_back(sep);
+                        }
+                        else
+                        {
+                            final_rows.push_back(padded[row_index++]);
+                        }
+                    }
+                }
+                final_rows.push_back("");
+
+                lines_.erase(lines_.begin() + a, lines_.begin() + b + 1);
+                lines_.insert(lines_.begin() + a, final_rows.begin(), final_rows.end());
+                row_ = a;
+                col_ = 0;
+                visual_row_ = -1;
+                state_->mode = Mode::NORMAL;
+                Save();
+                state_->status = "Table updated";
             }
 
             static std::vector<std::string> SplitLines(const std::string& text)
@@ -431,12 +646,40 @@ namespace scribbolyth::editor
                 if (row_ >= static_cast<int>(lines_.size())) --row_;
             }
 
+            void DeleteSelection()
+            {
+                if (active_ == nullptr) return;
+                LoadIfChanged();
+                if (lines_.empty()) lines_.push_back("");
+
+                int a = (visual_row_ >= 0) ? std::min(visual_row_, row_) : row_;
+                int b = (visual_row_ >= 0) ? std::max(visual_row_, row_) : row_;
+                if (a > b) std::swap(a, b);
+
+                if (static_cast<int>(lines_.size()) == b - a + 1)
+                {
+                    lines_.assign(1, ""); // leave a blank line - if nothing is left
+                                          // row_ = 0;
+                }
+                else
+                {
+                    lines_.erase(lines_.begin() + a, lines_.begin() + b + 1);
+                    row_ = std::min(a, static_cast<int>(lines_.size()) - 1);
+                }
+                col_ = 0;
+                visual_row_ = -1;
+                state_->mode = Mode::NORMAL;
+                Save();
+                state_->status = "Selection deleted";
+            }
+
             std::shared_ptr<EditorState> state_;
             scribbolyth::treeview::TreeNode* active_ = nullptr;
             std::vector<std::string> lines_;
             int row_ = 0;
             int col_ = 0;
             int last_col_ = 0;
+            int visual_row_ = -1;
     };
 
     ftxui::Component MakeEditor(std::shared_ptr<EditorState> state)
