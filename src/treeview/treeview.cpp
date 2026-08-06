@@ -597,7 +597,7 @@ namespace scribbolyth::treeview
         selected_ = nullptr;
         RefreshActiveNode();
         state_->status = "Imported " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
-        PushRecentFile(path);
+        // PushRecentFile(path);
         PersistLastFile();
     }
 
