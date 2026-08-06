@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Regression test: :w warning, :S save, on-disk JSON, :open reload.
+"""Regression test: :w warning, :S save, on-disk JSON, :open reload, and
+auto-restore of the last opened file via init.conf on relaunch.
 
 Uses an explicit workdir so the saved file survives a relaunch.
 """
@@ -51,13 +52,14 @@ try:
             s.dump()
             raise SystemExit(1)
 
-    # quit, relaunch in the same directory, and :open the file back
+    # quit, relaunch in the same directory: init.conf should restore the
+    # last opened file automatically
     s.quit()
     s = harness.launch(workdir=DATA_DIR)
-    s.require('Select a node to edit', 'relaunch must start blank')
+    s.require('Read Me', 'relaunch should auto-restore the last opened file')
     s.send(b':open ' + path.encode())
     s.send(b'\r')
-    s.require('Read Me', ':open should load the saved tree')
+    s.require('Read Me', ':open should still load a file explicitly')
     # the saved history should have come back with the file
     s.send(b'<')                  # open the history dialog
     s.require(' < History ', 'history dialog should open')
