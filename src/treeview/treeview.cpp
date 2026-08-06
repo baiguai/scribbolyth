@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <filesystem>
+#include <fstream>
 #include <functional>
 #include <string>
 #include <utility>
@@ -189,6 +190,9 @@ namespace scribbolyth::treeview
                 };
                 state_->operations["new_document"] = [this](const std::string&, int)
                 {
+                    LogDbg("new_document recents-before=[");
+                    for (const auto& r : state_->recent_files) LogDbg("  " + r);
+                    LogDbg("]");
                     roots_.clear();
                     current_file_.clear();
                     selected_ = nullptr;
@@ -295,6 +299,8 @@ namespace scribbolyth::treeview
             void ImportFrom(const std::string& path);
             void ExportTo(const std::string& path);
             void PersistLastFile();
+            void PushRecentFile(const std::string& path);
+            void LogDbg(const std::string& msg);
             bool IsDirectory(const std::string& path);
             void BrowseFor(const std::string& dir, const std::string& command,
                            std::function<void(const std::string&)> on_pick);
@@ -531,6 +537,12 @@ namespace scribbolyth::treeview
         }
     }
 
+    void TreeView::LogDbg(const std::string& msg)
+    {
+        std::ofstream dbg("/tmp/opencode/debug.log", std::ios::app);
+        dbg << msg << "\n";
+    }
+
     void TreeView::SaveTo(const std::string& path)
     {
         std::string json = scribbolyth::io::Serialize(roots_, state_->treeview_width,
@@ -543,11 +555,15 @@ namespace scribbolyth::treeview
         }
         current_file_ = path;
         state_->status = "Saved " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
+        PushRecentFile(path);
         PersistLastFile();
     }
 
     void TreeView::LoadFrom(const std::string& path)
     {
+        LogDbg("LoadFrom enter path=" + path + " recents=[");
+        for (const auto& r : state_->recent_files) LogDbg("  " + r);
+        LogDbg("]");
         std::string content;
         if (!scribbolyth::io::ReadFile(path, content))
         {
@@ -573,7 +589,11 @@ namespace scribbolyth::treeview
         selected_ = nullptr;
         RefreshActiveNode();
         state_->status = "Loaded " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
+        PushRecentFile(path);
         PersistLastFile();
+        LogDbg("LoadFrom done path=" + path + " recents=[");
+        for (const auto& r : state_->recent_files) LogDbg("  " + r);
+        LogDbg("]");
     }
 
     void TreeView::ImportFrom(const std::string& path)
@@ -594,6 +614,7 @@ namespace scribbolyth::treeview
         selected_ = nullptr;
         RefreshActiveNode();
         state_->status = "Imported " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
+        PushRecentFile(path);
         PersistLastFile();
     }
 
@@ -623,7 +644,19 @@ namespace scribbolyth::treeview
     void TreeView::PersistLastFile()
     {
         if (state_->init_path.empty()) return;
-        scribbolyth::config::WriteInit(state_->init_path, current_file_);
+        scribbolyth::config::WriteInit(state_->init_path, current_file_, state_->recent_files);
+    }
+
+    void TreeView::PushRecentFile(const std::string& path)
+    {
+        if (path.empty()) return;
+        auto& recent = state_->recent_files;
+        recent.erase(std::remove(recent.begin(), recent.end(), path), recent.end());
+        recent.insert(recent.begin(), path);
+        if (recent.size() > EditorState::kRecentMax)
+        {
+            recent.resize(EditorState::kRecentMax);
+        }
     }
 
     void TreeView::BrowseFor(const std::string& dir, const std::string& command,

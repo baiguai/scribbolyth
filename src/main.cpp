@@ -9,6 +9,7 @@
 #include "browser/browser.hpp"
 #include "help/help.hpp"
 #include "history/history.hpp"
+#include "recent/recent.hpp"
 #include "links/links.hpp"
 #include "op/op.hpp"
 #include "search/search.hpp"
@@ -52,6 +53,9 @@ int main(int, char** argv) {
     bool show_history = false;
     state->operations["history"] = [&show_history](const std::string&, int) { show_history = true; };
 
+    bool show_recent = false;
+    state->operations["recents"] = [&show_recent](const std::string&, int) { show_recent = true; };
+
     bool show_file_browser = false;
     state->show_file_browser = &show_file_browser;
 
@@ -86,7 +90,7 @@ int main(int, char** argv) {
     state->init_path = init_path.string();
 
     std::string last_file;
-    if (scribbolyth::config::ReadInit(init_path.string(), last_file) && !last_file.empty())
+    if (scribbolyth::config::ReadInit(init_path.string(), last_file, state->recent_files) && !last_file.empty())
     {
         auto it = state->operations.find("open");
         std::error_code ec;
@@ -169,12 +173,14 @@ int main(int, char** argv) {
     auto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);
     auto links_comp = scribbolyth::links::MakeLinksDialog(state, &show_links);
     auto history_comp = scribbolyth::history::MakeHistoryDialog(state, &show_history);
+    auto recent_comp = scribbolyth::recent::MakeRecentDialog(state, &show_recent);
     auto browser_comp = scribbolyth::browser::MakeFileBrowserDialog(state, &show_file_browser);
-    auto root = Modal(Modal(Modal(Modal(Modal(Modal(container, help_comp, &show_help),
+    auto root = Modal(Modal(Modal(Modal(Modal(Modal(Modal(container, help_comp, &show_help),
                                                   search_comp, &show_search),
                                           bookmarks_comp, &show_bookmarks),
                                   links_comp, &show_links),
                           history_comp, &show_history),
+                        recent_comp, &show_recent),
                   browser_comp, &show_file_browser);
 
     screen.Loop(root);
