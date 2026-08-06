@@ -1,7 +1,6 @@
 #include "recent.hpp"
 
 #include <algorithm>
-#include <fstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -123,8 +122,6 @@ namespace scribbolyth::recent
             if (recent.empty()) return;
             const int sel = std::min(selection_, static_cast<int>(recent.size()) - 1);
             const std::string chosen = recent[static_cast<std::size_t>(sel)];
-            std::ofstream dbg("/tmp/opencode/debug.log", std::ios::app);
-            dbg << "Dialog Open sel=" << sel << " size=" << recent.size() << "\n";
             state_->status = "";
             Close();
             auto it = state_->operations.find("open");
