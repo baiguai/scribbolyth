@@ -123,12 +123,13 @@ namespace scribbolyth::config
         return true;
     }
 
-    bool ReadInit(const std::string& path, std::string& last_file)
+    bool ReadInit(const std::string& path, std::string& last_file, std::vector<std::string>& recent_files)
     {
         std::ifstream file(path);
         if (!file.is_open()) return false;
 
         last_file.clear();
+        recent_files.clear();
         std::string line;
         while (std::getline(file, line))
         {
@@ -143,24 +144,31 @@ namespace scribbolyth::config
             std::string key = (kend == std::string::npos)
                                   ? ""
                                   : line.substr(start, kend - start + 1);
-            if (key != "last_file") continue;
 
             std::size_t p = line.find_first_not_of(" \t", eq + 1);
-            if (p == std::string::npos)
-            {
-                last_file.clear();
-            }
-            else
+            std::string value;
+            if (p != std::string::npos)
             {
                 std::size_t end = line.find_last_not_of(" \t");
-                last_file = line.substr(p, end - p + 1);
+                value = line.substr(p, end - p + 1);
             }
-            return true;
+
+            if (key == "last_file")
+            {
+                last_file = value;
+            }
+            else if (key == "recent_file")
+            {
+                if (!value.empty())
+                {
+                    recent_files.push_back(value);
+                }
+            }
         }
         return true;
     }
 
-    bool WriteInit(const std::string& path, const std::string& last_file)
+    bool WriteInit(const std::string& path, const std::string& last_file, const std::vector<std::string>& recent_files)
     {
         std::ofstream file(path, std::ios::binary);
         if (!file.is_open()) return false;
@@ -168,6 +176,10 @@ namespace scribbolyth::config
         file << "# scribbolyth init configuration - written by the app\n";
         file << "# On startup the app reopens `last_file` when it still exists.\n";
         file << "last_file = " << last_file << "\n";
+        for (const auto& recent : recent_files)
+        {
+            file << "recent_file = " << recent << "\n";
+        }
         return static_cast<bool>(file);
     }
 }

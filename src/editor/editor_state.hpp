@@ -36,6 +36,9 @@ struct EditorState {
     std::vector<std::string> history;
     static constexpr std::size_t kHistoryMax = 30;
 
+    std::vector<std::string> recent_files;
+    static constexpr std::size_t kRecentMax = 20;
+
     // File browser dialog. `show_file_browser` is the Modal visibility flag;
     // `browser_start_dir` is the directory to open in; `browser_pick` is
     // invoked with the chosen file's path when the user presses Enter.

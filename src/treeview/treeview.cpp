@@ -295,6 +295,7 @@ namespace scribbolyth::treeview
             void ImportFrom(const std::string& path);
             void ExportTo(const std::string& path);
             void PersistLastFile();
+            void PushRecentFile(const std::string& path);
             bool IsDirectory(const std::string& path);
             void BrowseFor(const std::string& dir, const std::string& command,
                            std::function<void(const std::string&)> on_pick);
@@ -543,6 +544,7 @@ namespace scribbolyth::treeview
         }
         current_file_ = path;
         state_->status = "Saved " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
+        PushRecentFile(path);
         PersistLastFile();
     }
 
@@ -573,6 +575,7 @@ namespace scribbolyth::treeview
         selected_ = nullptr;
         RefreshActiveNode();
         state_->status = "Loaded " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
+        PushRecentFile(path);
         PersistLastFile();
     }
 
@@ -594,6 +597,7 @@ namespace scribbolyth::treeview
         selected_ = nullptr;
         RefreshActiveNode();
         state_->status = "Imported " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
+        PushRecentFile(path);
         PersistLastFile();
     }
 
@@ -623,7 +627,19 @@ namespace scribbolyth::treeview
     void TreeView::PersistLastFile()
     {
         if (state_->init_path.empty()) return;
-        scribbolyth::config::WriteInit(state_->init_path, current_file_);
+        scribbolyth::config::WriteInit(state_->init_path, current_file_, state_->recent_files);
+    }
+
+    void TreeView::PushRecentFile(const std::string& path)
+    {
+        if (path.empty()) return;
+        auto& recent = state_->recent_files;
+        recent.erase(std::remove(recent.begin(), recent.end(), path), recent.end());
+        recent.insert(recent.begin(), path);
+        if (recent.size() > EditorState::kRecentMax)
+        {
+            recent.resize(EditorState::kRecentMax);
+        }
     }
 
     void TreeView::BrowseFor(const std::string& dir, const std::string& command,
