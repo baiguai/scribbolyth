@@ -22,28 +22,22 @@ namespace scribbolyth::op
         {
             namespace fs = std::filesystem;
 
-            std::string dir;
-            std::string prefix;
-            std::size_t slash = arg.find_last_of('/');
-            if (slash == std::string::npos)
-            {
-                prefix = arg;
-            }
-            else if (slash == arg.size() - 1)
-            {
-                std::string d = arg.substr(0, slash);
-                dir = d.empty() ? "/" : d;
-            }
-            else
-            {
-                dir = arg.substr(0, slash);
-                if (dir.empty() && !arg.empty() && arg[0] == '/') dir = "/";
-                prefix = arg.substr(slash + 1);
-            }
+            // Decompose the argument into (directory, filename prefix) using
+            // std::filesystem so each platform handles its own conventions:
+            // '/' and '\' separators, drive letters (C:\), trailing slashes.
+            const fs::path p(arg);
+            const std::string prefix = p.filename().string();
+            const std::string parent = p.parent_path().string();
 
-            std::string search_dir = dir.empty() ? "." : dir;
+            // Join candidates with the separator the user is typing. A '/'
+            // anywhere wins even on Windows, where both separators are valid.
+            char sep = fs::path::preferred_separator;
+            if (parent.find('/') != std::string::npos) sep = '/';
+
+            const std::string search = parent.empty() ? "." : parent;
+
             std::error_code ec;
-            for (auto it = fs::directory_iterator(search_dir, ec), end = fs::directory_iterator();
+            for (auto it = fs::directory_iterator(search, ec), end = fs::directory_iterator();
                  it != end && !ec; it.increment(ec))
             {
                 std::string entry = it->path().filename().string();
@@ -56,8 +50,20 @@ namespace scribbolyth::op
 
                 std::error_code ec2;
                 bool is_dir = it->is_directory(ec2);
-                std::string full = (dir.empty() || dir == "/") ? (dir + entry) : (dir + "/" + entry);
-                if (is_dir) full += "/";
+                std::string full;
+                if (parent.empty())
+                {
+                    full = entry;
+                }
+                else if (parent.back() == '/' || parent.back() == '\\')
+                {
+                    full = parent + entry;   // parent is already a root ("/", "C:\")
+                }
+                else
+                {
+                    full = parent + sep + entry;
+                }
+                if (is_dir) full += sep;
                 matches.push_back(std::move(full));
             }
             std::sort(matches.begin(), matches.end());
@@ -153,6 +159,16 @@ namespace scribbolyth::op
         state->mode_before_command = state->mode;
         state->mode = Mode::COMMAND;
         state->command_buffer = command.empty() ? ":" : (":" + command + " ");
+        state->command_cursor = static_cast<int>(state->command_buffer.size());
+        if (state->active_child) *state->active_child = 1;
+    }
+
+    void OpenCommandLineWithArgs(std::shared_ptr<EditorState> state,
+                                 const std::string& command, const std::string& args)
+    {
+        state->mode_before_command = state->mode;
+        state->mode = Mode::COMMAND;
+        state->command_buffer = ":" + command + (args.empty() ? "" : " " + args);
         state->command_cursor = static_cast<int>(state->command_buffer.size());
         if (state->active_child) *state->active_child = 1;
     }
