@@ -1,5 +1,6 @@
 #include "main.hpp"
 
+#include <cstdlib>
 #include <filesystem>
 #include <iostream>
 
@@ -72,6 +73,28 @@ int main(int, char** argv) {
         template_path = "scribboleth.html";
     }
     state->template_path = template_path.string();
+
+    fs::path init_path;
+    if (const char* env = std::getenv("SCRIBBOLYTH_INIT"); env != nullptr && *env != '\0')
+    {
+        init_path = env;
+    }
+    else
+    {
+        init_path = fs::path(argv[0]).parent_path() / "init.conf";
+    }
+    state->init_path = init_path.string();
+
+    std::string last_file;
+    if (scribbolyth::config::ReadInit(init_path.string(), last_file) && !last_file.empty())
+    {
+        auto it = state->operations.find("open");
+        std::error_code ec;
+        if (it != state->operations.end() && fs::exists(last_file, ec))
+        {
+            it->second(last_file, 1);
+        }
+    }
 
     InputOption command_option;
     command_option.transform = [](InputState state)

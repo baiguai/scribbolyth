@@ -70,6 +70,9 @@ class Session:
             os.close(slave)
             os.chdir(self.workdir)
             os.environ['TERM'] = 'xterm-256color'
+            # isolate init.conf (last-opened-file) per test workdir so a saved
+            # file is auto-restored on relaunch instead of hitting build/bin/
+            os.environ['SCRIBBOLYTH_INIT'] = os.path.join(self.workdir, 'init.conf')
             os.execvp(self.bin_path, [self.bin_path])
             os._exit(127)
         os.close(slave)

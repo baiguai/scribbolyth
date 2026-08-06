@@ -64,7 +64,7 @@ try:
 
     # l enters the docs dir again; then l enters nested/.
     s.send(b'j')
-    s.require('2/3', 'j should move onto docs/')
+    s.require('2/4', 'j should move onto docs/')
     s.send(b'l')
     s.require('tree.json', 'l on docs/ should enter the directory')
     s.forbid('root.txt', 'inside docs/ there should be no root.txt')
@@ -203,7 +203,7 @@ try:
     s.require('1/3 (of 5)')
     s.send(b'h')                      # go up one level
     s.require('root.txt', 'h should go up to the workdir')
-    s.require('1/3', 'the workdir has 3 entries')
+    s.require('1/4', 'the workdir has 4 entries')
     s.forbid(' (of ', 'going up should clear the filter')
     s.send(b'\x1b')
     s.forbid(' File Browser ')

@@ -77,11 +77,19 @@ if [ -f "bin/$APP_NAME" ]; then
     else
         echo "Warning: config/scribboleth.html not found - template not copied"
     fi
+    if [ -f "../config/init.conf" ]; then
+        cp "../config/init.conf" "bin/"
+        echo "Init config copied to: $(pwd)/bin/init.conf"
+    else
+        echo "Warning: config/init.conf not found - init config not copied"
+    fi
     if [ -d "../build-windows/bin" ]; then
         cp "../config/commands.conf" "../build-windows/bin/" 2>/dev/null || \
             echo "Warning: could not copy config to build-windows/bin/"
         cp "../config/scribboleth.html" "../build-windows/bin/" 2>/dev/null || \
             echo "Warning: could not copy template to build-windows/bin/"
+        cp "../config/init.conf" "../build-windows/bin/" 2>/dev/null || \
+            echo "Warning: could not copy init config to build-windows/bin/"
     fi
 
     echo "-- Build successful --"

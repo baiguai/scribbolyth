@@ -27,6 +27,7 @@ struct EditorState {
     scribbolyth::treeview::TreeNode* active_node = nullptr;
     std::string status;
     std::string template_path;
+    std::string init_path;
     std::vector<scribbolyth::bookmark::Bookmark> bookmarks;
 
     // Viewed-node history: node ids of every selected node that has text,

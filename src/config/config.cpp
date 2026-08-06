@@ -122,4 +122,52 @@ namespace scribbolyth::config
         }
         return true;
     }
+
+    bool ReadInit(const std::string& path, std::string& last_file)
+    {
+        std::ifstream file(path);
+        if (!file.is_open()) return false;
+
+        last_file.clear();
+        std::string line;
+        while (std::getline(file, line))
+        {
+            std::size_t start = line.find_first_not_of(" \t");
+            if (start == std::string::npos) continue;
+            if (line[start] == '#') continue;
+
+            std::size_t eq = line.find('=', start);
+            if (eq == std::string::npos) continue;
+
+            std::size_t kend = line.find_last_not_of(" \t", eq - 1);
+            std::string key = (kend == std::string::npos)
+                                  ? ""
+                                  : line.substr(start, kend - start + 1);
+            if (key != "last_file") continue;
+
+            std::size_t p = line.find_first_not_of(" \t", eq + 1);
+            if (p == std::string::npos)
+            {
+                last_file.clear();
+            }
+            else
+            {
+                std::size_t end = line.find_last_not_of(" \t");
+                last_file = line.substr(p, end - p + 1);
+            }
+            return true;
+        }
+        return true;
+    }
+
+    bool WriteInit(const std::string& path, const std::string& last_file)
+    {
+        std::ofstream file(path, std::ios::binary);
+        if (!file.is_open()) return false;
+
+        file << "# scribbolyth init configuration - written by the app\n";
+        file << "# On startup the app reopens `last_file` when it still exists.\n";
+        file << "last_file = " << last_file << "\n";
+        return static_cast<bool>(file);
+    }
 }

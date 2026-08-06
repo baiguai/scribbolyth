@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "../bookmark/bookmark.hpp"
+#include "../config/config.hpp"
 #include "../history/history.hpp"
 #include "../io/serialize.hpp"
 #include "../html/convert.hpp"
@@ -194,6 +195,7 @@ namespace scribbolyth::treeview
                     state_->treeview_width = kDefaultTreeviewWidth;
                     state_->bookmarks.clear();
                     state_->history.clear();
+                    PersistLastFile();
                     RefreshActiveNode();
                     state_->status = "New document - no file path";
                 };
@@ -292,6 +294,7 @@ namespace scribbolyth::treeview
             void LoadFrom(const std::string& path);
             void ImportFrom(const std::string& path);
             void ExportTo(const std::string& path);
+            void PersistLastFile();
             bool IsDirectory(const std::string& path);
             void BrowseFor(const std::string& dir, const std::string& command,
                            std::function<void(const std::string&)> on_pick);
@@ -540,6 +543,7 @@ namespace scribbolyth::treeview
         }
         current_file_ = path;
         state_->status = "Saved " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
+        PersistLastFile();
     }
 
     void TreeView::LoadFrom(const std::string& path)
@@ -569,6 +573,7 @@ namespace scribbolyth::treeview
         selected_ = nullptr;
         RefreshActiveNode();
         state_->status = "Loaded " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
+        PersistLastFile();
     }
 
     void TreeView::ImportFrom(const std::string& path)
@@ -589,6 +594,7 @@ namespace scribbolyth::treeview
         selected_ = nullptr;
         RefreshActiveNode();
         state_->status = "Imported " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
+        PersistLastFile();
     }
 
     void TreeView::ExportTo(const std::string& path)
@@ -612,6 +618,12 @@ namespace scribbolyth::treeview
     {
         std::error_code ec;
         return std::filesystem::is_directory(path, ec);
+    }
+
+    void TreeView::PersistLastFile()
+    {
+        if (state_->init_path.empty()) return;
+        scribbolyth::config::WriteInit(state_->init_path, current_file_);
     }
 
     void TreeView::BrowseFor(const std::string& dir, const std::string& command,
