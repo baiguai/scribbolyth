@@ -85,6 +85,48 @@ namespace scribbolyth::html
                     }
                 }
 
+                bool ParseHistory(std::vector<std::string>& ids)
+                {
+                    if (!Consume('[')) return false;
+                    SkipWs();
+                    if (Consume(']')) return true;
+                    while (true)
+                    {
+                        SkipWs();
+                        std::string id;
+                        if (!Consume('{')) return false;
+                        SkipWs();
+                        if (Consume('}')) return false;  // an entry must have an id
+                        while (true)
+                        {
+                            SkipWs();
+                            std::string key;
+                            if (!ParseString(key)) return false;
+                            SkipWs();
+                            if (!Consume(':')) return false;
+                            SkipWs();
+                            if (key == "id")
+                            {
+                                if (!ParseString(id)) return false;
+                            }
+                            else
+                            {
+                                if (!SkipValue()) return false;
+                            }
+                            SkipWs();
+                            if (Consume(',')) continue;
+                            if (Consume('}')) break;
+                            return false;
+                        }
+                        if (id.empty()) return false;
+                        ids.push_back(std::move(id));
+                        SkipWs();
+                        if (Consume(',')) continue;
+                        if (Consume(']')) return true;
+                        return false;
+                    }
+                }
+
             private:
                 const std::string& s_;
                 std::size_t i_ = 0;
@@ -444,10 +486,51 @@ namespace scribbolyth::html
             ReplaceArray(html, open, close, json);
             return true;
         }
+
+        // Serialize the viewed-node history into the HTML app's format:
+        //   { "id", "title" }  one entry per id, most recent last.
+        // Entries whose target node no longer exists are skipped.
+        void AppendHistoryJson(std::string& out,
+                               const std::vector<std::string>& history,
+                               const std::vector<TreeNode>& roots)
+        {
+            out += "[\n";
+            std::size_t written = 0;
+            for (const auto& id : history)
+            {
+                std::vector<std::string> path;
+                const TreeNode* node = FindNodeById(roots, id, path);
+                if (!node) continue;
+
+                if (written != 0) out += ",\n";
+                out += "  {\"id\": \"" + id + "\",\n";
+                out += "   \"title\": " + scribbolyth::io::JsonEscape(node->name) + "\n";
+                out += "  }";
+                ++written;
+            }
+            out += "\n]";
+        }
+
+        bool ReplaceHistory(std::string& html,
+                            const std::vector<std::string>& history,
+                            const std::vector<TreeNode>& roots)
+        {
+            if (history.empty()) return true;  // keep the template's block as-is
+
+            std::size_t open = 0;
+            std::size_t close = 0;
+            if (!FindJsArray(html, "historyStack", open, close)) return false;
+
+            std::string json;
+            AppendHistoryJson(json, history, roots);
+            ReplaceArray(html, open, close, json);
+            return true;
+        }
     }
 
     bool ImportHtmlFile(const std::string& path, std::vector<TreeNode>& roots,
-                        std::vector<bookmark::Bookmark>* bookmarks)
+                        std::vector<bookmark::Bookmark>* bookmarks,
+                        std::vector<std::string>* history)
     {
         std::string content;
         if (!scribbolyth::io::ReadFile(path, content)) return false;
@@ -479,18 +562,34 @@ namespace scribbolyth::html
             *bookmarks = std::move(marks);
         }
 
+        if (history)
+        {
+            std::vector<std::string> ids;
+            std::size_t h_open = 0;
+            std::size_t h_close = 0;
+            if (FindJsArray(content, "historyStack", h_open, h_close))
+            {
+                std::string h_array = content.substr(h_open, h_close - h_open + 1);
+                Parser h_parser(h_array);
+                if (!h_parser.ParseHistory(ids)) return false;
+            }
+            *history = std::move(ids);
+        }
+
         roots = std::move(result);
         return true;
     }
 
     bool ExportHtmlFile(const std::string& template_path, const std::string& out_path,
                         const std::vector<TreeNode>& roots,
-                        const std::vector<bookmark::Bookmark>& bookmarks)
+                        const std::vector<bookmark::Bookmark>& bookmarks,
+                        const std::vector<std::string>& history)
     {
         std::string content;
         if (!scribbolyth::io::ReadFile(template_path, content)) return false;
         if (!ReplaceTreeData(content, roots)) return false;
         if (!ReplaceBookmarks(content, bookmarks, roots)) return false;
+        if (!ReplaceHistory(content, history, roots)) return false;
         return scribbolyth::io::WriteFile(out_path, content);
     }
 }
