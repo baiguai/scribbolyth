@@ -138,8 +138,11 @@ A **dialog** is a modal overlay drawn on top of the app. The real ones are
 The file browser is special: it is not bound to a key, it opens when a path
 command (`open`/`saveas`/`import_html`/`export_html`) is given a **directory**
 argument. `j`/`k` move, `h` goes up, `l`/`Enter` enter a directory, `Enter`
-picks the selected file, `gg`/`G` jump to the first/last row, `Esc` cancels,
-and the picked file's path is handed back to the invoking operation.
+picks the selected file, `gg`/`G` jump to the first/last row, `/` opens a
+case-insensitive filter field that narrows the list as you type (`Enter` keeps
+the filtered list and hides the field, `Esc` in the field clears it), and `Esc`
+clears an applied filter before cancelling the dialog. The picked file's path
+is handed back to the invoking operation.
 Below we build a small new one end to end: pressing `t` in TREE mode lists
 every `TODO:` line in the active node's text; `j`/`k` move, `Enter` jumps to
 the line, `Esc` cancels.

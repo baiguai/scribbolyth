@@ -58,9 +58,21 @@ namespace scribbolyth::browser
 
         bool OnEvent(ftxui::Event event) override
         {
+            if (filter_active_) return OnFilterEvent(event);
+
             if (event == ftxui::Event::Escape)
             {
+                if (!filter_.empty())
+                {
+                    ClearFilter();
+                    return true;
+                }
                 Close();
+                return true;
+            }
+            if (event.is_character() && event.character() == "/")
+            {
+                filter_active_ = true;
                 return true;
             }
             if (event == ftxui::Event::Return)
@@ -113,7 +125,7 @@ namespace scribbolyth::browser
         {
             Recompute();
 
-            const int total = static_cast<int>(entries_.size());
+            const int total = static_cast<int>(visible_.size());
             const int sel = std::min(selection_, std::max(0, total - 1));
             const int top = ComputeTop(sel, total);
             const int count = std::min(kVisibleRows, std::max(0, total - top));
@@ -121,32 +133,58 @@ namespace scribbolyth::browser
             const std::size_t row_width = static_cast<std::size_t>(content_width_ + 2);
 
             ftxui::Elements rows;
+            if (filter_active_)
+            {
+                rows.push_back(ftxui::text(PadRight("  / " + filter_ + "_  ", content_width_ + 2))
+                               | ftxui::inverted);
+            }
             rows.push_back(ftxui::text(PadRight("  " + dir_, content_width_ + 2)) | ftxui::dim);
             rows.push_back(ftxui::separator());
 
             if (total == 0)
             {
-                rows.push_back(ftxui::text(PadRight("  (empty directory)", row_width)) | ftxui::dim);
+                rows.push_back(ftxui::text(PadRight(
+                    filter_.empty() ? "  (empty directory)" : "  (no matches)", row_width))
+                               | ftxui::dim);
             }
             else
             {
                 for (int i = 0; i < count; ++i)
                 {
                     const int index = top + i;
-                    ftxui::Element row =
-                        ftxui::text(" " + PadRight(rendered_[static_cast<std::size_t>(index)], static_cast<std::size_t>(content_width_)) + " ");
+                    ftxui::Element row = ftxui::text(
+                        " " + PadRight(entries_[visible_[static_cast<std::size_t>(index)]].display,
+                                       static_cast<std::size_t>(content_width_))
+                        + " ");
                     if (index == sel) row = row | ftxui::inverted;
                     rows.push_back(row);
                 }
             }
-            while (static_cast<int>(rows.size()) < kVisibleRows + 2)
+            const int pad_to = kVisibleRows + 2 + (filter_active_ ? 1 : 0);
+            while (static_cast<int>(rows.size()) < pad_to)
             {
                 rows.push_back(ftxui::text(PadRight("", row_width)));
             }
 
-            const std::string footer =
-                "  " + std::to_string(total == 0 ? 0 : sel + 1) + "/" + std::to_string(total) +
-                "    j/k move  h up  l enter  gg top  G bottom  Enter pick  Esc cancel  ";
+            std::string footer = "  " + std::to_string(total == 0 ? 0 : sel + 1) + "/"
+                                 + std::to_string(total);
+            if (!filter_.empty())
+            {
+                footer += " (of " + std::to_string(entries_.size()) + ")";
+            }
+            if (filter_active_)
+            {
+                footer += "    type to filter  Enter keep  Esc clear  ";
+            }
+            else if (filter_.empty())
+            {
+                footer +=
+                    "    j/k move  h up  l enter  gg/G  Enter pick  / filter  Esc cancel  ";
+            }
+            else
+            {
+                footer += "    Esc clear  j/k move  h up  l enter  Enter pick  / filter  ";
+            }
 
             return ftxui::window(ftxui::text(" File Browser "),
                                  ftxui::vbox({
@@ -175,6 +213,8 @@ namespace scribbolyth::browser
             selection_ = 0;
             scroll_ = 0;
             pending_g_ = false;
+            filter_.clear();
+            filter_active_ = false;
             start_dir_.clear();
             needs_refresh_ = true;
         }
@@ -188,22 +228,22 @@ namespace scribbolyth::browser
 
         void MoveSelection(int dir)
         {
-            if (entries_.empty()) return;
-            const int total = static_cast<int>(entries_.size());
+            if (visible_.empty()) return;
+            const int total = static_cast<int>(visible_.size());
             selection_ = std::max(0, std::min(total - 1, selection_ + dir));
         }
 
         void JumpToTop()
         {
-            if (entries_.empty()) return;
+            if (visible_.empty()) return;
             selection_ = 0;
             pending_g_ = false;
         }
 
         void JumpToBottom()
         {
-            if (entries_.empty()) return;
-            selection_ = static_cast<int>(entries_.size()) - 1;
+            if (visible_.empty()) return;
+            selection_ = static_cast<int>(visible_.size()) - 1;
             pending_g_ = false;
         }
 
@@ -213,7 +253,7 @@ namespace scribbolyth::browser
             const fs::path parent = current.parent_path();
             if (parent == current) return;
             SetDir(parent.string());
-            selection_ = 0;
+            ClearFilter();
         }
 
         void Activate()
@@ -223,13 +263,13 @@ namespace scribbolyth::browser
 
         void EnterAt(bool pick_file)
         {
-            if (entries_.empty()) return;
-            const int sel = std::min(selection_, static_cast<int>(entries_.size()) - 1);
-            const Entry& entry = entries_[static_cast<std::size_t>(sel)];
+            if (visible_.empty()) return;
+            const int sel = std::min(selection_, static_cast<int>(visible_.size()) - 1);
+            const Entry& entry = entries_[visible_[static_cast<std::size_t>(sel)]];
             if (entry.is_dir)
             {
                 SetDir(entry.path);
-                selection_ = 0;
+                ClearFilter();
                 return;
             }
             if (!pick_file) return;
@@ -241,6 +281,13 @@ namespace scribbolyth::browser
             callback(picked);
         }
 
+        void ClearFilter()
+        {
+            filter_.clear();
+            filter_active_ = false;
+            selection_ = 0;
+        }
+
         int ComputeTop(int sel, int total) const
         {
             const int max_top = std::max(0, total - kVisibleRows);
@@ -250,19 +297,55 @@ namespace scribbolyth::browser
             return std::max(0, std::min(top, max_top));
         }
 
+        bool OnFilterEvent(ftxui::Event event)
+        {
+            if (event == ftxui::Event::Escape)
+            {
+                ClearFilter();
+                return true;
+            }
+            if (event == ftxui::Event::Return)
+            {
+                filter_active_ = false;
+                selection_ = 0;
+                return true;
+            }
+            if (event == ftxui::Event::Backspace)
+            {
+                if (!filter_.empty()) filter_.pop_back();
+                selection_ = 0;
+                return true;
+            }
+            if (event.is_character())
+            {
+                filter_ += event.character();
+                selection_ = 0;
+                return true;
+            }
+            return true;
+        }
+
         void Recompute()
         {
             if (state_->browser_start_dir != start_dir_)
             {
                 start_dir_ = state_->browser_start_dir;
+                filter_.clear();
+                filter_active_ = false;
                 SetDir(start_dir_);
                 selection_ = 0;
             }
-            if (!needs_refresh_) return;
-            needs_refresh_ = false;
+            if (needs_refresh_)
+            {
+                needs_refresh_ = false;
+                Relist();
+            }
+            if (last_filter_ != filter_) ApplyFilter();
+        }
 
+        void Relist()
+        {
             entries_.clear();
-            rendered_.clear();
             content_width_ = 24;
 
             std::error_code ec;
@@ -306,12 +389,25 @@ namespace scribbolyth::browser
             {
                 content_width_ = std::max(content_width_, static_cast<int>(e.display.size()));
             }
-            for (const Entry& e : entries_)
-            {
-                rendered_.push_back(e.display);
-            }
 
-            selection_ = std::max(0, std::min(selection_, static_cast<int>(entries_.size()) - 1));
+            ApplyFilter();
+        }
+
+        void ApplyFilter()
+        {
+            last_filter_ = filter_;
+            visible_.clear();
+            const std::string needle = Lower(filter_);
+            for (std::size_t i = 0; i < entries_.size(); ++i)
+            {
+                if (needle.empty()
+                    || Lower(entries_[i].display).find(needle) != std::string::npos)
+                {
+                    visible_.push_back(i);
+                }
+            }
+            const int total = static_cast<int>(visible_.size());
+            selection_ = std::max(0, std::min(selection_, total - 1));
         }
 
         std::shared_ptr<EditorState> state_;
@@ -321,7 +417,10 @@ namespace scribbolyth::browser
         std::string start_dir_;
         bool needs_refresh_ = true;
         std::vector<Entry> entries_;
-        std::vector<std::string> rendered_;
+        std::vector<std::size_t> visible_;
+        std::string filter_;
+        std::string last_filter_;
+        bool filter_active_ = false;
         int selection_ = 0;
         int scroll_ = 0;
         int content_width_ = 24;

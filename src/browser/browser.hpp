@@ -16,7 +16,12 @@ namespace scribbolyth::browser
     // import_html/export_html). Keys: j/k (or ArrowDown/ArrowUp) move the
     // selection, h (or Backspace) goes up one level, l or Enter enters a
     // directory, Enter picks the selected file (l does nothing on a file),
-    // gg jumps to the first row, G to the last, Escape cancels. Picking a file
-    // invokes `state->browser_pick` with its full path and closes the dialog.
+    // gg jumps to the first row, G to the last, / opens a case-insensitive
+    // filter field that narrows the list as you type, Escape cancels.
+    // While the filter field is open, Enter keeps the filtered list and hides
+    // the field; Escape clears the filter and closes the field. Escape with a
+    // filter applied (field hidden) clears the filter; only Escape with no
+    // filter cancels the dialog. Picking a file invokes
+    // `state->browser_pick` with its full path and closes the dialog.
     ftxui::Component MakeFileBrowserDialog(std::shared_ptr<EditorState> state, bool* show);
 }

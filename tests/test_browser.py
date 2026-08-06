@@ -104,6 +104,95 @@ try:
     s.send(b'\x1b')
     s.forbid(' File Browser ')
 
+    # --- / filter ---------------------------------------------------------
+    # `/` opens a filter field; typed keys go to the filter, not navigation.
+    s.send(b':open docs')
+    s.send(b'\r')
+    s.require(' File Browser ')
+    s.send(b'/')
+    s.require('type to filter  Enter keep  Esc clear',
+              '/ should open the filter field')
+    s.require('1/5', 'an empty filter still shows the full list')
+
+    # 'o' matches info.txt, notes.md and tree.json (not nested/ or ../).
+    s.send(b'o')
+    s.require('1/3 (of 5)', "'o' should narrow the list to 3 of 5 entries")
+    s.forbid('nested/', 'nested/ does not contain o')
+
+    # 'j' while typing goes into the filter ('oj' matches nothing).
+    s.send(b'j')
+    s.require('(no matches)', 'typing j should narrow to nothing (not move)')
+    s.send(b'\x7f')
+    s.require('1/3 (of 5)', 'Backspace should remove the trailing j')
+
+    # Enter keeps the filtered list and hides the filter field.
+    s.send(b'\r')
+    s.forbid('type to filter', 'Enter should hide the filter field')
+    s.require('1/3 (of 5)', 'Enter should keep the filtered list')
+    s.require('Esc clear', 'with a filter applied Esc should clear it')
+
+    # navigation now works on the filtered list; Enter picks tree.json.
+    s.send(b'j')
+    s.require('2/3', 'j should move within the filtered list')
+    s.send(b'G')
+    s.require('3/3', 'G should jump to the last filtered entry')
+    s.send(b'\r')
+    s.forbid(' File Browser ', 'Enter should pick the filtered tree.json')
+    s.require('Loaded 1 nodes from', 'the pick should be loaded')
+
+    # Esc with a filter applied (field hidden) clears it; the dialog stays.
+    s.send(b':open docs')
+    s.send(b'\r')
+    s.send(b'/')
+    s.send(b'o')
+    s.send(b'\r')                     # keep the filter
+    s.require('Esc clear')
+    s.send(b'\x1b')                   # Esc: clear the filter, not the dialog
+    s.require('1/5', 'Esc should clear the filter and show all entries')
+    s.require('Esc cancel', 'with no filter Esc should cancel the dialog')
+    s.send(b'\x1b')                   # Esc now closes the dialog
+    s.forbid(' File Browser ')
+
+    # Esc with the filter field open clears and closes the field, not the
+    # dialog.
+    s.send(b':open docs')
+    s.send(b'\r')
+    s.send(b'/')
+    s.send(b'o')
+    s.require('type to filter')
+    s.send(b'\x1b')                   # Esc in the field: clear + close field
+    s.require('1/5', 'Esc in the field should clear the filter')
+    s.send(b'\x1b')                   # Esc closes the dialog
+    s.forbid(' File Browser ')
+
+    # Entering a directory clears the applied filter.
+    s.send(b':open docs')
+    s.send(b'\r')
+    s.send(b'/')
+    s.send(b'nes')                    # matches nested/ only
+    s.send(b'\r')                     # keep the filter
+    s.require('1/1 (of 5)', 'filter should match nested/ only')
+    s.send(b'l')                      # enter the filtered directory
+    s.require('deep.txt', 'l should enter the filtered directory')
+    s.require('1/2', 'inside nested/ the filter should be cleared')
+    s.forbid(' (of ', 'entering a dir should clear the filter')
+    s.send(b'\x1b')
+    s.forbid(' File Browser ')
+
+    # Going up a level also clears the applied filter.
+    s.send(b':open docs')
+    s.send(b'\r')
+    s.send(b'/')
+    s.send(b'o')
+    s.send(b'\r')                     # keep the filter
+    s.require('1/3 (of 5)')
+    s.send(b'h')                      # go up one level
+    s.require('root.txt', 'h should go up to the workdir')
+    s.require('1/3', 'the workdir has 3 entries')
+    s.forbid(' (of ', 'going up should clear the filter')
+    s.send(b'\x1b')
+    s.forbid(' File Browser ')
+
     # :saveas with a directory also opens the browser; the pick saves there.
     s.send(b':saveas docs')
     s.send(b'\r')
