@@ -193,6 +193,7 @@ namespace scribbolyth::treeview
                     selected_ = nullptr;
                     state_->treeview_width = kDefaultTreeviewWidth;
                     state_->bookmarks.clear();
+                    state_->history.clear();
                     RefreshActiveNode();
                     state_->status = "New document - no file path";
                 };
@@ -530,7 +531,8 @@ namespace scribbolyth::treeview
     void TreeView::SaveTo(const std::string& path)
     {
         std::string json = scribbolyth::io::Serialize(roots_, state_->treeview_width,
-                                                      state_->bookmarks);
+                                                      state_->bookmarks,
+                                                      state_->history);
         if (!scribbolyth::io::WriteFile(path, json))
         {
             state_->status = "Error: could not write " + path;
@@ -551,13 +553,16 @@ namespace scribbolyth::treeview
         std::vector<TreeNode> loaded;
         int loaded_width = state_->treeview_width;
         std::vector<scribbolyth::bookmark::Bookmark> loaded_marks;
-        if (!scribbolyth::io::Deserialize(content, loaded, &loaded_width, &loaded_marks))
+        std::vector<std::string> loaded_history;
+        if (!scribbolyth::io::Deserialize(content, loaded, &loaded_width, &loaded_marks,
+                                          &loaded_history))
         {
             state_->status = "Error: could not parse " + path;
             return;
         }
         state_->treeview_width = loaded_width;
         state_->bookmarks = std::move(loaded_marks);
+        state_->history = std::move(loaded_history);
         EnsureIds(loaded);
         roots_ = std::move(loaded);
         current_file_ = path;
@@ -570,13 +575,15 @@ namespace scribbolyth::treeview
     {
         std::vector<TreeNode> loaded;
         std::vector<scribbolyth::bookmark::Bookmark> loaded_marks;
-        if (!scribbolyth::html::ImportHtmlFile(path, loaded, &loaded_marks))
+        std::vector<std::string> loaded_history;
+        if (!scribbolyth::html::ImportHtmlFile(path, loaded, &loaded_marks, &loaded_history))
         {
             state_->status = "Error: could not import " + path;
             return;
         }
         EnsureIds(loaded);
         state_->bookmarks = std::move(loaded_marks);
+        state_->history = std::move(loaded_history);
         roots_ = std::move(loaded);
         current_file_.clear();
         selected_ = nullptr;
@@ -592,7 +599,8 @@ namespace scribbolyth::treeview
             return;
         }
         if (!scribbolyth::html::ExportHtmlFile(state_->template_path, path,
-                                               roots_, state_->bookmarks))
+                                               roots_, state_->bookmarks,
+                                               state_->history))
         {
             state_->status = "Error: could not export " + path;
             return;
