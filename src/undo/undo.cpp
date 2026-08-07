@@ -46,48 +46,59 @@ namespace scribbolyth::undo
         }
     }
 
-    std::string LineOf(const treeview::TreeNode& node, int depth)
-    {
-        std::string line(static_cast<std::size_t>(std::min(depth, 20)) * 2, ' ');
-        line += node.name;
-        if (!node.text.empty())
-        {
-            std::size_t nl = node.text.find('\n');
-            std::string first = (nl == std::string::npos) ? node.text
-                                                          : node.text.substr(0, nl);
-            if (!first.empty()) line += "  " + first;
-        }
-        return line;
-    }
-
     namespace
     {
-        void CollectDocLines(const treeview::TreeNode& node, int depth,
-                             std::vector<std::string>& out)
+        std::vector<std::string> SplitLines(const std::string& text)
         {
-            out.push_back(LineOf(node, depth));
-            for (const auto& child : node.children)
+            std::vector<std::string> out;
+            std::size_t start = 0;
+            while (start <= text.size())
             {
-                CollectDocLines(child, depth + 1, out);
+                const std::size_t nl = text.find('\n', start);
+                if (nl == std::string::npos)
+                {
+                    out.push_back(text.substr(start));
+                    break;
+                }
+                out.push_back(text.substr(start, nl - start));
+                start = nl + 1;
             }
+            return out;
         }
-    }
 
-    std::vector<std::string> DocLines(const std::vector<treeview::TreeNode>& roots)
-    {
-        std::vector<std::string> out;
-        for (const auto& root : roots)
+        treeview::TreeNode* FindNode(std::vector<treeview::TreeNode>& nodes,
+                                     const std::string& id)
         {
-            CollectDocLines(root, 0, out);
+            for (auto& node : nodes)
+            {
+                if (node.id == id) return &node;
+                if (treeview::TreeNode* found = FindNode(node.children, id)) return found;
+            }
+            return nullptr;
         }
-        return out;
+
+        // Text lines of the node `id` inside a serialized snapshot. The undo
+        // dialog shows only the currently active note, so this pulls that one
+        // node's text out of the snapshot rather than rendering the whole
+        // document.
+        std::vector<std::string> NodeTextDoc(const std::string& json,
+                                             const std::string& id)
+        {
+            std::vector<treeview::TreeNode> roots;
+            int width = 0;
+            std::vector<bookmark::Bookmark> marks;
+            std::vector<std::string> hist;
+            if (!io::Deserialize(json, roots, &width, &marks, &hist)) return {};
+            treeview::TreeNode* node = FindNode(roots, id);
+            if (node == nullptr) return {};
+            return SplitLines(node->text);
+        }
     }
 
-    std::string FirstLine(const std::vector<treeview::TreeNode>& roots)
+    std::string FirstTextLine(const treeview::TreeNode& node)
     {
-        auto lines = DocLines(roots);
-        if (lines.empty()) return "(empty document)";
-        return lines.front();
+        const std::size_t nl = node.text.find('\n');
+        return (nl == std::string::npos) ? node.text : node.text.substr(0, nl);
     }
 
     class UndoDialog : public ftxui::ComponentBase
@@ -141,28 +152,20 @@ namespace scribbolyth::undo
             const int total = static_cast<int>(stack.size());
             const int sel = std::min(selection_, std::max(0, total - 1));
 
+            const std::string active_id = state_->active_node ? state_->active_node->id : "";
+
             std::vector<std::string> cur;
-            if (state_->collect_all_nodes)
+            if (state_->active_node)
             {
-                for (const auto& item : state_->collect_all_nodes())
-                {
-                    cur.push_back(LineOf(*item.first, item.second));
-                }
+                cur = SplitLines(state_->active_node->text);
             }
 
             std::vector<std::string> snap;
             std::vector<int> mark;
-            if (total > 0)
+            if (total > 0 && !active_id.empty())
             {
-                std::vector<treeview::TreeNode> roots;
-                int width = state_->treeview_width;
-                std::vector<bookmark::Bookmark> marks;
-                std::vector<std::string> hist;
-                if (io::Deserialize(stack[static_cast<std::size_t>(total - 1 - sel)].json,
-                                    roots, &width, &marks, &hist))
-                {
-                    snap = DocLines(roots);
-                }
+                snap = NodeTextDoc(stack[static_cast<std::size_t>(total - 1 - sel)].json,
+                                   active_id);
                 mark = DiffMark(snap, cur);
             }
 
