@@ -1,6 +1,7 @@
 #include "editor.hpp"
 
 #include <algorithm>
+#include <cstdio>
 #include <string>
 #include <vector>
 
@@ -83,6 +84,33 @@ namespace scribbolyth::editor
                 cells.pop_back();
             }
             return cells;
+        }
+
+        // Read the system clipboard through whatever tool the desktop exposes:
+        // Wayland (wl-paste), X11 (xclip/xsel). Returns "" when nothing is
+        // available or the clipboard is empty.
+        std::string ReadClipboard()
+        {
+            const char* commands[] = {
+                "wl-paste --no-newline 2>/dev/null",
+                "xclip -o -selection clipboard 2>/dev/null",
+                "xsel -o --clipboard 2>/dev/null",
+            };
+            for (const char* cmd : commands)
+            {
+                FILE* pipe = popen(cmd, "r");
+                if (pipe == nullptr) continue;
+                std::string data;
+                char buf[512];
+                std::size_t n;
+                while ((n = fread(buf, 1, sizeof(buf), pipe)) > 0)
+                {
+                    data.append(buf, n);
+                }
+                const int rc = pclose(pipe);
+                if (rc == 0 && !data.empty()) return data;
+            }
+            return "";
         }
     }
 
@@ -202,7 +230,21 @@ namespace scribbolyth::editor
                 };
 
                 state_->operations["yank"] = [](const std::string&, int) {};
-                state_->operations["paste"] = [](const std::string&, int) {};
+                state_->operations["paste"] = [this](const std::string&, int)
+                {
+                    if (!Editable()) return;
+                    LoadIfChanged();
+                    const std::string clip = ReadClipboard();
+                    if (clip.empty())
+                    {
+                        state_->status = "Clipboard is empty";
+                        return;
+                    }
+                    PasteText(clip);
+                    Clamp();
+                    Save();
+                    state_->status = "Pasted";
+                };
                 state_->operations["format_table"] = [this](const std::string&, int)
                 {
                     FormatTable();
@@ -359,6 +401,12 @@ namespace scribbolyth::editor
                     if (c >= size)
                     {
                         parts.push_back(ftxui::text(" ") | ftxui::inverted | ftxui::focus);
+                    }
+                    else if (parts.empty())
+                    {
+                        ftxui::Element sp = ftxui::text(" ");
+                        if (highlighted) sp = sp | ftxui::inverted;
+                        parts.push_back(std::move(sp));
                     }
                     rows.push_back(ftxui::hbox(std::move(parts)));
                 }
@@ -673,6 +721,33 @@ namespace scribbolyth::editor
             {
                 lines_[row_].insert(static_cast<std::size_t>(col_), text);
                 col_ += static_cast<int>(text.size());
+            }
+
+            // Insert clipboard-style text (possibly multi-line) at the cursor.
+            void PasteText(const std::string& text)
+            {
+                std::vector<std::string> parts = SplitLines(text);
+                if (parts.empty()) parts.push_back("");
+
+                if (parts.size() == 1)
+                {
+                    InsertText(parts[0]);
+                    return;
+                }
+
+                std::string head = lines_[row_].substr(0, static_cast<std::size_t>(col_));
+                std::string tail = lines_[row_].substr(static_cast<std::size_t>(col_));
+                lines_[row_] = head + parts[0];
+                if (parts.size() > 2)
+                {
+                    lines_.insert(lines_.begin() + row_ + 1,
+                                  parts.begin() + 1, parts.end() - 1);
+                }
+                lines_.insert(lines_.begin() + row_ + 1 + (parts.size() - 2),
+                              parts.back() + tail);
+                row_ += static_cast<int>(parts.size()) - 1;
+                col_ = static_cast<int>(parts.back().size());
+                last_col_ = col_;
             }
 
             void InsertNewline()

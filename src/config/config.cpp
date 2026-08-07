@@ -59,6 +59,7 @@ namespace scribbolyth::config
             if (token == "PageDown")    { out = Event::PageDown;  return true; }
             if (token == "Home")        { out = Event::Home;      return true; }
             if (token == "End")         { out = Event::End;       return true; }
+            if (token == "CtrlV")       { out = Event::Special("\x16"); return true; }
             if (token.size() == 1)      { out = Event::Character(token[0]); return true; }
             return false;
         }
