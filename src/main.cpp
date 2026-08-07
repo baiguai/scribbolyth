@@ -13,6 +13,7 @@
 #include "links/links.hpp"
 #include "op/op.hpp"
 #include "search/search.hpp"
+#include "undo/undo.hpp"
 
 using namespace ftxui;
 
@@ -55,6 +56,9 @@ int main(int, char** argv) {
 
     bool show_recent = false;
     state->operations["recents"] = [&show_recent](const std::string&, int) { show_recent = true; };
+
+    bool show_undo = false;
+    state->operations["undo"] = [&show_undo](const std::string&, int) { show_undo = true; };
 
     bool show_file_browser = false;
     state->show_file_browser = &show_file_browser;
@@ -174,14 +178,16 @@ int main(int, char** argv) {
     auto links_comp = scribbolyth::links::MakeLinksDialog(state, &show_links);
     auto history_comp = scribbolyth::history::MakeHistoryDialog(state, &show_history);
     auto recent_comp = scribbolyth::recent::MakeRecentDialog(state, &show_recent);
+    auto undo_comp = scribbolyth::undo::MakeUndoDialog(state, &show_undo);
     auto browser_comp = scribbolyth::browser::MakeFileBrowserDialog(state, &show_file_browser);
-    auto root = Modal(Modal(Modal(Modal(Modal(Modal(Modal(container, help_comp, &show_help),
-                                                  search_comp, &show_search),
-                                          bookmarks_comp, &show_bookmarks),
-                                  links_comp, &show_links),
-                          history_comp, &show_history),
-                        recent_comp, &show_recent),
-                  browser_comp, &show_file_browser);
+    auto root = Modal(Modal(Modal(Modal(Modal(Modal(Modal(Modal(container, help_comp, &show_help),
+                                                          search_comp, &show_search),
+                                                  bookmarks_comp, &show_bookmarks),
+                                          links_comp, &show_links),
+                                  history_comp, &show_history),
+                          recent_comp, &show_recent),
+                  undo_comp, &show_undo),
+          browser_comp, &show_file_browser);
 
     screen.Loop(root);
 
