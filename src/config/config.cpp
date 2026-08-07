@@ -60,6 +60,8 @@ namespace scribbolyth::config
             if (token == "Home")        { out = Event::Home;      return true; }
             if (token == "End")         { out = Event::End;       return true; }
             if (token == "CtrlV")       { out = Event::Special("\x16"); return true; }
+            if (token == "CtrlC")       { out = Event::Special("\x03"); return true; }
+            if (token == "CtrlX")       { out = Event::Special("\x18"); return true; }
             if (token.size() == 1)      { out = Event::Character(token[0]); return true; }
             return false;
         }

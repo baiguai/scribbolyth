@@ -112,6 +112,27 @@ namespace scribbolyth::editor
             }
             return "";
         }
+
+        // Write to the system clipboard through whatever tool the desktop
+        // exposes: Wayland (wl-copy), X11 (xclip/xsel). Returns false when
+        // no tool is available.
+        bool WriteClipboard(const std::string& text)
+        {
+            const char* commands[] = {
+                "wl-copy 2>/dev/null",
+                "xclip -i -selection clipboard 2>/dev/null",
+                "xsel --input --clipboard 2>/dev/null",
+            };
+            for (const char* cmd : commands)
+            {
+                FILE* pipe = popen(cmd, "w");
+                if (pipe == nullptr) continue;
+                std::fwrite(text.data(), 1, text.size(), pipe);
+                const int rc = pclose(pipe);
+                if (rc == 0) return true;
+            }
+            return false;
+        }
     }
 
     class Editor : public ftxui::ComponentBase
@@ -229,7 +250,57 @@ namespace scribbolyth::editor
                     DeleteSelection();
                 };
 
-                state_->operations["yank"] = [](const std::string&, int) {};
+                state_->operations["yank"] = [this](const std::string&, int)
+                {
+                    if (active_ == nullptr) return;
+                    LoadIfChanged();
+                    const std::string text = SelectionText();
+                    if (text.empty())
+                    {
+                        state_->status = "Nothing to copy";
+                        return;
+                    }
+                    if (!WriteClipboard(text))
+                    {
+                        state_->status = "Clipboard unavailable";
+                        return;
+                    }
+                    if (IsVisualMode(state_->mode))
+                    {
+                        visual_row_ = -1;
+                        visual_col_ = -1;
+                        state_->mode = Mode::NORMAL;
+                    }
+                    state_->status = "Copied";
+                };
+                state_->operations["cut"] = [this](const std::string&, int)
+                {
+                    if (active_ == nullptr) return;
+                    LoadIfChanged();
+                    if (lines_.empty()) lines_.push_back("");
+                    const bool had_visual = IsVisualMode(state_->mode) && visual_row_ >= 0;
+                    const std::string text = SelectionText();
+                    if (text.empty())
+                    {
+                        state_->status = "Nothing to cut";
+                        return;
+                    }
+                    if (!WriteClipboard(text))
+                    {
+                        state_->status = "Clipboard unavailable";
+                        return;
+                    }
+                    if (had_visual)
+                    {
+                        DeleteSelection();
+                        state_->status = "Cut";
+                        return;
+                    }
+                    DeleteLine();
+                    Clamp();
+                    Save();
+                    state_->status = "Cut";
+                };
                 state_->operations["paste"] = [this](const std::string&, int)
                 {
                     if (!Editable()) return;
@@ -809,6 +880,67 @@ namespace scribbolyth::editor
                 }
                 lines_.erase(lines_.begin() + row_);
                 if (row_ >= static_cast<int>(lines_.size())) --row_;
+            }
+
+            // The text currently under a VISUAL/VISUAL_LINE selection, or the
+            // current line when no selection is active (NORMAL/INSERT).
+            // Line-based copies include a trailing newline so a cut+paste
+            // round-trip reproduces the lines.
+            std::string SelectionText() const
+            {
+                std::string out;
+                if (state_->mode == Mode::VISUAL && visual_row_ >= 0 && visual_col_ >= 0)
+                {
+                    int aRow = visual_row_, aCol = visual_col_;
+                    int bRow = row_, bCol = col_;
+                    if (aRow > bRow || (aRow == bRow && aCol > bCol))
+                    {
+                        std::swap(aRow, bRow);
+                        std::swap(aCol, bCol);
+                    }
+                    if (aRow == bRow)
+                    {
+                        aCol = std::min(aCol, static_cast<int>(lines_[aRow].size()));
+                        bCol = std::min(bCol, static_cast<int>(lines_[aRow].size()));
+                        if (aCol == bCol && bCol < static_cast<int>(lines_[aRow].size()))
+                        {
+                            ++bCol;
+                        }
+                        if (bCol > aCol)
+                        {
+                            out = lines_[aRow].substr(static_cast<std::size_t>(aCol),
+                                                      static_cast<std::size_t>(bCol - aCol));
+                        }
+                        return out;
+                    }
+                    out += lines_[aRow].substr(static_cast<std::size_t>(aCol));
+                    for (int r = aRow + 1; r < bRow; ++r)
+                    {
+                        out += '\n';
+                        out += lines_[r];
+                    }
+                    out += '\n';
+                    out += lines_[bRow].substr(0, static_cast<std::size_t>(std::min(
+                        bCol, static_cast<int>(lines_[bRow].size()))));
+                    return out;
+                }
+                if (IsVisualMode(state_->mode) && visual_row_ >= 0)
+                {
+                    int a = std::min(visual_row_, row_);
+                    int b = std::max(visual_row_, row_);
+                    for (int r = a; r <= b; ++r)
+                    {
+                        out += lines_[r];
+                        out += '\n';
+                    }
+                    return out;
+                }
+                if (row_ >= 0 && row_ < static_cast<int>(lines_.size()))
+                {
+                    out = lines_[row_];
+                    out += '\n';
+                }
+                return out;
             }
 
             void DeleteSelection()
