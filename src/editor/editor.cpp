@@ -215,6 +215,8 @@ namespace scribbolyth::editor
                     row_ = std::max(0, std::min(line, static_cast<int>(lines_.size()) - 1));
                     col_ = 0;
                     last_col_ = 0;
+                    visual_row_ = -1;
+                    visual_col_ = -1;
                 };
 
                 state_->operations["bookmark"] = [this](const std::string& args, int)
@@ -254,35 +256,111 @@ namespace scribbolyth::editor
 
                 ftxui::Elements rows;
                 const bool sel_active = IsVisualMode(state_->mode) && visual_row_ >= 0;
-                const int lo = sel_active ? std::min(visual_row_, row_) : 0;
-                const int hi = sel_active ? std::max(visual_row_, row_) : -1;
-                for (int r = 0; r < static_cast<int>(lines_.size()); ++r)
+                const bool line_visual = sel_active && state_->mode == Mode::VISUAL_LINE;
+                const int lo = line_visual ? std::min(visual_row_, row_) : 0;
+                const int hi = line_visual ? std::max(visual_row_, row_) : -1;
+
+                // Character-wise selection range (VISUAL): the anchor row/col
+                // and the cursor row/col, normalized so the first row/col is
+                // the upper endpoint. On the last row the upper column is
+                // exclusive, mirroring the cursor semantics (col_ is the index
+                // of the char under the cursor, and the line end sits past the
+                // final char).
+                const bool char_sel = sel_active && !line_visual && visual_col_ >= 0;
+                int c_first = visual_row_, c_last = row_;
+                int c_first_col = visual_col_, c_last_col = col_;
+                if (char_sel && (c_first > c_last
+                                 || (c_first == c_last && c_first_col > c_last_col)))
                 {
-                    const bool selected = r >= lo && r <= hi;
-                    if (r == row_)
+                    std::swap(c_first, c_last);
+                    std::swap(c_first_col, c_last_col);
+                }
+                auto RowHighlight = [&](int r, int& h_lo, int& h_hi) -> bool
+                {
+                    if (line_visual)
                     {
-                        int c = std::max(0, col_);
-                        std::string pre = lines_[r].substr(0, static_cast<std::size_t>(c));
-                        std::string at = (c < static_cast<int>(lines_[r].size()))
-                                             ? lines_[r].substr(static_cast<std::size_t>(c), 1)
-                                             : " ";
-                        std::string post = (c < static_cast<int>(lines_[r].size()))
-                                               ? lines_[r].substr(static_cast<std::size_t>(c) + 1)
-                                               : "";
-                        rows.push_back(ftxui::hbox({
-                            ftxui::text(pre) | (selected ? ftxui::inverted : ftxui::nothing),
-                            ftxui::text(at) | ftxui::inverted | ftxui::focus,
-                            ftxui::text(post) | (selected ? ftxui::inverted : ftxui::nothing),
-                        }));
+                        if (r < lo || r > hi) return false;
+                        h_lo = 0;
+                        h_hi = static_cast<int>(lines_[r].size());
+                        return true;
                     }
-                    else if (selected)
+                    if (!char_sel || r < c_first || r > c_last) return false;
+                    const int size = static_cast<int>(lines_[r].size());
+                    if (c_first == c_last)
                     {
-                        rows.push_back(ftxui::text(lines_[r]) | ftxui::inverted);
+                        h_lo = std::min(c_first_col, c_last_col);
+                        h_hi = std::min(std::max(c_first_col, c_last_col) + 1, size);
+                    }
+                    else if (r == c_first)
+                    {
+                        h_lo = c_first_col;
+                        h_hi = size;
+                    }
+                    else if (r == c_last)
+                    {
+                        h_lo = 0;
+                        h_hi = std::min(c_last_col, size);
                     }
                     else
                     {
-                        rows.push_back(ftxui::text(lines_[r]));
+                        h_lo = 0;
+                        h_hi = size;
                     }
+                    return h_lo < h_hi;
+                };
+
+                for (int r = 0; r < static_cast<int>(lines_.size()); ++r)
+                {
+                    const int size = static_cast<int>(lines_[r].size());
+                    int h_lo = 0, h_hi = -1;
+                    const bool highlighted = RowHighlight(r, h_lo, h_hi);
+                    const int c = (r == row_) ? std::max(0, col_) : -1;
+
+                    // Split the line at every boundary that changes the
+                    // styling (selection start/end and the cursor char) so a
+                    // partially selected line still renders correctly.
+                    std::vector<int> cuts;
+                    cuts.reserve(6);
+                    cuts.push_back(0);
+                    if (highlighted)
+                    {
+                        cuts.push_back(h_lo);
+                        cuts.push_back(h_hi);
+                    }
+                    if (c >= 0)
+                    {
+                        cuts.push_back(c);
+                        cuts.push_back(std::min(c + 1, size));
+                    }
+                    cuts.push_back(size);
+                    std::sort(cuts.begin(), cuts.end());
+                    cuts.erase(std::unique(cuts.begin(), cuts.end()), cuts.end());
+
+                    ftxui::Elements parts;
+                    for (std::size_t i = 0; i + 1 < cuts.size(); ++i)
+                    {
+                        const int a = cuts[i];
+                        const int b = cuts[i + 1];
+                        if (b <= a) continue;
+                        const bool cursor_char = (c >= 0 && a == c && b == c + 1);
+                        const bool selected = highlighted && a >= h_lo && b <= h_hi;
+                        ftxui::Element el = ftxui::text(lines_[r].substr(
+                            static_cast<std::size_t>(a), static_cast<std::size_t>(b - a)));
+                        if (cursor_char)
+                        {
+                            el = el | ftxui::inverted | ftxui::focus;
+                        }
+                        else if (selected)
+                        {
+                            el = el | ftxui::inverted;
+                        }
+                        parts.push_back(std::move(el));
+                    }
+                    if (c >= size)
+                    {
+                        parts.push_back(ftxui::text(" ") | ftxui::inverted | ftxui::focus);
+                    }
+                    rows.push_back(ftxui::hbox(std::move(parts)));
                 }
                 return ftxui::vbox(std::move(rows)) | ftxui::frame | ftxui::flex;
             }
@@ -298,10 +376,12 @@ namespace scribbolyth::editor
                     if (!visual_before && IsVisualMode(state_->mode))
                     {
                         visual_row_ = row_;
+                        visual_col_ = col_;
                     }
                     if (visual_before && !IsVisualMode(state_->mode))
                     {
                         visual_row_ = -1;
+                        visual_col_ = -1;
                     }
                     return true;
                 }
@@ -330,6 +410,7 @@ namespace scribbolyth::editor
                 if (active_ == state_->active_node) return;
                 active_ = state_->active_node;
                 visual_row_ = -1;
+                visual_col_ = -1;
                 if (active_ == nullptr)
                 {
                     lines_.clear();
@@ -482,6 +563,7 @@ namespace scribbolyth::editor
                 row_ = a;
                 col_ = 0;
                 visual_row_ = -1;
+                visual_col_ = -1;
                 state_->mode = Mode::NORMAL;
                 Save();
                 state_->status = "Table updated";
@@ -660,6 +742,51 @@ namespace scribbolyth::editor
                 LoadIfChanged();
                 if (lines_.empty()) lines_.push_back("");
 
+                if (state_->mode == Mode::VISUAL && visual_row_ >= 0 && visual_col_ >= 0)
+                {
+                    int aRow = visual_row_, aCol = visual_col_;
+                    int bRow = row_, bCol = col_;
+                    if (aRow > bRow || (aRow == bRow && aCol > bCol))
+                    {
+                        std::swap(aRow, bRow);
+                        std::swap(aCol, bCol);
+                    }
+                    if (aRow == bRow && aCol == bCol)
+                    {
+                        // Empty selection: delete the char under the cursor.
+                        if (bCol < static_cast<int>(lines_[aRow].size())) ++bCol;
+                    }
+                    if (aRow == bRow)
+                    {
+                        std::string& line = lines_[aRow];
+                        aCol = std::min(aCol, static_cast<int>(line.size()));
+                        bCol = std::min(bCol, static_cast<int>(line.size()));
+                        if (bCol > aCol)
+                        {
+                            line.erase(static_cast<std::size_t>(aCol),
+                                       static_cast<std::size_t>(bCol - aCol));
+                        }
+                    }
+                    else
+                    {
+                        std::string head = lines_[aRow].substr(
+                            0, static_cast<std::size_t>(aCol));
+                        std::string tail = lines_[bRow].substr(static_cast<std::size_t>(
+                            std::min(bCol, static_cast<int>(lines_[bRow].size()))));
+                        lines_.erase(lines_.begin() + aRow, lines_.begin() + bRow + 1);
+                        lines_.insert(lines_.begin() + aRow, head + tail);
+                    }
+                    if (lines_.empty()) lines_.push_back("");
+                    row_ = std::min(aRow, static_cast<int>(lines_.size()) - 1);
+                    col_ = std::min(aCol, static_cast<int>(lines_[row_].size()));
+                    visual_row_ = -1;
+                    visual_col_ = -1;
+                    state_->mode = Mode::NORMAL;
+                    Save();
+                    state_->status = "Selection deleted";
+                    return;
+                }
+
                 int a = (visual_row_ >= 0) ? std::min(visual_row_, row_) : row_;
                 int b = (visual_row_ >= 0) ? std::max(visual_row_, row_) : row_;
                 if (a > b) std::swap(a, b);
@@ -676,6 +803,7 @@ namespace scribbolyth::editor
                 }
                 col_ = 0;
                 visual_row_ = -1;
+                visual_col_ = -1;
                 state_->mode = Mode::NORMAL;
                 Save();
                 state_->status = "Selection deleted";
@@ -688,6 +816,7 @@ namespace scribbolyth::editor
             int col_ = 0;
             int last_col_ = 0;
             int visual_row_ = -1;
+            int visual_col_ = -1;
     };
 
     ftxui::Component MakeEditor(std::shared_ptr<EditorState> state)
