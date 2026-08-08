@@ -78,6 +78,14 @@ namespace scribbolyth::help
                 entry.function    = fields[6];
                 entry.description = (fields.size() > 7) ? fields[7] : "";
 
+                // Entries without a key binding (GLOBAL) show their command
+                // as the "key", e.g. ":qa", so the diagram and the ':'
+                // key filter cover them too.
+                if (entry.key == "-" && entry.command != "-")
+                {
+                    entry.key = ":" + entry.command;
+                }
+
                 // The diagram (and the filter) shows the binding and its
                 // description; the op, command and function names stay hidden.
                 entry.line = PadRight(entry.mode, 6) + " " +
