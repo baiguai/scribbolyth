@@ -16,7 +16,8 @@ namespace scribbolyth::help
         std::string command;
         std::string op;
         std::string function;
-        std::string line;
+        std::string description;
+        std::string line;   // the diagram line shown in the dialog
     };
 
     // Build the key-binding help dialog. Reads its entries from `config_path`
