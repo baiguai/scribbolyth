@@ -164,6 +164,11 @@ namespace scribbolyth::editor
                     if (!Editable()) return;
                     for (int i = 0; i < count; ++i) CursorWordBack();
                 };
+                state_->operations["cursor_word_end"] = [this](const std::string&, int count)
+                {
+                    if (!Editable()) return;
+                    for (int i = 0; i < count; ++i) CursorWordEnd();
+                };
                 state_->operations["cursor_file_start"] = [this](const std::string&, int)
                 {
                     if (!Editable()) return;
@@ -754,6 +759,22 @@ namespace scribbolyth::editor
                 auto& line = lines_[row_];
                 while (col_ > 0 && line[col_ - 1] == ' ') --col_;
                 while (col_ > 0 && line[col_ - 1] != ' ') --col_;
+            }
+
+            void CursorWordEnd()
+            {
+                auto& line = lines_[row_];
+                const int size = static_cast<int>(line.size());
+                if (col_ >= size) return;
+                while (col_ < size && line[col_] == ' ') ++col_;
+                if (col_ >= size) return;
+                if (col_ + 1 >= size || line[col_ + 1] == ' ')
+                {
+                    while (col_ < size && line[col_] != ' ') ++col_;
+                    while (col_ < size && line[col_] == ' ') ++col_;
+                    if (col_ >= size) return;
+                }
+                while (col_ + 1 < size && line[col_] != ' ' && line[col_ + 1] != ' ') ++col_;
             }
 
             void InsertText(const std::string& text)
