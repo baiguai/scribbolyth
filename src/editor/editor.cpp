@@ -169,6 +169,12 @@ namespace scribbolyth::editor
                     if (!Editable()) return;
                     for (int i = 0; i < count; ++i) CursorWordEnd();
                 };
+                state_->operations["select_word"] = [this](const std::string&, int)
+                {
+                    if (!Editable()) return;
+                    if (!IsVisualMode(state_->mode)) return;
+                    SelectInnerWord();
+                };
                 state_->operations["cursor_file_start"] = [this](const std::string&, int)
                 {
                     if (!Editable()) return;
@@ -777,6 +783,33 @@ namespace scribbolyth::editor
                 while (col_ + 1 < size && line[col_] != ' ' && line[col_ + 1] != ' ') ++col_;
             }
 
+            void SelectInnerWord()
+            {
+                auto& line = lines_[row_];
+                const int size = static_cast<int>(line.size());
+                int c = col_;
+                if (c >= size) c = size - 1;
+                if (c < 0) return;
+                if (line[c] == ' ')
+                {
+                    while (c < size && line[c] == ' ') ++c;
+                }
+                if (c >= size)
+                {
+                    state_->status = "No word here";
+                    return;
+                }
+                int start = c;
+                int end = c;
+                while (start > 0 && line[start - 1] != ' ') --start;
+                while (end < size && line[end] != ' ') ++end;
+
+                state_->mode = Mode::VISUAL;
+                visual_row_ = row_;
+                visual_col_ = start;
+                col_ = end -1;
+            }
+
             void InsertText(const std::string& text)
             {
                 lines_[row_].insert(static_cast<std::size_t>(col_), text);
@@ -889,12 +922,9 @@ namespace scribbolyth::editor
                     }
                     if (aRow == bRow)
                     {
-                        aCol = std::min(aCol, static_cast<int>(lines_[aRow].size()));
-                        bCol = std::min(bCol, static_cast<int>(lines_[aRow].size()));
-                        if (aCol == bCol && bCol < static_cast<int>(lines_[aRow].size()))
-                        {
-                            ++bCol;
-                        }
+                        const int size = static_cast<int>(lines_[aRow].size());
+                        aCol = std::min(aCol, size);
+                        bCol = std::min(bCol + 1, size);
                         if (bCol > aCol)
                         {
                             out = lines_[aRow].substr(static_cast<std::size_t>(aCol),
@@ -947,16 +977,12 @@ namespace scribbolyth::editor
                         std::swap(aRow, bRow);
                         std::swap(aCol, bCol);
                     }
-                    if (aRow == bRow && aCol == bCol)
-                    {
-                        // Empty selection: delete the char under the cursor.
-                        if (bCol < static_cast<int>(lines_[aRow].size())) ++bCol;
-                    }
                     if (aRow == bRow)
                     {
                         std::string& line = lines_[aRow];
-                        aCol = std::min(aCol, static_cast<int>(line.size()));
-                        bCol = std::min(bCol, static_cast<int>(line.size()));
+                        const int size = static_cast<int>(line.size());
+                        aCol = std::min(aCol, size);
+                        bCol = std::min(bCol + 1, size);
                         if (bCol > aCol)
                         {
                             line.erase(static_cast<std::size_t>(aCol),
