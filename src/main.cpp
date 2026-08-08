@@ -4,6 +4,11 @@
 #include <filesystem>
 #include <iostream>
 
+#ifndef _WIN32
+#include <termios.h>
+#include <unistd.h>
+#endif
+
 #include "config/config.hpp"
 #include "bookmarks/bookmarks.hpp"
 #include "browser/browser.hpp"
@@ -33,6 +38,15 @@ int main(int, char** argv) {
 
     auto screen = ScreenInteractive::Fullscreen();
     auto quit = screen.ExitLoopClosure();
+
+#ifndef _WIN32
+    struct termios term;
+    if (tcgetattr(STDIN_FILENO, &term) == 0)
+    {
+        term.c_lflag &= ~ISIG;
+        tcsetattr(STDIN_FILENO, TCSANOW, &term);
+    }
+#endif
 
     state->operations["quit"] = [quit](const std::string&, int) { quit(); };
     state->commands["qa"] = "quit";

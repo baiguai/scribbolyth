@@ -221,6 +221,14 @@ namespace scribbolyth::op
 
     bool HandleKey(std::shared_ptr<EditorState> state, ftxui::Event event)
     {
+        // Some terminals deliver Enter as an ESC sequence instead of CR/LF:
+        // SS3 "ESC O M" (application-keypad Enter) and CSI "ESC [ 1 9 ~".
+        // Normalize them so Return bindings fire in every mode.
+        if (event == ftxui::Event::Special("\x1bOM")
+            || event == ftxui::Event::Special("\x1b[19~"))
+        {
+            event = ftxui::Event::Return;
+        }
         return Dispatch(state, Resolve(state, event));
     }
 }
