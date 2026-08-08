@@ -1,13 +1,13 @@
 #include "editor.hpp"
 
 #include <algorithm>
-#include <cstdio>
 #include <string>
 #include <vector>
 
 #include <ftxui/dom/elements.hpp>
 
 #include "../bookmark/bookmark.hpp"
+#include "../clipboard/clipboard.hpp"
 #include "../history/history.hpp"
 
 namespace scribbolyth::editor
@@ -86,52 +86,20 @@ namespace scribbolyth::editor
             return cells;
         }
 
-        // Read the system clipboard through whatever tool the desktop exposes:
-        // Wayland (wl-paste), X11 (xclip/xsel). Returns "" when nothing is
-        // available or the clipboard is empty.
+        // Read the system clipboard (Win32 API on Windows, wl-paste/xclip/xsel
+        // on POSIX). Returns "" when nothing is available or the clipboard is
+        // empty.
         std::string ReadClipboard()
         {
-            const char* commands[] = {
-                "wl-paste --no-newline 2>/dev/null",
-                "xclip -o -selection clipboard 2>/dev/null",
-                "xsel -o --clipboard 2>/dev/null",
-            };
-            for (const char* cmd : commands)
-            {
-                FILE* pipe = popen(cmd, "r");
-                if (pipe == nullptr) continue;
-                std::string data;
-                char buf[512];
-                std::size_t n;
-                while ((n = fread(buf, 1, sizeof(buf), pipe)) > 0)
-                {
-                    data.append(buf, n);
-                }
-                const int rc = pclose(pipe);
-                if (rc == 0 && !data.empty()) return data;
-            }
-            return "";
+            return scribbolyth::clipboard::Read();
         }
 
-        // Write to the system clipboard through whatever tool the desktop
-        // exposes: Wayland (wl-copy), X11 (xclip/xsel). Returns false when
-        // no tool is available.
+        // Write to the system clipboard (Win32 API on Windows,
+        // wl-copy/xclip/xsel on POSIX). Returns false when no tool is
+        // available.
         bool WriteClipboard(const std::string& text)
         {
-            const char* commands[] = {
-                "wl-copy 2>/dev/null",
-                "xclip -i -selection clipboard 2>/dev/null",
-                "xsel --input --clipboard 2>/dev/null",
-            };
-            for (const char* cmd : commands)
-            {
-                FILE* pipe = popen(cmd, "w");
-                if (pipe == nullptr) continue;
-                std::fwrite(text.data(), 1, text.size(), pipe);
-                const int rc = pclose(pipe);
-                if (rc == 0) return true;
-            }
-            return false;
+            return scribbolyth::clipboard::Write(text);
         }
     }
 
