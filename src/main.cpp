@@ -1,16 +1,24 @@
 #include "main.hpp"
 
+#include <cstdlib>
 #include <filesystem>
 #include <iostream>
+
+#ifndef _WIN32
+#include <termios.h>
+#include <unistd.h>
+#endif
 
 #include "config/config.hpp"
 #include "bookmarks/bookmarks.hpp"
 #include "browser/browser.hpp"
 #include "help/help.hpp"
 #include "history/history.hpp"
+#include "recent/recent.hpp"
 #include "links/links.hpp"
 #include "op/op.hpp"
 #include "search/search.hpp"
+#include "undo/undo.hpp"
 
 using namespace ftxui;
 
@@ -31,6 +39,15 @@ int main(int, char** argv) {
     auto screen = ScreenInteractive::Fullscreen();
     auto quit = screen.ExitLoopClosure();
 
+#ifndef _WIN32
+    struct termios term;
+    if (tcgetattr(STDIN_FILENO, &term) == 0)
+    {
+        term.c_lflag &= ~ISIG;
+        tcsetattr(STDIN_FILENO, TCSANOW, &term);
+    }
+#endif
+
     state->operations["quit"] = [quit](const std::string&, int) { quit(); };
     state->commands["qa"] = "quit";
 
@@ -50,6 +67,12 @@ int main(int, char** argv) {
 
     bool show_history = false;
     state->operations["history"] = [&show_history](const std::string&, int) { show_history = true; };
+
+    bool show_recent = false;
+    state->operations["recents"] = [&show_recent](const std::string&, int) { show_recent = true; };
+
+    bool show_undo = false;
+    state->operations["undo"] = [&show_undo](const std::string&, int) { show_undo = true; };
 
     bool show_file_browser = false;
     state->show_file_browser = &show_file_browser;
@@ -72,6 +95,28 @@ int main(int, char** argv) {
         template_path = "scribboleth.html";
     }
     state->template_path = template_path.string();
+
+    fs::path init_path;
+    if (const char* env = std::getenv("SCRIBBOLYTH_INIT"); env != nullptr && *env != '\0')
+    {
+        init_path = env;
+    }
+    else
+    {
+        init_path = fs::path(argv[0]).parent_path() / "init.conf";
+    }
+    state->init_path = init_path.string();
+
+    std::string last_file;
+    if (scribbolyth::config::ReadInit(init_path.string(), last_file, state->recent_files) && !last_file.empty())
+    {
+        auto it = state->operations.find("open");
+        std::error_code ec;
+        if (it != state->operations.end() && fs::exists(last_file, ec))
+        {
+            it->second(last_file, 1);
+        }
+    }
 
     InputOption command_option;
     command_option.transform = [](InputState state)
@@ -146,13 +191,17 @@ int main(int, char** argv) {
     auto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);
     auto links_comp = scribbolyth::links::MakeLinksDialog(state, &show_links);
     auto history_comp = scribbolyth::history::MakeHistoryDialog(state, &show_history);
+    auto recent_comp = scribbolyth::recent::MakeRecentDialog(state, &show_recent);
+    auto undo_comp = scribbolyth::undo::MakeUndoDialog(state, &show_undo);
     auto browser_comp = scribbolyth::browser::MakeFileBrowserDialog(state, &show_file_browser);
-    auto root = Modal(Modal(Modal(Modal(Modal(Modal(container, help_comp, &show_help),
-                                                  search_comp, &show_search),
-                                          bookmarks_comp, &show_bookmarks),
-                                  links_comp, &show_links),
-                          history_comp, &show_history),
-                  browser_comp, &show_file_browser);
+    auto root = Modal(Modal(Modal(Modal(Modal(Modal(Modal(Modal(container, help_comp, &show_help),
+                                                          search_comp, &show_search),
+                                                  bookmarks_comp, &show_bookmarks),
+                                          links_comp, &show_links),
+                                  history_comp, &show_history),
+                          recent_comp, &show_recent),
+                  undo_comp, &show_undo),
+          browser_comp, &show_file_browser);
 
     screen.Loop(root);
 

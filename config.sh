@@ -20,6 +20,8 @@ SOURCES=(
     "src/links/links.cpp"
     "src/history/history.cpp"
     "src/browser/browser.cpp"
+    "src/recent/recent.cpp"
+    "src/undo/undo.cpp"
 )
 
 LIBS=(

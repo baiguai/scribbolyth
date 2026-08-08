@@ -59,6 +59,9 @@ namespace scribbolyth::config
             if (token == "PageDown")    { out = Event::PageDown;  return true; }
             if (token == "Home")        { out = Event::Home;      return true; }
             if (token == "End")         { out = Event::End;       return true; }
+            if (token == "CtrlV")       { out = Event::Special("\x16"); return true; }
+            if (token == "CtrlC")       { out = Event::Special("\x03"); return true; }
+            if (token == "CtrlX")       { out = Event::Special("\x18"); return true; }
             if (token.size() == 1)      { out = Event::Character(token[0]); return true; }
             return false;
         }
@@ -121,5 +124,65 @@ namespace scribbolyth::config
             else km.Bind(events, std::move(binding));
         }
         return true;
+    }
+
+    bool ReadInit(const std::string& path, std::string& last_file, std::vector<std::string>& recent_files)
+    {
+        std::ifstream file(path);
+        if (!file.is_open()) return false;
+
+        last_file.clear();
+        recent_files.clear();
+        std::string line;
+        while (std::getline(file, line))
+        {
+            std::size_t start = line.find_first_not_of(" \t");
+            if (start == std::string::npos) continue;
+            if (line[start] == '#') continue;
+
+            std::size_t eq = line.find('=', start);
+            if (eq == std::string::npos) continue;
+
+            std::size_t kend = line.find_last_not_of(" \t", eq - 1);
+            std::string key = (kend == std::string::npos)
+                                  ? ""
+                                  : line.substr(start, kend - start + 1);
+
+            std::size_t p = line.find_first_not_of(" \t", eq + 1);
+            std::string value;
+            if (p != std::string::npos)
+            {
+                std::size_t end = line.find_last_not_of(" \t");
+                value = line.substr(p, end - p + 1);
+            }
+
+            if (key == "last_file")
+            {
+                last_file = value;
+            }
+            else if (key == "recent_file")
+            {
+                if (!value.empty())
+                {
+                    recent_files.push_back(value);
+                }
+            }
+        }
+        return true;
+    }
+
+    bool WriteInit(const std::string& path, const std::string& last_file, const std::vector<std::string>& recent_files)
+    {
+        std::ofstream file(path, std::ios::binary);
+        if (!file.is_open()) return false;
+
+        file << "# scribbolyth init configuration - written by the app\n";
+        file << "# On startup the app reopens `last_file` when it still exists.\n";
+        file << "last_file = " << last_file << "\n";
+        for (const auto& recent : recent_files)
+        {
+            file << "recent_file = " << recent << "\n";
+        }
+        return static_cast<bool>(file);
     }
 }

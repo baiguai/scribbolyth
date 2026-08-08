@@ -15,6 +15,14 @@ inline constexpr int kDefaultTreeviewWidth = 30;
 inline constexpr int kMinTreeviewWidth = 10;
 inline constexpr int kMaxTreeviewWidth = 200;
 
+// A single undoable point-in-time snapshot of the document. `json` is the
+// full serialized state (tree + bookmarks + history + width); `preview` is
+// a short human label for the undo dialog's list.
+struct UndoState {
+    std::string json;
+    std::string preview;
+};
+
 struct EditorState {
     Mode mode = Mode::TREE;
     std::string command_buffer;
@@ -27,6 +35,7 @@ struct EditorState {
     scribbolyth::treeview::TreeNode* active_node = nullptr;
     std::string status;
     std::string template_path;
+    std::string init_path;
     std::vector<scribbolyth::bookmark::Bookmark> bookmarks;
 
     // Viewed-node history: node ids of every selected node that has text,
@@ -34,6 +43,23 @@ struct EditorState {
     // the treeview; the history dialog resolves ids to live nodes.
     std::vector<std::string> history;
     static constexpr std::size_t kHistoryMax = 30;
+
+    std::vector<std::string> recent_files;
+    static constexpr std::size_t kRecentMax = 20;
+
+    // Document undo history. A snapshot is pushed before every content
+    // mutation (tree edits and text edits); `undo_stack` is newest last,
+    // `redo_stack` newest first. `snapshot_undo`/`apply_undo`/`clear_undo`
+    // are installed by the treeview. The undo dialog reads the stacks
+    // directly and applies a rollback through `apply_undo`.
+    std::vector<UndoState> undo_stack;
+    std::vector<UndoState> redo_stack;
+    static constexpr std::size_t kUndoMax = 50;
+
+    std::function<void()> snapshot_undo;
+    // `index` 0 = newest snapshot.
+    std::function<void(std::size_t index)> apply_undo;
+    std::function<void()> clear_undo;
 
     // File browser dialog. `show_file_browser` is the Modal visibility flag;
     // `browser_start_dir` is the directory to open in; `browser_pick` is

@@ -14,6 +14,7 @@
 #include <ftxui/dom/elements.hpp>
 #include <ftxui/screen/box.hpp>
 
+#include "../clipboard/clipboard.hpp"
 #include "../editor/editor_state.hpp"
 #include "../treeview/tree_node.hpp"
 
@@ -81,45 +82,9 @@ namespace scribbolyth::links
             (void)rc;
         }
 
-        // Finds an installed clipboard tool. The result is cached because
-        // probing spawns a shell each time.
-        const char* ClipboardTool()
-        {
-            static const char* tool = [] {
-                if (std::system("command -v xclip >/dev/null 2>&1") == 0)
-                {
-                    return "xclip -selection clipboard";
-                }
-                if (std::system("command -v wl-copy >/dev/null 2>&1") == 0)
-                {
-                    return "wl-copy";
-                }
-                if (std::system("command -v xsel >/dev/null 2>&1") == 0)
-                {
-                    return "xsel --clipboard --input";
-                }
-                return "";
-            }();
-            return tool;
-        }
-
         bool CopyToClipboard(const std::string& text)
         {
-            const char* tool = ClipboardTool();
-            if (!tool || !*tool) return false;
-
-            std::string escaped;
-            for (const char c : text)
-            {
-                if (c == '\'') escaped += "'\\''";
-                else escaped += c;
-            }
-            // Backgrounded so the clipboard owner does not block the app.
-            const std::string command =
-                "printf '%s' '" + escaped + "' | nohup " + tool + " >/dev/null 2>&1 &";
-            const int rc = std::system(command.c_str());
-            (void)rc;
-            return true;
+            return scribbolyth::clipboard::Write(text);
         }
 
         // Mirrors the three regexes of the HTML app's openLinksDialog().
@@ -396,7 +361,7 @@ namespace scribbolyth::links
             }
             else
             {
-                state_->status = "Clipboard unavailable (install xclip, wl-copy or xsel)";
+                state_->status = "Clipboard unavailable";
             }
         }
 
