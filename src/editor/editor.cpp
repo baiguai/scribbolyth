@@ -224,6 +224,13 @@ namespace scribbolyth::editor
                     Clamp();
                     Save();
                 };
+                state_->operations["delete_to_eol"] = [this](const std::string&, int)
+                {
+                    if (!Editable()) return;
+                    DeleteToEol();
+                    Clamp();
+                    Save();
+                };
                 state_->operations["delete_selection"] = [this](const std::string&, int)
                 {
                     DeleteSelection();
@@ -902,6 +909,17 @@ namespace scribbolyth::editor
                 }
                 lines_.erase(lines_.begin() + row_);
                 if (row_ >= static_cast<int>(lines_.size())) --row_;
+            }
+
+            // Vim 'D' = 'd$': delete from the cursor to the end of the line,
+            // leaving the line itself (and the newline) in place.
+            void DeleteToEol()
+            {
+                auto& line = lines_[row_];
+                if (col_ < static_cast<int>(line.size()))
+                {
+                    line.erase(static_cast<std::size_t>(col_));
+                }
             }
 
             // The text currently under a VISUAL/VISUAL_LINE selection, or the
