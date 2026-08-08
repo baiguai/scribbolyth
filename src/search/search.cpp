@@ -133,7 +133,7 @@ namespace scribbolyth::search
 
             const std::string footer =
                 "  " + std::to_string(total == 0 ? 0 : sel + 1) + "/" + std::to_string(total) +
-                "    Up/Down move  Enter jump  Esc cancel  'r:' = regex  ";
+                "    Up/Down move  Enter jump  Esc cancel  ':x' = titles only  'r:' = regex  ";
 
             return ftxui::window(ftxui::text(" / Search "),
                                 ftxui::vbox({
@@ -195,10 +195,16 @@ namespace scribbolyth::search
 
             std::string query = filter_;
             bool is_regex = false;
+            bool title_only = false;
             if (query.size() >= 2 && query[0] == 'r' && query[1] == ':')
             {
                 is_regex = true;
                 query = query.substr(2);
+            }
+            if (!query.empty() && query[0] == ':')
+            {
+                title_only = true;
+                query = query.substr(1);
             }
 
             if (is_regex)
@@ -210,7 +216,8 @@ namespace scribbolyth::search
                         const std::regex re(query, std::regex::icase);
                         for (const auto& item : all)
                         {
-                            if (std::regex_search(item.first->name, re) || std::regex_search(item.first->text, re))
+                            if (std::regex_search(item.first->name, re) ||
+                                (!title_only && std::regex_search(item.first->text, re)))
                             {
                                 results_.push_back(Result{item.first, std::string(static_cast<std::size_t>(item.second) * 2, ' ') + item.first->name});
                             }
@@ -236,7 +243,7 @@ namespace scribbolyth::search
                 {
                     if (needle.empty() ||
                         Lower(item.first->name).find(needle) != std::string::npos ||
-                        Lower(item.first->text).find(needle) != std::string::npos)
+                        (!title_only && Lower(item.first->text).find(needle) != std::string::npos))
                     {
                         results_.push_back(Result{item.first, std::string(static_cast<std::size_t>(item.second) * 2, ' ') + item.first->name});
                     }

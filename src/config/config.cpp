@@ -87,7 +87,7 @@ namespace scribbolyth::config
             if (hash != std::string::npos && line[hash] == '#') line = line.substr(0, hash);
             auto fields = SplitFields(line);
             if (fields.empty()) continue;
-            if (fields.size() != 7) return false;
+            if (fields.size() < 7) return false;
 
             const std::string& mode     = fields[0];
             const std::string& key      = fields[1];
