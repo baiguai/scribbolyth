@@ -84,6 +84,7 @@ namespace scribbolyth::history
 
             const int total = static_cast<int>(entries_.size());
             const int sel = std::min(selection_, std::max(0, total - 1));
+            const int width = 74;
 
             const int max_top = std::max(0, total - kVisibleRows);
             int top = std::min(scroll_, max_top);
@@ -121,7 +122,7 @@ namespace scribbolyth::history
                                     ftxui::separator(),
                                     ftxui::vbox(std::move(rows)),
                                     ftxui::separator(),
-                                    ftxui::text(PadRight(footer, row_width)) | ftxui::dim,
+                                    ftxui::text(PadRight(footer, width)) | ftxui::dim,
                                 })) |
                    ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
