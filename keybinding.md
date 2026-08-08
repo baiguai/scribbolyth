@@ -59,19 +59,20 @@ Rules:
 
 One entry per line:
 
-    mode  key  repeat  command  args  op  function
+    mode  key  repeat  command  args  op  function  description
 
 Blank lines and lines starting with `#` are ignored.
 
-| Column    | Meaning                                                                                          |
-|-----------|--------------------------------------------------------------------------------------------------|
-| `mode`    | `TREE`, `NORMAL`, `INSERT`, `VISUAL` — binds `key` in that mode. `GLOBAL` — registers a command only (no key). |
-| `key`     | The key that triggers the binding. `-` means no key.                                             |
-| `repeat`  | `yes`/`no` — accepts a count prefix (`3 j`).                                                     |
-| `command` | Optional `:name` usable from the command line. `-` means no command-line access.                 |
-| `args`    | `-`, `prompt`, or a literal string. See below.                                                   |
-| `op`      | The operation name from Step 1. `-` means no dispatch.                                           |
-| `function`| Documentation only — the function the op calls. Ignored by the loader.                           |
+| Column       | Meaning                                                                                          |
+|--------------|--------------------------------------------------------------------------------------------------|
+| `mode`       | `TREE`, `NORMAL`, `INSERT`, `VISUAL` — binds `key` in that mode. `GLOBAL` — registers a command only (no key). |
+| `key`        | The key that triggers the binding. `-` means no key.                                             |
+| `repeat`     | `yes`/`no` — accepts a count prefix (`3 j`).                                                     |
+| `command`    | Optional `:name` usable from the command line. `-` means no command-line access.                 |
+| `args`       | `-`, `prompt`, or a literal string. See below.                                                   |
+| `op`         | The operation name from Step 1. `-` means no dispatch.                                           |
+| `function`   | Documentation only — the function the op calls. Ignored by the loader.                           |
+| `description`| User-facing text shown in the `?` help dialog. Quote it when it contains spaces (`"Move up"`).    |
 
 `key` values:
 
