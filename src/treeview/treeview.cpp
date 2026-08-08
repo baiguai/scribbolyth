@@ -645,12 +645,20 @@ namespace scribbolyth::treeview
 
     void TreeView::ExportTo(const std::string& path)
     {
-        if (state_->template_path.empty())
+        // When overwriting an existing export, patch the data in that file in
+        // place rather than regenerating from the config template, so any other
+        // edits made to the exported file are preserved. Only the tree,
+        // bookmarks and history data sections change.
+        std::error_code ec;
+        const bool overwrite = std::filesystem::exists(path, ec);
+        const std::string base = overwrite ? path : state_->template_path;
+
+        if (base.empty())
         {
             state_->status = "Error: scribboleth.html template not found";
             return;
         }
-        if (!scribbolyth::html::ExportHtmlFile(state_->template_path, path,
+        if (!scribbolyth::html::ExportHtmlFile(base, path,
                                                roots_, state_->bookmarks,
                                                state_->history))
         {
