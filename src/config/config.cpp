@@ -68,10 +68,11 @@ namespace scribbolyth::config
 
         Keymap& ModeKeymap(std::shared_ptr<EditorState> state, const std::string& mode)
         {
-            if (mode == "TREE")   return state->tree_keymap;
-            if (mode == "NORMAL") return state->normal_keymap;
-            if (mode == "INSERT") return state->insert_keymap;
-            return state->visual_keymap; // VISUAL
+            if (mode == "TREE")          return state->tree_keymap;
+            if (mode == "NORMAL")        return state->normal_keymap;
+            if (mode == "INSERT")        return state->insert_keymap;
+            if (mode == "VISUAL_BLOCK")  return state->visual_block_keymap;
+            return state->visual_keymap; // VISUAL, VISUAL_LINE
         }
     }
 

@@ -146,6 +146,10 @@ namespace scribbolyth::treeview
                 {
                     state_->mode = Mode::VISUAL_LINE;
                 };
+                state_->operations["enter_visual_block"] = [this](const std::string&, int)
+                {
+                    state_->mode = Mode::VISUAL_BLOCK;
+                };
                 state_->operations["enter_command"] = [this](const std::string&, int)
                 {
                     scribbolyth::op::OpenCommandLine(state_, "");

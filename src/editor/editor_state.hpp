@@ -95,16 +95,18 @@ struct EditorState {
     Keymap normal_keymap;
     Keymap insert_keymap;
     Keymap visual_keymap;
+    Keymap visual_block_keymap;
     Keymap tree_keymap;
 
     Keymap& ActiveKeymap() {
         switch (mode) {
-            case Mode::TREE:        return tree_keymap;
-            case Mode::INSERT:      return insert_keymap;
+            case Mode::TREE:            return tree_keymap;
+            case Mode::INSERT:          return insert_keymap;
             case Mode::VISUAL:
-            case Mode::VISUAL_LINE: return visual_keymap;
-            case Mode::COMMAND:     return normal_keymap;
-            default:                return normal_keymap;
+            case Mode::VISUAL_LINE:     return visual_keymap;
+            case Mode::VISUAL_BLOCK:    return visual_block_keymap;
+            case Mode::COMMAND:         return normal_keymap;
+            default:                    return normal_keymap;
         }
     }
 };

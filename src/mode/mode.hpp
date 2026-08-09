@@ -9,6 +9,7 @@ enum class Mode
     INSERT,
     VISUAL,
     VISUAL_LINE,
+    VISUAL_BLOCK,
     COMMAND
 };
 
@@ -22,6 +23,7 @@ inline std::string ModeName(Mode m)
         case Mode::VISUAL:          return "VISUAL";
         case Mode::COMMAND:         return "COMMAND";
         case Mode::VISUAL_LINE:     return "VISUAL LINE";
+        case Mode::VISUAL_BLOCK:    return "VISUAL BLOCK";
     }
     return "???";
 }

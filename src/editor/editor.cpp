@@ -9,6 +9,7 @@
 #include "../bookmark/bookmark.hpp"
 #include "../clipboard/clipboard.hpp"
 #include "../history/history.hpp"
+#include "../visual_block/visual_block.hpp"
 
 namespace scribbolyth::editor
 {
@@ -26,7 +27,7 @@ namespace scribbolyth::editor
 
         bool IsVisualMode(Mode m)
         {
-            return m == Mode::VISUAL || m == Mode::VISUAL_LINE;
+            return m == Mode::VISUAL || m == Mode::VISUAL_LINE || m == Mode::VISUAL_BLOCK;
         }
 
         std::string TrimBoth(const std::string& s)
@@ -243,6 +244,43 @@ namespace scribbolyth::editor
                 {
                     LowerSelection();
                 };
+                state_->operations["block_insert_start"] = [this](const std::string&, int)
+                {
+                    if (!Editable()) return;
+                    EnterBlockInsert(false);
+                };
+                state_->operations["block_insert_end"] = [this](const std::string&, int)
+                {
+                    if (!Editable()) return;
+                    EnterBlockInsert(true);
+                };
+                state_->operations["block_file_start"] = [this](const std::string&, int)
+                {
+                    if (!Editable()) return;
+                    row_ = 0;
+                    col_ = std::min(col_, static_cast<int>(lines_[row_].size()));
+                    last_col_ = col_;
+                };
+                state_->operations["block_file_end"] = [this](const std::string&, int)
+                {
+                    if (!Editable()) return;
+                    row_ = static_cast<int>(lines_.size()) - 1;
+                    col_ = std::min(col_, static_cast<int>(lines_[row_].size()));
+                    last_col_ = col_;
+                };
+                state_->operations["block_to_eol"] = [this](const std::string&, int)
+                {
+                    if (!Editable()) return;
+                    const int b_lo = std::min(visual_row_, row_);
+                    const int b_hi = std::max(visual_row_, row_);
+                    int widest = 0;
+                    for (int r = b_lo; r <= b_hi; ++r)
+                    {
+                        widest = std::max(widest, static_cast<int>(lines_[r].size()));
+                    }
+                    col_ = widest;
+                    last_col_ = col_;
+                };
 
                 state_->operations["yank"] = [this](const std::string&, int)
                 {
@@ -384,6 +422,22 @@ namespace scribbolyth::editor
                 }
                 auto RowHighlight = [&](int r, int& h_lo, int& h_hi) -> bool
                 {
+                    // Column block (Ctrl+V): a rectangle whose rows run from
+                    // the anchor to the cursor and whose columns run from the
+                    // smaller of the two columns to the larger (inclusive).
+                    if (state_->mode == Mode::VISUAL_BLOCK
+                        && visual_row_ >= 0 && visual_col_ >= 0)
+                    {
+                        const int b_lo = std::min(visual_row_, row_);
+                        const int b_hi = std::max(visual_row_, row_);
+                        const int b_col_lo = std::min(visual_col_, col_);
+                        const int b_col_hi = std::max(visual_col_, col_);
+                        if (r < b_lo || r > b_hi) return false;
+                        const int size = static_cast<int>(lines_[r].size());
+                        h_lo = std::min(b_col_lo, size);
+                        h_hi = std::min(b_col_hi + 1, size);
+                        return h_lo < h_hi;
+                    }
                     if (line_visual)
                     {
                         if (r < lo || r > hi) return false;
@@ -484,6 +538,30 @@ namespace scribbolyth::editor
             bool OnEvent(ftxui::Event event) override
             {
                 const bool visual_before = IsVisualMode(state_->mode);
+
+                // While a block insert (Ctrl+V then I/A) is pending, typed
+                // characters are buffered instead of being handled by the
+                // regular INSERT path, so the whole block can be updated in a
+                // single step when Esc applies the insertion.
+                if (block_insert_.active)
+                {
+                    if (event == ftxui::Event::Backspace)
+                    {
+                        if (!block_insert_.pending.empty())
+                        {
+                            block_insert_.pending.pop_back();
+                            Backspace();
+                        }
+                        return true;
+                    }
+                    if (event.is_character())
+                    {
+                        block_insert_.pending += event.character();
+                        InsertText(event.character());
+                        return true;
+                    }
+                }
+
                 if (scribbolyth::op::HandleKey(state_, event))
                 {
                     if (!visual_before && IsVisualMode(state_->mode))
@@ -495,6 +573,10 @@ namespace scribbolyth::editor
                     {
                         visual_row_ = -1;
                         visual_col_ = -1;
+                    }
+                    if (block_insert_.active && state_->mode == Mode::NORMAL)
+                    {
+                        ApplyBlockInsert();
                     }
                     return true;
                 }
@@ -718,7 +800,8 @@ namespace scribbolyth::editor
             {
                 if (lines_.empty()) lines_.push_back("");
                 row_ = std::max(0, std::min(row_, static_cast<int>(lines_.size()) - 1));
-                col_ = std::max(0, std::min(col_, static_cast<int>(lines_[row_].size())));
+                if (state_->mode != Mode::VISUAL_BLOCK)
+                    col_ = std::max(0, std::min(col_, static_cast<int>(lines_[row_].size())));
             }
 
             void CursorUp()
@@ -727,7 +810,8 @@ namespace scribbolyth::editor
                 {
                     last_col_ = col_;
                     --row_;
-                    col_ = std::min(last_col_, static_cast<int>(lines_[row_].size()));
+                    if (state_->mode != Mode::VISUAL_BLOCK)
+                        col_ = std::min(last_col_, static_cast<int>(lines_[row_].size()));
                 }
                 else
                 {
@@ -741,12 +825,18 @@ namespace scribbolyth::editor
                 {
                     last_col_ = col_;
                     ++row_;
-                    col_ = std::min(last_col_, static_cast<int>(lines_[row_].size()));
+                    if (state_->mode != Mode::VISUAL_BLOCK)
+                        col_ = std::min(last_col_, static_cast<int>(lines_[row_].size()));
                 }
             }
 
             void CursorLeft()
             {
+                if (state_->mode == Mode::VISUAL_BLOCK)
+                {
+                    col_ = std::max(0, col_ - 1);
+                    return;
+                }
                 if (col_ > 0)
                 {
                     --col_;
@@ -760,6 +850,11 @@ namespace scribbolyth::editor
 
             void CursorRight()
             {
+                if (state_->mode == Mode::VISUAL_BLOCK)
+                {
+                    ++col_;
+                    return;
+                }
                 if (col_ < static_cast<int>(lines_[row_].size()))
                 {
                     ++col_;
@@ -906,6 +1001,76 @@ namespace scribbolyth::editor
                 }
             }
 
+            // Enter INSERT mode with a pending block insert (Vim Ctrl+V then
+            // I/A). The text the user types is accumulated in block_insert_ and
+            // shown live on the top row; ApplyBlockInsert() replays it on the
+            // remaining rows when Esc is pressed.
+            void EnterBlockInsert(bool at_end)
+            {
+                if (!(state_->mode == Mode::VISUAL_BLOCK
+                      && visual_row_ >= 0 && visual_col_ >= 0))
+                {
+                    return;
+                }
+                const auto block =
+                    visual_block::MakeBlock(visual_row_, visual_col_, row_, col_);
+                block_insert_.active = true;
+                block_insert_.at_end = at_end;
+                block_insert_.col = at_end ? block.col_hi + 1 : block.col_lo;
+                block_insert_.pending.clear();
+                block_insert_.rows.clear();
+                for (int r = block.row_lo; r <= block.row_hi; ++r)
+                {
+                    block_insert_.rows.push_back(r);
+                }
+                row_ = block.row_lo;
+                col_ = at_end
+                           ? std::min(block.col_hi + 1,
+                                      static_cast<int>(lines_[row_].size()))
+                           : std::min(block.col_lo,
+                                      static_cast<int>(lines_[row_].size()));
+                last_col_ = col_;
+                visual_row_ = -1;
+                visual_col_ = -1;
+                state_->mode = Mode::INSERT;
+            }
+
+            void ApplyBlockInsert()
+            {
+                if (!block_insert_.active) return;
+                block_insert_.active = false;
+                if (!block_insert_.pending.empty())
+                {
+                    for (const int r : block_insert_.rows)
+                    {
+                        if (r == row_) continue; // already edited live while typing
+                        if (block_insert_.at_end)
+                        {
+                            std::string& line = lines_[r];
+                            line.insert(std::min(block_insert_.col,
+                                                 static_cast<int>(line.size())),
+                                        block_insert_.pending);
+                        }
+                        else
+                        {
+                            std::string& line = lines_[r];
+                            if (static_cast<int>(line.size()) < block_insert_.col)
+                            {
+                                line.append(static_cast<std::size_t>(block_insert_.col) -
+                                                static_cast<std::size_t>(line.size()),
+                                            ' ');
+                            }
+                            line.insert(static_cast<std::size_t>(block_insert_.col),
+                                        block_insert_.pending);
+                        }
+                    }
+                    Save();
+                    state_->status = "Block inserted";
+                }
+                block_insert_.pending.clear();
+                block_insert_.rows.clear();
+            }
+
             void DeleteChar()
             {
                 auto& line = lines_[row_];
@@ -950,6 +1115,13 @@ namespace scribbolyth::editor
             std::string SelectionText() const
             {
                 std::string out;
+                if (state_->mode == Mode::VISUAL_BLOCK
+                    && visual_row_ >= 0 && visual_col_ >= 0)
+                {
+                    return visual_block::Extract(
+                        lines_,
+                        visual_block::MakeBlock(visual_row_, visual_col_, row_, col_));
+                }
                 if (state_->mode == Mode::VISUAL && visual_row_ >= 0 && visual_col_ >= 0)
                 {
                     int aRow = visual_row_, aCol = visual_col_;
@@ -1048,6 +1220,24 @@ namespace scribbolyth::editor
                     return;
                 }
 
+                if (state_->mode == Mode::VISUAL_BLOCK
+                    && visual_row_ >= 0 && visual_col_ >= 0)
+                {
+                    const auto block =
+                        visual_block::MakeBlock(visual_row_, visual_col_, row_, col_);
+                    visual_block::Erase(lines_, block);
+                    row_ = block.row_lo;
+                    col_ = std::min(block.col_lo,
+                                    static_cast<int>(lines_[row_].size()));
+                    visual_row_ = -1;
+                    visual_col_ = -1;
+                    state_->mode = Mode::NORMAL;
+                    Clamp();
+                    Save();
+                    state_->status = "Selection deleted";
+                    return;
+                }
+
                 int a = (visual_row_ >= 0) ? std::min(visual_row_, row_) : row_;
                 int b = (visual_row_ >= 0) ? std::max(visual_row_, row_) : row_;
                 if (a > b) std::swap(a, b);
@@ -1092,6 +1282,23 @@ namespace scribbolyth::editor
                 if (active_ == nullptr) return;
                 LoadIfChanged();
                 if (lines_.empty()) lines_.push_back("");
+
+                if (state_->mode == Mode::VISUAL_BLOCK
+                    && visual_row_ >= 0 && visual_col_ >= 0)
+                {
+                    const auto block =
+                        visual_block::MakeBlock(visual_row_, visual_col_, row_, col_);
+                    visual_block::Transform(lines_, block, fold);
+                    row_ = block.row_lo;
+                    col_ = std::min(block.col_lo,
+                                    static_cast<int>(lines_[row_].size()));
+                    visual_row_ = -1;
+                    visual_col_ = -1;
+                    state_->mode = Mode::NORMAL;
+                    Save();
+                    state_->status = status_msg;
+                    return;
+                }
 
                 if (state_->mode == Mode::VISUAL && visual_row_ >= 0 && visual_col_ >= 0)
                 {
@@ -1166,6 +1373,16 @@ namespace scribbolyth::editor
             int last_col_ = 0;
             int visual_row_ = -1;
             int visual_col_ = -1;
+
+            struct BlockInsert
+            {
+                bool active = false;
+                bool at_end = false;
+                int col = 0;
+                std::vector<int> rows;
+                std::string pending;
+            };
+            BlockInsert block_insert_;
     };
 
     ftxui::Component MakeEditor(std::shared_ptr<EditorState> state)
