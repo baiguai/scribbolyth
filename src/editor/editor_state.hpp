@@ -89,22 +89,44 @@ struct EditorState {
     // node. Set by the editor.
     std::function<void(int)> reveal_line;
 
+    // Vim-style find state (the last '/' search). `search_matches` holds the
+    // nodes that matched the last query, in document order; `search_index` is
+    // the currently selected match (n/N move it, wrapping). `search_active`
+    // is cleared by ':noh' to hide the match highlight; the query and match
+    // list are kept so n/N keep working, as in Vim.
+    std::string search_query;
+    std::vector<scribbolyth::treeview::TreeNode*> search_matches;
+    int search_index = -1;
+    bool search_active = false;
+
+    // Set when a '/' find executes; the editor consumes it to move its cursor
+    // to the first occurrence in the (possibly unchanged) active node so the
+    // match is revealed in the text, as in Vim.
+    bool search_reveal_pending = false;
+
+    // Step to the next (dir > 0) or previous (dir < 0) find result. Set by the
+    // editor: it moves the cursor through the occurrences of the query inside
+    // the active node's text (wrapping within the node), as in Vim.
+    std::function<void(int)> search_jump;
+
     std::map<std::string, scribbolyth::op::Operation> operations;
     std::map<std::string, std::string> commands;
 
     Keymap normal_keymap;
     Keymap insert_keymap;
     Keymap visual_keymap;
+    Keymap visual_block_keymap;
     Keymap tree_keymap;
 
     Keymap& ActiveKeymap() {
         switch (mode) {
-            case Mode::TREE:        return tree_keymap;
-            case Mode::INSERT:      return insert_keymap;
+            case Mode::TREE:            return tree_keymap;
+            case Mode::INSERT:          return insert_keymap;
             case Mode::VISUAL:
-            case Mode::VISUAL_LINE: return visual_keymap;
-            case Mode::COMMAND:     return normal_keymap;
-            default:                return normal_keymap;
+            case Mode::VISUAL_LINE:     return visual_keymap;
+            case Mode::VISUAL_BLOCK:    return visual_block_keymap;
+            case Mode::COMMAND:         return normal_keymap;
+            default:                    return normal_keymap;
         }
     }
 };

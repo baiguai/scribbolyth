@@ -34,6 +34,117 @@ namespace scribbolyth::search
             treeview::TreeNode* node;
             std::string line;
         };
+
+        // Parsed search query: a leading "r:" selects case-insensitive regex
+        // matching and a leading ":" restricts the match to node titles.
+        struct Filter
+        {
+            std::string query;
+            bool is_regex = false;
+            bool title_only = false;
+        };
+
+        Filter ParseFilter(const std::string& raw)
+        {
+            Filter f;
+            f.query = raw;
+            if (f.query.size() >= 2 && f.query[0] == 'r' && f.query[1] == ':')
+            {
+                f.is_regex = true;
+                f.query = f.query.substr(2);
+            }
+            if (!f.query.empty() && f.query[0] == ':')
+            {
+                f.title_only = true;
+                f.query = f.query.substr(1);
+            }
+            return f;
+        }
+
+        // Case-insensitive match of a node against a parsed filter. An empty
+        // query matches everything. When `query` is a regex that fails to
+        // compile, returns false and sets `*regex_error`.
+        bool NodeMatches(const treeview::TreeNode& node, const Filter& f,
+                         bool* regex_error)
+        {
+            if (f.query.empty()) return true;
+            if (f.is_regex)
+            {
+                try
+                {
+                    const std::regex re(f.query, std::regex::icase);
+                    return std::regex_search(node.name, re)
+                        || (!f.title_only && std::regex_search(node.text, re));
+                }
+                catch (const std::regex_error&)
+                {
+                    if (regex_error) *regex_error = true;
+                    return false;
+                }
+            }
+            const std::string needle = Lower(f.query);
+            return Lower(node.name).find(needle) != std::string::npos
+                || (!f.title_only && Lower(node.text).find(needle) != std::string::npos);
+        }
+    }
+
+    std::vector<treeview::TreeNode*> FindMatches(std::shared_ptr<EditorState> state,
+                                                 const std::string& raw_query)
+    {
+        std::vector<treeview::TreeNode*> out;
+        std::vector<std::pair<treeview::TreeNode*, int>> all;
+        if (state->collect_all_nodes)
+        {
+            all = state->collect_all_nodes();
+        }
+        const Filter f = ParseFilter(raw_query);
+        bool regex_error = false;
+        for (const auto& item : all)
+        {
+            if (NodeMatches(*item.first, f, &regex_error))
+            {
+                out.push_back(item.first);
+            }
+        }
+        return out;
+    }
+
+    std::vector<std::pair<int, int>> FindLineMatches(const std::string& line,
+                                                     const std::string& raw_query)
+    {
+        const Filter f = ParseFilter(raw_query);
+        if (f.title_only || f.query.empty()) return {};
+
+        std::vector<std::pair<int, int>> out;
+        if (f.is_regex)
+        {
+            try
+            {
+                const std::regex re(f.query, std::regex::icase);
+                for (std::sregex_iterator it(line.begin(), line.end(), re), end;
+                     it != end; ++it)
+                {
+                    out.emplace_back(static_cast<int>(it->position()),
+                                     static_cast<int>(it->position() + it->length()));
+                }
+            }
+            catch (const std::regex_error&)
+            {
+                return {};
+            }
+            return out;
+        }
+
+        const std::string needle = Lower(f.query);
+        const std::string hay = Lower(line);
+        std::size_t pos = 0;
+        while ((pos = hay.find(needle, pos)) != std::string::npos)
+        {
+            out.emplace_back(static_cast<int>(pos),
+                             static_cast<int>(pos + needle.size()));
+            pos += needle.size();
+        }
+        return out;
     }
 
     class SearchDialog : public ftxui::ComponentBase
@@ -193,62 +304,16 @@ namespace scribbolyth::search
                 content_width_ = std::max(content_width_, static_cast<int>(line.size()));
             }
 
-            std::string query = filter_;
-            bool is_regex = false;
-            bool title_only = false;
-            if (query.size() >= 2 && query[0] == 'r' && query[1] == ':')
+            const Filter f = ParseFilter(filter_);
+            bool regex_error = false;
+            for (const auto& item : all)
             {
-                is_regex = true;
-                query = query.substr(2);
-            }
-            if (!query.empty() && query[0] == ':')
-            {
-                title_only = true;
-                query = query.substr(1);
-            }
-
-            if (is_regex)
-            {
-                if (!query.empty())
+                if (NodeMatches(*item.first, f, &regex_error))
                 {
-                    try
-                    {
-                        const std::regex re(query, std::regex::icase);
-                        for (const auto& item : all)
-                        {
-                            if (std::regex_search(item.first->name, re) ||
-                                (!title_only && std::regex_search(item.first->text, re)))
-                            {
-                                results_.push_back(Result{item.first, std::string(static_cast<std::size_t>(item.second) * 2, ' ') + item.first->name});
-                            }
-                        }
-                    }
-                    catch (const std::regex_error&)
-                    {
-                        regex_error_ = true;
-                    }
-                }
-                else
-                {
-                    for (const auto& item : all)
-                    {
-                        results_.push_back(Result{item.first, std::string(static_cast<std::size_t>(item.second) * 2, ' ') + item.first->name});
-                    }
+                    results_.push_back(Result{item.first, std::string(static_cast<std::size_t>(item.second) * 2, ' ') + item.first->name});
                 }
             }
-            else
-            {
-                const std::string needle = Lower(query);
-                for (const auto& item : all)
-                {
-                    if (needle.empty() ||
-                        Lower(item.first->name).find(needle) != std::string::npos ||
-                        (!title_only && Lower(item.first->text).find(needle) != std::string::npos))
-                    {
-                        results_.push_back(Result{item.first, std::string(static_cast<std::size_t>(item.second) * 2, ' ') + item.first->name});
-                    }
-                }
-            }
+            if (regex_error) regex_error_ = true;
 
             selection_ = 0;
             scroll_ = 0;
