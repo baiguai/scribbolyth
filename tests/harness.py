@@ -279,10 +279,14 @@ class Session:
         elif final == 'D':
             self._c = max(0, self._c - (nums[0] if nums else 1))
         elif final == 'm':
-            if not nums or nums == [0]:
+            names = ['black', 'red', 'green', 'yellow', 'blue',
+                     'magenta', 'cyan', 'white']
+            i = 0
+            if not nums or (len(nums) == 1 and nums[0] == 0):
                 self._sgr = set()
             else:
-                for code in nums:
+                while i < len(nums):
+                    code = nums[i]
                     if code == 0:
                         self._sgr = set()
                     elif code == 1:
@@ -295,6 +299,36 @@ class Session:
                         self._sgr.discard('bold')
                     elif code == 27:
                         self._sgr.discard('inv')
+                    elif 30 <= code <= 37:
+                        self._sgr = {x for x in self._sgr if not x.startswith('fg')}
+                        self._sgr.add('fg' + names[code - 30])
+                    elif code == 39:
+                        self._sgr = {x for x in self._sgr if not x.startswith('fg')}
+                    elif 40 <= code <= 47:
+                        self._sgr = {x for x in self._sgr if not x.startswith('bg')}
+                        self._sgr.add('bg' + names[code - 40])
+                    elif code == 49:
+                        self._sgr = {x for x in self._sgr if not x.startswith('bg')}
+                    elif 90 <= code <= 97:
+                        self._sgr = {x for x in self._sgr if not x.startswith('fg')}
+                        self._sgr.add('fg' + names[code - 90])
+                    elif 100 <= code <= 107:
+                        self._sgr = {x for x in self._sgr if not x.startswith('bg')}
+                        self._sgr.add('bg' + names[code - 100])
+                    elif code in (38, 48):
+                        key = 'fg' if code == 38 else 'bg'
+                        if i + 2 < len(nums) and nums[i + 1] == 5:
+                            self._sgr = {x for x in self._sgr
+                                         if not x.startswith(key)}
+                            self._sgr.add(key + 'c%d' % nums[i + 2])
+                            i += 2
+                        elif i + 4 < len(nums) and nums[i + 1] == 2:
+                            self._sgr = {x for x in self._sgr
+                                         if not x.startswith(key)}
+                            self._sgr.add(key + 'rgb%d_%d_%d'
+                                          % (nums[i + 2], nums[i + 3], nums[i + 4]))
+                            i += 4
+                    i += 1
         elif final == 'J':
             self.grid = [[(' ', set()) for _ in range(self.cols)]
                          for _ in range(self.rows)]

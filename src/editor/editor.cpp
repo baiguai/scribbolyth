@@ -9,6 +9,7 @@
 #include "../bookmark/bookmark.hpp"
 #include "../clipboard/clipboard.hpp"
 #include "../history/history.hpp"
+#include "../search/search.hpp"
 #include "../visual_block/visual_block.hpp"
 
 namespace scribbolyth::editor
@@ -398,6 +399,11 @@ namespace scribbolyth::editor
                 {
                     return ftxui::text("Select a node to edit") | ftxui::dim | ftxui::center;
                 }
+                if (state_->search_reveal_pending)
+                {
+                    state_->search_reveal_pending = false;
+                    JumpToFirstSearchMatch();
+                }
 
                 ftxui::Elements rows;
                 const bool sel_active = IsVisualMode(state_->mode) && visual_row_ >= 0;
@@ -420,6 +426,15 @@ namespace scribbolyth::editor
                     std::swap(c_first, c_last);
                     std::swap(c_first_col, c_last_col);
                 }
+                // Search-match highlighting: when the active node is one of
+                // the find matches, every occurrence of the query in its text
+                // is highlighted so the '/' find is visible in the editor too.
+                const bool node_is_search_match =
+                    state_->search_active
+                    && std::find(state_->search_matches.begin(),
+                                 state_->search_matches.end(), active_)
+                           != state_->search_matches.end();
+
                 auto RowHighlight = [&](int r, int& h_lo, int& h_hi) -> bool
                 {
                     // Column block (Ctrl+V): a rectangle whose rows run from
@@ -493,6 +508,17 @@ namespace scribbolyth::editor
                         cuts.push_back(c);
                         cuts.push_back(std::min(c + 1, size));
                     }
+                    std::vector<std::pair<int, int>> line_matches;
+                    if (node_is_search_match)
+                    {
+                        line_matches = scribbolyth::search::FindLineMatches(
+                            lines_[r], state_->search_query);
+                        for (const auto& m : line_matches)
+                        {
+                            cuts.push_back(m.first);
+                            cuts.push_back(m.second);
+                        }
+                    }
                     cuts.push_back(size);
                     std::sort(cuts.begin(), cuts.end());
                     cuts.erase(std::unique(cuts.begin(), cuts.end()), cuts.end());
@@ -505,6 +531,9 @@ namespace scribbolyth::editor
                         if (b <= a) continue;
                         const bool cursor_char = (c >= 0 && a == c && b == c + 1);
                         const bool selected = highlighted && a >= h_lo && b <= h_hi;
+                        const bool match = std::any_of(
+                            line_matches.begin(), line_matches.end(),
+                            [&](const auto& m) { return a >= m.first && b <= m.second; });
                         ftxui::Element el = ftxui::text(lines_[r].substr(
                             static_cast<std::size_t>(a), static_cast<std::size_t>(b - a)));
                         if (cursor_char)
@@ -514,6 +543,10 @@ namespace scribbolyth::editor
                         else if (selected)
                         {
                             el = el | ftxui::inverted;
+                        }
+                        else if (match)
+                        {
+                            el = el | ftxui::bgcolor(ftxui::Color::Yellow);
                         }
                         parts.push_back(std::move(el));
                     }
@@ -618,6 +651,34 @@ namespace scribbolyth::editor
                 row_ = 0;
                 col_ = 0;
                 last_col_ = 0;
+                JumpToFirstSearchMatch();
+            }
+
+            // Move the cursor to the first occurrence of the active search
+            // query in the freshly loaded node, so the '/' find and n/N
+            // navigation reveal the match in the editor (as in Vim).
+            void JumpToFirstSearchMatch()
+            {
+                if (!state_->search_active || active_ == nullptr) return;
+                if (std::find(state_->search_matches.begin(),
+                              state_->search_matches.end(), active_)
+                    == state_->search_matches.end())
+                {
+                    return;
+                }
+                for (std::size_t r = 0; r < lines_.size(); ++r)
+                {
+                    const auto ranges =
+                        scribbolyth::search::FindLineMatches(lines_[r],
+                                                             state_->search_query);
+                    if (!ranges.empty())
+                    {
+                        row_ = static_cast<int>(r);
+                        col_ = ranges[0].first;
+                        last_col_ = col_;
+                        return;
+                    }
+                }
             }
 
             void Save()

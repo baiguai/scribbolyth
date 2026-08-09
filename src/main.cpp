@@ -143,7 +143,13 @@ int main(int, char** argv) {
         }
         if (event == Event::Escape || event == Event::Return) {
             if (event == Event::Return)
-                scribbolyth::op::ExecuteCommand(state, state->command_buffer);
+            {
+                const std::string& buffer = state->command_buffer;
+                if (!buffer.empty() && buffer[0] == '/')
+                    scribbolyth::op::ExecuteSearch(state, buffer);
+                else
+                    scribbolyth::op::ExecuteCommand(state, buffer);
+            }
             state->command_buffer.clear();
             state->command_cursor = 0;
             if (state->active_child)

@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <filesystem>
 #include <functional>
+#include <set>
 #include <string>
 #include <utility>
 
@@ -12,6 +13,7 @@
 #include "../history/history.hpp"
 #include "../io/serialize.hpp"
 #include "../html/convert.hpp"
+#include "../op/op.hpp"
 #include "../undo/undo.hpp"
 
 namespace scribbolyth::treeview
@@ -153,6 +155,23 @@ namespace scribbolyth::treeview
                 state_->operations["enter_command"] = [this](const std::string&, int)
                 {
                     scribbolyth::op::OpenCommandLine(state_, "");
+                };
+                state_->operations["enter_search"] = [this](const std::string&, int)
+                {
+                    scribbolyth::op::OpenSearchCommand(state_);
+                };
+                state_->operations["search_next"] = [this](const std::string&, int)
+                {
+                    SearchJump(+1);
+                };
+                state_->operations["search_prev"] = [this](const std::string&, int)
+                {
+                    SearchJump(-1);
+                };
+                state_->operations["search_clear"] = [this](const std::string&, int)
+                {
+                    state_->search_active = false;
+                    state_->status = "Search highlight cleared";
                 };
                 state_->operations["save"] = [this](const std::string&, int)
                 {
@@ -304,6 +323,7 @@ namespace scribbolyth::treeview
             void DeleteNode();
             void MoveNode(int dir);
             void MoveParent(int dir);
+            void SearchJump(int dir);
             void RefreshActiveNode();
             void SaveTo(const std::string& path);
             void LoadFrom(const std::string& path);
@@ -475,6 +495,23 @@ namespace scribbolyth::treeview
             }
         }
         selected_ = visible.front();
+    }
+
+    void TreeView::SearchJump(int dir)
+    {
+        const auto& matches = state_->search_matches;
+        if (matches.empty())
+        {
+            state_->status = "No search";
+            return;
+        }
+        const int n = static_cast<int>(matches.size());
+        int idx = state_->search_index;
+        if (idx < 0) idx = (dir > 0) ? 0 : n - 1;
+        else idx = (idx + dir + n) % n;
+        state_->search_index = idx;
+        if (state_->reveal_node) state_->reveal_node(matches[static_cast<std::size_t>(idx)]);
+        state_->status = "Match " + std::to_string(idx + 1) + " of " + std::to_string(n);
     }
 
     void TreeView::MoveNode(int dir)
@@ -935,11 +972,16 @@ namespace scribbolyth::treeview
         return scribbolyth::op::HandleKey(state_, event);
     }
 
-    void RenderNode(const TreeNode& node, int depth, const TreeNode* selected, ftxui::Elements& rows)
+    void RenderNode(const TreeNode& node, int depth, const TreeNode* selected,
+                    const std::set<const TreeNode*>* matches, ftxui::Elements& rows)
     {
         std::string indent(depth * 2, ' ');
         std::string marker = !node.children.empty() ? (node.expanded ? "▾" : "▸") : " ";
         auto row = ftxui::text(indent + marker + " " + node.name);
+        if (matches != nullptr && matches->find(&node) != matches->end())
+        {
+            row |= ftxui::bgcolor(ftxui::Color::Yellow);
+        }
         if (&node == selected)
         {
             row |= ftxui::inverted;
@@ -953,16 +995,24 @@ namespace scribbolyth::treeview
         }
         for (const auto& child : node.children)
         {
-            RenderNode(child, depth + 1, selected, rows);
+            RenderNode(child, depth + 1, selected, matches, rows);
         }
     }
 
     ftxui::Element TreeView::Render()
     {
+        std::set<const TreeNode*> matches;
+        if (state_->search_active)
+        {
+            for (const TreeNode* m : state_->search_matches)
+            {
+                matches.insert(m);
+            }
+        }
         ftxui::Elements rows;
         for (const auto& root : roots_)
         {
-            RenderNode(root, 0, selected_, rows);
+            RenderNode(root, 0, selected_, &matches, rows);
         }
         return ftxui::vbox(std::move(rows)) | ftxui::frame | ftxui::flex;
     }

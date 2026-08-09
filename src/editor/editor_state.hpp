@@ -89,6 +89,21 @@ struct EditorState {
     // node. Set by the editor.
     std::function<void(int)> reveal_line;
 
+    // Vim-style find state (the last '/' search). `search_matches` holds the
+    // nodes that matched the last query, in document order; `search_index` is
+    // the currently selected match (n/N move it, wrapping). `search_active`
+    // is cleared by ':noh' to hide the match highlight; the query and match
+    // list are kept so n/N keep working, as in Vim.
+    std::string search_query;
+    std::vector<scribbolyth::treeview::TreeNode*> search_matches;
+    int search_index = -1;
+    bool search_active = false;
+
+    // Set when a '/' find executes; the editor consumes it to move its cursor
+    // to the first occurrence in the (possibly unchanged) active node so the
+    // match is revealed in the text, as in Vim.
+    bool search_reveal_pending = false;
+
     std::map<std::string, scribbolyth::op::Operation> operations;
     std::map<std::string, std::string> commands;
 
