@@ -39,9 +39,20 @@ try:
     s.require('Alpha', 'tree node created')
     s.require('Gamma', 'tree node created')
 
-    # 1) '/' in NORMAL opens the command field prefilled with '/'
+    # Gamma (the selected node) gets a body with repeated words so n/N have
+    # occurrences to step through. Still in TREE mode, so 'i' then 'i' cleanly
+    # drops into INSERT with no stray characters.
     s.send(b'i')
     s.step(0.3)
+    s.send(b'i')
+    s.step(0.3)
+    s.send(b'gain first gain second gain third')
+    s.step(0.3)
+    s.send(b'\x1b')
+    s.step(0.3)
+    s.require('gain', 'gamma body text entered')
+
+    # 1) '/' in NORMAL opens the command field prefilled with '/'
     assert 'NORMAL' in s.row_text(s.rows - 1), 'mode must be NORMAL'
     s.send(b'/')
     s.step(0.3)
@@ -66,18 +77,6 @@ try:
     print('ok: matches are highlighted and the first is selected')
 
     # 4) n/N step the cursor through the matches inside the note text
-    s.send(b'a')
-    s.send(b'Body')
-    s.send(b'\r')
-    s.step(0.3)
-    s.send(b'i')
-    s.step(0.3)
-    s.send(b'i')
-    s.step(0.3)
-    s.send(b'gain first gain second gain third')
-    s.step(0.3)
-    s.send(b'\x1b')
-    s.step(0.3)
     s.send(b'/gain')
     s.step(0.3)
     s.send(b'\r')
@@ -156,6 +155,48 @@ try:
     assert cur is not None and s.row_text(cur[0])[cur[1]:cur[1] + 4] == 'gain', \
         'cursor must land on the (case-insensitive) match'
     print('ok: search is case-insensitive')
+
+    # 9) '*' searches for the word under the cursor and jumps to the next match
+    first_col = cur[1]
+    s.send(b'*')
+    s.step(0.3)
+    cur = editor_cursor()
+    assert cur is not None and cur[1] > first_col, '* must jump to the next occurrence'
+    assert s.row_text(cur[0])[cur[1]:cur[1] + 4] == 'gain', '* jumped onto the word'
+    assert 'Match 1 of 1' in s.row_text(s.rows - 1), '* reports the match'
+    second_col = cur[1]
+    s.send(b'n')
+    s.step(0.2)
+    cur = editor_cursor()
+    assert cur is not None and cur[1] > second_col, 'n must continue stepping after *'
+    s.send(b'n')
+    s.step(0.2)
+    cur = editor_cursor()
+    assert cur is not None and cur[1] == first_col, 'n must wrap to the first after *'
+    print('ok: * searches for the word under the cursor')
+
+    # 10) '*' re-enables the highlight after :noh and keeps the query for n/N
+    s.send(b':noh')
+    s.step(0.2)
+    s.send(b'\r')
+    s.step(0.3)
+    assert 'Search highlight cleared' in s.row_text(s.rows - 1), ':noh status'
+    s.send(b'*')
+    s.step(0.3)
+    yellow = any('bgyellow' in st
+                 for r in range(0, s.rows - 2)
+                 for c in range(31, s.cols)
+                 for st in s.grid[r][c][1])
+    assert yellow, '* must re-highlight the word'
+    cur = editor_cursor()
+    assert cur is not None and s.row_text(cur[0])[cur[1]:cur[1] + 4] == 'gain', \
+        'cursor must sit on a gain after *'
+    s.send(b'n')
+    s.step(0.2)
+    cur2 = editor_cursor()
+    assert cur2 is not None and cur2 != cur, 'n must still step after *'
+    print('ok: * re-enables the search highlight and n still steps')
+
 finally:
     s.quit()
 

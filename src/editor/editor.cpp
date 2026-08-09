@@ -1,6 +1,7 @@
 #include "editor.hpp"
 
 #include <algorithm>
+#include <cctype>
 #include <string>
 #include <vector>
 
@@ -368,6 +369,10 @@ namespace scribbolyth::editor
                 state_->search_jump = [this](int dir)
                 {
                     StepSearchOccurrence(dir);
+                };
+                state_->operations["search_word"] = [this](const std::string&, int)
+                {
+                    SearchWordUnderCursor();
                 };
 
                 state_->operations["bookmark"] = [this](const std::string& args, int)
@@ -755,6 +760,64 @@ namespace scribbolyth::editor
                     }
                     SetCursor(occs.back().line, occs.back().col);
                 }
+            }
+
+            // The word (letters, digits, '_') under the editor cursor, as Vim
+            // defines it for '*'. When the cursor sits right after a word,
+            // that word is used.
+            std::string WordUnderCursor() const
+            {
+                if (lines_.empty()) return "";
+                const std::string& line = lines_[static_cast<std::size_t>(row_)];
+                if (line.empty()) return "";
+                const auto is_word = [](char ch) {
+                    return std::isalnum(static_cast<unsigned char>(ch)) || ch == '_';
+                };
+                const int size = static_cast<int>(line.size());
+                int pos = std::min(col_, size - 1);
+                if (pos >= 0 && !is_word(line[static_cast<std::size_t>(pos)])
+                    && pos > 0 && is_word(line[static_cast<std::size_t>(pos - 1)]))
+                {
+                    pos = pos - 1;
+                }
+                if (pos < 0 || !is_word(line[static_cast<std::size_t>(pos)])) return "";
+                int start = pos;
+                while (start > 0 && is_word(line[static_cast<std::size_t>(start - 1)]))
+                {
+                    --start;
+                }
+                int end = pos + 1;
+                while (end < size && is_word(line[static_cast<std::size_t>(end)]))
+                {
+                    ++end;
+                }
+                return line.substr(static_cast<std::size_t>(start),
+                                   static_cast<std::size_t>(end - start));
+            }
+
+            // Vim '*': search for the word under the cursor and jump to its
+            // next occurrence (wrapping). The word becomes the active find
+            // query, so n/N continue stepping through it and the highlight
+            // shows every node that contains it.
+            void SearchWordUnderCursor()
+            {
+                if (active_ == nullptr) return;
+                LoadIfChanged();
+                const std::string word = WordUnderCursor();
+                if (word.empty())
+                {
+                    state_->status = "No word under cursor";
+                    return;
+                }
+                state_->search_query = word;
+                state_->search_matches = scribbolyth::search::FindMatches(state_, word);
+                state_->search_active = true;
+                const auto it = std::find(state_->search_matches.begin(),
+                                          state_->search_matches.end(), active_);
+                state_->search_index = (it == state_->search_matches.end())
+                    ? -1
+                    : static_cast<int>(it - state_->search_matches.begin());
+                StepSearchOccurrence(+1);
             }
 
             void Save()
