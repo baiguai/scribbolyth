@@ -1,6 +1,7 @@
 #include "editor.hpp"
 
 #include <algorithm>
+#include <cctype>
 #include <string>
 #include <vector>
 
@@ -9,6 +10,8 @@
 #include "../bookmark/bookmark.hpp"
 #include "../clipboard/clipboard.hpp"
 #include "../history/history.hpp"
+#include "../search/search.hpp"
+#include "../visual_block/visual_block.hpp"
 
 namespace scribbolyth::editor
 {
@@ -26,7 +29,7 @@ namespace scribbolyth::editor
 
         bool IsVisualMode(Mode m)
         {
-            return m == Mode::VISUAL || m == Mode::VISUAL_LINE;
+            return m == Mode::VISUAL || m == Mode::VISUAL_LINE || m == Mode::VISUAL_BLOCK;
         }
 
         std::string TrimBoth(const std::string& s)
@@ -100,6 +103,48 @@ namespace scribbolyth::editor
         bool WriteClipboard(const std::string& text)
         {
             return scribbolyth::clipboard::Write(text);
+        }
+
+        // Split "old/new" at the first unescaped '/'. A backslash-slash
+        // ("\/") is a literal slash and is unescaped in both parts. Returns
+        // false when no separator is present.
+        bool ParseReplaceArgs(const std::string& args, std::string& old_text,
+                              std::string& new_text)
+        {
+            std::size_t sep = std::string::npos;
+            for (std::size_t i = 0; i < args.size(); ++i)
+            {
+                if (args[i] == '/' && (i == 0 || args[i - 1] != '\\'))
+                {
+                    sep = i;
+                    break;
+                }
+            }
+            if (sep == std::string::npos) return false;
+            old_text = args.substr(0, sep);
+            new_text = args.substr(sep + 1);
+
+            const auto unescape = [](std::string& s)
+            {
+                std::string out;
+                out.reserve(s.size());
+                for (std::size_t i = 0; i < s.size(); ++i)
+                {
+                    if (s[i] == '\\' && i + 1 < s.size() && s[i + 1] == '/')
+                    {
+                        out += '/';
+                        ++i;
+                    }
+                    else
+                    {
+                        out += s[i];
+                    }
+                }
+                s = out;
+            };
+            unescape(old_text);
+            unescape(new_text);
+            return true;
         }
     }
 
@@ -243,6 +288,43 @@ namespace scribbolyth::editor
                 {
                     LowerSelection();
                 };
+                state_->operations["block_insert_start"] = [this](const std::string&, int)
+                {
+                    if (!Editable()) return;
+                    EnterBlockInsert(false);
+                };
+                state_->operations["block_insert_end"] = [this](const std::string&, int)
+                {
+                    if (!Editable()) return;
+                    EnterBlockInsert(true);
+                };
+                state_->operations["block_file_start"] = [this](const std::string&, int)
+                {
+                    if (!Editable()) return;
+                    row_ = 0;
+                    col_ = std::min(col_, static_cast<int>(lines_[row_].size()));
+                    last_col_ = col_;
+                };
+                state_->operations["block_file_end"] = [this](const std::string&, int)
+                {
+                    if (!Editable()) return;
+                    row_ = static_cast<int>(lines_.size()) - 1;
+                    col_ = std::min(col_, static_cast<int>(lines_[row_].size()));
+                    last_col_ = col_;
+                };
+                state_->operations["block_to_eol"] = [this](const std::string&, int)
+                {
+                    if (!Editable()) return;
+                    const int b_lo = std::min(visual_row_, row_);
+                    const int b_hi = std::max(visual_row_, row_);
+                    int widest = 0;
+                    for (int r = b_lo; r <= b_hi; ++r)
+                    {
+                        widest = std::max(widest, static_cast<int>(lines_[r].size()));
+                    }
+                    col_ = widest;
+                    last_col_ = col_;
+                };
 
                 state_->operations["yank"] = [this](const std::string&, int)
                 {
@@ -326,6 +408,19 @@ namespace scribbolyth::editor
                     visual_col_ = -1;
                 };
 
+                state_->search_jump = [this](int dir)
+                {
+                    StepSearchOccurrence(dir);
+                };
+                state_->operations["search_word"] = [this](const std::string&, int)
+                {
+                    SearchWordUnderCursor();
+                };
+                state_->operations["replace"] = [this](const std::string& args, int)
+                {
+                    ReplaceText(args);
+                };
+
                 state_->operations["bookmark"] = [this](const std::string& args, int)
                 {
                     if (state_->active_node == nullptr) return;
@@ -360,6 +455,11 @@ namespace scribbolyth::editor
                 {
                     return ftxui::text("Select a node to edit") | ftxui::dim | ftxui::center;
                 }
+                if (state_->search_reveal_pending)
+                {
+                    state_->search_reveal_pending = false;
+                    JumpToFirstSearchMatch();
+                }
 
                 ftxui::Elements rows;
                 const bool sel_active = IsVisualMode(state_->mode) && visual_row_ >= 0;
@@ -382,8 +482,33 @@ namespace scribbolyth::editor
                     std::swap(c_first, c_last);
                     std::swap(c_first_col, c_last_col);
                 }
+                // Search-match highlighting: when the active node is one of
+                // the find matches, every occurrence of the query in its text
+                // is highlighted so the '/' find is visible in the editor too.
+                const bool node_is_search_match =
+                    state_->search_active
+                    && std::find(state_->search_matches.begin(),
+                                 state_->search_matches.end(), active_)
+                           != state_->search_matches.end();
+
                 auto RowHighlight = [&](int r, int& h_lo, int& h_hi) -> bool
                 {
+                    // Column block (Ctrl+V): a rectangle whose rows run from
+                    // the anchor to the cursor and whose columns run from the
+                    // smaller of the two columns to the larger (inclusive).
+                    if (state_->mode == Mode::VISUAL_BLOCK
+                        && visual_row_ >= 0 && visual_col_ >= 0)
+                    {
+                        const int b_lo = std::min(visual_row_, row_);
+                        const int b_hi = std::max(visual_row_, row_);
+                        const int b_col_lo = std::min(visual_col_, col_);
+                        const int b_col_hi = std::max(visual_col_, col_);
+                        if (r < b_lo || r > b_hi) return false;
+                        const int size = static_cast<int>(lines_[r].size());
+                        h_lo = std::min(b_col_lo, size);
+                        h_hi = std::min(b_col_hi + 1, size);
+                        return h_lo < h_hi;
+                    }
                     if (line_visual)
                     {
                         if (r < lo || r > hi) return false;
@@ -439,6 +564,17 @@ namespace scribbolyth::editor
                         cuts.push_back(c);
                         cuts.push_back(std::min(c + 1, size));
                     }
+                    std::vector<std::pair<int, int>> line_matches;
+                    if (node_is_search_match)
+                    {
+                        line_matches = scribbolyth::search::FindLineMatches(
+                            lines_[r], state_->search_query);
+                        for (const auto& m : line_matches)
+                        {
+                            cuts.push_back(m.first);
+                            cuts.push_back(m.second);
+                        }
+                    }
                     cuts.push_back(size);
                     std::sort(cuts.begin(), cuts.end());
                     cuts.erase(std::unique(cuts.begin(), cuts.end()), cuts.end());
@@ -451,6 +587,9 @@ namespace scribbolyth::editor
                         if (b <= a) continue;
                         const bool cursor_char = (c >= 0 && a == c && b == c + 1);
                         const bool selected = highlighted && a >= h_lo && b <= h_hi;
+                        const bool match = std::any_of(
+                            line_matches.begin(), line_matches.end(),
+                            [&](const auto& m) { return a >= m.first && b <= m.second; });
                         ftxui::Element el = ftxui::text(lines_[r].substr(
                             static_cast<std::size_t>(a), static_cast<std::size_t>(b - a)));
                         if (cursor_char)
@@ -460,6 +599,10 @@ namespace scribbolyth::editor
                         else if (selected)
                         {
                             el = el | ftxui::inverted;
+                        }
+                        else if (match)
+                        {
+                            el = el | ftxui::bgcolor(ftxui::Color::Yellow);
                         }
                         parts.push_back(std::move(el));
                     }
@@ -484,6 +627,30 @@ namespace scribbolyth::editor
             bool OnEvent(ftxui::Event event) override
             {
                 const bool visual_before = IsVisualMode(state_->mode);
+
+                // While a block insert (Ctrl+V then I/A) is pending, typed
+                // characters are buffered instead of being handled by the
+                // regular INSERT path, so the whole block can be updated in a
+                // single step when Esc applies the insertion.
+                if (block_insert_.active)
+                {
+                    if (event == ftxui::Event::Backspace)
+                    {
+                        if (!block_insert_.pending.empty())
+                        {
+                            block_insert_.pending.pop_back();
+                            Backspace();
+                        }
+                        return true;
+                    }
+                    if (event.is_character())
+                    {
+                        block_insert_.pending += event.character();
+                        InsertText(event.character());
+                        return true;
+                    }
+                }
+
                 if (scribbolyth::op::HandleKey(state_, event))
                 {
                     if (!visual_before && IsVisualMode(state_->mode))
@@ -491,10 +658,15 @@ namespace scribbolyth::editor
                         visual_row_ = row_;
                         visual_col_ = col_;
                     }
-                    if (visual_before && !IsVisualMode(state_->mode))
+                    if (visual_before && !IsVisualMode(state_->mode)
+                        && state_->mode != Mode::COMMAND)
                     {
                         visual_row_ = -1;
                         visual_col_ = -1;
+                    }
+                    if (block_insert_.active && state_->mode == Mode::NORMAL)
+                    {
+                        ApplyBlockInsert();
                     }
                     return true;
                 }
@@ -536,6 +708,313 @@ namespace scribbolyth::editor
                 row_ = 0;
                 col_ = 0;
                 last_col_ = 0;
+                JumpToFirstSearchMatch();
+            }
+
+            // Move the cursor to the first occurrence of the active search
+            // query in the freshly loaded node, so the '/' find and n/N
+            // navigation reveal the match in the editor (as in Vim).
+            void JumpToFirstSearchMatch()
+            {
+                if (!state_->search_active || active_ == nullptr) return;
+                if (std::find(state_->search_matches.begin(),
+                              state_->search_matches.end(), active_)
+                    == state_->search_matches.end())
+                {
+                    return;
+                }
+                for (std::size_t r = 0; r < lines_.size(); ++r)
+                {
+                    const auto ranges =
+                        scribbolyth::search::FindLineMatches(lines_[r],
+                                                             state_->search_query);
+                    if (!ranges.empty())
+                    {
+                        SetCursor(static_cast<int>(r), ranges[0].first);
+                        return;
+                    }
+                }
+            }
+
+            // Place the cursor on (row, col), clamped to the document.
+            void SetCursor(int row, int col)
+            {
+                if (lines_.empty()) return;
+                row_ = std::max(0, std::min(row, static_cast<int>(lines_.size()) - 1));
+                col_ = std::max(0, std::min(col, static_cast<int>(lines_[static_cast<std::size_t>(row_)].size())));
+                last_col_ = col_;
+                visual_row_ = -1;
+                visual_col_ = -1;
+            }
+
+            // Step the cursor to the next (dir > 0) or previous (dir < 0)
+            // occurrence of the active search query inside the current node's
+            // text, wrapping around like Vim's n/N. Also works while the
+            // highlight is hidden by ':noh' (the query is kept). Does nothing
+            // when there is no search or the node has no occurrences.
+            void StepSearchOccurrence(int dir)
+            {
+                if (active_ == nullptr) return;
+                if (state_->search_query.empty())
+                {
+                    state_->status = "No search";
+                    return;
+                }
+
+                struct Occ
+                {
+                    int line;
+                    int col;
+                };
+                std::vector<Occ> occs;
+                for (std::size_t r = 0; r < lines_.size(); ++r)
+                {
+                    const auto ranges =
+                        scribbolyth::search::FindLineMatches(lines_[r],
+                                                             state_->search_query);
+                    for (const auto& m : ranges)
+                    {
+                        occs.push_back(Occ{static_cast<int>(r), m.first});
+                    }
+                }
+                if (occs.empty())
+                {
+                    state_->status = "No matches in this node";
+                    return;
+                }
+
+                if (dir > 0)
+                {
+                    for (const auto& o : occs)
+                    {
+                        if (o.line > row_ || (o.line == row_ && o.col > col_))
+                        {
+                            SetCursor(o.line, o.col);
+                            return;
+                        }
+                    }
+                    SetCursor(occs.front().line, occs.front().col);
+                }
+                else
+                {
+                    for (auto it = occs.rbegin(); it != occs.rend(); ++it)
+                    {
+                        if (it->line < row_ || (it->line == row_ && it->col < col_))
+                        {
+                            SetCursor(it->line, it->col);
+                            return;
+                        }
+                    }
+                    SetCursor(occs.back().line, occs.back().col);
+                }
+            }
+
+            // The word (letters, digits, '_') under the editor cursor, as Vim
+            // defines it for '*'. When the cursor sits right after a word,
+            // that word is used.
+            std::string WordUnderCursor() const
+            {
+                if (lines_.empty()) return "";
+                const std::string& line = lines_[static_cast<std::size_t>(row_)];
+                if (line.empty()) return "";
+                const auto is_word = [](char ch) {
+                    return std::isalnum(static_cast<unsigned char>(ch)) || ch == '_';
+                };
+                const int size = static_cast<int>(line.size());
+                int pos = std::min(col_, size - 1);
+                if (pos >= 0 && !is_word(line[static_cast<std::size_t>(pos)])
+                    && pos > 0 && is_word(line[static_cast<std::size_t>(pos - 1)]))
+                {
+                    pos = pos - 1;
+                }
+                if (pos < 0 || !is_word(line[static_cast<std::size_t>(pos)])) return "";
+                int start = pos;
+                while (start > 0 && is_word(line[static_cast<std::size_t>(start - 1)]))
+                {
+                    --start;
+                }
+                int end = pos + 1;
+                while (end < size && is_word(line[static_cast<std::size_t>(end)]))
+                {
+                    ++end;
+                }
+                return line.substr(static_cast<std::size_t>(start),
+                                   static_cast<std::size_t>(end - start));
+            }
+
+            // Vim '*': search for the word under the cursor and jump to its
+            // next occurrence (wrapping). The word becomes the active find
+            // query, so n/N continue stepping through it and the highlight
+            // shows every node that contains it.
+            void SearchWordUnderCursor()
+            {
+                if (active_ == nullptr) return;
+                LoadIfChanged();
+                const std::string word = WordUnderCursor();
+                if (word.empty())
+                {
+                    state_->status = "No word under cursor";
+                    return;
+                }
+                state_->search_query = word;
+                state_->search_matches = scribbolyth::search::FindMatches(state_, word);
+                state_->search_active = true;
+                const auto it = std::find(state_->search_matches.begin(),
+                                          state_->search_matches.end(), active_);
+                state_->search_index = (it == state_->search_matches.end())
+                    ? -1
+                    : static_cast<int>(it - state_->search_matches.begin());
+                StepSearchOccurrence(+1);
+            }
+
+            // Replace every occurrence of `old_text` in `line` with `new_text`,
+            // counting the replacements.
+            void ReplaceAllInString(std::string& line, const std::string& old_text,
+                                    const std::string& new_text, int& count)
+            {
+                if (old_text.empty()) return;
+                std::size_t pos = 0;
+                while ((pos = line.find(old_text, pos)) != std::string::npos)
+                {
+                    line.replace(pos, old_text.size(), new_text);
+                    pos += new_text.size();
+                    ++count;
+                }
+            }
+
+            // Replace within the half-open column range [lo, hi) of `line`.
+            void ReplaceRange(std::string& line, int lo, int hi,
+                              const std::string& old_text,
+                              const std::string& new_text, int& count)
+            {
+                lo = std::max(0, lo);
+                hi = std::min(hi, static_cast<int>(line.size()));
+                if (lo >= hi) return;
+                std::string seg = line.substr(static_cast<std::size_t>(lo),
+                                              static_cast<std::size_t>(hi - lo));
+                ReplaceAllInString(seg, old_text, new_text, count);
+                line.replace(static_cast<std::size_t>(lo),
+                             static_cast<std::size_t>(hi - lo), seg);
+            }
+
+            void FinishReplace(int count)
+            {
+                if (count > 0)
+                {
+                    state_->status = "Replaced " + std::to_string(count)
+                        + (count == 1 ? " occurrence" : " occurrences");
+                }
+                else
+                {
+                    state_->status = "No matches replaced";
+                }
+            }
+
+            // Vim ':replace old/new' (also bound to 'R'): literal, global
+            // replace of `old` with `new` inside the current node's text. In
+            // NORMAL mode the whole node text is processed (like :%s/../g);
+            // in VISUAL/VISUAL_LINE/VISUAL_BLOCK only the selected range is
+            // touched. Only this node's text is ever changed.
+            void ReplaceText(const std::string& args)
+            {
+                if (active_ == nullptr) return;
+                LoadIfChanged();
+                if (lines_.empty()) lines_.push_back("");
+
+                std::string old_text, new_text;
+                if (!ParseReplaceArgs(args, old_text, new_text))
+                {
+                    state_->status = "Usage: replace old/new";
+                    return;
+                }
+                if (old_text.empty())
+                {
+                    state_->status = "Replace: empty old text";
+                    return;
+                }
+
+                int count = 0;
+                // The op runs while the command line is active, so the mode
+                // that invoked it (and any VISUAL selection) is captured by
+                // mode_before_command and the selection anchor.
+                const bool was_visual =
+                    IsVisualMode(state_->mode_before_command) && visual_row_ >= 0;
+                if (was_visual && state_->mode_before_command == Mode::VISUAL)
+                {
+                    int aRow = visual_row_, aCol = visual_col_;
+                    int bRow = row_, bCol = col_;
+                    if (aRow > bRow || (aRow == bRow && aCol > bCol))
+                    {
+                        std::swap(aRow, bRow);
+                        std::swap(aCol, bCol);
+                    }
+                    if (aRow == bRow)
+                    {
+                        const int size = static_cast<int>(lines_[aRow].size());
+                        aCol = std::min(aCol, size);
+                        bCol = std::min(bCol + 1, size);
+                        ReplaceRange(lines_[aRow], aCol, bCol, old_text, new_text, count);
+                    }
+                    else
+                    {
+                        ReplaceRange(lines_[aRow], aCol,
+                                     static_cast<int>(lines_[aRow].size()),
+                                     old_text, new_text, count);
+                        for (int r = aRow + 1; r < bRow; ++r)
+                        {
+                            ReplaceAllInString(lines_[r], old_text, new_text, count);
+                        }
+                        ReplaceRange(lines_[bRow], 0,
+                                     std::min(bCol, static_cast<int>(lines_[bRow].size())),
+                                     old_text, new_text, count);
+                    }
+                    row_ = aRow;
+                    col_ = std::min(aCol, static_cast<int>(lines_[aRow].size()));
+                }
+                else if (was_visual && state_->mode_before_command == Mode::VISUAL_LINE)
+                {
+                    const int a = std::min(visual_row_, row_);
+                    const int b = std::max(visual_row_, row_);
+                    for (int r = a; r <= b; ++r)
+                    {
+                        ReplaceAllInString(lines_[r], old_text, new_text, count);
+                    }
+                    row_ = a;
+                    col_ = 0;
+                }
+                else if (was_visual && state_->mode_before_command == Mode::VISUAL_BLOCK)
+                {
+                    const auto block =
+                        visual_block::MakeBlock(visual_row_, visual_col_, row_, col_);
+                    for (int r = block.row_lo; r <= block.row_hi; ++r)
+                    {
+                        int lo = 0, hi = 0;
+                        if (!visual_block::LineSpan(lines_, block, r, lo, hi)) continue;
+                        ReplaceRange(lines_[r], lo, hi, old_text, new_text, count);
+                    }
+                    row_ = block.row_lo;
+                    col_ = std::min(block.col_lo,
+                                    static_cast<int>(lines_[row_].size()));
+                }
+                else
+                {
+                    for (std::string& line : lines_)
+                    {
+                        ReplaceAllInString(line, old_text, new_text, count);
+                    }
+                }
+
+                // Leave VISUAL mode like Vim's :s does; the mode restored by
+                // the command line is whatever is set here.
+                if (was_visual)
+                {
+                    visual_row_ = -1;
+                    visual_col_ = -1;
+                    state_->mode = Mode::NORMAL;
+                    state_->mode_before_command = Mode::NORMAL;
+                }
+                Save();
+                FinishReplace(count);
             }
 
             void Save()
@@ -718,7 +1197,8 @@ namespace scribbolyth::editor
             {
                 if (lines_.empty()) lines_.push_back("");
                 row_ = std::max(0, std::min(row_, static_cast<int>(lines_.size()) - 1));
-                col_ = std::max(0, std::min(col_, static_cast<int>(lines_[row_].size())));
+                if (state_->mode != Mode::VISUAL_BLOCK)
+                    col_ = std::max(0, std::min(col_, static_cast<int>(lines_[row_].size())));
             }
 
             void CursorUp()
@@ -727,7 +1207,8 @@ namespace scribbolyth::editor
                 {
                     last_col_ = col_;
                     --row_;
-                    col_ = std::min(last_col_, static_cast<int>(lines_[row_].size()));
+                    if (state_->mode != Mode::VISUAL_BLOCK)
+                        col_ = std::min(last_col_, static_cast<int>(lines_[row_].size()));
                 }
                 else
                 {
@@ -741,12 +1222,18 @@ namespace scribbolyth::editor
                 {
                     last_col_ = col_;
                     ++row_;
-                    col_ = std::min(last_col_, static_cast<int>(lines_[row_].size()));
+                    if (state_->mode != Mode::VISUAL_BLOCK)
+                        col_ = std::min(last_col_, static_cast<int>(lines_[row_].size()));
                 }
             }
 
             void CursorLeft()
             {
+                if (state_->mode == Mode::VISUAL_BLOCK)
+                {
+                    col_ = std::max(0, col_ - 1);
+                    return;
+                }
                 if (col_ > 0)
                 {
                     --col_;
@@ -760,6 +1247,11 @@ namespace scribbolyth::editor
 
             void CursorRight()
             {
+                if (state_->mode == Mode::VISUAL_BLOCK)
+                {
+                    ++col_;
+                    return;
+                }
                 if (col_ < static_cast<int>(lines_[row_].size()))
                 {
                     ++col_;
@@ -906,6 +1398,76 @@ namespace scribbolyth::editor
                 }
             }
 
+            // Enter INSERT mode with a pending block insert (Vim Ctrl+V then
+            // I/A). The text the user types is accumulated in block_insert_ and
+            // shown live on the top row; ApplyBlockInsert() replays it on the
+            // remaining rows when Esc is pressed.
+            void EnterBlockInsert(bool at_end)
+            {
+                if (!(state_->mode == Mode::VISUAL_BLOCK
+                      && visual_row_ >= 0 && visual_col_ >= 0))
+                {
+                    return;
+                }
+                const auto block =
+                    visual_block::MakeBlock(visual_row_, visual_col_, row_, col_);
+                block_insert_.active = true;
+                block_insert_.at_end = at_end;
+                block_insert_.col = at_end ? block.col_hi + 1 : block.col_lo;
+                block_insert_.pending.clear();
+                block_insert_.rows.clear();
+                for (int r = block.row_lo; r <= block.row_hi; ++r)
+                {
+                    block_insert_.rows.push_back(r);
+                }
+                row_ = block.row_lo;
+                col_ = at_end
+                           ? std::min(block.col_hi + 1,
+                                      static_cast<int>(lines_[row_].size()))
+                           : std::min(block.col_lo,
+                                      static_cast<int>(lines_[row_].size()));
+                last_col_ = col_;
+                visual_row_ = -1;
+                visual_col_ = -1;
+                state_->mode = Mode::INSERT;
+            }
+
+            void ApplyBlockInsert()
+            {
+                if (!block_insert_.active) return;
+                block_insert_.active = false;
+                if (!block_insert_.pending.empty())
+                {
+                    for (const int r : block_insert_.rows)
+                    {
+                        if (r == row_) continue; // already edited live while typing
+                        if (block_insert_.at_end)
+                        {
+                            std::string& line = lines_[r];
+                            line.insert(std::min(block_insert_.col,
+                                                 static_cast<int>(line.size())),
+                                        block_insert_.pending);
+                        }
+                        else
+                        {
+                            std::string& line = lines_[r];
+                            if (static_cast<int>(line.size()) < block_insert_.col)
+                            {
+                                line.append(static_cast<std::size_t>(block_insert_.col) -
+                                                static_cast<std::size_t>(line.size()),
+                                            ' ');
+                            }
+                            line.insert(static_cast<std::size_t>(block_insert_.col),
+                                        block_insert_.pending);
+                        }
+                    }
+                    Save();
+                    state_->status = "Block inserted";
+                }
+                block_insert_.pending.clear();
+                block_insert_.rows.clear();
+            }
+
             void DeleteChar()
             {
                 auto& line = lines_[row_];
@@ -950,6 +1512,13 @@ namespace scribbolyth::editor
             std::string SelectionText() const
             {
                 std::string out;
+                if (state_->mode == Mode::VISUAL_BLOCK
+                    && visual_row_ >= 0 && visual_col_ >= 0)
+                {
+                    return visual_block::Extract(
+                        lines_,
+                        visual_block::MakeBlock(visual_row_, visual_col_, row_, col_));
+                }
                 if (state_->mode == Mode::VISUAL && visual_row_ >= 0 && visual_col_ >= 0)
                 {
                     int aRow = visual_row_, aCol = visual_col_;
@@ -1048,6 +1617,24 @@ namespace scribbolyth::editor
                     return;
                 }
 
+                if (state_->mode == Mode::VISUAL_BLOCK
+                    && visual_row_ >= 0 && visual_col_ >= 0)
+                {
+                    const auto block =
+                        visual_block::MakeBlock(visual_row_, visual_col_, row_, col_);
+                    visual_block::Erase(lines_, block);
+                    row_ = block.row_lo;
+                    col_ = std::min(block.col_lo,
+                                    static_cast<int>(lines_[row_].size()));
+                    visual_row_ = -1;
+                    visual_col_ = -1;
+                    state_->mode = Mode::NORMAL;
+                    Clamp();
+                    Save();
+                    state_->status = "Selection deleted";
+                    return;
+                }
+
                 int a = (visual_row_ >= 0) ? std::min(visual_row_, row_) : row_;
                 int b = (visual_row_ >= 0) ? std::max(visual_row_, row_) : row_;
                 if (a > b) std::swap(a, b);
@@ -1092,6 +1679,23 @@ namespace scribbolyth::editor
                 if (active_ == nullptr) return;
                 LoadIfChanged();
                 if (lines_.empty()) lines_.push_back("");
+
+                if (state_->mode == Mode::VISUAL_BLOCK
+                    && visual_row_ >= 0 && visual_col_ >= 0)
+                {
+                    const auto block =
+                        visual_block::MakeBlock(visual_row_, visual_col_, row_, col_);
+                    visual_block::Transform(lines_, block, fold);
+                    row_ = block.row_lo;
+                    col_ = std::min(block.col_lo,
+                                    static_cast<int>(lines_[row_].size()));
+                    visual_row_ = -1;
+                    visual_col_ = -1;
+                    state_->mode = Mode::NORMAL;
+                    Save();
+                    state_->status = status_msg;
+                    return;
+                }
 
                 if (state_->mode == Mode::VISUAL && visual_row_ >= 0 && visual_col_ >= 0)
                 {
@@ -1166,6 +1770,16 @@ namespace scribbolyth::editor
             int last_col_ = 0;
             int visual_row_ = -1;
             int visual_col_ = -1;
+
+            struct BlockInsert
+            {
+                bool active = false;
+                bool at_end = false;
+                int col = 0;
+                std::vector<int> rows;
+                std::string pending;
+            };
+            BlockInsert block_insert_;
     };
 
     ftxui::Component MakeEditor(std::shared_ptr<EditorState> state)

@@ -7,6 +7,7 @@
 
 #include "../editor/editor_state.hpp"
 #include "../mode/mode.hpp"
+#include "../search/search.hpp"
 
 namespace scribbolyth::op
 {
@@ -97,6 +98,7 @@ namespace scribbolyth::op
     void CompleteCommand(std::shared_ptr<EditorState> state)
     {
         std::string cmd = state->command_buffer;
+        if (!cmd.empty() && cmd[0] == '/') return;  // searching, not a command
         if (!cmd.empty() && cmd[0] == ':') cmd.erase(0, 1);
 
         std::size_t space = cmd.find(' ');
@@ -163,6 +165,15 @@ namespace scribbolyth::op
         if (state->active_child) *state->active_child = 1;
     }
 
+    void OpenSearchCommand(std::shared_ptr<EditorState> state)
+    {
+        state->mode_before_command = state->mode;
+        state->mode = Mode::COMMAND;
+        state->command_buffer = "/";
+        state->command_cursor = static_cast<int>(state->command_buffer.size());
+        if (state->active_child) *state->active_child = 1;
+    }
+
     void OpenCommandLineWithArgs(std::shared_ptr<EditorState> state,
                                  const std::string& command, const std::string& args)
     {
@@ -191,6 +202,41 @@ namespace scribbolyth::op
         auto op_it = state->operations.find(cmd_it->second);
         if (op_it == state->operations.end()) return false;
         op_it->second(args, 1);
+        return true;
+    }
+
+    bool ExecuteSearch(std::shared_ptr<EditorState> state, const std::string& input)
+    {
+        if (input.empty() || input[0] != '/') return false;
+
+        // An empty query re-runs the previous search, as in Vim.
+        std::string raw = input.substr(1);
+        if (raw.empty())
+        {
+            if (state->search_query.empty())
+            {
+                state->status = "No previous search";
+                return true;
+            }
+            raw = state->search_query;
+        }
+
+        state->search_query = raw;
+        state->search_matches = scribbolyth::search::FindMatches(state, raw);
+        state->search_index = -1;
+
+        if (state->search_matches.empty())
+        {
+            state->search_active = true;
+            state->status = "Pattern not found: " + raw;
+            return true;
+        }
+
+        state->search_active = true;
+        state->search_index = 0;
+        state->search_reveal_pending = true;
+        if (state->reveal_node) state->reveal_node(state->search_matches[0]);
+        state->status = "Match 1 of " + std::to_string(state->search_matches.size());
         return true;
     }
 

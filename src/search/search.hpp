@@ -1,13 +1,35 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include <ftxui/component/component.hpp>
 
 struct EditorState;
 
+namespace scribbolyth::treeview
+{
+    struct TreeNode;
+}
+
 namespace scribbolyth::search
 {
+    // Find all nodes matching `raw_query` (same prefix rules as the search
+    // dialog: a leading "r:" makes it a case-insensitive regex, a leading ":"
+    // restricts it to node titles, otherwise it is a case-insensitive
+    // substring match against titles and content). Returns matches in document
+    // order. Used by the Vim-style '/' find (n/N navigation).
+    std::vector<scribbolyth::treeview::TreeNode*> FindMatches(
+        std::shared_ptr<EditorState> state, const std::string& raw_query);
+
+    // Ranges [lo, hi) of every occurrence of `raw_query` inside `line`, using
+    // the same prefix rules as FindMatches (a leading "r:" makes it a
+    // case-insensitive regex, a leading ":" restricts it to titles, so a
+    // title-only query never matches content). Empty for no matches, an empty
+    // query, or an invalid regex. Used to highlight matches in the editor text.
+    std::vector<std::pair<int, int>> FindLineMatches(const std::string& line,
+                                                     const std::string& raw_query);
+
     // Build the node search/filter dialog. While *show is true it consumes
     // every event, so no app key bindings fire. ArrowUp/ArrowDown move the
     // selection, Enter jumps to the selected node (revealing it in the tree),
