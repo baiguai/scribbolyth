@@ -104,6 +104,48 @@ namespace scribbolyth::editor
         {
             return scribbolyth::clipboard::Write(text);
         }
+
+        // Split "old/new" at the first unescaped '/'. A backslash-slash
+        // ("\/") is a literal slash and is unescaped in both parts. Returns
+        // false when no separator is present.
+        bool ParseReplaceArgs(const std::string& args, std::string& old_text,
+                              std::string& new_text)
+        {
+            std::size_t sep = std::string::npos;
+            for (std::size_t i = 0; i < args.size(); ++i)
+            {
+                if (args[i] == '/' && (i == 0 || args[i - 1] != '\\'))
+                {
+                    sep = i;
+                    break;
+                }
+            }
+            if (sep == std::string::npos) return false;
+            old_text = args.substr(0, sep);
+            new_text = args.substr(sep + 1);
+
+            const auto unescape = [](std::string& s)
+            {
+                std::string out;
+                out.reserve(s.size());
+                for (std::size_t i = 0; i < s.size(); ++i)
+                {
+                    if (s[i] == '\\' && i + 1 < s.size() && s[i + 1] == '/')
+                    {
+                        out += '/';
+                        ++i;
+                    }
+                    else
+                    {
+                        out += s[i];
+                    }
+                }
+                s = out;
+            };
+            unescape(old_text);
+            unescape(new_text);
+            return true;
+        }
     }
 
     class Editor : public ftxui::ComponentBase
@@ -374,6 +416,10 @@ namespace scribbolyth::editor
                 {
                     SearchWordUnderCursor();
                 };
+                state_->operations["replace"] = [this](const std::string& args, int)
+                {
+                    ReplaceText(args);
+                };
 
                 state_->operations["bookmark"] = [this](const std::string& args, int)
                 {
@@ -612,7 +658,8 @@ namespace scribbolyth::editor
                         visual_row_ = row_;
                         visual_col_ = col_;
                     }
-                    if (visual_before && !IsVisualMode(state_->mode))
+                    if (visual_before && !IsVisualMode(state_->mode)
+                        && state_->mode != Mode::COMMAND)
                     {
                         visual_row_ = -1;
                         visual_col_ = -1;
@@ -818,6 +865,156 @@ namespace scribbolyth::editor
                     ? -1
                     : static_cast<int>(it - state_->search_matches.begin());
                 StepSearchOccurrence(+1);
+            }
+
+            // Replace every occurrence of `old_text` in `line` with `new_text`,
+            // counting the replacements.
+            void ReplaceAllInString(std::string& line, const std::string& old_text,
+                                    const std::string& new_text, int& count)
+            {
+                if (old_text.empty()) return;
+                std::size_t pos = 0;
+                while ((pos = line.find(old_text, pos)) != std::string::npos)
+                {
+                    line.replace(pos, old_text.size(), new_text);
+                    pos += new_text.size();
+                    ++count;
+                }
+            }
+
+            // Replace within the half-open column range [lo, hi) of `line`.
+            void ReplaceRange(std::string& line, int lo, int hi,
+                              const std::string& old_text,
+                              const std::string& new_text, int& count)
+            {
+                lo = std::max(0, lo);
+                hi = std::min(hi, static_cast<int>(line.size()));
+                if (lo >= hi) return;
+                std::string seg = line.substr(static_cast<std::size_t>(lo),
+                                              static_cast<std::size_t>(hi - lo));
+                ReplaceAllInString(seg, old_text, new_text, count);
+                line.replace(static_cast<std::size_t>(lo),
+                             static_cast<std::size_t>(hi - lo), seg);
+            }
+
+            void FinishReplace(int count)
+            {
+                if (count > 0)
+                {
+                    state_->status = "Replaced " + std::to_string(count)
+                        + (count == 1 ? " occurrence" : " occurrences");
+                }
+                else
+                {
+                    state_->status = "No matches replaced";
+                }
+            }
+
+            // Vim ':replace old/new' (also bound to 'R'): literal, global
+            // replace of `old` with `new` inside the current node's text. In
+            // NORMAL mode the whole node text is processed (like :%s/../g);
+            // in VISUAL/VISUAL_LINE/VISUAL_BLOCK only the selected range is
+            // touched. Only this node's text is ever changed.
+            void ReplaceText(const std::string& args)
+            {
+                if (active_ == nullptr) return;
+                LoadIfChanged();
+                if (lines_.empty()) lines_.push_back("");
+
+                std::string old_text, new_text;
+                if (!ParseReplaceArgs(args, old_text, new_text))
+                {
+                    state_->status = "Usage: replace old/new";
+                    return;
+                }
+                if (old_text.empty())
+                {
+                    state_->status = "Replace: empty old text";
+                    return;
+                }
+
+                int count = 0;
+                // The op runs while the command line is active, so the mode
+                // that invoked it (and any VISUAL selection) is captured by
+                // mode_before_command and the selection anchor.
+                const bool was_visual =
+                    IsVisualMode(state_->mode_before_command) && visual_row_ >= 0;
+                if (was_visual && state_->mode_before_command == Mode::VISUAL)
+                {
+                    int aRow = visual_row_, aCol = visual_col_;
+                    int bRow = row_, bCol = col_;
+                    if (aRow > bRow || (aRow == bRow && aCol > bCol))
+                    {
+                        std::swap(aRow, bRow);
+                        std::swap(aCol, bCol);
+                    }
+                    if (aRow == bRow)
+                    {
+                        const int size = static_cast<int>(lines_[aRow].size());
+                        aCol = std::min(aCol, size);
+                        bCol = std::min(bCol + 1, size);
+                        ReplaceRange(lines_[aRow], aCol, bCol, old_text, new_text, count);
+                    }
+                    else
+                    {
+                        ReplaceRange(lines_[aRow], aCol,
+                                     static_cast<int>(lines_[aRow].size()),
+                                     old_text, new_text, count);
+                        for (int r = aRow + 1; r < bRow; ++r)
+                        {
+                            ReplaceAllInString(lines_[r], old_text, new_text, count);
+                        }
+                        ReplaceRange(lines_[bRow], 0,
+                                     std::min(bCol, static_cast<int>(lines_[bRow].size())),
+                                     old_text, new_text, count);
+                    }
+                    row_ = aRow;
+                    col_ = std::min(aCol, static_cast<int>(lines_[aRow].size()));
+                }
+                else if (was_visual && state_->mode_before_command == Mode::VISUAL_LINE)
+                {
+                    const int a = std::min(visual_row_, row_);
+                    const int b = std::max(visual_row_, row_);
+                    for (int r = a; r <= b; ++r)
+                    {
+                        ReplaceAllInString(lines_[r], old_text, new_text, count);
+                    }
+                    row_ = a;
+                    col_ = 0;
+                }
+                else if (was_visual && state_->mode_before_command == Mode::VISUAL_BLOCK)
+                {
+                    const auto block =
+                        visual_block::MakeBlock(visual_row_, visual_col_, row_, col_);
+                    for (int r = block.row_lo; r <= block.row_hi; ++r)
+                    {
+                        int lo = 0, hi = 0;
+                        if (!visual_block::LineSpan(lines_, block, r, lo, hi)) continue;
+                        ReplaceRange(lines_[r], lo, hi, old_text, new_text, count);
+                    }
+                    row_ = block.row_lo;
+                    col_ = std::min(block.col_lo,
+                                    static_cast<int>(lines_[row_].size()));
+                }
+                else
+                {
+                    for (std::string& line : lines_)
+                    {
+                        ReplaceAllInString(line, old_text, new_text, count);
+                    }
+                }
+
+                // Leave VISUAL mode like Vim's :s does; the mode restored by
+                // the command line is whatever is set here.
+                if (was_visual)
+                {
+                    visual_row_ = -1;
+                    visual_col_ = -1;
+                    state_->mode = Mode::NORMAL;
+                    state_->mode_before_command = Mode::NORMAL;
+                }
+                Save();
+                FinishReplace(count);
             }
 
             void Save()
