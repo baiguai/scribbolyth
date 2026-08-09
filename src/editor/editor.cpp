@@ -235,6 +235,14 @@ namespace scribbolyth::editor
                 {
                     DeleteSelection();
                 };
+                state_->operations["upper_selection"] = [this](const std::string&, int)
+                {
+                    UpperSelection();
+                };
+                state_->operations["lower_selection"] = [this](const std::string&, int)
+                {
+                    LowerSelection();
+                };
 
                 state_->operations["yank"] = [this](const std::string&, int)
                 {
@@ -693,6 +701,19 @@ namespace scribbolyth::editor
                 return out;
             }
 
+            // ASCII-only case folding: the editor is byte-oriented (columns =
+            // bytes), so folding a full byte would corrupt UTF-8 text. Other
+            // bytes (letters with diacritics, CJK, emoji, ...) are left as-is.
+            static char ToUpperAscii(char c)
+            {
+                return (c >= 'a' && c <= 'z') ? static_cast<char>(c - 'a' + 'A') : c;
+            }
+
+            static char ToLowerAscii(char c)
+            {
+                return (c >= 'A' && c <= 'Z') ? static_cast<char>(c - 'A' + 'a') : c;
+            }
+
             void Clamp()
             {
                 if (lines_.empty()) lines_.push_back("");
@@ -1047,6 +1068,94 @@ namespace scribbolyth::editor
                 state_->mode = Mode::NORMAL;
                 Save();
                 state_->status = "Selection deleted";
+            }
+
+            // Vim 'U' (VISUAL): uppercase the selected text. Folding never
+            // changes line count or line length, so nothing is erased or
+            // reassembled; the cursor is placed at the start of the selection
+            // and the mode returns to NORMAL.
+            void UpperSelection()
+            {
+                TransformSelection([](char c) { return ToUpperAscii(c); },
+                                   "Selection uppercased");
+            }
+
+            // Vim 'u' (VISUAL): lowercase the selected text.
+            void LowerSelection()
+            {
+                TransformSelection([](char c) { return ToLowerAscii(c); },
+                                   "Selection lowercased");
+            }
+
+            void TransformSelection(char (*fold)(char), const char* status_msg)
+            {
+                if (active_ == nullptr) return;
+                LoadIfChanged();
+                if (lines_.empty()) lines_.push_back("");
+
+                if (state_->mode == Mode::VISUAL && visual_row_ >= 0 && visual_col_ >= 0)
+                {
+                    int aRow = visual_row_, aCol = visual_col_;
+                    int bRow = row_, bCol = col_;
+                    if (aRow > bRow || (aRow == bRow && aCol > bCol))
+                    {
+                        std::swap(aRow, bRow);
+                        std::swap(aCol, bCol);
+                    }
+                    if (aRow == bRow)
+                    {
+                        std::string& line = lines_[aRow];
+                        const int size = static_cast<int>(line.size());
+                        aCol = std::min(aCol, size);
+                        bCol = std::min(bCol + 1, size);
+                        for (int c = aCol; c < bCol; ++c)
+                        {
+                            line[static_cast<std::size_t>(c)] =
+                                fold(line[static_cast<std::size_t>(c)]);
+                        }
+                    }
+                    else
+                    {
+                        for (int c = aCol; c < static_cast<int>(lines_[aRow].size()); ++c)
+                        {
+                            lines_[aRow][static_cast<std::size_t>(c)] =
+                                fold(lines_[aRow][static_cast<std::size_t>(c)]);
+                        }
+                        for (int r = aRow + 1; r < bRow; ++r)
+                        {
+                            for (char& ch : lines_[r]) ch = fold(ch);
+                        }
+                        const int bSize = static_cast<int>(lines_[bRow].size());
+                        for (int c = 0; c < std::min(bCol, bSize); ++c)
+                        {
+                            lines_[bRow][static_cast<std::size_t>(c)] =
+                                fold(lines_[bRow][static_cast<std::size_t>(c)]);
+                        }
+                    }
+                    row_ = aRow;
+                    col_ = std::min(aCol, static_cast<int>(lines_[aRow].size()));
+                    visual_row_ = -1;
+                    visual_col_ = -1;
+                    state_->mode = Mode::NORMAL;
+                    Save();
+                    state_->status = status_msg;
+                    return;
+                }
+
+                int a = (visual_row_ >= 0) ? std::min(visual_row_, row_) : row_;
+                int b = (visual_row_ >= 0) ? std::max(visual_row_, row_) : row_;
+                if (a > b) std::swap(a, b);
+                for (int r = a; r <= b; ++r)
+                {
+                    for (char& ch : lines_[r]) ch = fold(ch);
+                }
+                row_ = a;
+                col_ = 0;
+                visual_row_ = -1;
+                visual_col_ = -1;
+                state_->mode = Mode::NORMAL;
+                Save();
+                state_->status = status_msg;
             }
 
             std::shared_ptr<EditorState> state_;
