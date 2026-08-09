@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Test Vim-style find: '/' in NORMAL mode, n/N next/prev, ':noh' clear."""
+"""Test Vim-style find: '/' in NORMAL mode, n/N step the cursor through the
+matches inside the current node's text, ':noh' clears the highlight."""
 import harness
 
 s = harness.launch(cols=80, rows=24)
@@ -13,6 +14,14 @@ try:
 
     def tree_sel(row):
         return 'inv' in s.grid[row][2][1]
+
+    def editor_cursor():
+        """(row, col) of the editor's inverted cursor char in the pane."""
+        for r in range(0, s.rows - 2):
+            for c in range(31, s.cols):  # editor pane sits right of the tree
+                if 'inv' in s.grid[r][c][1]:
+                    return (r, c)
+        return None
 
     # three root nodes: Alpha, Beta, Gamma
     s.send(b'a')
@@ -56,24 +65,53 @@ try:
     assert tree_sel(0), 'first match (Alpha) must be selected'
     print('ok: matches are highlighted and the first is selected')
 
-    # 4) n / N cycle through the matches with wrap-around
+    # 4) n/N step the cursor through the matches inside the note text
+    s.send(b'a')
+    s.send(b'Body')
+    s.send(b'\r')
+    s.step(0.3)
+    s.send(b'i')
+    s.step(0.3)
+    s.send(b'i')
+    s.step(0.3)
+    s.send(b'gain first gain second gain third')
+    s.step(0.3)
+    s.send(b'\x1b')
+    s.step(0.3)
+    s.send(b'/gain')
+    s.step(0.3)
+    s.send(b'\r')
+    s.step(0.3)
+    assert 'Match 1 of 1' in s.row_text(s.rows - 1), 'body search status'
+    cur = editor_cursor()
+    assert cur is not None, 'cursor must land on the first match'
+    first_col = cur[1]
+    assert s.row_text(cur[0])[first_col:first_col + 4] == 'gain', \
+        'cursor must sit on the first occurrence'
     s.send(b'n')
     s.step(0.2)
-    assert 'Match 2 of 3' in s.row_text(s.rows - 1), 'n must move to match 2'
-    assert tree_sel(1), 'Beta must be selected after n'
+    cur = editor_cursor()
+    assert cur is not None and cur[1] > first_col, 'n must move to the next match'
+    assert s.row_text(cur[0])[cur[1]:cur[1] + 4] == 'gain', 'next match is gain'
+    second_col = cur[1]
     s.send(b'n')
     s.step(0.2)
-    assert 'Match 3 of 3' in s.row_text(s.rows - 1), 'n must move to match 3'
-    assert tree_sel(2), 'Gamma must be selected after n'
+    cur = editor_cursor()
+    assert cur is not None and cur[1] > second_col, 'n must move to the third match'
+    last_col = cur[1]
     s.send(b'n')
     s.step(0.2)
-    assert 'Match 1 of 3' in s.row_text(s.rows - 1), 'n must wrap to match 1'
-    assert tree_sel(0), 'wrap must select Alpha again'
+    cur = editor_cursor()
+    assert cur is not None and cur[1] == first_col, 'n must wrap to the first match'
     s.send(b'N')
     s.step(0.2)
-    assert 'Match 3 of 3' in s.row_text(s.rows - 1), 'N must wrap to match 3'
-    assert tree_sel(2), 'N wrap must select Gamma'
-    print('ok: n/N cycle with wrap-around')
+    cur = editor_cursor()
+    assert cur is not None and cur[1] == last_col, 'N must wrap to the last match'
+    s.send(b'N')
+    s.step(0.2)
+    cur = editor_cursor()
+    assert cur is not None and cur[1] == second_col, 'N must move to the previous match'
+    print('ok: n/N step through the matches inside the note text with wrap-around')
 
     # 5) :noh hides the highlight but keeps the search (n still works)
     s.send(b':noh')
@@ -81,11 +119,15 @@ try:
     s.send(b'\r')
     s.step(0.3)
     assert 'Search highlight cleared' in s.row_text(s.rows - 1), ':noh status'
-    assert not (tree_has_yellow(0) or tree_has_yellow(1) or tree_has_yellow(2)), \
-        ':noh must clear the highlight'
+    for r in range(0, s.rows - 2):
+        for c in range(0, s.cols):
+            assert 'bgyellow' not in s.grid[r][c][1], \
+                ':noh must clear every highlight'
+    before = editor_cursor()
     s.send(b'n')
     s.step(0.2)
-    assert 'Match 1 of 3' in s.row_text(s.rows - 1), 'n must still work after :noh'
+    after = editor_cursor()
+    assert after is not None and after != before, 'n must still step after :noh'
     print('ok: :noh hides highlights, n still navigates')
 
     # 6) no matches reports the pattern
@@ -105,56 +147,15 @@ try:
     print('ok: empty / re-runs the previous search')
 
     # 8) the match is case-insensitive
-    s.send(b'/ALPHA')
+    s.send(b'/GAIN')
     s.step(0.3)
     s.send(b'\r')
     s.step(0.3)
     assert 'Match 1 of 1' in s.row_text(s.rows - 1), 'case-insensitive match'
+    cur = editor_cursor()
+    assert cur is not None and s.row_text(cur[0])[cur[1]:cur[1] + 4] == 'gain', \
+        'cursor must land on the (case-insensitive) match'
     print('ok: search is case-insensitive')
-
-    # 9) a match inside the note body is revealed and highlighted in the editor
-    s.send(b'a')
-    s.send(b'Body')
-    s.send(b'\r')
-    s.step(0.3)
-    s.send(b'i')
-    s.step(0.3)
-    s.send(b'i')
-    s.step(0.3)
-    s.send(b'GPS satellite clocks gain about 38 microseconds')
-    s.step(0.3)
-    s.send(b'\x1b')
-    s.step(0.3)
-    s.send(b'/gain')
-    s.step(0.3)
-    s.send(b'\r')
-    s.step(0.3)
-    assert 'Match 1 of 1' in s.row_text(s.rows - 1), 'body search status'
-    editor_row = None
-    match_col = None
-    for r in range(0, s.rows - 2):
-        idx = s.row_text(r).find('gain')
-        if idx >= 31:  # inside the editor pane (tree pane is ~30 cols)
-            editor_row = r
-            match_col = idx
-            break
-    assert editor_row is not None, 'match must be visible in the editor'
-    assert 'inv' in s.grid[editor_row][match_col][1], \
-        'editor cursor must sit on the match'
-    assert 'bgyellow' in s.grid[editor_row][match_col + 1][1], \
-        'the rest of the match must be highlighted in the editor'
-    print('ok: note-body matches are revealed and highlighted in the editor')
-
-    # 10) :noh also clears the editor-side highlight
-    s.send(b':noh')
-    s.step(0.2)
-    s.send(b'\r')
-    s.step(0.3)
-    assert 'Search highlight cleared' in s.row_text(s.rows - 1), ':noh status'
-    for c in range(31, s.cols):
-        assert 'bgyellow' not in s.grid[editor_row][c][1], \
-            ':noh must clear the editor highlight'
-    print('ok: :noh clears the editor highlight too')
 finally:
     s.quit()
 

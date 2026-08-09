@@ -104,6 +104,11 @@ struct EditorState {
     // match is revealed in the text, as in Vim.
     bool search_reveal_pending = false;
 
+    // Step to the next (dir > 0) or previous (dir < 0) find result. Set by the
+    // editor: it moves the cursor through the occurrences of the query inside
+    // the active node's text (wrapping within the node), as in Vim.
+    std::function<void(int)> search_jump;
+
     std::map<std::string, scribbolyth::op::Operation> operations;
     std::map<std::string, std::string> commands;
 

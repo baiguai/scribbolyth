@@ -162,11 +162,13 @@ namespace scribbolyth::treeview
                 };
                 state_->operations["search_next"] = [this](const std::string&, int)
                 {
-                    SearchJump(+1);
+                    if (state_->search_jump) state_->search_jump(+1);
+                    else SearchJump(+1);
                 };
                 state_->operations["search_prev"] = [this](const std::string&, int)
                 {
-                    SearchJump(-1);
+                    if (state_->search_jump) state_->search_jump(-1);
+                    else SearchJump(-1);
                 };
                 state_->operations["search_clear"] = [this](const std::string&, int)
                 {

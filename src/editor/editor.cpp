@@ -365,6 +365,11 @@ namespace scribbolyth::editor
                     visual_col_ = -1;
                 };
 
+                state_->search_jump = [this](int dir)
+                {
+                    StepSearchOccurrence(dir);
+                };
+
                 state_->operations["bookmark"] = [this](const std::string& args, int)
                 {
                     if (state_->active_node == nullptr) return;
@@ -673,11 +678,82 @@ namespace scribbolyth::editor
                                                              state_->search_query);
                     if (!ranges.empty())
                     {
-                        row_ = static_cast<int>(r);
-                        col_ = ranges[0].first;
-                        last_col_ = col_;
+                        SetCursor(static_cast<int>(r), ranges[0].first);
                         return;
                     }
+                }
+            }
+
+            // Place the cursor on (row, col), clamped to the document.
+            void SetCursor(int row, int col)
+            {
+                if (lines_.empty()) return;
+                row_ = std::max(0, std::min(row, static_cast<int>(lines_.size()) - 1));
+                col_ = std::max(0, std::min(col, static_cast<int>(lines_[static_cast<std::size_t>(row_)].size())));
+                last_col_ = col_;
+                visual_row_ = -1;
+                visual_col_ = -1;
+            }
+
+            // Step the cursor to the next (dir > 0) or previous (dir < 0)
+            // occurrence of the active search query inside the current node's
+            // text, wrapping around like Vim's n/N. Also works while the
+            // highlight is hidden by ':noh' (the query is kept). Does nothing
+            // when there is no search or the node has no occurrences.
+            void StepSearchOccurrence(int dir)
+            {
+                if (active_ == nullptr) return;
+                if (state_->search_query.empty())
+                {
+                    state_->status = "No search";
+                    return;
+                }
+
+                struct Occ
+                {
+                    int line;
+                    int col;
+                };
+                std::vector<Occ> occs;
+                for (std::size_t r = 0; r < lines_.size(); ++r)
+                {
+                    const auto ranges =
+                        scribbolyth::search::FindLineMatches(lines_[r],
+                                                             state_->search_query);
+                    for (const auto& m : ranges)
+                    {
+                        occs.push_back(Occ{static_cast<int>(r), m.first});
+                    }
+                }
+                if (occs.empty())
+                {
+                    state_->status = "No matches in this node";
+                    return;
+                }
+
+                if (dir > 0)
+                {
+                    for (const auto& o : occs)
+                    {
+                        if (o.line > row_ || (o.line == row_ && o.col > col_))
+                        {
+                            SetCursor(o.line, o.col);
+                            return;
+                        }
+                    }
+                    SetCursor(occs.front().line, occs.front().col);
+                }
+                else
+                {
+                    for (auto it = occs.rbegin(); it != occs.rend(); ++it)
+                    {
+                        if (it->line < row_ || (it->line == row_ && it->col < col_))
+                        {
+                            SetCursor(it->line, it->col);
+                            return;
+                        }
+                    }
+                    SetCursor(occs.back().line, occs.back().col);
                 }
             }
 
