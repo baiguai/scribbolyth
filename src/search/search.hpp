@@ -14,11 +14,12 @@ namespace scribbolyth::treeview
 
 namespace scribbolyth::search
 {
-    // Find all nodes matching `raw_query` (same prefix rules as the search
-    // dialog: a leading "r:" makes it a case-insensitive regex, a leading ":"
-    // restricts it to node titles, otherwise it is a case-insensitive
-    // substring match against titles and content). Returns matches in document
-    // order. Used by the Vim-style '/' find (n/N navigation).
+    // Find matches for `raw_query` inside the currently active node only
+    // (the same prefix rules as the search dialog apply: a leading "r:" makes
+    // it a case-insensitive regex, a leading ":" restricts it to node titles,
+    // otherwise it is a case-insensitive substring match). Returns either the
+    // active node (when it matches) or nothing, so the Vim-style '/' find and
+    // n/N navigation stay confined to the node being edited.
     std::vector<scribbolyth::treeview::TreeNode*> FindMatches(
         std::shared_ptr<EditorState> state, const std::string& raw_query);
 

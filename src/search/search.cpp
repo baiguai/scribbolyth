@@ -92,19 +92,12 @@ namespace scribbolyth::search
                                                  const std::string& raw_query)
     {
         std::vector<treeview::TreeNode*> out;
-        std::vector<std::pair<treeview::TreeNode*, int>> all;
-        if (state->collect_all_nodes)
-        {
-            all = state->collect_all_nodes();
-        }
+        if (state->active_node == nullptr) return out;
         const Filter f = ParseFilter(raw_query);
         bool regex_error = false;
-        for (const auto& item : all)
+        if (NodeMatches(*state->active_node, f, &regex_error))
         {
-            if (NodeMatches(*item.first, f, &regex_error))
-            {
-                out.push_back(item.first);
-            }
+            out.push_back(state->active_node);
         }
         return out;
     }

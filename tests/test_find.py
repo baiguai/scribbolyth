@@ -67,14 +67,15 @@ try:
     s.send(b'\r')
     s.step(0.3)
     assert 'NORMAL' in s.row_text(s.rows - 1), 'mode must return to NORMAL'
-    assert 'Match 1 of 3' in s.row_text(s.rows - 1), 'status must show match 1 of 3'
-    print('ok: /a Enter finds 3 matches (Alpha, Beta, Gamma)')
+    assert 'Match 1 of 1' in s.row_text(s.rows - 1), 'status must show match 1 of 1'
+    print('ok: /a Enter finds a match in the current node (Gamma)')
 
-    # 3) every matching node is highlighted yellow; the first is selected
-    assert tree_has_yellow(0) and tree_has_yellow(1) and tree_has_yellow(2), \
-        'all matching nodes must be highlighted'
-    assert tree_sel(0), 'first match (Alpha) must be selected'
-    print('ok: matches are highlighted and the first is selected')
+    # 3) the search stays confined to the current node: only it is highlighted
+    assert tree_has_yellow(2), 'the current node must be highlighted'
+    assert not tree_has_yellow(0) and not tree_has_yellow(1), \
+        'other nodes must not be highlighted'
+    assert tree_sel(2), 'the current node (Gamma) must be selected'
+    print('ok: search stays confined to the current node')
 
     # 4) n/N step the cursor through the matches inside the note text
     s.send(b'/gain')
