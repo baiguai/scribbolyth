@@ -29,6 +29,7 @@ struct EditorState {
     int command_cursor = 0;
     int* active_child = nullptr;
     Mode mode_before_command = Mode::TREE;
+    bool changed = false;
 
     int treeview_width = kDefaultTreeviewWidth;
 

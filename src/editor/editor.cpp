@@ -248,6 +248,13 @@ namespace scribbolyth::editor
                     InsertText("    ");
                     Save();
                 };
+                state_->operations["insert_rule"] = [this](const std::string&, int)
+                {
+                    if (!Editable()) return;
+                    InsertText(std::string(80, '-'));
+                    Clamp();
+                    Save();
+                };
                 state_->operations["backspace_char"] = [this](const std::string&, int count)
                 {
                     if (!Editable()) return;
@@ -1027,7 +1034,11 @@ namespace scribbolyth::editor
                     if (i != 0) joined += '\n';
                     joined += lines_[i];
                 }
-                active_->text = std::move(joined);
+                if (joined != active_->text)
+                {
+                    active_->text = std::move(joined);
+                    state_->changed = true;
+                }
                 if (!active_->text.empty())
                 {
                     scribbolyth::history::Record(*state_, active_->id);

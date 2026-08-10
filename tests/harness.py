@@ -80,14 +80,17 @@ class Session:
         self.pid = pid
 
     def quit(self):
-        """Quit the app cleanly (:qa), forcing a kill if it hangs.
+        """Quit the app cleanly (:qa!), forcing a kill if it hangs.
+
+        Uses the force-quit variant so teardown also works with unsaved
+        changes, which would otherwise block :qa.
 
         Returns True when the app exited on its own, False when we had to
         kill it. Safe to call multiple times."""
         if self.pid is None:
             return True
         try:
-            os.write(self.master, b':qa\r')
+            os.write(self.master, b':qa!\r')
         except OSError:
             pass
         self.step(timeout=0.5)
