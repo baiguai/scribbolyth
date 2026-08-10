@@ -229,6 +229,7 @@ namespace scribbolyth::treeview
                     ClearUndo();
                     PersistLastFile();
                     RefreshActiveNode();
+                    state_->changed = false;
                     state_->status = "New document - no file path";
                 };
                 state_->operations["import_html"] = [this](const std::string& path, int)
@@ -626,6 +627,7 @@ namespace scribbolyth::treeview
             return;
         }
         current_file_ = path;
+        state_->changed = false;
         state_->status = "Saved " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
         PushRecentFile(path);
         PersistLastFile();
@@ -658,6 +660,7 @@ namespace scribbolyth::treeview
         selected_ = nullptr;
         ClearUndo();
         RefreshActiveNode();
+        state_->changed = false;
         state_->status = "Loaded " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
         PushRecentFile(path);
         PersistLastFile();
@@ -681,6 +684,7 @@ namespace scribbolyth::treeview
         selected_ = nullptr;
         ClearUndo();
         RefreshActiveNode();
+        state_->changed = false;
         state_->status = "Imported " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
         // PushRecentFile(path);
         PersistLastFile();
@@ -792,6 +796,7 @@ namespace scribbolyth::treeview
         state_->treeview_width = width;
         state_->bookmarks = std::move(marks);
         state_->history = std::move(hist);
+        state_->changed = true;
         selected_ = nullptr;
         if (!selected_id.empty())
         {
