@@ -1,9 +1,11 @@
 #include "treeview.hpp"
 
 #include <algorithm>
+#include <cctype>
 #include <cstddef>
 #include <filesystem>
 #include <functional>
+#include <regex>
 #include <set>
 #include <string>
 #include <utility>
@@ -24,6 +26,25 @@ namespace scribbolyth::treeview
     TreeNode* FindById(std::vector<TreeNode>& nodes, const std::string& id);
     void CollectAllDepth(TreeNode& node, int depth, std::vector<std::pair<TreeNode*, int>>& out);
     void EnsureIds(std::vector<TreeNode>& nodes);
+
+    std::string TrimWhitespace(const std::string& s)
+    {
+        std::size_t b = 0;
+        std::size_t e = s.size();
+        while (b < e && std::isspace(static_cast<unsigned char>(s[b]))) ++b;
+        while (e > b && std::isspace(static_cast<unsigned char>(s[e - 1]))) --e;
+        return s.substr(b, e - b);
+    }
+
+    // Strip the underscores of inter-note links (_text_ -> text) for the
+    // plain-text note export, keeping surrounding whitespace/line breaks,
+    // mirroring the regex used by the web app's exportNoteAsTxt().
+    std::string StripNoteLinks(const std::string& content)
+    {
+        static const std::regex node_link_re(
+            R"((^|\s)_([^_]|[^_].*?[^_])_(?=\s|[.,!?;:)]|$))");
+        return std::regex_replace(content, node_link_re, "$1$2");
+    }
 
     class TreeView : public ftxui::ComponentBase
     {
@@ -266,6 +287,32 @@ namespace scribbolyth::treeview
                     }
                     ExportTo(path);
                 };
+                state_->operations["export_note_txt"] = [this](const std::string& path, int)
+                {
+                    if (path.empty() || IsDirectory(path))
+                    {
+                        BrowseFor(path.empty() ? ExportStartDir() : path,
+                                  "export_note_txt", [this](const std::string& chosen)
+                                  {
+                                      ExportNoteTxt(chosen);
+                                  });
+                        return;
+                    }
+                    ExportNoteTxt(path);
+                };
+                state_->operations["export_tree_txt"] = [this](const std::string& path, int)
+                {
+                    if (path.empty() || IsDirectory(path))
+                    {
+                        BrowseFor(path.empty() ? ExportStartDir() : path,
+                                  "export_tree_txt", [this](const std::string& chosen)
+                                  {
+                                      ExportTreeTxt(chosen);
+                                  });
+                        return;
+                    }
+                    ExportTreeTxt(path);
+                };
                 state_->operations["treeview_width_increase"] = [this](const std::string&, int count)
                 {
                     state_->treeview_width = std::min(kMaxTreeviewWidth,
@@ -332,6 +379,10 @@ namespace scribbolyth::treeview
             void LoadFrom(const std::string& path);
             void ImportFrom(const std::string& path);
             void ExportTo(const std::string& path);
+            void ExportNoteTxt(const std::string& path);
+            void ExportTreeTxt(const std::string& path);
+            std::string CollectBranchTxt(const TreeNode& node) const;
+            std::string ExportStartDir() const;
             void PersistLastFile();
             void PushRecentFile(const std::string& path);
             void SnapshotUndo();
@@ -713,6 +764,81 @@ namespace scribbolyth::treeview
             return;
         }
         state_->status = "Exported " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
+    }
+
+    // Export the selected note's text as plain text, with inter-note link
+    // underscores stripped (web app's exportNoteAsTxt()).
+    void TreeView::ExportNoteTxt(const std::string& path)
+    {
+        if (selected_ == nullptr)
+        {
+            state_->status = "No note selected";
+            return;
+        }
+        if (selected_->text.empty())
+        {
+            state_->status = "Note is empty";
+            return;
+        }
+        const std::string content = StripNoteLinks(selected_->text);
+        if (!scribbolyth::io::WriteFile(path, content))
+        {
+            state_->status = "Error: could not export " + path;
+            return;
+        }
+        state_->status = "Exported note to " + path;
+    }
+
+    // Export the selected branch as plain text, depth-first: each node's text
+    // is written verbatim followed by four blank lines; nodes whose text
+    // contains "#noexp" are skipped (web app's exportTreeAsTxt()).
+    void TreeView::ExportTreeTxt(const std::string& path)
+    {
+        if (selected_ == nullptr)
+        {
+            state_->status = "No node selected";
+            return;
+        }
+        const std::string content = CollectBranchTxt(*selected_);
+        if (!scribbolyth::io::WriteFile(path, content))
+        {
+            state_->status = "Error: could not export " + path;
+            return;
+        }
+        state_->status = "Exported branch to " + path;
+    }
+
+    std::string TreeView::CollectBranchTxt(const TreeNode& node) const
+    {
+        std::string out;
+        if (!TrimWhitespace(node.text).empty()
+            && node.text.find("#noexp") == std::string::npos)
+        {
+            out += node.text;
+            out += "\n\n\n\n";
+        }
+        for (const auto& child : node.children)
+        {
+            out += CollectBranchTxt(child);
+        }
+        return out;
+    }
+
+    // Where the save-as-style file dialog opens for the txt exports: the
+    // folder of the document currently being edited, or the working directory
+    // when no file is loaded yet. Always absolute and non-empty (the browser
+    // skips re-listing when the start dir equals its previous value, which is
+    // empty on first use).
+    std::string TreeView::ExportStartDir() const
+    {
+        if (!current_file_.empty())
+        {
+            const std::string parent =
+                std::filesystem::path(current_file_).parent_path().string();
+            if (!parent.empty()) return parent;
+        }
+        std::error_code ec;
+        return std::filesystem::current_path(ec).string();
     }
 
     bool TreeView::IsDirectory(const std::string& path)

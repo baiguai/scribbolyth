@@ -248,13 +248,14 @@ try:
     s.send(b'\r')
     s.require('Saved 1 nodes to', 'the pick should be saved via :saveas')
 
-    # Save/export: Enter on a folder closes the browser and reopens the
-    # command line prefilled with that folder, so a filename can be typed.
+    # Save/export: the dialog is a folder picker. Enter on a folder closes it
+    # and reopens the command line prefilled with that folder's path; a
+    # filename is then typed and Enter saves into it.
     s.send(b':saveas docs')
     s.send(b'\r')
     s.require(' File Browser ')
     s.send(b'j')                        # onto nested/
-    s.send(b'\r')                       # Enter exits to the command line
+    s.send(b'\r')                       # Enter picks the folder
     s.forbid(' File Browser ', 'Enter on a folder should close the browser')
     s.require(':saveas ', 'Enter on a folder should reopen :saveas')
     s.require('nested/', 'the command line should be prefilled with the folder')
@@ -279,13 +280,14 @@ try:
     s.send(b'\x1b')
     s.forbid(' File Browser ')
 
-    # Export: Enter on a folder reopens :X so a filename can be typed.
+    # Export: Enter on a folder closes the browser and reopens :X prefilled
+    # with that folder's path for a filename.
     s.send(b':X docs')
     s.send(b'\r')
     s.require(' File Browser ', 'a dir arg to :X should open the browser')
     s.send(b'j')                        # onto nested/
-    s.send(b'\r')
-    s.forbid(' File Browser ')
+    s.send(b'\r')                       # Enter picks the folder
+    s.forbid(' File Browser ', 'Enter on a folder should close the browser')
     s.require(':X ', 'Enter on a folder should reopen :X')
     s.send(b'site.html')
     s.send(b'\r')
