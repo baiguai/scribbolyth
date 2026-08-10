@@ -248,6 +248,13 @@ namespace scribbolyth::editor
                     InsertText("    ");
                     Save();
                 };
+                state_->operations["insert_rule"] = [this](const std::string&, int)
+                {
+                    if (!Editable()) return;
+                    InsertText(std::string(80, '-'));
+                    Clamp();
+                    Save();
+                };
                 state_->operations["backspace_char"] = [this](const std::string&, int count)
                 {
                     if (!Editable()) return;
