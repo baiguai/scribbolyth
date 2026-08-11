@@ -4,10 +4,10 @@
   "bookmarks": [
   ],
   "history": [
-    "7dwjs6ui",
     "cmueptx0",
-    "v1anzsho",
     "e0puu0iy",
+    "7dwjs6ui",
+    "v1anzsho",
     "6gskj7g5"
   ],
   "roots": [
@@ -30,8 +30,8 @@
   {
     "id": "6gskj7g5",
     "name": "Project Structure",
-    "expanded": false,
-    "text": "scribbolyth/\n| build-windows/\n| build/\n| cmake/\n| config/\n| developers/\n| patches/\n| src/\n| tests/\n| CMakeLists.txt\n| CMakeLists.txt.in\n| LICENSE\n| README.md\n| app.sh*\n| build-windows.sh*\n| build.sh*\n| config.sh*\n| devnotes.scr\n| example.html*\n| keybinding.md\n| leakcheck.sh*\n| run.sh*\n\n\nSee:\n\n_Code Files_\n_Tool Scripts_\n_Configurations_",
+    "expanded": true,
+    "text": "scribbolyth/\n| build-windows/\n| build/\n| cmake/\n| config/\n| developers/\n| patches/\n| src/\n| tests/\n| CMakeLists.txt\n| CMakeLists.txt.in\n| LICENSE\n| README.md\n| app.sh\n| build-windows.sh\n| build.sh\n| config.sh\n| example.html\n| keybinding.md\n| leakcheck.sh\n| run.sh\n| setup.sh\n| upgrade.sh\n\n\nSee:\n\n_Code Files_\n_Tool Scripts_\n_Configurations_",
     "children": [
     {
       "id": "7dwjs6ui",
@@ -45,7 +45,7 @@
       "id": "e0puu0iy",
       "name": "Tool Scripts",
       "expanded": false,
-      "text": "Tool Scripts\n    CMakeLists.txt.in\n        This is a CMakeLists template - that is used by the build.sh, in conjunction with the config.sh\n\n    config.sh\n        Here is where you will add the .cpp files you need to have included in the CMakeLists file, for the compiler/linker.\n\n    leakcheck.sh\n        Launch the scribbolyth binary via this, and use it for a bit. It will check for memory leaks.\n\n    build.sh\n        Builds the Linux version of Scribbolyth.\n\n    build-windows.sh\n        Builds the Windows version of Scribbolyth.\n\n    run.sh\n        Builds then runs the Linux version of Scribbolyth.\n\n    app.sh\n        Just runs the Linux version of Scribbolyth - without doing a build first.",
+      "text": "Tool Scripts\n    CMakeLists.txt.in\n        This is a CMakeLists template - that is used by the build.sh, in conjunction with the config.sh\n\n    config.sh\n        Here is where you will add the .cpp files you need to have included in the CMakeLists file, for the compiler/linker.\n\n    leakcheck.sh\n        Launch the scribbolyth binary via this, and use it for a bit. It will check for memory leaks.\n\n    build.sh\n        Builds the Linux and Windows versions of Scribbolyth.\n\n    build-windows.sh\n        Builds only the Windows version of Scribbolyth.\n\n    run.sh\n        Builds then runs the Linux version of Scribbolyth.\n\n    app.sh\n        Just runs the Linux version of Scribbolyth - without doing a build first.\n\n\n    setup.sh\n    upgrade.sh",
       "children": [
       ]
     },
