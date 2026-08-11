@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <map>
 #include <regex>
 #include <utility>
 #include <vector>
@@ -27,6 +28,11 @@ namespace scribbolyth::search
         {
             if (s.size() >= width) return s;
             return s + std::string(width - s.size(), ' ');
+        }
+
+        std::string IndentName(int depth, const std::string& name)
+        {
+            return std::string(static_cast<std::size_t>(depth) * 2, ' ') + name;
         }
 
         struct Result
@@ -85,6 +91,43 @@ namespace scribbolyth::search
             const std::string needle = Lower(f.query);
             return Lower(node.name).find(needle) != std::string::npos
                 || (!f.title_only && Lower(node.text).find(needle) != std::string::npos);
+        }
+
+        // A tag that is purely hex digits of length 3, 4, 6 or 8 (e.g. "#fff"
+        // or "#ff8800") is an HTML color, not a tag.
+        bool IsHexColor(const std::string& tag)
+        {
+            const std::size_t n = tag.size();
+            if (n != 3 && n != 4 && n != 6 && n != 8) return false;
+            return std::all_of(tag.begin(), tag.end(), [](unsigned char c) {
+                return std::isxdigit(c) != 0;
+            });
+        }
+
+        // Collect `#tag` tokens from `text` into `counts` (keyed by lowercase
+        // tag, so the map iteration is sorted and de-duplicated). HTML color
+        // codes such as "#fff" or "#ff8800" are ignored.
+        void CollectTags(const std::string& text, std::map<std::string, int>& counts)
+        {
+            static const std::regex kTagRegex(R"(#[\w-]+)");
+            for (std::sregex_iterator it(text.begin(), text.end(), kTagRegex), end;
+                 it != end; ++it)
+            {
+                const std::string tag = Lower(it->str().substr(1));
+                if (IsHexColor(tag)) continue;
+                ++counts[tag];
+            }
+        }
+
+        bool ContainsTag(const std::string& text, const std::string& tag)
+        {
+            static const std::regex kTagRegex(R"(#[\w-]+)");
+            for (std::sregex_iterator it(text.begin(), text.end(), kTagRegex), end;
+                 it != end; ++it)
+            {
+                if (Lower(it->str().substr(1)) == tag) return true;
+            }
+            return false;
         }
     }
 
@@ -157,6 +200,14 @@ namespace scribbolyth::search
             }
             if (event == ftxui::Event::Return)
             {
+                if (tag_phase_ && !results_.empty())
+                {
+                    const int sel = std::min(selection_, static_cast<int>(results_.size()) - 1);
+                    filter_ = results_[static_cast<std::size_t>(sel)].line;
+                    tag_phase_ = false;
+                    Invalidate();
+                    return true;
+                }
                 if (!results_.empty())
                 {
                     const int sel = std::min(selection_, static_cast<int>(results_.size()) - 1);
@@ -237,7 +288,7 @@ namespace scribbolyth::search
 
             const std::string footer =
                 "  " + std::to_string(total == 0 ? 0 : sel + 1) + "/" + std::to_string(total) +
-                "    Up/Down move  Enter jump  Esc cancel  ':x' = titles only  'r:' = regex  ";
+                "    Up/Down move  Enter jump  Esc cancel  ':x' = titles only  'r:' = regex  '#' = tags  ";
 
             return ftxui::window(ftxui::text(" / Search "),
                                 ftxui::vbox({
@@ -250,7 +301,7 @@ namespace scribbolyth::search
                                     ftxui::separator(),
                                     ftxui::text(PadRight(footer, row_width)) | ftxui::dim,
                                 })) |
-                   ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |
+                   ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 190) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
         }
 
@@ -269,6 +320,7 @@ namespace scribbolyth::search
             selection_ = 0;
             scroll_ = 0;
             regex_error_ = false;
+            tag_phase_ = false;
             results_valid_ = false;
         }
 
@@ -283,6 +335,7 @@ namespace scribbolyth::search
         {
             results_.clear();
             regex_error_ = false;
+            tag_phase_ = false;
 
             std::vector<std::pair<treeview::TreeNode*, int>> all;
             if (state_->collect_all_nodes)
@@ -293,24 +346,67 @@ namespace scribbolyth::search
             content_width_ = 72;
             for (const auto& item : all)
             {
-                const std::string line = std::string(static_cast<std::size_t>(item.second) * 2, ' ') + item.first->name;
-                content_width_ = std::max(content_width_, static_cast<int>(line.size()));
+                content_width_ = std::max(content_width_,
+                                          static_cast<int>(IndentName(item.second, item.first->name).size()));
             }
 
-            const Filter f = ParseFilter(filter_);
-            bool regex_error = false;
-            for (const auto& item : all)
+            if (!filter_.empty() && filter_[0] == '#')
             {
-                if (NodeMatches(*item.first, f, &regex_error))
-                {
-                    results_.push_back(Result{item.first, std::string(static_cast<std::size_t>(item.second) * 2, ' ') + item.first->name});
-                }
+                RecomputeTags(all);
             }
-            if (regex_error) regex_error_ = true;
+            else
+            {
+                const Filter f = ParseFilter(filter_);
+                bool regex_error = false;
+                for (const auto& item : all)
+                {
+                    if (NodeMatches(*item.first, f, &regex_error))
+                    {
+                        results_.push_back(Result{item.first, IndentName(item.second, item.first->name)});
+                    }
+                }
+                if (regex_error) regex_error_ = true;
+            }
 
             selection_ = 0;
             scroll_ = 0;
             results_valid_ = true;
+        }
+
+        // Tag search: a leading '#' lists matching tags; picking one (or an
+        // exact match) lists the nodes whose content carries that tag.
+        void RecomputeTags(const std::vector<std::pair<treeview::TreeNode*, int>>& all)
+        {
+            const std::string typed = Lower(filter_.substr(1));
+
+            std::map<std::string, int> counts;
+            for (const auto& item : all)
+            {
+                CollectTags(item.first->text, counts);
+            }
+
+            if (!typed.empty() && counts.find(typed) != counts.end())
+            {
+                for (const auto& item : all)
+                {
+                    if (ContainsTag(item.first->text, typed))
+                    {
+                        results_.push_back(Result{item.first, IndentName(item.second, item.first->name)});
+                    }
+                }
+                return;
+            }
+
+            tag_phase_ = true;
+            for (const auto& entry : counts)
+            {
+                if (entry.first.find(typed) != std::string::npos)
+                {
+                    const std::string line = "#" + entry.first;
+                    results_.push_back(Result{nullptr, line});
+                    content_width_ = std::max(content_width_, static_cast<int>(line.size()));
+                }
+            }
         }
 
         std::shared_ptr<EditorState> state_;
@@ -321,6 +417,7 @@ namespace scribbolyth::search
         int content_width_ = 72;
         bool results_valid_ = false;
         bool regex_error_ = false;
+        bool tag_phase_ = false;
         std::vector<Result> results_;
         static constexpr int kVisibleRows = 18;
     };
