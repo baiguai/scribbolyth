@@ -93,15 +93,29 @@ namespace scribbolyth::search
                 || (!f.title_only && Lower(node.text).find(needle) != std::string::npos);
         }
 
+        // A tag that is purely hex digits of length 3, 4, 6 or 8 (e.g. "#fff"
+        // or "#ff8800") is an HTML color, not a tag.
+        bool IsHexColor(const std::string& tag)
+        {
+            const std::size_t n = tag.size();
+            if (n != 3 && n != 4 && n != 6 && n != 8) return false;
+            return std::all_of(tag.begin(), tag.end(), [](unsigned char c) {
+                return std::isxdigit(c) != 0;
+            });
+        }
+
         // Collect `#tag` tokens from `text` into `counts` (keyed by lowercase
-        // tag, so the map iteration is sorted and de-duplicated).
+        // tag, so the map iteration is sorted and de-duplicated). HTML color
+        // codes such as "#fff" or "#ff8800" are ignored.
         void CollectTags(const std::string& text, std::map<std::string, int>& counts)
         {
             static const std::regex kTagRegex(R"(#[\w-]+)");
             for (std::sregex_iterator it(text.begin(), text.end(), kTagRegex), end;
                  it != end; ++it)
             {
-                ++counts[Lower(it->str().substr(1))];
+                const std::string tag = Lower(it->str().substr(1));
+                if (IsHexColor(tag)) continue;
+                ++counts[tag];
             }
         }
 

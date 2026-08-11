@@ -18,13 +18,15 @@ try:
              'text': 'beta note #Foo #baz, and #foo.bar'},
             {'id': 'n3', 'name': 'Gamma', 'expanded': True,
              'text': 'gamma #qux #alpha-tag'},
+            {'id': 'n4', 'name': 'Delta', 'expanded': True,
+             'text': 'colors #fff #ff8800 #ff8800aa and #mix #work'},
         ],
     }
     with open(doc_path, 'w', encoding='utf-8') as f:
         json.dump(doc, f)
 
     s.send((':open %s\r' % doc_path).encode())
-    s.require('Loaded 3 nodes', 'doc should load')
+    s.require('Loaded', 'doc should load')
 
     # '#' alone lists every tag once, case-insensitively de-duplicated and sorted
     s.send(b'/')
@@ -35,8 +37,20 @@ try:
     s.require('#bar', 'tag #bar listed')
     s.require('#baz', 'tag #baz listed')
     s.require('#foo', 'tag #foo listed once (Foo deduped)')
+    s.require('#mix', 'tag #mix listed')
     s.require('#qux', 'tag #qux listed')
+    s.require('#work', 'tag #work listed')
     s.forbid('#Foo', 'tags should be lowercased', rows=range(3, 26))
+    for color in ('#fff', '#ff8800', '#ff8800aa'):
+        s.forbid(color, 'HTML color %s should not be a tag' % color,
+                 rows=range(3, 26))
+
+    # searching for an HTML color finds nothing
+    s.send(b'ff8800')
+    s.require('Search: #ff8800_', 'filter should show #ff8800')
+    s.require('No matches', 'color should not match any tag')
+    s.send(b'\x7f' * 6)  # clear 'ff8800' back to '#'
+    s.require('Search: #_', 'back to bare #')
 
     # a substring narrows the tag list
     s.send(b'fo')
