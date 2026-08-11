@@ -220,6 +220,13 @@ namespace scribbolyth::editor
                     if (!IsVisualMode(state_->mode)) return;
                     SelectInnerWord();
                 };
+                state_->operations["delete_word"] = [this](const std::string&, int count)
+                {
+                    if (!Editable()) return;
+                    for (int i = 0; i < count; ++i) DeleteInnerWord();
+                    Clamp();
+                    Save();
+                };
                 state_->operations["cursor_file_start"] = [this](const std::string&, int)
                 {
                     if (!Editable()) return;
@@ -1339,6 +1346,36 @@ namespace scribbolyth::editor
                 visual_row_ = row_;
                 visual_col_ = start;
                 col_ = end -1;
+            }
+
+            // Delete the inner word under the cursor (diw): the word's
+            // characters only, keeping surrounding whitespace, mirroring the
+            // bounds chosen by SelectInnerWord().
+            void DeleteInnerWord()
+            {
+                auto& line = lines_[row_];
+                const int size = static_cast<int>(line.size());
+                int c = col_;
+                if (c >= size) c = size - 1;
+                if (c < 0) return;
+                if (line[c] == ' ')
+                {
+                    while (c < size && line[c] == ' ') ++c;
+                }
+                if (c >= size)
+                {
+                    state_->status = "No word here";
+                    return;
+                }
+                int start = c;
+                int end = c;
+                while (start > 0 && line[start - 1] != ' ') --start;
+                while (end < size && line[end] != ' ') ++end;
+
+                line.erase(static_cast<std::size_t>(start),
+                           static_cast<std::size_t>(end - start));
+                col_ = start;
+                last_col_ = col_;
             }
 
             void InsertText(const std::string& text)
