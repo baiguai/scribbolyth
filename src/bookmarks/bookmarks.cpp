@@ -63,6 +63,11 @@ namespace scribbolyth::bookmarks
                 MoveSelection(-1);
                 return true;
             }
+            if (event.is_character() && event.character() == "D")
+            {
+                Unbookmark();
+                return true;
+            }
             return true;
         }
 
@@ -102,7 +107,7 @@ namespace scribbolyth::bookmarks
 
             const std::string footer =
                 "  " + std::to_string(total == 0 ? 0 : sel + 1) + "/" + std::to_string(total) +
-                "    j/k move  Enter jump  Esc cancel  ";
+                "    j/k move  Enter jump  D unbookmark  Esc cancel  ";
 
             return ftxui::window(ftxui::text(" ` Bookmarks "),
                                 ftxui::vbox({
@@ -150,6 +155,19 @@ namespace scribbolyth::bookmarks
             if (entries_.empty()) return;
             const int total = static_cast<int>(entries_.size());
             selection_ = std::max(0, std::min(total - 1, selection_ + dir));
+        }
+
+        // Remove the selected bookmark. entries_ mirrors state_->bookmarks
+        // one-for-one, so the selected row maps directly to a bookmark index.
+        void Unbookmark()
+        {
+            if (entries_.empty()) return;
+            const int sel = std::min(selection_, static_cast<int>(entries_.size()) - 1);
+            state_->bookmarks.erase(state_->bookmarks.begin() + sel);
+            selection_ = std::max(0, std::min(selection_,
+                                              static_cast<int>(state_->bookmarks.size()) - 1));
+            scroll_ = 0;
+            state_->status = "Bookmark removed";
         }
 
         void Recompute()
