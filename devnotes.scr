@@ -4,7 +4,8 @@
   "bookmarks": [
   ],
   "history": [
-    "v1anzsho"
+    "v1anzsho",
+    "6gskj7g5"
   ],
   "roots": [
   {
@@ -21,6 +22,14 @@
       "children": [
       ]
     }
+    ]
+  },
+  {
+    "id": "6gskj7g5",
+    "name": "Project Structure",
+    "expanded": false,
+    "text": "scribbolyth/\n| build-windows/\n| build/\n| cmake/\n| config/\n| developers/\n| patches/\n| src/\n| tests/\n| CMakeLists.txt\n| CMakeLists.txt.in\n| LICENSE\n| README.md\n| app.sh*\n| build-windows.sh*\n| build.sh*\n| config.sh*\n| devnotes.scr\n| example.html*\n| keybinding.md\n| leakcheck.sh*\n| run.sh*\n| setup.sh*\n",
+    "children": [
     ]
   }
   ]
