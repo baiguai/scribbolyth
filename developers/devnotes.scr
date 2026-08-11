@@ -4,101 +4,57 @@
   "bookmarks": [
   ],
   "history": [
+    "7dwjs6ui",
+    "cmueptx0",
     "v1anzsho",
-    "7avxdch2",
-    "haauqii2",
-    "flu2acys",
-    "y18iyzfs",
-    "usvi4me4",
-    "uzlhtl4w",
-    "azductam",
-    "is0jbvmd"
+    "e0puu0iy",
+    "6gskj7g5"
   ],
   "roots": [
   {
     "id": "tpg8a0cc",
     "name": "Introduction",
-    "expanded": false,
+    "expanded": true,
     "text": "",
     "children": [
     {
       "id": "v1anzsho",
       "name": "What is Scribbolyth",
       "expanded": true,
-      "text": "What is Scribbolyth\n\nScribbolyth is a Vim-like notes editor, built in C++, and utilizing a treeview as its primary orginizational structure.\n\nIt is the successor to the scribboleth.html editor.\n\nThe benefits of Scribbolyth are:\n\n* It behaves like a standard console-based editor, without the need to run NodeJs servers to make saving easier.\n    Since the original .html based app is just a stand alone .html file - saving is ... weird there.\n    The beauty of that application is - all you need is a browser to run it!\n    But saving is awkward unless you do saving via its Node saver script.\n\n* It works in partner with the .html version of itself.\n    The .html version of this application can be imported into Scribbolyth - and Scribbolyth files can be exported as stand alone .html versions of the application.",
+      "text": "What is Scribbolyth\n\nScribbolyth is a Vim-like notes editor, built in C++, and utilizing a treeview as its primary orginizational structure.\n\nIt is the successor to the scribboleth.html editor.\n\nThe benefits of Scribbolyth are:\n\n* It behaves like a standard console-based editor, without the need to run NodeJs servers to make saving easier.\n    Since the original .html based app is just a stand alone .html file - saving is ... weird there.\n    The beauty of that application is - all you need is a browser to run it!\n    But saving is awkward unless you do saving via its Node saver script.",
       "children": [
       ]
     }
     ]
   },
   {
-    "id": "8xgakift",
-    "name": "Code Structure",
-    "expanded": true,
-    "text": "",
+    "id": "6gskj7g5",
+    "name": "Project Structure",
+    "expanded": false,
+    "text": "scribbolyth/\n| build-windows/\n| build/\n| cmake/\n| config/\n| developers/\n| patches/\n| src/\n| tests/\n| CMakeLists.txt\n| CMakeLists.txt.in\n| LICENSE\n| README.md\n| app.sh*\n| build-windows.sh*\n| build.sh*\n| config.sh*\n| devnotes.scr\n| example.html*\n| keybinding.md\n| leakcheck.sh*\n| run.sh*\n\n\nSee:\n\n_Code Files_\n_Tool Scripts_\n_Configurations_",
     "children": [
     {
-      "id": "7avxdch2",
-      "name": "Src",
+      "id": "7dwjs6ui",
+      "name": "Code Files",
       "expanded": true,
-      "text": "Src\n\nThe 'src' directory houses all of Scribbolyth's source code.\nWithin this directory are other directories for each components of the application.\nIn those folders are the headers and source code files for that section.",
+      "text": "Code Files\n    The actual source code files can be found in the ./src directory.",
       "children": [
-      {
-        "id": "haauqii2",
-        "name": "Bookmark",
-        "expanded": true,
-        "text": "Bookmark\n\nThe bookmark directory simply defines an ID method as well as the structure of a bookmark object within the code.",
-        "children": [
-        ]
-      },
-      {
-        "id": "flu2acys",
-        "name": "Bookmarks",
-        "expanded": true,
-        "text": "Bookmarks\n\nThe bookmarks directory handles the bookmarks dialog.",
-        "children": [
-        ]
-      },
-      {
-        "id": "y18iyzfs",
-        "name": "Browser",
-        "expanded": true,
-        "text": "Browser\n\nThe browser directory handles the file browser dialog.\nThis is use when doing:\n\n* Open\n* Import .html\n* Saveas\n* Export .html",
-        "children": [
-        ]
-      },
-      {
-        "id": "usvi4me4",
-        "name": "Clipboard",
-        "expanded": true,
-        "text": "Clipboard\n\nThis folder contains only a Header designed to handle clipboard management, cross platform.",
-        "children": [
-        ]
-      },
-      {
-        "id": "uzlhtl4w",
-        "name": "Config",
-        "expanded": true,
-        "text": "Config\n\nThe config directory handles the loading, reading, and writing of configuration values.",
-        "children": [
-        ]
-      },
-      {
-        "id": "azductam",
-        "name": "Editor",
-        "expanded": true,
-        "text": "Editor\n\nThe editor directory handles both the note editor itself and the editor state that is utilized while the app is running.",
-        "children": [
-        ]
-      },
-      {
-        "id": "is0jbvmd",
-        "name": "Help",
-        "expanded": true,
-        "text": "Help\n\nThe help directory houses code that defines help objects and defines the help dialog itself.",
-        "children": [
-        ]
-      }
+      ]
+    },
+    {
+      "id": "e0puu0iy",
+      "name": "Tool Scripts",
+      "expanded": false,
+      "text": "Tool Scripts\n    CMakeLists.txt.in\n        This is a CMakeLists template - that is used by the build.sh, in conjunction with the config.sh\n\n    config.sh\n        Here is where you will add the .cpp files you need to have included in the CMakeLists file, for the compiler/linker.\n\n    leakcheck.sh\n        Launch the scribbolyth binary via this, and use it for a bit. It will check for memory leaks.\n\n    build.sh\n        Builds the Linux version of Scribbolyth.\n\n    build-windows.sh\n        Builds the Windows version of Scribbolyth.\n\n    run.sh\n        Builds then runs the Linux version of Scribbolyth.\n\n    app.sh\n        Just runs the Linux version of Scribbolyth - without doing a build first.",
+      "children": [
+      ]
+    },
+    {
+      "id": "cmueptx0",
+      "name": "Configurations",
+      "expanded": true,
+      "text": "Configurations\n\nscribbolyth/\n| build-windows/\n| build/\n| cmake/\n| config/\n| | commands.conf\n| | init.conf\n| | scribboleth.html\n\n    commands.conf\n        This defines all the key bindings, and is read for the help dialog.\n        It is copied to the output directory by the build.sh script.\n\n    init.conf\n        This is the primary Scribbolyth configuration file.\n        The default one is copied to the output directory by the build.sh script.\n\n    scribboleth.html\n        This is a blank copy of the latest .html version of this app (it's called Scribboleth).\n        It is used by the export to .html feature.",
+      "children": [
       ]
     }
     ]
