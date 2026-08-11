@@ -1,5 +1,7 @@
 #include "keymap.hpp"
 
+#include <algorithm>
+
 void Keymap::Bind(ftxui::Event event, Binding binding)
 {
     single_bindings_[event.input()] = std::move(binding);
@@ -43,6 +45,19 @@ Keymap::Result Keymap::Handle(ftxui::Event event)
         {
             pending_.clear();
             return finish({ib->second.op, ib->second.command, ib->second.args});
+        }
+
+        // Keep waiting if the candidate is a prefix of a longer sequence
+        // (e.g. "d i" while "d i w" is bound), so single keys like `i` don't
+        // fire in the middle of an operator sequence.
+        for (auto& [seq, _] : sequence_bindings_)
+        {
+            if (candidate.size() < seq.size()
+                && std::equal(candidate.begin(), candidate.end(), seq.begin()))
+            {
+                pending_ = candidate;
+                return {"", "", "", true};
+            }
         }
 
         pending_.clear();

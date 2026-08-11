@@ -82,6 +82,19 @@ namespace scribbolyth::browser
                 filter_active_ = true;
                 return true;
             }
+            if (event.is_character() && event.character() == ":"
+                && !state_->browser_command.empty())
+            {
+                // The dialog just picks a directory; `:` hands the currently
+                // shown directory back to the save/export command line so the
+                // user can type a filename.
+                const std::string command = std::move(state_->browser_command);
+                state_->browser_command.clear();
+                const std::string target = (fs::path(dir_) / "").string();
+                Close();
+                scribbolyth::op::OpenCommandLineWithArgs(state_, command, target);
+                return true;
+            }
             if (event == ftxui::Event::Return)
             {
                 Activate();
@@ -175,8 +188,13 @@ namespace scribbolyth::browser
                 rows.push_back(ftxui::text(PadRight("", row_width)));
             }
 
-            const std::string help_move =
+            std::string help_move =
                 "    j/k move  h up  l enter  gg/G  Enter pick  / filter  Esc cancel  ";
+            if (!state_->browser_command.empty())
+            {
+                help_move =
+                    "    j/k move  h up  l enter  gg/G  Enter pick  : name  / filter  Esc cancel  ";
+            }
             const std::string help_clear =
                 "    Esc clear  j/k move  h up  l enter  Enter pick  / filter  ";
             const std::string help_type = "    type to filter  Enter keep  Esc clear  ";
@@ -284,8 +302,10 @@ namespace scribbolyth::browser
             if (entry.is_dir)
             {
                 // `l` always navigates into the folder. For save/export-style
-                // ops (`browser_command` set) Enter instead hands the folder
-                // back to the command line so the user can type a filename.
+                // ops (`browser_command` set) the dialog is a folder picker:
+                // Enter hands the chosen folder back to the command line so a
+                // filename can be typed. `:` picks the currently shown folder
+                // the same way.
                 if (!pick_file || state_->browser_command.empty())
                 {
                     SetDir(entry.path);

@@ -48,8 +48,18 @@ int main(int, char** argv) {
     }
 #endif
 
-    state->operations["quit"] = [quit](const std::string&, int) { quit(); };
+    state->operations["quit"] = [state, quit](const std::string&, int)
+    {
+        if (state->changed)
+        {
+            state->status = "Unsaved changes - use :w to save or :qa! to quit without saving";
+            return;
+        }
+        quit();
+    };
+    state->operations["quit_force"] = [quit](const std::string&, int) { quit(); };
     state->commands["qa"] = "quit";
+    state->commands["qa!"] = "quit_force";
 
     bool show_help = false;
     state->operations["show_help"] = [&show_help](const std::string&, int) { show_help = true; };
@@ -170,8 +180,13 @@ int main(int, char** argv) {
 
     auto status_bar = Renderer([state]
     {
+        std::string mode_str = ModeName(state->mode);
+        if (state->changed)
+        {
+            mode_str += " [+]";
+        }
         ftxui::Elements parts = {
-            text(ModeName(state->mode)) | bold,
+            text(mode_str) | bold,
             // separator(),
             // text(" scribbolyth ") | dim,
         };
