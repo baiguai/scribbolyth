@@ -226,5 +226,13 @@ int main(int, char** argv) {
 
     screen.Loop(root);
 
+    // Break the shared_ptr cycles the UI graph creates (the editor/treeview
+    // components hold `state_`, while `state` holds them via focus_*/the op
+    // lambdas capture `state`). Without this, EditorState and everything it
+    // owns leak on return.
+    state->operations.clear();
+    state->focus_editor = nullptr;
+    state->focus_treeview = nullptr;
+
     return 0;
 }
