@@ -4,11 +4,14 @@
   "bookmarks": [
   ],
   "history": [
-    "cmueptx0",
-    "e0puu0iy",
-    "7dwjs6ui",
     "v1anzsho",
-    "6gskj7g5"
+    "6gskj7g5",
+    "7dwjs6ui",
+    "e0puu0iy",
+    "cmueptx0",
+    "g98ovtzg",
+    "w5v6qi45",
+    "ovs2ua28"
   ],
   "roots": [
   {
@@ -45,7 +48,7 @@
       "id": "e0puu0iy",
       "name": "Tool Scripts",
       "expanded": false,
-      "text": "Tool Scripts\n    CMakeLists.txt.in\n        This is a CMakeLists template - that is used by the build.sh, in conjunction with the config.sh\n\n    config.sh\n        Here is where you will add the .cpp files you need to have included in the CMakeLists file, for the compiler/linker.\n\n    leakcheck.sh\n        Launch the scribbolyth binary via this, and use it for a bit. It will check for memory leaks.\n\n    build.sh\n        Builds the Linux and Windows versions of Scribbolyth.\n\n    build-windows.sh\n        Builds only the Windows version of Scribbolyth.\n\n    run.sh\n        Builds then runs the Linux version of Scribbolyth.\n\n    app.sh\n        Just runs the Linux version of Scribbolyth - without doing a build first.\n\n\n    setup.sh\n    upgrade.sh",
+      "text": "Tool Scripts\n    CMakeLists.txt.in\n        This is a CMakeLists template - that is used by the build.sh, in conjunction with the config.sh\n\n    config.sh\n        Here is where you will add the .cpp files you need to have included in the CMakeLists file, for the compiler/linker.\n\n    leakcheck.sh\n        Launch the scribbolyth binary via this, and use it for a bit. It will check for memory leaks.\n\n    build.sh\n        Builds the Linux and Windows versions of Scribbolyth.\n\n    build-windows.sh\n        Builds only the Windows version of Scribbolyth.\n\n    run.sh\n        Builds then runs the Linux version of Scribbolyth.\n\n    app.sh\n        Just runs the Linux version of Scribbolyth - without doing a build first.\n\n\n    setup.sh\n        This script ensures that requirements like Fxtui are present.\n\n    upgrade.sh\n        This script checks Fxtui and other requirements for updates.",
       "children": [
       ]
     },
@@ -55,6 +58,46 @@
       "expanded": true,
       "text": "Configurations\n\nscribbolyth/\n| build-windows/\n| build/\n| cmake/\n| config/\n| | commands.conf\n| | init.conf\n| | scribboleth.html\n\n    commands.conf\n        This defines all the key bindings, and is read for the help dialog.\n        It is copied to the output directory by the build.sh script.\n\n    init.conf\n        This is the primary Scribbolyth configuration file.\n        The default one is copied to the output directory by the build.sh script.\n\n    scribboleth.html\n        This is a blank copy of the latest .html version of this app (it's called Scribboleth).\n        It is used by the export to .html feature.",
       "children": [
+      ]
+    }
+    ]
+  },
+  {
+    "id": "hzrkdl74",
+    "name": "Source Code",
+    "expanded": false,
+    "text": "",
+    "children": [
+    ]
+  },
+  {
+    "id": "nzq1ufpv",
+    "name": "Tasks",
+    "expanded": true,
+    "text": "",
+    "children": [
+    {
+      "id": "g98ovtzg",
+      "name": "Adding a Key Binding",
+      "expanded": true,
+      "text": "Adding new key bindings consists of two primary steps.\n\n* Adding the C++ Operation.\n    These are registered in state->operations\n* Defining the key binding in the configuration file.\n    This will register key bindings as well as :command actions that can be entered\n\n\nSee\n_New Keybinding Example_",
+      "children": [
+      {
+        "id": "w5v6qi45",
+        "name": "New Keybinding Example",
+        "expanded": true,
+        "text": "For this tutorial we're going to create the Vim 'j' key binding.\n'j' moves the cursor down within the text (when in NORMAL mode).",
+        "children": [
+        {
+          "id": "ovs2ua28",
+          "name": "The Config Entry",
+          "expanded": false,
+          "text": "First let's add the key binding to our commands config:\n\nIn ./config/commands.conf :\n\nLet's add the following entry and I'll explain each value:\n\n# MODE          KEY          REP   CMD          ARGS     OP                          FUNCTION                    DESC\nNORMAL          j            yes   -            -        cursor_down                 -                           \"Move cursor down\"\n\n\nMODE\n    Scribbolyth has multiple modes (like Vim does - but with the addition of a TREE mode).\n    We want 'j' to work when in NORMAL mode.\n\nKEY\n    This is a case sensitive value that specifies the key.\n    There are some special values that can be entered here - refer to the default ./config/commands.conf\n\nREP\n    If this is set to yes - the command can be repeated, like:\n    '5j'\n    Would move 5 lines down.\n\nCMD\n    If there is a :command command associated with this, it would go here.\n    See _Command Tutorial_\n\nARGS\n    This is used mainly with :command entries.\n\nOP\n    This is the name of the operation that the key binding is associated with.\n\nFUNCTION\n    This is the name of the actual function that is called.\n    In general the OP will reference an actual function itself, so this usually can be blank.\n\nDESC\n    The description is used by the keymaps help dialog to display a friendly description of what the binding does.",
+          "children": [
+          ]
+        }
+        ]
+      }
       ]
     }
     ]
