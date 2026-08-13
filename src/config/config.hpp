@@ -16,4 +16,7 @@ namespace scribbolyth::config
 
     // Persist `last_file` (may be empty) to the app's init config.
     bool WriteInit(const std::string& path, const std::string& last_file, const std::vector<std::string>& recent_files);
+
+    // persist the recent files order etc
+    bool WriteRecentFiles(const std::string& path, const std::vector<std::string>& recent_files);
 }

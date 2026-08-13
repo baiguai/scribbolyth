@@ -79,7 +79,20 @@ int main(int, char** argv) {
     state->operations["history"] = [&show_history](const std::string&, int) { show_history = true; };
 
     bool show_recent = false;
-    state->operations["recents"] = [&show_recent](const std::string&, int) { show_recent = true; };
+    state->operations["recents"] = [&show_recent, &state](const std::string&, int)
+    {
+        const std::size_t removed = scribbolyth::recent::PruneRecentFiles(state->recent_files);
+        if (removed > 0)
+        {
+            if (!state->init_path.empty())
+            {
+                scribbolyth::config::WriteRecentFiles(state->init_path, state->recent_files);
+            }
+            state->status = "Removed " + std::to_string(removed) +
+                " stale recent entr" + (removed == 1 ?"y" : "ies");
+        }
+        show_recent = true;
+    };
 
     bool show_undo = false;
     state->operations["undo"] = [&show_undo](const std::string&, int) { show_undo = true; };
@@ -126,6 +139,13 @@ int main(int, char** argv) {
         {
             it->second(last_file, 1);
         }
+    }
+
+    if (std::size_t removed = scribbolyth::recent::PruneRecentFiles(state->recent_files))
+    {
+        std::cerr << "Removed " << removed << " stale recent entr"
+                  << (removed == 1 ? "y" : "ies") << " from init.conf\n";
+        scribbolyth::config::WriteInit(init_path.string(), last_file, state->recent_files);
     }
 
     InputOption command_option;
@@ -225,6 +245,14 @@ int main(int, char** argv) {
           browser_comp, &show_file_browser);
 
     screen.Loop(root);
+
+    // Break the shared_ptr cycles the UI graph creates (the editor/treeview
+    // components hold `state_`, while `state` holds them via focus_*/the op
+    // lambdas capture `state`). Without this, EditorState and everything it
+    // owns leak on return.
+    state->operations.clear();
+    state->focus_editor = nullptr;
+    state->focus_treeview = nullptr;
 
     return 0;
 }

@@ -5,98 +5,97 @@
   ],
   "history": [
     "v1anzsho",
-    "7avxdch2",
-    "haauqii2",
-    "flu2acys",
-    "y18iyzfs",
-    "usvi4me4",
-    "uzlhtl4w",
-    "azductam",
-    "is0jbvmd"
+    "6gskj7g5",
+    "7dwjs6ui",
+    "e0puu0iy",
+    "cmueptx0",
+    "g98ovtzg",
+    "w5v6qi45",
+    "ovs2ua28"
   ],
   "roots": [
   {
     "id": "tpg8a0cc",
     "name": "Introduction",
-    "expanded": false,
+    "expanded": true,
     "text": "",
     "children": [
     {
       "id": "v1anzsho",
       "name": "What is Scribbolyth",
       "expanded": true,
-      "text": "What is Scribbolyth\n\nScribbolyth is a Vim-like notes editor, built in C++, and utilizing a treeview as its primary orginizational structure.\n\nIt is the successor to the scribboleth.html editor.\n\nThe benefits of Scribbolyth are:\n\n* It behaves like a standard console-based editor, without the need to run NodeJs servers to make saving easier.\n    Since the original .html based app is just a stand alone .html file - saving is ... weird there.\n    The beauty of that application is - all you need is a browser to run it!\n    But saving is awkward unless you do saving via its Node saver script.\n\n* It works in partner with the .html version of itself.\n    The .html version of this application can be imported into Scribbolyth - and Scribbolyth files can be exported as stand alone .html versions of the application.",
+      "text": "What is Scribbolyth\n\nScribbolyth is a Vim-like notes editor, built in C++, and utilizing a treeview as its primary orginizational structure.\n\nIt is the successor to the scribboleth.html editor.\n\nThe benefits of Scribbolyth are:\n\n* It behaves like a standard console-based editor, without the need to run NodeJs servers to make saving easier.\n    Since the original .html based app is just a stand alone .html file - saving is ... weird there.\n    The beauty of that application is - all you need is a browser to run it!\n    But saving is awkward unless you do saving via its Node saver script.",
       "children": [
       ]
     }
     ]
   },
   {
-    "id": "8xgakift",
-    "name": "Code Structure",
+    "id": "6gskj7g5",
+    "name": "Project Structure",
+    "expanded": true,
+    "text": "scribbolyth/\n| build-windows/\n| build/\n| cmake/\n| config/\n| developers/\n| patches/\n| src/\n| tests/\n| CMakeLists.txt\n| CMakeLists.txt.in\n| LICENSE\n| README.md\n| app.sh\n| build-windows.sh\n| build.sh\n| config.sh\n| example.html\n| keybinding.md\n| leakcheck.sh\n| run.sh\n| setup.sh\n| upgrade.sh\n\n\nSee:\n\n_Code Files_\n_Tool Scripts_\n_Configurations_",
+    "children": [
+    {
+      "id": "7dwjs6ui",
+      "name": "Code Files",
+      "expanded": true,
+      "text": "Code Files\n    The actual source code files can be found in the ./src directory.",
+      "children": [
+      ]
+    },
+    {
+      "id": "e0puu0iy",
+      "name": "Tool Scripts",
+      "expanded": false,
+      "text": "Tool Scripts\n    CMakeLists.txt.in\n        This is a CMakeLists template - that is used by the build.sh, in conjunction with the config.sh\n\n    config.sh\n        Here is where you will add the .cpp files you need to have included in the CMakeLists file, for the compiler/linker.\n\n    leakcheck.sh\n        Launch the scribbolyth binary via this, and use it for a bit. It will check for memory leaks.\n\n    build.sh\n        Builds the Linux and Windows versions of Scribbolyth.\n\n    build-windows.sh\n        Builds only the Windows version of Scribbolyth.\n\n    run.sh\n        Builds then runs the Linux version of Scribbolyth.\n\n    app.sh\n        Just runs the Linux version of Scribbolyth - without doing a build first.\n\n\n    setup.sh\n        This script ensures that requirements like Fxtui are present.\n\n    upgrade.sh\n        This script checks Fxtui and other requirements for updates.",
+      "children": [
+      ]
+    },
+    {
+      "id": "cmueptx0",
+      "name": "Configurations",
+      "expanded": true,
+      "text": "Configurations\n\nscribbolyth/\n| build-windows/\n| build/\n| cmake/\n| config/\n| | commands.conf\n| | init.conf\n| | scribboleth.html\n\n    commands.conf\n        This defines all the key bindings, and is read for the help dialog.\n        It is copied to the output directory by the build.sh script.\n\n    init.conf\n        This is the primary Scribbolyth configuration file.\n        The default one is copied to the output directory by the build.sh script.\n\n    scribboleth.html\n        This is a blank copy of the latest .html version of this app (it's called Scribboleth).\n        It is used by the export to .html feature.",
+      "children": [
+      ]
+    }
+    ]
+  },
+  {
+    "id": "hzrkdl74",
+    "name": "Source Code",
+    "expanded": false,
+    "text": "",
+    "children": [
+    ]
+  },
+  {
+    "id": "nzq1ufpv",
+    "name": "Tasks",
     "expanded": true,
     "text": "",
     "children": [
     {
-      "id": "7avxdch2",
-      "name": "Src",
+      "id": "g98ovtzg",
+      "name": "Adding a Key Binding",
       "expanded": true,
-      "text": "Src\n\nThe 'src' directory houses all of Scribbolyth's source code.\nWithin this directory are other directories for each components of the application.\nIn those folders are the headers and source code files for that section.",
+      "text": "Adding new key bindings consists of two primary steps.\n\n* Adding the C++ Operation.\n    These are registered in state->operations\n* Defining the key binding in the configuration file.\n    This will register key bindings as well as :command actions that can be entered\n\n\nSee\n_New Keybinding Example_",
       "children": [
       {
-        "id": "haauqii2",
-        "name": "Bookmark",
+        "id": "w5v6qi45",
+        "name": "New Keybinding Example",
         "expanded": true,
-        "text": "Bookmark\n\nThe bookmark directory simply defines an ID method as well as the structure of a bookmark object within the code.",
+        "text": "For this tutorial we're going to create the Vim 'j' key binding.\n'j' moves the cursor down within the text (when in NORMAL mode).",
         "children": [
-        ]
-      },
-      {
-        "id": "flu2acys",
-        "name": "Bookmarks",
-        "expanded": true,
-        "text": "Bookmarks\n\nThe bookmarks directory handles the bookmarks dialog.",
-        "children": [
-        ]
-      },
-      {
-        "id": "y18iyzfs",
-        "name": "Browser",
-        "expanded": true,
-        "text": "Browser\n\nThe browser directory handles the file browser dialog.\nThis is use when doing:\n\n* Open\n* Import .html\n* Saveas\n* Export .html",
-        "children": [
-        ]
-      },
-      {
-        "id": "usvi4me4",
-        "name": "Clipboard",
-        "expanded": true,
-        "text": "Clipboard\n\nThis folder contains only a Header designed to handle clipboard management, cross platform.",
-        "children": [
-        ]
-      },
-      {
-        "id": "uzlhtl4w",
-        "name": "Config",
-        "expanded": true,
-        "text": "Config\n\nThe config directory handles the loading, reading, and writing of configuration values.",
-        "children": [
-        ]
-      },
-      {
-        "id": "azductam",
-        "name": "Editor",
-        "expanded": true,
-        "text": "Editor\n\nThe editor directory handles both the note editor itself and the editor state that is utilized while the app is running.",
-        "children": [
-        ]
-      },
-      {
-        "id": "is0jbvmd",
-        "name": "Help",
-        "expanded": true,
-        "text": "Help\n\nThe help directory houses code that defines help objects and defines the help dialog itself.",
-        "children": [
+        {
+          "id": "ovs2ua28",
+          "name": "The Config Entry",
+          "expanded": false,
+          "text": "First let's add the key binding to our commands config:\n\nIn ./config/commands.conf :\n\nLet's add the following entry and I'll explain each value:\n\n# MODE          KEY          REP   CMD          ARGS     OP                          DESC\nNORMAL          j            yes   -            -        cursor_down                 \"Move cursor down\"\n\n\nMODE\n    Scribbolyth has multiple modes (like Vim does - but with the addition of a TREE mode).\n    We want 'j' to work when in NORMAL mode.\n\nKEY\n    This is a case sensitive value that specifies the key.\n    There are some special values that can be entered here - refer to the default ./config/commands.conf\n\nREP\n    If this is set to yes - the command can be repeated, like:\n    '5j'\n    Would move 5 lines down.\n\nCMD\n    If there is a :command command associated with this, it would go here.\n    See _Command Tutorial_\n\nARGS\n    This is used mainly with :command entries.\n\nOP\n    This is the name of the operation that the key binding is associated with.\n    The OP typically calls the function that will actually be doing the work.\n\nDESC\n    The description is used by the keymaps help dialog to display a friendly description of what the binding does.",
+          "children": [
+          ]
+        }
         ]
       }
       ]

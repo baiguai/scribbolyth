@@ -68,15 +68,14 @@ namespace scribbolyth::help
                 if (hash != std::string::npos && line[hash] == '#') line = line.substr(0, hash);
 
                 auto fields = SplitFields(line);
-                if (fields.size() < 7) continue;
+                if (fields.size() < 6) continue;
 
                 HelpEntry entry;
                 entry.mode        = fields[0];
                 entry.key         = fields[1];
                 entry.command     = fields[3];
                 entry.op          = fields[5];
-                entry.function    = fields[6];
-                entry.description = (fields.size() > 7) ? fields[7] : "";
+                entry.description = (fields.size() > 6) ? fields[6] : "";
 
                 // Entries without a key binding (GLOBAL) show their command
                 // as the "key", e.g. ":qa", so the diagram and the ':'
@@ -87,7 +86,7 @@ namespace scribbolyth::help
                 }
 
                 // The diagram (and the filter) shows the binding and its
-                // description; the op, command and function names stay hidden.
+                // description; the op and command names stay hidden.
                 entry.line = PadRight(entry.mode, 6) + " " +
                              PadRight(entry.key, 12) + " " +
                              entry.description;

@@ -59,7 +59,7 @@ Rules:
 
 One entry per line:
 
-    mode  key  repeat  command  args  op  function  description
+    mode  key  repeat  command  args  op  description
 
 Blank lines and lines starting with `#` are ignored.
 
@@ -71,7 +71,6 @@ Blank lines and lines starting with `#` are ignored.
 | `command`    | Optional `:name` usable from the command line. `-` means no command-line access.                 |
 | `args`       | `-`, `prompt`, or a literal string. See below.                                                   |
 | `op`         | The operation name from Step 1. `-` means no dispatch.                                           |
-| `function`   | Documentation only — the function the op calls. Ignored by the loader.                           |
 | `description`| User-facing text shown in the `?` help dialog. Quote it when it contains spaces (`"Move up"`).    |
 
 `key` values:
@@ -96,16 +95,16 @@ so a row like `TREE  #  no  ...` binds `#`.
 Examples — the same op bound four ways:
 
     # key-only
-    TREE   s   no   -   -   sort_nodes   SortNodes()
+    TREE   s   no   -   -   sort_nodes
 
     # key + :command
-    TREE   s   no   sort_nodes   -   sort_nodes   SortNodes()
+    TREE   s   no   sort_nodes   -   sort_nodes
 
     # command-only (no key) — run as :sort_nodes from any mode
-    GLOBAL   -   -   sort_nodes   -   sort_nodes   SortNodes()
+    GLOBAL   -   -   sort_nodes   -   sort_nodes
 
     # key that prompts for an argument before running
-    TREE   a   no   create_node   prompt   new_node   InsertNode(name)
+    TREE   a   no   create_node   prompt   new_node
 
 For the last one: press `a` → the command line opens with `:create_node `
 prefilled → type a name → `Enter` creates the node. The same op is also

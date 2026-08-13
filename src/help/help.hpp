@@ -15,7 +15,6 @@ namespace scribbolyth::help
         std::string key;
         std::string command;
         std::string op;
-        std::string function;
         std::string description;
         std::string line;   // the diagram line shown in the dialog
     };
