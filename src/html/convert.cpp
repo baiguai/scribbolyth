@@ -347,6 +347,30 @@ namespace scribbolyth::html
             return false;
         }
 
+        // The exported content keeps the note's text, but if its first line is
+        // not already the node's name, the name is prepended on its own line so
+        // every note reads as a titled section in the rendered HTML. Notes
+        // with no text are left untouched (no title line is invented for them).
+        std::string ExportContent(const TreeNode& node)
+        {
+            if (node.name.empty() || node.text.empty()) return node.text;
+
+            std::size_t nl = node.text.find('\n');
+            const std::string first_line =
+                (nl == std::string::npos) ? node.text : node.text.substr(0, nl);
+
+            auto trim = [](const std::string& s) {
+                const std::string ws = " \t\r\n";
+                std::size_t b = s.find_first_not_of(ws);
+                if (b == std::string::npos) return std::string();
+                std::size_t e = s.find_last_not_of(ws);
+                return s.substr(b, e - b + 1);
+            };
+
+            if (trim(first_line) == trim(node.name)) return node.text;
+            return node.name + "\n\n" + node.text;
+        }
+
         void AppendNode(std::string& out, const TreeNode& node, int depth)
         {
             std::string pad(depth * 2, ' ');
@@ -356,7 +380,7 @@ namespace scribbolyth::html
             out += pad + "{\n";
             out += pad2 + "\"id\": \"" + id + "\",\n";
             out += pad2 + "\"title\": " + scribbolyth::io::JsonEscape(node.name) + ",\n";
-            out += pad2 + "\"content\": " + scribbolyth::io::JsonEscape(node.text) + ",\n";
+            out += pad2 + "\"content\": " + scribbolyth::io::JsonEscape(ExportContent(node)) + ",\n";
             if (node.children.empty())
             {
                 out += pad2 + "\"children\": [],\n";
