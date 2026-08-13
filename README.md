@@ -4,14 +4,15 @@ So it has the familiar Vim modes plus a TREE mode for managing the treeview.
 
 # Downloading
 
+
 # Prerequisites
 
-Scribbolyth is a terminal app: you run it from a terminal window. Neither the
-Linux binary nor the Windows `.exe` needs anything installed — no libraries, no
-runtimes, no packages. What matters is that the **config files travel with the
+Scribbolyth is a terminal app. Neither the Linux binary nor the
+Windows `.exe` needs anything installed — no libraries, no runtimes,
+no packages. What matters is that the **config files travel with the
 binary**.
 
-## Required: the three config files sit next to the executable
+## Required: the three config files in the app`s directory
 
 The app looks for `commands.conf`, `init.conf` and `scribboleth.html` in the
 same folder as the executable (`build.sh` copies them there automatically). If
