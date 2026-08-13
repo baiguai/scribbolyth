@@ -1,13 +1,17 @@
 #include "recent.hpp"
 
 #include <algorithm>
+#include <cstddef>
+#include <filesystem>
 #include <string>
+#include <system_error>
 #include <utility>
 #include <vector>
 
 #include <ftxui/component/event.hpp>
 #include <ftxui/dom/elements.hpp>
 
+#include "../config/config.hpp"
 #include "../editor/editor_state.hpp"
 
 namespace scribbolyth::recent
@@ -47,10 +51,25 @@ namespace scribbolyth::recent
                 MoveSelection(+1);
                 return true;
             }
-            if (event == ftxui::Event::ArrowDown
+            if (event == ftxui::Event::ArrowUp
                     || (event.is_character() && event.character() == "k"))
             {
                 MoveSelection(-1);
+                return true;
+            }
+            if (event.is_character() && event.character() == "D")
+            {
+                RemoveSelected();
+                return true;
+            }
+            if (event.is_character() && event.character() == "J")
+            {
+                MoveEntry(+1);
+                return true;
+            }
+            if (event.is_character() && event.character() == "K")
+            {
+                MoveEntry(-1);
                 return true;
             }
             return true; // consume everything else
@@ -95,7 +114,7 @@ namespace scribbolyth::recent
 
             const std::string footer =
                 "  " + std::to_string(total == 0 ? 0 : sel + 1) + "/" + std::to_string(total) +
-                "   j/k move  Enter open  Esc cancel  ";
+                "   j/k move  J/K reorder  D remove  Enter open  Esc cancel  ";
 
             return ftxui::window(ftxui::text(" < Recent Files "),
                                 ftxui::vbox({
@@ -139,6 +158,37 @@ namespace scribbolyth::recent
             selection_ = std::max(0, std::min(total - 1, selection_ + dir));
         }
 
+        void RemoveSelected()
+        {
+            auto& recent = state_->recent_files;
+            if (recent.empty()) return;
+            const int sel = std::min(selection_, static_cast<int>(recent.size()) - 1);
+            recent.erase(recent.begin() + sel);
+            selection_ = std::max(0, std::min(selection_, static_cast<int>(recent.size()) - 1));
+            scroll_ = 0;
+            if (!state_->init_path.empty())
+            {
+                scribbolyth::config::WriteRecentFiles(state_->init_path, recent);
+            }
+            state_->status = "Recent entry removed";
+        }
+
+        void MoveEntry(int dir)
+        {
+            auto& recent = state_->recent_files;
+            if (recent.empty()) return;
+            const int sel = std::min(selection_, static_cast<int>(recent.size()) - 1);
+            const int other = sel + dir;
+            if (other < 0 || other >= static_cast<int>(recent.size())) return;
+            std::swap(recent[static_cast<std::size_t>(sel)],
+                    recent[static_cast<std::size_t>(other)]);
+            selection_ = other;
+            if (!state_->init_path.empty())
+            {
+                scribbolyth::config::WriteRecentFiles(state_->init_path, recent);
+            }
+        }
+
         std::shared_ptr<EditorState> state_;
         bool* show_;
         int selection_ = 0;
@@ -150,5 +200,19 @@ namespace scribbolyth::recent
     ftxui::Component MakeRecentDialog(std::shared_ptr<EditorState> state, bool* show)
     {
         return ftxui::Make<RecentDialog>(std::move(state), show);
+    }
+
+    std::size_t PruneRecentFiles(std::vector<std::string>& recent_files)
+    {
+        const std::size_t before = recent_files.size();
+        std::error_code ec;
+        recent_files.erase(
+                std::remove_if(recent_files.begin(), recent_files.end(),
+                    [&ec](const std::string& path)
+                    {
+                        return !std::filesystem::exists(path, ec);
+                    }),
+                recent_files.end());
+        return before - recent_files.size();
     }
 }

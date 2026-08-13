@@ -187,4 +187,12 @@ namespace scribbolyth::config
         }
         return static_cast<bool>(file);
     }
+
+    bool WriteRecentFiles(const std::string& path, const std::vector<std::string>& recent_files)
+    {
+        std::string last_file;
+        std::vector<std::string> ignored;
+        ReadInit(path, last_file, ignored);
+        return WriteInit(path, last_file, recent_files);
+    }
 }
