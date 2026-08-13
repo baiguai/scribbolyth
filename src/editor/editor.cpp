@@ -290,6 +290,22 @@ namespace scribbolyth::editor
                     Clamp();
                     Save();
                 };
+                state_->operations["move_line_down"] = [this](const std::string&, int count)
+                {
+                    if (!Editable()) return;
+                    for (int i = 0; i < count; ++i) MoveLine(+1);
+                    Clamp();
+                    last_col_ = col_;
+                    Save();
+                };
+                state_->operations["move_line_up"] = [this](const std::string&, int count)
+                {
+                    if (!Editable()) return;
+                    for (int i = 0; i < count; ++i) MoveLine(-1);
+                    Clamp();
+                    last_col_ = col_;
+                    Save();
+                };
                 state_->operations["delete_selection"] = [this](const std::string&, int)
                 {
                     DeleteSelection();
@@ -1551,6 +1567,17 @@ namespace scribbolyth::editor
                 {
                     line.erase(static_cast<std::size_t>(col_));
                 }
+            }
+
+            // Vim-style line move: swap the current line with the one above
+            // (dir < 0) or below (dir > 0), carrying the cursor with it.
+            void MoveLine(int dir)
+            {
+                const int target = row_ + dir;
+                if (target < 0 || target >= static_cast<int>(lines_.size())) return;
+                std::swap(lines_[static_cast<std::size_t>(row_)],
+                          lines_[static_cast<std::size_t>(target)]);
+                row_ = target;
             }
 
             // The text currently under a VISUAL/VISUAL_LINE selection, or the

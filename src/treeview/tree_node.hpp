@@ -10,7 +10,7 @@ namespace scribbolyth::treeview
     {
         std::string id;
         std::string name;
-        bool expanded;
+        bool expanded = false;
         std::string text;
         std::vector<TreeNode> children;
     };

@@ -89,7 +89,7 @@ namespace scribbolyth::config
             if (hash != std::string::npos && line[hash] == '#') line = line.substr(0, hash);
             auto fields = SplitFields(line);
             if (fields.empty()) continue;
-            if (fields.size() < 7) return false;
+            if (fields.size() < 6) return false;
 
             const std::string& mode     = fields[0];
             const std::string& key      = fields[1];
@@ -186,5 +186,13 @@ namespace scribbolyth::config
             file << "recent_file = " << recent << "\n";
         }
         return static_cast<bool>(file);
+    }
+
+    bool WriteRecentFiles(const std::string& path, const std::vector<std::string>& recent_files)
+    {
+        std::string last_file;
+        std::vector<std::string> ignored;
+        ReadInit(path, last_file, ignored);
+        return WriteInit(path, last_file, recent_files);
     }
 }
