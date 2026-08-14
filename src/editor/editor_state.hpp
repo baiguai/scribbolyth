@@ -90,6 +90,11 @@ struct EditorState {
     // node. Set by the editor.
     std::function<void(int)> reveal_line;
 
+    // Insert `text` into the currently active node at the editor cursor, as a
+    // single undoable edit. Set by the editor; used by dialogs to inject text
+    // (e.g. a node link picked from a search) at the cursor.
+    std::function<void(const std::string&)> insert_text_at_cursor;
+
     // Vim-style find state (the last '/' search). `search_matches` holds the
     // nodes that matched the last query, in document order; `search_index` is
     // the currently selected match (n/N move it, wrapping). `search_active`
