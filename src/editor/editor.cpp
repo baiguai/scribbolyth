@@ -438,6 +438,15 @@ namespace scribbolyth::editor
                     visual_col_ = -1;
                 };
 
+                state_->insert_text_at_cursor = [this](const std::string& text)
+                {
+                    LoadIfChanged();
+                    if (!Editable() || text.empty()) return;
+                    if (lines_.empty()) lines_.push_back("");
+                    InsertText(text);
+                    Save();
+                };
+
                 state_->search_jump = [this](int dir)
                 {
                     StepSearchOccurrence(dir);

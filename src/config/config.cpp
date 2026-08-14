@@ -63,6 +63,8 @@ namespace scribbolyth::config
             if (token == "CtrlC")       { out = Event::Special("\x03"); return true; }
             if (token == "CtrlX")       { out = Event::Special("\x18"); return true; }
             if (token == "CtrlDash")    { out = Event::Special("\x1f"); return true; }
+            if (token == "CtrlQuote")   { out = Event::Special("\x07"); return true; }
+            if (token == "CtrlRBracket"){ out = Event::Special("\x1d"); return true; }
             if (token.size() == 1)      { out = Event::Character(token[0]); return true; }
             return false;
         }
