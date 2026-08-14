@@ -20,6 +20,12 @@
 
 namespace scribbolyth::links
 {
+    std::string PadRight(const std::string& s, std::size_t width)
+    {
+        if (s.size() >= width) return s;
+        return s + std::string(width - s.size(), ' ');
+    }
+
     std::string Trim(const std::string& s)
     {
         std::size_t first = s.find_first_not_of(" \t\r\n");
@@ -43,22 +49,27 @@ namespace scribbolyth::links
         return target.size() >= 3 && target.front() == '_' && target.back() == '_';
     }
 
+    bool IsUrlTarget(const std::string& target)
+    {
+        return target.size() >= 7 &&
+               (target.rfind("http://", 0) == 0 ||
+                target.rfind("https://", 0) == 0 ||
+                target.rfind("file://", 0) == 0);
+    }
+
     std::string NoteTitle(const std::string& target)
     {
         return target.substr(1, target.size() - 2);
     }
 
+    // Mirrors the three regexes of the HTML app's openLinksDialog().
+    const std::regex kMarkdownRegex(
+        R"(\[([^\]]+)\](?:[ \t]*\r?\n[ \t]*|[ \t]*)(https?://\S+|file://\S+|_[^_]+_))",
+        std::regex_constants::icase);
+    const std::regex kUrlRegex(R"(\b(?:https?|file)://[^\s]+)",
+                               std::regex_constants::icase);
     const std::regex kNoteRegex(
         R"((?:^|\s|\()_([^_]|[^_].*?[^_])_(?=\s|[.,!?;:)]|$))");
-
-    struct Link
-    {
-        std::string label;
-        std::string target;
-        treeview::TreeNode* node = nullptr;
-        bool from_markdown = false;
-        bool ok = true;
-    };
 
     void CollectLinks(const std::string& content, std::vector<Link>& out)
     {
@@ -116,20 +127,6 @@ namespace scribbolyth::links
 
     namespace
     {
-        std::string PadRight(const std::string& s, std::size_t width)
-        {
-            if (s.size() >= width) return s;
-            return s + std::string(width - s.size(), ' ');
-        }
-
-        bool IsUrlTarget(const std::string& target)
-        {
-            return target.size() >= 7 &&
-                   (target.rfind("http://", 0) == 0 ||
-                    target.rfind("https://", 0) == 0 ||
-                    target.rfind("file://", 0) == 0);
-        }
-
         void OpenExternal(const std::string& url)
         {
             std::string escaped;
@@ -152,13 +149,6 @@ namespace scribbolyth::links
         {
             return scribbolyth::clipboard::Write(text);
         }
-
-        // Mirrors the three regexes of the HTML app's openLinksDialog().
-        const std::regex kMarkdownRegex(
-            R"(\[([^\]]+)\](?:[ \t]*\r?\n[ \t]*|[ \t]*)(https?://\S+|file://\S+|_[^_]+_))",
-            std::regex_constants::icase);
-        const std::regex kUrlRegex(R"(\b(?:https?|file)://[^\s]+)",
-                                   std::regex_constants::icase);
     }
 
     class LinksDialog : public ftxui::ComponentBase

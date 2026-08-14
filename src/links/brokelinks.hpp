@@ -8,5 +8,5 @@ struct EditorState;
 
 namespace scribbolyth::brokenlinks
 {
-    fxtui::Component MakeDeadLinksDialog(std::shared_ptr<EditorState>, bool* show);
+    ftxui::Component MakeDeadLinksDialog(std::shared_ptr<EditorState>, bool* show);
 }

@@ -16,6 +16,7 @@
 #include "history/history.hpp"
 #include "recent/recent.hpp"
 #include "links/links.hpp"
+#include "links/brokelinks.hpp"
 #include "op/op.hpp"
 #include "search/search.hpp"
 #include "undo/undo.hpp"
@@ -235,14 +236,16 @@ int main(int, char** argv) {
     auto search_comp = scribbolyth::search::MakeSearchDialog(state, &show_search);
     auto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);
     auto links_comp = scribbolyth::links::MakeLinksDialog(state, &show_links);
+    auto dead_links_comp = scribbolyth::brokenlinks::MakeDeadLinksDialog(state, &show_dead_links);
     auto history_comp = scribbolyth::history::MakeHistoryDialog(state, &show_history);
     auto recent_comp = scribbolyth::recent::MakeRecentDialog(state, &show_recent);
     auto undo_comp = scribbolyth::undo::MakeUndoDialog(state, &show_undo);
     auto browser_comp = scribbolyth::browser::MakeFileBrowserDialog(state, &show_file_browser);
-    auto root = Modal(Modal(Modal(Modal(Modal(Modal(Modal(Modal(container, help_comp, &show_help),
+    auto root = Modal(Modal(Modal(Modal(Modal(Modal(Modal(Modal(Modal(container, help_comp, &show_help),
                                                           search_comp, &show_search),
                                                   bookmarks_comp, &show_bookmarks),
                                           links_comp, &show_links),
+                                  dead_links_comp, &show_dead_links),
                                   history_comp, &show_history),
                           recent_comp, &show_recent),
                   undo_comp, &show_undo),
