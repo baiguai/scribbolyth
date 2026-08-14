@@ -19,6 +19,7 @@ SOURCES=(
     "src/bookmark/bookmark.cpp"
     "src/bookmarks/bookmarks.cpp"
     "src/links/links.cpp"
+    "src/links/brokelinks.cpp"
     "src/history/history.cpp"
     "src/browser/browser.cpp"
     "src/recent/recent.cpp"

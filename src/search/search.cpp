@@ -186,8 +186,11 @@ namespace scribbolyth::search
     class SearchDialog : public ftxui::ComponentBase
     {
     public:
-        SearchDialog(std::shared_ptr<EditorState> state, bool* show)
-            : state_(std::move(state)), show_(show) {}
+        SearchDialog(std::shared_ptr<EditorState> state, bool* show,
+                     bool insert_mode)
+            : state_(std::move(state)),
+              show_(show),
+              insert_mode_(insert_mode) {}
 
         bool Focusable() const override { return true; }
 
@@ -211,9 +214,18 @@ namespace scribbolyth::search
                 if (!results_.empty())
                 {
                     const int sel = std::min(selection_, static_cast<int>(results_.size()) - 1);
-                    if (state_->reveal_node)
+                    treeview::TreeNode* node = results_[static_cast<std::size_t>(sel)].node;
+                    if (insert_mode_)
                     {
-                        state_->reveal_node(results_[static_cast<std::size_t>(sel)].node);
+                        if (state_->insert_text_at_cursor && node != nullptr)
+                        {
+                            state_->insert_text_at_cursor("_" + node->name + "_");
+                            state_->status = "Inserted " + node->name;
+                        }
+                    }
+                    else if (state_->reveal_node)
+                    {
+                        state_->reveal_node(node);
                         state_->status = "";
                     }
                     Close();
@@ -288,9 +300,11 @@ namespace scribbolyth::search
 
             const std::string footer =
                 "  " + std::to_string(total == 0 ? 0 : sel + 1) + "/" + std::to_string(total) +
-                "    Up/Down move  Enter jump  Esc cancel  ':x' = titles only  'r:' = regex  '#' = tags  ";
+                (insert_mode_
+                     ? "    Up/Down move  Enter insert _Title_  Esc cancel  ':x' = titles only  'r:' = regex  '#' = tags  "
+                     : "    Up/Down move  Enter jump  Esc cancel  ':x' = titles only  'r:' = regex  '#' = tags  ");
 
-            return ftxui::window(ftxui::text(" / Search "),
+            return ftxui::window(ftxui::text(insert_mode_ ? " / Insert Link " : " / Search "),
                                 ftxui::vbox({
                                     ftxui::hbox({
                                         ftxui::text(" Search: " + filter_ + "_"),
@@ -411,6 +425,7 @@ namespace scribbolyth::search
 
         std::shared_ptr<EditorState> state_;
         bool* show_;
+        bool insert_mode_;
         std::string filter_;
         int selection_ = 0;
         int scroll_ = 0;
@@ -422,8 +437,9 @@ namespace scribbolyth::search
         static constexpr int kVisibleRows = 18;
     };
 
-    ftxui::Component MakeSearchDialog(std::shared_ptr<EditorState> state, bool* show)
+    ftxui::Component MakeSearchDialog(std::shared_ptr<EditorState> state, bool* show,
+                                      bool insert_mode)
     {
-        return ftxui::Make<SearchDialog>(std::move(state), show);
+        return ftxui::Make<SearchDialog>(std::move(state), show, insert_mode);
     }
 }

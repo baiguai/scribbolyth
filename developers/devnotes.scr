@@ -101,7 +101,7 @@
           "id": "syh6uo05",
           "name": "Add Operator",
           "expanded": false,
-          "text": "If the command is in TREE mode, add this to the treeview.cpp, otherwise add it to editor.cpp\n\nstate_->operations[\"cursor_down\"] = [this](const std::string&, int count)\n{\n    if (!Editable()) return;\n    for (int i = 0; i < count; ++i) CursorDown();\n    Clamp();\n};",
+          "text": "The first thing you need to do is determine where the OP needs to be defined.\nIf it is strictly a Treeview operation - place it in treeview.cpp.\nIf it is something that can be called in multiple modes you can place it in\nmain.cpp.\nAnd if it is an editor only key binding, editor.cpp\n\n\nHere is an example OP:\n\nstate_->operations[\"cursor_down\"] = [this](const std::string&, int count)\n{\n    if (!Editable()) return;\n    for (int i = 0; i < count; ++i) CursorDown();\n    Clamp();\n};",
           "children": [
           ]
         },
