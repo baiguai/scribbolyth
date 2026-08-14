@@ -621,17 +621,19 @@ namespace scribbolyth::treeview
             while (v < visible.size() && visible[v] != selected_) ++v;
             if (v >= visible.size()) return;
 
+            // Nest under the node directly above at the same level (the
+            // previous sibling): moving a node down a level makes it the
+            // child of the node above it, not of that node's deepest
+            // descendant. (The old folder/note model found the deepest
+            // folder above; with everything a note that skips past the
+            // siblings and drops the node several levels too deep.)
             TreeNode* target = nullptr;
-            int best = -1;
             for (std::size_t i = v; i-- > 0;)
             {
-                TreeNode* n = visible[i];
-                // if (n->children.empty()) continue;
-                if (IsAncestor(*n, selected_)) continue;
-                if (depth[i] > best)
+                if (depth[i] == depth[v])
                 {
-                    best = depth[i];
-                    target = n;
+                    target = visible[i];
+                    break;
                 }
             }
             if (!target) return;
