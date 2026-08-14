@@ -37,5 +37,9 @@ namespace scribbolyth::search
     // Escape cancels. A leading "r:" makes the query a case-insensitive regex;
     // otherwise it is a case-insensitive substring match against node titles
     // and content. The dialog keeps a fixed size regardless of result count.
-    ftxui::Component MakeSearchDialog(std::shared_ptr<EditorState> state, bool* show);
+    // With `insert_mode` set, Enter instead inserts a `_Title_` node link to
+    // the selected node into the currently active node at the editor cursor
+    // (via state->insert_text_at_cursor) and closes.
+    ftxui::Component MakeSearchDialog(std::shared_ptr<EditorState> state, bool* show,
+                                      bool insert_mode = false);
 }

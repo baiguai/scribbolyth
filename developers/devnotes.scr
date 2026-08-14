@@ -11,7 +11,8 @@
     "cmueptx0",
     "g98ovtzg",
     "w5v6qi45",
-    "ovs2ua28"
+    "ovs2ua28",
+    "syh6uo05"
   ],
   "roots": [
   {
@@ -92,7 +93,23 @@
           "id": "ovs2ua28",
           "name": "The Config Entry",
           "expanded": false,
-          "text": "First let's add the key binding to our commands config:\n\nIn ./config/commands.conf :\n\nLet's add the following entry and I'll explain each value:\n\n# MODE          KEY          REP   CMD          ARGS     OP                          DESC\nNORMAL          j            yes   -            -        cursor_down                 \"Move cursor down\"\n\n\nMODE\n    Scribbolyth has multiple modes (like Vim does - but with the addition of a TREE mode).\n    We want 'j' to work when in NORMAL mode.\n\nKEY\n    This is a case sensitive value that specifies the key.\n    There are some special values that can be entered here - refer to the default ./config/commands.conf\n\nREP\n    If this is set to yes - the command can be repeated, like:\n    '5j'\n    Would move 5 lines down.\n\nCMD\n    If there is a :command command associated with this, it would go here.\n    See _Command Tutorial_\n\nARGS\n    This is used mainly with :command entries.\n\nOP\n    This is the name of the operation that the key binding is associated with.\n    The OP typically calls the function that will actually be doing the work.\n\nDESC\n    The description is used by the keymaps help dialog to display a friendly description of what the binding does.",
+          "text": "First let's add the key binding to our commands config:\n\nIn ./config/commands.conf :\n\nLet's add the following entry and I'll explain each value:\n\n# ---- NORMAL mode ----------------------------------------------------------\n# MODE            KEY          REP   CMD             ARGS    OP                            DESC\n  NORMAL          j            no    -               -       cursor_down                   \"Move cursor down\"\n\n\nMODE\n    Scribbolyth has multiple modes (like Vim does - but with the addition of a TREE mode).\n    We want 'j' to work when in NORMAL mode.\n\nKEY\n    This is a case sensitive value that specifies the key.\n    There are some special values that can be entered here - refer to the default ./config/commands.conf\n\nREP\n    If this is set to yes - the command can be repeated, like:\n    '5j'\n    Would move 5 lines down.\n\nCMD\n    If there is a :command command associated with this, it would go here.\n    See _Command Tutorial_\n\nARGS\n    This is used mainly with :command entries.\n\nOP\n    This is the name of the operation that the key binding is associated with.\n    The OP typically calls the function that will actually be doing the work.\n\nDESC\n    The description is used by the keymaps help dialog to display a friendly description of what the binding does.",
+          "children": [
+          ]
+        },
+        {
+          "id": "syh6uo05",
+          "name": "Add Operator",
+          "expanded": false,
+          "text": "The first thing you need to do is determine where the OP needs to be defined.\nIf it is strictly a Treeview operation - place it in treeview.cpp.\nIf it is something that can be called in multiple modes you can place it in\nmain.cpp.\nAnd if it is an editor only key binding, editor.cpp\n\n\nHere is an example OP:\n\nstate_->operations[\"cursor_down\"] = [this](const std::string&, int count)\n{\n    if (!Editable()) return;\n    for (int i = 0; i < count; ++i) CursorDown();\n    Clamp();\n};",
+          "children": [
+          ]
+        },
+        {
+          "id": "s233kqep",
+          "name": "Add Method",
+          "expanded": false,
+          "text": "",
           "children": [
           ]
         }

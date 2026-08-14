@@ -16,6 +16,7 @@
 #include "history/history.hpp"
 #include "recent/recent.hpp"
 #include "links/links.hpp"
+#include "links/brokelinks.hpp"
 #include "op/op.hpp"
 #include "search/search.hpp"
 #include "undo/undo.hpp"
@@ -67,6 +68,9 @@ int main(int, char** argv) {
     bool show_search = false;
     state->operations["search_start"] = [&show_search](const std::string&, int) { show_search = true; };
 
+    bool show_link_picker = false;
+    state->operations["insert_link"] = [&show_link_picker](const std::string&, int) { show_link_picker = true; };
+
     bool show_bookmarks = false;
     state->operations["bookmarks"] = [&show_bookmarks](const std::string&, int) { show_bookmarks = true; };
     state->commands["bookmarks"] = "bookmarks";
@@ -74,6 +78,10 @@ int main(int, char** argv) {
     bool show_links = false;
     state->operations["links"] = [&show_links](const std::string&, int) { show_links = true; };
     state->commands["links"] = "links";
+
+    bool show_dead_links = false;
+    state->operations["show_broke_links"] = [&show_dead_links](const std::string&, int) { show_dead_links = true; };
+    state->commands["show_broke_links"] = "show_broke_links";
 
     bool show_history = false;
     state->operations["history"] = [&show_history](const std::string&, int) { show_history = true; };
@@ -229,16 +237,20 @@ int main(int, char** argv) {
 
     auto help_comp = scribbolyth::help::MakeHelpDialog(state, config_path.string(), &show_help);
     auto search_comp = scribbolyth::search::MakeSearchDialog(state, &show_search);
+    auto link_picker_comp = scribbolyth::search::MakeSearchDialog(state, &show_link_picker, true);
     auto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);
     auto links_comp = scribbolyth::links::MakeLinksDialog(state, &show_links);
+    auto dead_links_comp = scribbolyth::brokenlinks::MakeDeadLinksDialog(state, &show_dead_links);
     auto history_comp = scribbolyth::history::MakeHistoryDialog(state, &show_history);
     auto recent_comp = scribbolyth::recent::MakeRecentDialog(state, &show_recent);
     auto undo_comp = scribbolyth::undo::MakeUndoDialog(state, &show_undo);
     auto browser_comp = scribbolyth::browser::MakeFileBrowserDialog(state, &show_file_browser);
-    auto root = Modal(Modal(Modal(Modal(Modal(Modal(Modal(Modal(container, help_comp, &show_help),
+    auto root = Modal(Modal(Modal(Modal(Modal(Modal(Modal(Modal(Modal(Modal(container, help_comp, &show_help),
                                                           search_comp, &show_search),
+                                                          link_picker_comp, &show_link_picker),
                                                   bookmarks_comp, &show_bookmarks),
                                           links_comp, &show_links),
+                                  dead_links_comp, &show_dead_links),
                                   history_comp, &show_history),
                           recent_comp, &show_recent),
                   undo_comp, &show_undo),
