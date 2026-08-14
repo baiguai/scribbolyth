@@ -75,6 +75,10 @@ int main(int, char** argv) {
     state->operations["links"] = [&show_links](const std::string&, int) { show_links = true; };
     state->commands["links"] = "links";
 
+    bool show_dead_links = false;
+    state->operations["show_broke_links"] = [&show_dead_links](const std::string&, int) { show_dead_links = true; };
+    state->commands["show_broke_links"] = "show_broke_links";
+
     bool show_history = false;
     state->operations["history"] = [&show_history](const std::string&, int) { show_history = true; };
 

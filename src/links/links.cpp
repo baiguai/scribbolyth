@@ -20,6 +20,100 @@
 
 namespace scribbolyth::links
 {
+    std::string Trim(const std::string& s)
+    {
+        std::size_t first = s.find_first_not_of(" \t\r\n");
+        if (first == std::string::npos) return "";
+        std::size_t last = s.find_last_not_of(" \t\r\n");
+        return s.substr(first, last - first + 1);
+    }
+
+    std::string Lower(const std::string& s)
+    {
+        std::string out = s;
+        for (char& c : out)
+        {
+            if (c >= 'A' && c <= 'Z') c = static_cast<char>(c - 'A' + 'a');
+        }
+        return out;
+    }
+
+    bool IsNoteTarget(const std::string& target)
+    {
+        return target.size() >= 3 && target.front() == '_' && target.back() == '_';
+    }
+
+    std::string NoteTitle(const std::string& target)
+    {
+        return target.substr(1, target.size() - 2);
+    }
+
+    const std::regex kNoteRegex(
+        R"((?:^|\s|\()_([^_]|[^_].*?[^_])_(?=\s|[.,!?;:)]|$))");
+
+    struct Link
+    {
+        std::string label;
+        std::string target;
+        treeview::TreeNode* node = nullptr;
+        bool from_markdown = false;
+        bool ok = true;
+    };
+
+    void CollectLinks(const std::string& content, std::vector<Link>& out)
+    {
+        // Markdown-style: [Label] optionally followed by whitespace/newline
+        // then a URL or a _Note_ reference.
+        {
+            std::smatch match;
+            std::string::const_iterator begin = content.begin();
+            std::string::const_iterator end = content.end();
+            while (std::regex_search(begin, end, match, kMarkdownRegex))
+            {
+                out.push_back(Link{Trim(match[1].str()), Trim(match[2].str()),
+                                   nullptr, true, true});
+                begin = match[0].second;
+            }
+        }
+        // Standalone URLs not already captured.
+        {
+            std::smatch match;
+            std::string::const_iterator begin = content.begin();
+            std::string::const_iterator end = content.end();
+            while (std::regex_search(begin, end, match, kUrlRegex))
+            {
+                const std::string target = match[0].str();
+                const bool seen = std::any_of(
+                    out.begin(), out.end(),
+                    [&target](const Link& l) { return l.target == target; });
+                if (!seen)
+                {
+                    out.push_back(Link{target, target, nullptr, false, true});
+                }
+                begin = match[0].second;
+            }
+        }
+        // _Note_ references not already captured.
+        {
+            std::smatch match;
+            std::string::const_iterator begin = content.begin();
+            std::string::const_iterator end = content.end();
+            while (std::regex_search(begin, end, match, kNoteRegex))
+            {
+                const std::string title = Trim(match[1].str());
+                const std::string wrapped = "_" + title + "_";
+                const bool seen = std::any_of(
+                    out.begin(), out.end(),
+                    [&wrapped](const Link& l) { return l.target == wrapped; });
+                if (!seen)
+                {
+                    out.push_back(Link{title, wrapped, nullptr, false, true});
+                }
+                begin = match[0].second;
+            }
+        }
+    }
+
     namespace
     {
         std::string PadRight(const std::string& s, std::size_t width)
@@ -28,40 +122,12 @@ namespace scribbolyth::links
             return s + std::string(width - s.size(), ' ');
         }
 
-        std::string Trim(const std::string& s)
-        {
-            std::size_t first = s.find_first_not_of(" \t\r\n");
-            if (first == std::string::npos) return "";
-            std::size_t last = s.find_last_not_of(" \t\r\n");
-            return s.substr(first, last - first + 1);
-        }
-
-        std::string Lower(const std::string& s)
-        {
-            std::string out = s;
-            for (char& c : out)
-            {
-                if (c >= 'A' && c <= 'Z') c = static_cast<char>(c - 'A' + 'a');
-            }
-            return out;
-        }
-
         bool IsUrlTarget(const std::string& target)
         {
             return target.size() >= 7 &&
                    (target.rfind("http://", 0) == 0 ||
                     target.rfind("https://", 0) == 0 ||
                     target.rfind("file://", 0) == 0);
-        }
-
-        bool IsNoteTarget(const std::string& target)
-        {
-            return target.size() >= 3 && target.front() == '_' && target.back() == '_';
-        }
-
-        std::string NoteTitle(const std::string& target)
-        {
-            return target.substr(1, target.size() - 2);
         }
 
         void OpenExternal(const std::string& url)
@@ -93,71 +159,6 @@ namespace scribbolyth::links
             std::regex_constants::icase);
         const std::regex kUrlRegex(R"(\b(?:https?|file)://[^\s]+)",
                                    std::regex_constants::icase);
-        const std::regex kNoteRegex(
-            R"((?:^|\s|\()_([^_]|[^_].*?[^_])_(?=\s|[.,!?;:)]|$))");
-
-        struct Link
-        {
-            std::string label;
-            std::string target;
-            treeview::TreeNode* node = nullptr;
-            bool from_markdown = false;
-            bool ok = true;
-        };
-
-        void CollectLinks(const std::string& content, std::vector<Link>& out)
-        {
-            // Markdown-style: [Label] optionally followed by whitespace/newline
-            // then a URL or a _Note_ reference.
-            {
-                std::smatch match;
-                std::string::const_iterator begin = content.begin();
-                std::string::const_iterator end = content.end();
-                while (std::regex_search(begin, end, match, kMarkdownRegex))
-                {
-                    out.push_back(Link{Trim(match[1].str()), Trim(match[2].str()),
-                                       nullptr, true, true});
-                    begin = match[0].second;
-                }
-            }
-            // Standalone URLs not already captured.
-            {
-                std::smatch match;
-                std::string::const_iterator begin = content.begin();
-                std::string::const_iterator end = content.end();
-                while (std::regex_search(begin, end, match, kUrlRegex))
-                {
-                    const std::string target = match[0].str();
-                    const bool seen = std::any_of(
-                        out.begin(), out.end(),
-                        [&target](const Link& l) { return l.target == target; });
-                    if (!seen)
-                    {
-                        out.push_back(Link{target, target, nullptr, false, true});
-                    }
-                    begin = match[0].second;
-                }
-            }
-            // _Note_ references not already captured.
-            {
-                std::smatch match;
-                std::string::const_iterator begin = content.begin();
-                std::string::const_iterator end = content.end();
-                while (std::regex_search(begin, end, match, kNoteRegex))
-                {
-                    const std::string title = Trim(match[1].str());
-                    const std::string wrapped = "_" + title + "_";
-                    const bool seen = std::any_of(
-                        out.begin(), out.end(),
-                        [&wrapped](const Link& l) { return l.target == wrapped; });
-                    if (!seen)
-                    {
-                        out.push_back(Link{title, wrapped, nullptr, false, true});
-                    }
-                    begin = match[0].second;
-                }
-            }
-        }
     }
 
     class LinksDialog : public ftxui::ComponentBase
