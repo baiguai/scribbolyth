@@ -245,16 +245,24 @@ int main(int, char** argv) {
     auto recent_comp = scribbolyth::recent::MakeRecentDialog(state, &show_recent);
     auto undo_comp = scribbolyth::undo::MakeUndoDialog(state, &show_undo);
     auto browser_comp = scribbolyth::browser::MakeFileBrowserDialog(state, &show_file_browser);
-    auto root = Modal(Modal(Modal(Modal(Modal(Modal(Modal(Modal(Modal(Modal(container, help_comp, &show_help),
-                                                          search_comp, &show_search),
-                                                          link_picker_comp, &show_link_picker),
-                                                  bookmarks_comp, &show_bookmarks),
-                                          links_comp, &show_links),
-                                  dead_links_comp, &show_dead_links),
-                                  history_comp, &show_history),
-                          recent_comp, &show_recent),
-                  undo_comp, &show_undo),
-          browser_comp, &show_file_browser);
+    auto modals = {
+        std::tuple(help_comp,        &show_help),
+        std::tuple(search_comp,      &show_search),
+        std::tuple(link_picker_comp, &show_link_picker),
+        std::tuple(bookmarks_comp,   &show_bookmarks),
+        std::tuple(links_comp,       &show_links),
+        std::tuple(dead_links_comp,  &show_dead_links),
+        std::tuple(history_comp,     &show_history),
+        std::tuple(recent_comp,      &show_recent),
+        std::tuple(undo_comp,        &show_undo),
+        std::tuple(browser_comp,     &show_file_browser),
+    };
+
+    auto root = container;
+    for (auto& [comp, show] : modals)
+    {
+        root = Modal(root, comp, show);
+    }
 
     screen.Loop(root);
 
