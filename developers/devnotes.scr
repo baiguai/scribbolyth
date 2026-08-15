@@ -8,12 +8,13 @@
     "6gskj7g5",
     "7dwjs6ui",
     "e0puu0iy",
-    "cmueptx0",
     "g98ovtzg",
     "w5v6qi45",
     "ovs2ua28",
     "syh6uo05",
-    "s233kqep"
+    "s233kqep",
+    "cmueptx0",
+    "a8fdbzvk"
   ],
   "roots": [
   {
@@ -26,7 +27,7 @@
       "id": "v1anzsho",
       "name": "What is Scribbolyth",
       "expanded": true,
-      "text": "What is Scribbolyth\n\nScribbolyth is a Vim-like notes editor, built in C++, and utilizing a treeview as its primary orginizational structure.\n\nIt is the successor to the scribboleth.html editor.\n\nThe benefits of Scribbolyth are:\n\n* It behaves like a standard console-based editor, without the need to run NodeJs servers to make saving easier.\n    Since the original .html based app is just a stand alone .html file - saving is ... weird there.\n    The beauty of that application is - all you need is a browser to run it!\n    But saving is awkward unless you do saving via its Node saver script.",
+      "text": "What is Scribbolyth\n\nScribbolyth is a Vim-like notes editor, built in C++, and utilizing a treeview as its primary orginizational structure.\n\nIt is the successor to the scribboleth.html editor AND can be used along with that iteration of the application thanks to the .html import and export features.\n\nThe benefits of Scribbolyth are:\n\n* It behaves like a standard console-based editor, without the need to run NodeJs servers to make saving easier.\n    Since the original .html based app is just a stand alone .html file - saving is ... weird there.\n    The beauty of that application is - all you need is a browser to run it!\n    But saving is awkward unless you do saving via its Node saver script.",
       "children": [
       ]
     }
@@ -58,7 +59,7 @@
       "id": "cmueptx0",
       "name": "Configurations",
       "expanded": true,
-      "text": "Configurations\n\nscribbolyth/\n| build-windows/\n| build/\n| cmake/\n| config/\n| | commands.conf\n| | init.conf\n| | scribboleth.html\n\n    commands.conf\n        This defines all the key bindings, and is read for the help dialog.\n        It is copied to the output directory by the build.sh script.\n\n    init.conf\n        This is the primary Scribbolyth configuration file.\n        The default one is copied to the output directory by the build.sh script.\n\n    scribboleth.html\n        This is a blank copy of the latest .html version of this app (it's called Scribboleth).\n        It is used by the export to .html feature.",
+      "text": "Configurations\n\nscribbolyth/\n| build-windows/\n| build/\n| cmake/\n| config/\n| | commands.conf\n| | init.conf\n| | scribboleth.html\n\n    commands.conf\n        This defines all the key bindings, and is read for the help dialog.\n        It is copied to the output directory by the build.sh script.\n\n    init.conf\n        This is the primary Scribbolyth configuration file.\n        The default one is copied to the output directory by the build.sh script.\n\n    scribboleth.html\n        This is a blank copy of the latest .html version of this app (it's called Scribboleth).\n        It is used by the export to .html feature if the output file doesn't exist yet.",
       "children": [
       ]
     }
@@ -111,6 +112,14 @@
           "name": "Add Method",
           "expanded": false,
           "text": "Since the OP calls: CursorDown\nAnd this is an Editor only function...\n\n\nIn the 'editor.cpp' file we add:\n\nvoid CursorDown()\n{\n    if (row_ < static_cast<int>(lines_.size()) - 1)\n    {\n        last_col_ = col_;\n        ++row_;\n        if (state_->mode != Mode::VISUAL_BLOCK)\n            col_ = std::min(last_col_, static_cast<int>(lines_[row_].size()));\n    }\n}\n",
+          "children": [
+          ]
+        },
+        {
+          "id": "a8fdbzvk",
+          "name": "More Examples",
+          "expanded": false,
+          "text": "Since there are so many key bindings already defined, you can begin in the commands.conf, and search for the OP name in the source code.\nThe OP will let you know the method that it will call so you can search for that in the source code.\n\nIn this way you can use the existing bindings as tutorials of sorts.",
           "children": [
           ]
         }

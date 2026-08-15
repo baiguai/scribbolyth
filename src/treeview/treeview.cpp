@@ -826,11 +826,9 @@ namespace scribbolyth::treeview
         return out;
     }
 
-    // Where the save-as-style file dialog opens for the txt exports: the
+    // Hitting Enter w/out entering a path shows the dialog, defaulted to the
     // folder of the document currently being edited, or the working directory
-    // when no file is loaded yet. Always absolute and non-empty (the browser
-    // skips re-listing when the start dir equals its previous value, which is
-    // empty on first use).
+    // when no file is loaded yet.
     std::string TreeView::ExportStartDir() const
     {
         if (!current_file_.empty())
