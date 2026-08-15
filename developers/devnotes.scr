@@ -8,13 +8,15 @@
     "6gskj7g5",
     "7dwjs6ui",
     "e0puu0iy",
-    "g98ovtzg",
-    "w5v6qi45",
     "ovs2ua28",
     "syh6uo05",
     "s233kqep",
     "cmueptx0",
-    "a8fdbzvk"
+    "a8fdbzvk",
+    "w5v6qi45",
+    "g98ovtzg",
+    "sdoapah7",
+    "kykwvipe"
   ],
   "roots": [
   {
@@ -66,29 +68,53 @@
     ]
   },
   {
-    "id": "hzrkdl74",
-    "name": "Source Code",
-    "expanded": false,
+    "id": "64h28uzf",
+    "name": "Dependencies",
+    "expanded": true,
     "text": "",
     "children": [
+    {
+      "id": "kykwvipe",
+      "name": "Xtfui",
+      "expanded": false,
+      "text": "Scribbolyth's only depency is ftxui!\nAnd you should be able to run the setup.sh script (which should be run when working with Scribbolyth for the first time).\nThis script will make sure that Windows building in Linux is possible via Mingw32 etc.",
+      "children": [
+      ]
+    }
+    ]
+  },
+  {
+    "id": "hzrkdl74",
+    "name": "Source Code",
+    "expanded": true,
+    "text": "",
+    "children": [
+    {
+      "id": "sdoapah7",
+      "name": "Source Code Structure",
+      "expanded": false,
+      "text": "Scribbolyth's source code is broken out into smaller focused headers and cpp files - stored within directories of similar names.\nThis makes code maintenance easy. If you are modifying the behavior of the treeview you would be working with files in:\n\nsrc/\n| ...\n| treeview/\n| | tree_node.hpp\n| | treeview.cpp\n| | treeview.hpp\n| ...\n",
+      "children": [
+      ]
+    }
     ]
   },
   {
     "id": "nzq1ufpv",
     "name": "Tasks",
-    "expanded": true,
+    "expanded": false,
     "text": "",
     "children": [
     {
       "id": "g98ovtzg",
-      "name": "Adding a Key Binding",
-      "expanded": true,
+      "name": "Key Bindings",
+      "expanded": false,
       "text": "Adding new key bindings consists of two primary steps.\n\n* Adding the C++ Operation.\n    These are registered in state->operations\n* Defining the key binding in the configuration file.\n    This will register key bindings as well as :command actions that can be entered\n\n\nSee\n_New Keybinding Example_",
       "children": [
       {
         "id": "w5v6qi45",
         "name": "New Keybinding Example",
-        "expanded": true,
+        "expanded": false,
         "text": "For this tutorial we're going to create the Vim 'j' key binding.\n'j' moves the cursor down within the text (when in NORMAL mode).",
         "children": [
         {
