@@ -1726,7 +1726,7 @@ namespace scribbolyth::editor
                 if (static_cast<int>(lines_.size()) == b - a + 1)
                 {
                     lines_.assign(1, ""); // leave a blank line - if nothing is left
-                                          // row_ = 0;
+                    row_ = 0;
                 }
                 else
                 {
