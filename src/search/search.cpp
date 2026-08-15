@@ -78,7 +78,7 @@ namespace scribbolyth::search
             {
                 try
                 {
-                    const std::regex re(f.query, std::regex::icase);
+                    const std::regex re(f.query, std::regex::icase | std::regex_constants::multiline);
                     return std::regex_search(node.name, re)
                         || (!f.title_only && std::regex_search(node.text, re));
                 }
