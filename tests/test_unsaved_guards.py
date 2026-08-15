@@ -79,6 +79,17 @@ try:
     assert 'Beta' in joined(), 'forced recent open should keep doc2'
     print('ok: O! forces the recent open')
 
+    # --- :O! opens the recent dialog pre-armed for a forced open ---
+    dirty()
+    s.send(b':O!\r')
+    s.step(0.3)
+    assert '!force-on' in joined(), ':O! should open the dialog pre-armed'
+    s.send(b'\r')
+    s.step(0.4)
+    assert 'Loaded' in status(), ':O! Enter should load the file'
+    assert 'Beta' in joined(), ':O! should force-open doc2'
+    print('ok: :O! forces the recent open')
+
     # --- :enew blocked, :enew! forces ---
     dirty()
     s.send(b':enew\r')
