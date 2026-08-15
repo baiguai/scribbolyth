@@ -1,22 +1,23 @@
 {
   "version": 1,
-  "tree_width": 30,
+  "tree_width": 34,
   "bookmarks": [
   ],
   "history": [
+    "ovs2ua28",
+    "syh6uo05",
+    "s233kqep",
+    "a8fdbzvk",
+    "w5v6qi45",
     "v1anzsho",
     "6gskj7g5",
     "7dwjs6ui",
     "e0puu0iy",
-    "ovs2ua28",
-    "syh6uo05",
-    "s233kqep",
     "cmueptx0",
-    "a8fdbzvk",
-    "w5v6qi45",
-    "g98ovtzg",
+    "kykwvipe",
     "sdoapah7",
-    "kykwvipe"
+    "g98ovtzg",
+    "pnk26kbn"
   ],
   "roots": [
   {
@@ -102,7 +103,7 @@
   {
     "id": "nzq1ufpv",
     "name": "Tasks",
-    "expanded": false,
+    "expanded": true,
     "text": "",
     "children": [
     {
@@ -151,6 +152,14 @@
         }
         ]
       }
+      ]
+    },
+    {
+      "id": "pnk26kbn",
+      "name": "Showing a Modal Dialog",
+      "expanded": false,
+      "text": "If your updates include showing a new dialog, here are the areas of the code you need to touch:\n\nmain.cpp\n\n(somewhere near:\nbool show_help = false;\n\nYou will add:\n\n    bool show_search = false;\n    state->operations[\"search_start\"] = [&show_search](const std::string&, int) { show_search = true; };\n\nThen near:\n    auto help_comp = scribbolyth::help::MakeHelpDialog(state, config_path.string(), &show_help);\n\nReplace it with:\n    auto search_comp = scribbolyth::search::MakeSearchDialog(state, &show_search);",
+      "children": [
       ]
     }
     ]
