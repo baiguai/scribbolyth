@@ -731,8 +731,14 @@ namespace scribbolyth::editor
 
             void LoadIfChanged()
             {
-                if (active_ == state_->active_node) return;
+                // Compare by id, not just pointer: nodes live in std::vectors,
+                // so erasing one (e.g. deleting a node) can leave a different
+                // node at the same address as the previously loaded one.
+                const std::string cur_id = state_->active_node
+                                               ? state_->active_node->id : "";
+                if (active_ == state_->active_node && active_id_ == cur_id) return;
                 active_ = state_->active_node;
+                active_id_ = cur_id;
                 visual_row_ = -1;
                 visual_col_ = -1;
                 if (active_ == nullptr)
@@ -1848,6 +1854,7 @@ namespace scribbolyth::editor
 
             std::shared_ptr<EditorState> state_;
             scribbolyth::treeview::TreeNode* active_ = nullptr;
+            std::string active_id_;
             std::vector<std::string> lines_;
             int row_ = 0;
             int col_ = 0;

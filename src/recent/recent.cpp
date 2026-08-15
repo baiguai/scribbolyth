@@ -62,6 +62,13 @@ namespace scribbolyth::recent
                 RemoveSelected();
                 return true;
             }
+            if (event.is_character() && event.character() == "!")
+            {
+                force_ = !force_;
+                state_->status = force_ ? "Force open - unsaved changes will be discarded"
+                                        : "";
+                return true;
+            }
             if (event.is_character() && event.character() == "J")
             {
                 MoveEntry(+1);
@@ -114,7 +121,7 @@ namespace scribbolyth::recent
 
             const std::string footer =
                 "  " + std::to_string(total == 0 ? 0 : sel + 1) + "/" + std::to_string(total) +
-                "   j/k move  J/K reorder  D remove  Enter open  Esc cancel  ";
+                "   j/k move  J/K reorder  D remove  ! force  Enter open  Esc cancel  ";
 
             return ftxui::window(ftxui::text(" < Recent Files "),
                                 ftxui::vbox({
@@ -133,6 +140,7 @@ namespace scribbolyth::recent
             *show_ = false;
             selection_ = 0;
             scroll_ = 0;
+            force_ = false;
         }
 
         void Open()
@@ -141,9 +149,10 @@ namespace scribbolyth::recent
             if (recent.empty()) return;
             const int sel = std::min(selection_, static_cast<int>(recent.size()) - 1);
             const std::string chosen = recent[static_cast<std::size_t>(sel)];
+            const bool force = force_;
             state_->status = "";
             Close();
-            auto it = state_->operations.find("open");
+            auto it = state_->operations.find(force ? "open_force" : "open");
             if (it != state_->operations.end())
             {
                 it->second(chosen, 1);
@@ -193,6 +202,7 @@ namespace scribbolyth::recent
         bool* show_;
         int selection_ = 0;
         int scroll_ = 0;
+        bool force_ = false;
         static constexpr int kVisibleRows = 18;
         static constexpr std::size_t kMaxContent = 88;
     };
