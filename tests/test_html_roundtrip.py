@@ -76,7 +76,7 @@ try:
         raise SystemExit(1)
 
     # new document clears history; importing the HTML brings it back
-    s.send(b':n'); s.send(b'\r')
+    s.send(b':n!'); s.send(b'\r')
     s.require('New document', 'new document should reset the workspace')
     s.send(b':U ' + HTML.encode())
     s.send(b'\r')
