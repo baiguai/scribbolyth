@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
+#include <memory>
 
 #ifndef _WIN32
 #include <termios.h>
@@ -87,7 +88,8 @@ int main(int, char** argv) {
     state->operations["history"] = [&show_history](const std::string&, int) { show_history = true; };
 
     bool show_recent = false;
-    state->operations["recents"] = [&show_recent, &state](const std::string&, int)
+    auto recent_force = std::make_shared<bool>(false);
+    const auto open_recent = [&show_recent, &state, &recent_force](bool force)
     {
         const std::size_t removed = scribbolyth::recent::PruneRecentFiles(state->recent_files);
         if (removed > 0)
@@ -99,8 +101,11 @@ int main(int, char** argv) {
             state->status = "Removed " + std::to_string(removed) +
                 " stale recent entr" + (removed == 1 ?"y" : "ies");
         }
+        *recent_force = force;
         show_recent = true;
     };
+    state->operations["recents"] = [&open_recent](const std::string&, int) { open_recent(false); };
+    state->operations["recents_force"] = [&open_recent](const std::string&, int) { open_recent(true); };
 
     bool show_undo = false;
     state->operations["undo"] = [&show_undo](const std::string&, int) { show_undo = true; };
@@ -242,7 +247,7 @@ int main(int, char** argv) {
     auto links_comp = scribbolyth::links::MakeLinksDialog(state, &show_links);
     auto dead_links_comp = scribbolyth::brokenlinks::MakeDeadLinksDialog(state, &show_dead_links);
     auto history_comp = scribbolyth::history::MakeHistoryDialog(state, &show_history);
-    auto recent_comp = scribbolyth::recent::MakeRecentDialog(state, &show_recent);
+    auto recent_comp = scribbolyth::recent::MakeRecentDialog(state, &show_recent, recent_force);
     auto undo_comp = scribbolyth::undo::MakeUndoDialog(state, &show_undo);
     auto browser_comp = scribbolyth::browser::MakeFileBrowserDialog(state, &show_file_browser);
     auto modals = {

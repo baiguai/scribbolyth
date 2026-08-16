@@ -15,7 +15,8 @@ namespace scribbolyth::op
     {
         bool IsPathCommand(const std::string& name)
         {
-            return name == "open" || name == "o" || name == "saveas"
+            return name == "open" || name == "o" || name == "o!"
+                || name == "saveas"
                 || name == "U" || name == "X"
                 || name == "export_note_txt" || name == "export_tree_txt";
         }
