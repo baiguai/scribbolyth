@@ -224,34 +224,31 @@ namespace scribbolyth::treeview
                 };
                 state_->operations["open"] = [this](const std::string& path, int)
                 {
-                    if (path.empty())
+                    if (state_->changed)
                     {
-                        state_->status = "Open requires a path";
+                        state_->status =
+                            "Unsaved changes - use :w to save or :o! to force";
                         return;
                     }
-                    if (IsDirectory(path))
-                    {
-                        BrowseFor(path, "", [this](const std::string& chosen)
-                                  {
-                                      LoadFrom(chosen);
-                                  });
-                        return;
-                    }
-                    LoadFrom(path);
+                    OpenFile(path);
+                };
+                state_->operations["open_force"] = [this](const std::string& path, int)
+                {
+                    OpenFile(path);
                 };
                 state_->operations["new_document"] = [this](const std::string&, int)
                 {
-                    roots_.clear();
-                    current_file_.clear();
-                    selected_ = nullptr;
-                    state_->treeview_width = kDefaultTreeviewWidth;
-                    state_->bookmarks.clear();
-                    state_->history.clear();
-                    ClearUndo();
-                    PersistLastFile();
-                    RefreshActiveNode();
-                    state_->changed = false;
-                    state_->status = "New document - no file path";
+                    if (state_->changed)
+                    {
+                        state_->status =
+                            "Unsaved changes - use :w to save or :enew! to force";
+                        return;
+                    }
+                    NewDocument();
+                };
+                state_->operations["new_document_force"] = [this](const std::string&, int)
+                {
+                    NewDocument();
                 };
                 state_->operations["import_html"] = [this](const std::string& path, int)
                 {
@@ -377,6 +374,8 @@ namespace scribbolyth::treeview
             void RefreshActiveNode();
             void SaveTo(const std::string& path);
             void LoadFrom(const std::string& path);
+            void OpenFile(const std::string& path);
+            void NewDocument();
             void ImportFrom(const std::string& path);
             void ExportTo(const std::string& path);
             void ExportNoteTxt(const std::string& path);
@@ -741,6 +740,39 @@ namespace scribbolyth::treeview
         state_->status = "Imported " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
         // PushRecentFile(path);
         PersistLastFile();
+    }
+
+    void TreeView::OpenFile(const std::string& path)
+    {
+        if (path.empty())
+        {
+            state_->status = "Open requires a path";
+            return;
+        }
+        if (IsDirectory(path))
+        {
+            BrowseFor(path, "", [this](const std::string& chosen)
+                      {
+                          LoadFrom(chosen);
+                      });
+            return;
+        }
+        LoadFrom(path);
+    }
+
+    void TreeView::NewDocument()
+    {
+        roots_.clear();
+        current_file_.clear();
+        selected_ = nullptr;
+        state_->treeview_width = kDefaultTreeviewWidth;
+        state_->bookmarks.clear();
+        state_->history.clear();
+        ClearUndo();
+        PersistLastFile();
+        RefreshActiveNode();
+        state_->changed = false;
+        state_->status = "New document - no file path";
     }
 
     void TreeView::ExportTo(const std::string& path)
