@@ -148,11 +148,19 @@ namespace scribbolyth::treeview
                 };
                 state_->operations["enter_normal"] = [this](const std::string&, int)
                 {
+                    if (selected_ == nullptr)
+                    {
+                        return;
+                    }
                     state_->mode = Mode::NORMAL;
                     if (state_->focus_editor) state_->focus_editor();
                 };
                 state_->operations["enter_insert"] = [this](const std::string&, int)
                 {
+                    if (selected_ == nullptr)
+                    {
+                        return;
+                    }
                     state_->mode = Mode::INSERT;
                     if (state_->focus_editor) state_->focus_editor();
                 };
@@ -163,14 +171,26 @@ namespace scribbolyth::treeview
                 };
                 state_->operations["enter_visual"] = [this](const std::string&, int)
                 {
+                    if (selected_ == nullptr)
+                    {
+                        return;
+                    }
                     state_->mode = Mode::VISUAL;
                 };
                 state_->operations["enter_visual_line"] = [this](const std::string&, int)
                 {
+                    if (selected_ == nullptr)
+                    {
+                        return;
+                    }
                     state_->mode = Mode::VISUAL_LINE;
                 };
                 state_->operations["enter_visual_block"] = [this](const std::string&, int)
                 {
+                    if (selected_ == nullptr)
+                    {
+                        return;
+                    }
                     state_->mode = Mode::VISUAL_BLOCK;
                 };
                 state_->operations["enter_command"] = [this](const std::string&, int)
