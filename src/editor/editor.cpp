@@ -227,6 +227,20 @@ namespace scribbolyth::editor
                     Clamp();
                     Save();
                 };
+                state_->operations["delete_word_back"] = [this](const std::string&, int count)
+                {
+                    if (!Editable()) return;
+                    for (int i = 0; i < count; ++i) DeleteWordBack();
+                    Clamp();
+                    Save();
+                };
+                state_->operations["delete_word_forward"] = [this](const std::string&, int count)
+                {
+                    if (!Editable()) return;
+                    for (int i = 0; i < count; ++i) DeleteWordForward();
+                    Clamp();
+                    Save();
+                };
                 state_->operations["cursor_file_start"] = [this](const std::string&, int)
                 {
                     if (!Editable()) return;
@@ -1406,6 +1420,34 @@ namespace scribbolyth::editor
                 line.erase(static_cast<std::size_t>(start),
                            static_cast<std::size_t>(end - start));
                 col_ = start;
+                last_col_ = col_;
+            }
+
+            void DeleteWordBack()
+            {
+                auto& line = lines_[row_];
+                int end = col_;
+
+                while (end > 0 && line[end - 1] == ' ') --end;
+                while (end > 0 && line[end - 1] != ' ') --end;
+
+                line.erase(static_cast<std::size_t>(end),
+                           static_cast<std::size_t>(col_ - end));
+                col_ = end;
+                last_col_ = end;
+            }
+
+            void DeleteWordForward()
+            {
+                auto& line = lines_[row_];
+                const int size = static_cast<int>(line.size());
+                int end = col_;
+
+                while (end < size && line[end] != ' ') ++end;
+                while (end < size && line[end] == ' ') ++end;
+
+                line.erase(static_cast<std::size_t>(col_),
+                           static_cast<std::size_t>(end - col_));
                 last_col_ = col_;
             }
 
