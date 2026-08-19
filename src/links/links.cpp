@@ -186,6 +186,11 @@ namespace scribbolyth::links
                 MoveSelection(+1);
                 return true;
             }
+            if ((event.is_character() && event.character() == "G"))
+            {
+                MoveToEnd();
+                return true;
+            }
             if (event == ftxui::Event::ArrowUp
                 || (event.is_character() && event.character() == "k"))
             {
@@ -325,6 +330,13 @@ namespace scribbolyth::links
             if (entries_.empty()) return;
             const int total = static_cast<int>(entries_.size());
             selection_ = std::max(0, std::min(total - 1, selection_ + dir));
+        }
+
+        void MoveToEnd()
+        {
+            if (entries_.empty()) return;
+            const int total = static_cast<int>(entries_.size());
+            selection_ = std::max(0, (total -1 ));
         }
 
         // Mirror of the HTML app's `y` key: copy a URL verbatim, or a note
