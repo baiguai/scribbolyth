@@ -39,6 +39,8 @@ namespace scribbolyth::bookmarks
 
         bool Focusable() const override { return true; }
 
+        bool pending_g_ = false;
+
         bool OnEvent(ftxui::Event event) override
         {
             if (event == ftxui::Event::Escape)
@@ -51,6 +53,27 @@ namespace scribbolyth::bookmarks
                 Jump();
                 return true;
             }
+
+            if (event.is_character() && event.character() == "g")
+            {
+                if (pending_g_)
+                {
+                    pending_g_ = false;
+                    MoveToStart();
+                    return true;
+                }
+                pending_g_ = true;
+                return true;
+            }
+            if ((event.is_character() && event.character() == "G"))
+            {
+                pending_g_ = false;
+                MoveToEnd();
+                return true;
+            }
+
+            pending_g_ = false;
+
             if (event == ftxui::Event::ArrowDown
                 || (event.is_character() && event.character() == "j"))
             {
@@ -155,6 +178,19 @@ namespace scribbolyth::bookmarks
             if (entries_.empty()) return;
             const int total = static_cast<int>(entries_.size());
             selection_ = std::max(0, std::min(total - 1, selection_ + dir));
+        }
+
+        void MoveToStart()
+        {
+            selection_ = 0;
+        }
+
+        void MoveToEnd()
+        {
+            if (!entries_.empty())
+            {
+                selection_ = static_cast<int>(entries_.size()) -1;
+            }
         }
 
         // Remove the selected bookmark. entries_ mirrors state_->bookmarks
