@@ -159,6 +159,8 @@ namespace scribbolyth::links
 
         bool Focusable() const override { return true; }
 
+        bool pending_g_ = false;
+
         bool OnEvent(ftxui::Event event) override
         {
             if (event.is_mouse())
@@ -175,6 +177,26 @@ namespace scribbolyth::links
                 Activate();
                 return true;
             }
+            if (event.is_character() && event.character() == "g")
+            {
+                if (pending_g_)
+                {
+                    pending_g_ = false;
+                    MoveToStart();
+                    return true;
+                }
+                pending_g_ = true;
+                return true;
+            }
+            if ((event.is_character() && event.character() == "G"))
+            {
+                pending_g_ = false;
+                MoveToEnd();
+                return true;
+            }
+
+            pending_g_ = false;
+
             if (event.is_character() && event.character() == "y")
             {
                 CopySelected();
@@ -186,12 +208,14 @@ namespace scribbolyth::links
                 MoveSelection(+1);
                 return true;
             }
+
             if (event == ftxui::Event::ArrowUp
                 || (event.is_character() && event.character() == "k"))
             {
                 MoveSelection(-1);
                 return true;
             }
+
             return true;
         }
 
@@ -325,6 +349,19 @@ namespace scribbolyth::links
             if (entries_.empty()) return;
             const int total = static_cast<int>(entries_.size());
             selection_ = std::max(0, std::min(total - 1, selection_ + dir));
+        }
+
+        void MoveToStart()
+        {
+            selection_ = 0;
+        }
+
+        void MoveToEnd()
+        {
+            if (!entries_.empty())
+            {
+                selection_ = static_cast<int>(entries_.size()) -1;
+            }
         }
 
         // Mirror of the HTML app's `y` key: copy a URL verbatim, or a note
