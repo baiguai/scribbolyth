@@ -599,8 +599,11 @@ namespace scribbolyth::editor
                     const int size = static_cast<int>(lines_[r].size());
                     int h_lo = 0, h_hi = -1;
                     const bool highlighted = RowHighlight(r, h_lo, h_hi);
+
+                    // Cursor hiding logic
                     const bool show_cursor = state_->mode != Mode::TREE;
 
+                    // Draw the cursor
                     const int c = show_cursor && r == row_ ? std::max(0, col_) : -1;
 
                     // Split the line at every boundary that changes the
