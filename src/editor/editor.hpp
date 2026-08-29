@@ -8,4 +8,4 @@ namespace scribbolyth::editor {
 
 ftxui::Component MakeEditor(std::shared_ptr<EditorState> state);
 
-} // namespace scribbolyth::editor
+}
