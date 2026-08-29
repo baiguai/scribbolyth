@@ -73,3 +73,6 @@ Testing/
 .cache/
 __pycache__/
 *.pyc
+
+*.aider.*
+*coder.db
