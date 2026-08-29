@@ -5642,6 +5642,7 @@
                             const nodeContent = n.content || '';
                             const matches = nodeContent.match(/#[\w-]+/g) || [];
                             for (const t of matches) {
+                                if (/^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(t)) continue;
                                 allTagSet[t.slice(1).toLowerCase()] = true;
                             }
                             if (n.children && n.children.length) {
@@ -5666,6 +5667,7 @@
                         const nodeContent = n.content || '';
                         const matches = nodeContent.match(/#[\w-]+/g) || [];
                         for (const t of matches) {
+                            if (/^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(t)) continue;
                             const tagVal = t.slice(1).toLowerCase();
                             if (tagVal.includes(tagLower)) {
                                 allTagCounts[tagVal] = (allTagCounts[tagVal] || 0) + 1;
