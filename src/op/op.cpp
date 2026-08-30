@@ -17,7 +17,7 @@ namespace scribbolyth::op
         {
             return name == "open" || name == "o" || name == "o!"
                 || name == "saveas"
-                || name == "U" || name == "X"
+                || name == "U" || name == "X" || name == "x"
                 || name == "export_note_txt" || name == "export_tree_txt";
         }
 

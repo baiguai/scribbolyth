@@ -334,6 +334,36 @@ namespace scribbolyth::treeview
                     }
                     ExportTo(path);
                 };
+                state_->operations["export_scribbolyth"] = [this](const std::string& path, int)
+                {
+                    // With no node selected this is just a save-as of the whole
+                    // document. Otherwise the selected node (and everything under
+                    // it) is written out as its own Scribbolyth file.
+                    if (selected_ == nullptr)
+                    {
+                        if (path.empty() || IsDirectory(path))
+                        {
+                            BrowseFor(path.empty() ? ExportStartDir() : path,
+                                      "saveas", [this](const std::string& chosen)
+                                      {
+                                          SaveTo(chosen);
+                                      });
+                            return;
+                        }
+                        SaveTo(path);
+                        return;
+                    }
+                    if (path.empty() || IsDirectory(path))
+                    {
+                        BrowseFor(path.empty() ? ExportStartDir() : path,
+                                  "x", [this](const std::string& chosen)
+                                  {
+                                      ExportScribbolyth(chosen);
+                                  });
+                        return;
+                    }
+                    ExportScribbolyth(path);
+                };
                 state_->operations["export_note_txt"] = [this](const std::string& path, int)
                 {
                     if (path.empty() || IsDirectory(path))
@@ -434,6 +464,7 @@ namespace scribbolyth::treeview
             void ExportTo(const std::string& path);
             void ExportNoteTxt(const std::string& path);
             void ExportTreeTxt(const std::string& path);
+            void ExportScribbolyth(const std::string& path);
             std::string CollectBranchTxt(const TreeNode& node) const;
             std::string ExportStartDir() const;
             void PersistLastFile();
@@ -907,6 +938,31 @@ namespace scribbolyth::treeview
             return;
         }
         state_->status = "Exported " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
+    }
+
+    // Export the selected node and its whole subtree as a standalone
+    // Scribbolyth document (its own .scribboleth file). Unlike SaveTo this
+    // does not repoint current_file_, touch the recent-files list or rewrite
+    // init.conf: the branch is written to `path` and the open document is
+    // left exactly as it was. Bookmarks and history are not carried over and
+    // the pane width is preserved so the file reopens with the same layout.
+    void TreeView::ExportScribbolyth(const std::string& path)
+    {
+        if (selected_ == nullptr)
+        {
+            state_->status = "No node selected";
+            return;
+        }
+        std::vector<TreeNode> branch;
+        branch.push_back(*selected_);
+        const std::string json = scribbolyth::io::Serialize(branch, state_->treeview_width,
+                                                            {}, {});
+        if (!scribbolyth::io::WriteFile(path, json))
+        {
+            state_->status = "Error: could not export " + path;
+            return;
+        }
+        state_->status = "Exported " + std::to_string(CountNodes(branch)) + " nodes to " + path;
     }
 
     // Export the selected note's text as plain text, with inter-note link
