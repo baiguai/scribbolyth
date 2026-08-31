@@ -29,6 +29,12 @@ struct EditorState {
     int command_cursor = 0;
     int* active_child = nullptr;
     Mode mode_before_command = Mode::TREE;
+
+    // When a command sets this on Enter (e.g. :calc leaving its result in the
+    // field), the command line stays open with the buffer the command wrote
+    // instead of closing. The Enter handler consumes and resets it.
+    bool command_keep_open = false;
+
     bool changed = false;
 
     int treeview_width = kDefaultTreeviewWidth;
