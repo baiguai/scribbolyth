@@ -5,9 +5,10 @@
 that node and its whole subtree as a standalone .scribboleth document
 (bookmarks and history reset, no sibling roots); with no selection it behaves
 as a plain save-as of the entire document. The branch export round-trips:
-reopening it yields only the branch.
+reopening it yields only the branch. Every save/export is stamped with the
+Scribbolyth signature line, and files without it are rejected on open as not
+being Scribbolyth files.
 """
-import json
 import os
 import shutil
 
@@ -45,21 +46,25 @@ try:
     s.send(b'alpha.scribboleth'); s.send(b'\r'); s.step(0.7)
     s.require('Exported 3 nodes to', 'subtree export status')
     s.forbid(' File Browser ', 'a file path must export directly, no browser')
-    with open(SUB) as f:
-        doc = json.load(f)
+    doc = harness.read_doc(SUB)
+    with open(SUB, encoding='utf-8') as f:
+        assert f.read().startswith(harness.SIGNATURE), (
+            'subtree export must start with the scribbolyth signature')
     assert [n['name'] for n in doc['roots']] == ['Alpha'], (
         'branch export must contain only Alpha, got %r' % [n['name'] for n in doc['roots']])
     assert [c['name'] for c in doc['roots'][0]['children']] == ['Omega'], 'Alpha must keep Omega'
     assert [c['name'] for c in doc['roots'][0]['children'][0]['children']] == ['Delta'], 'Omega must keep Delta'
-    assert 'Doc' not in json.dumps(doc), 'sibling root must not leak into the export'
+    assert 'Doc' not in str(doc), 'sibling root must not leak into the export'
     assert doc['bookmarks'] == [] and doc['history'] == [], 'branch export must reset attachments'
 
     # No selection: :x is a save-as of the entire document (5 nodes).
     s.send(b'\x1b')                                 # deselect
     s.send((':x ' + FULL).encode()); s.send(b'\r')
     s.require('Saved 5 nodes to', 'no selection must behave as :saveas')
-    with open(FULL) as f:
-        whole = json.load(f)
+    whole = harness.read_doc(FULL)
+    with open(FULL, encoding='utf-8') as f:
+        assert f.read().startswith(harness.SIGNATURE), (
+            'save-as must start with the scribbolyth signature')
     assert [n['name'] for n in whole['roots']] == ['Doc', 'Alpha', 'Beta'], (
         'save-as must include all roots, got %r' % [n['name'] for n in whole['roots']])
 
@@ -72,6 +77,17 @@ try:
     s.require('Delta', 'Delta should be present after expand')
     s.forbid('Doc', 'Doc must not load with the branch')
     s.forbid('Beta', 'Beta must not load with the branch')
+
+    # A file without the signature is not a Scribbolyth file and must be
+    # rejected on open, leaving the current document untouched.
+    legacy = os.path.join(DATA_DIR, 'not_scribbolyth.json')
+    with open(legacy, 'w', encoding='utf-8') as f:
+        f.write('{"version":1,"tree_width":30,"bookmarks":[],"history":[],'
+                '"roots":[{"id":"lx","name":"Legacy","expanded":true,'
+                '"text":"","children":[]}]}')
+    s.send((':o ' + legacy).encode()); s.send(b'\r')
+    s.require('not a Scribbolyth file', 'unsigned file must be rejected')
+    s.forbid('Legacy', 'Legacy node must not load')
 finally:
     s.quit()
 

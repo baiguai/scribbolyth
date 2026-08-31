@@ -4,7 +4,6 @@
 The cursor follows the moved line, a count works ('3K'), the boundary lines
 are no-ops, and the move is undoable via the undo dialog.
 """
-import json
 import os
 
 import harness
@@ -25,8 +24,7 @@ try:
     doc_path = os.path.join(s.workdir, 'doc.json')
 
     def note_text():
-        with open(doc_path, encoding='utf-8') as f:
-            return json.load(f)['roots'][0]['text']
+        return harness.read_doc(doc_path)['roots'][0]['text']
 
     def save():
         s.send((':saveas %s\r' % doc_path).encode())
