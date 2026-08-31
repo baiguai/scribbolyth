@@ -825,6 +825,11 @@ namespace scribbolyth::treeview
             state_->status = "Error: could not open " + path;
             return;
         }
+        if (!scribbolyth::io::HasFileSignature(content))
+        {
+            state_->status = "Error: not a Scribbolyth file: " + path;
+            return;
+        }
         std::vector<TreeNode> loaded;
         int loaded_width = state_->treeview_width;
         std::vector<scribbolyth::bookmark::Bookmark> loaded_marks;

@@ -7,7 +7,6 @@ deepest visible node above the selection, dropping the node under a descendant
 several levels too deep. Also checks 'H' reverses it and that 'L' is a no-op
 when there is no node above at the same level.
 """
-import json
 import os
 
 import harness
@@ -29,8 +28,7 @@ try:
         s.require('Saved', 'doc should save')
 
     def roots():
-        with open(doc_path, encoding='utf-8') as f:
-            return json.load(f)['roots']
+        return harness.read_doc(doc_path)['roots']
 
     def child_names(node):
         return [c['name'] for c in node['children']]

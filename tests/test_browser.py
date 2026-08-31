@@ -80,8 +80,8 @@ try:
     s.require('2/2', 'l on a file must not pick or move it')
     s.send(b'\r')
     s.forbid(' File Browser ', 'Enter should close the dialog')
-    s.require('Error: could not parse',
-              'Enter should run :open on nested/deep.txt (a non-JSON file)')
+    s.require('not a Scribbolyth file',
+              'Enter should run :open on nested/deep.txt (not a Scribbolyth file)')
 
     # h goes up one level; Esc cancels without doing anything.
     s.send(b':open docs')
@@ -130,7 +130,7 @@ try:
     s.send(b'o')
     s.require('1/3 (of 5)', "'o' should narrow the list to 3 of 5 entries")
     # The last row is the status bar, which still shows the earlier
-    # "Error: could not parse .../nested/deep.txt" message; the dialog
+    # "Error: ... is not a Scribbolyth file" message; the dialog
     # itself (rows above it) must not list nested/.
     s.forbid('nested/', 'nested/ does not contain o', rows=range(s.rows - 1))
 

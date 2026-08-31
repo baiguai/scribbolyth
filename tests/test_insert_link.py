@@ -4,7 +4,6 @@ a search-style dialog that, on Enter, inserts a `_Title_` node link to the
 selected node into the currently active node's contents at the editor cursor,
 instead of jumping to it like the normal search dialog does.
 """
-import json
 import os
 
 import harness
@@ -31,8 +30,7 @@ try:
     doc_path = os.path.join(s.workdir, 'doc.json')
 
     def roots():
-        with open(doc_path, encoding='utf-8') as f:
-            return json.load(f)['roots']
+        return harness.read_doc(doc_path)['roots']
 
     def by_name(name):
         for n in roots():

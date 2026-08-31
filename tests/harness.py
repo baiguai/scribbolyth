@@ -20,6 +20,7 @@ override it with the environment variable SCRIBBOLYTH_BIN.
 """
 
 import fcntl
+import json
 import os
 import pty
 import select
@@ -32,6 +33,22 @@ import time
 
 DEFAULT_BIN = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                            '..', 'build', 'bin', 'scribbolyth')
+
+# Magic first line of every saved Scribbolyth document (io/kFileSignature).
+SIGNATURE = '//scribbolyth\n'
+
+
+def read_doc(path):
+    """Load a saved Scribbolyth JSON document.
+
+    Strips the magic signature line at the top (io/kFileSignature) before
+    parsing the JSON that follows it.
+    """
+    with open(path, encoding='utf-8') as f:
+        content = f.read()
+    if content.startswith(SIGNATURE):
+        content = content[len(SIGNATURE):]
+    return json.loads(content)
 
 
 class Session:

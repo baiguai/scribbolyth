@@ -429,14 +429,24 @@ namespace scribbolyth::io
             out += (i + 1 < roots.size()) ? ",\n" : "\n";
         }
         out += "  ]\n}\n";
-        return out;
+        return std::string(kFileSignature) + out;
+    }
+
+    bool HasFileSignature(const std::string& content)
+    {
+        const std::string sig(kFileSignature);
+        return content.compare(0, sig.size(), sig) == 0;
     }
 
     bool Deserialize(const std::string& json, std::vector<TreeNode>& roots,
                      int* tree_width, std::vector<bookmark::Bookmark>* bookmarks,
                      std::vector<std::string>* history)
     {
-        Parser parser(json);
+        // A real Scribbolyth document always carries the magic signature line,
+        // distinguishing it from arbitrary JSON.
+        if (!HasFileSignature(json)) return false;
+        const std::string body(json.substr(std::string(kFileSignature).size()));
+        Parser parser(body);
         return parser.Deserialize(roots, tree_width, bookmarks, history);
     }
 

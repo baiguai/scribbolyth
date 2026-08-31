@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Bookmarks dialog: 'D' removes the selected bookmark."""
-import json
 import os
 
 import harness
@@ -33,8 +32,7 @@ try:
     doc_path = os.path.join(s.workdir, 'doc.json')
     s.send((':saveas %s\r' % doc_path).encode())
     s.require('Saved', 'doc should save')
-    with open(doc_path, encoding='utf-8') as f:
-        data = json.load(f)
+    data = harness.read_doc(doc_path)
     if data.get('bookmarks'):
         print('FAIL: bookmark still present after D')
         s.dump()
