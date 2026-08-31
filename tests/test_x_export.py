@@ -6,7 +6,8 @@ that node and its whole subtree as a standalone .scribboleth document
 (bookmarks and history reset, no sibling roots); with no selection it behaves
 as a plain save-as of the entire document. The branch export round-trips:
 reopening it yields only the branch. Every save/export is stamped with the
-Scribbolyth signature line; legacy files without it still open for now.
+Scribbolyth signature line, and files without it are rejected on open as not
+being Scribbolyth files.
 """
 import os
 import shutil
@@ -77,15 +78,16 @@ try:
     s.forbid('Doc', 'Doc must not load with the branch')
     s.forbid('Beta', 'Beta must not load with the branch')
 
-    # Back-compat (for now): a file without the signature still opens.
-    legacy = os.path.join(DATA_DIR, 'legacy.json')
+    # A file without the signature is not a Scribbolyth file and must be
+    # rejected on open, leaving the current document untouched.
+    legacy = os.path.join(DATA_DIR, 'not_scribbolyth.json')
     with open(legacy, 'w', encoding='utf-8') as f:
         f.write('{"version":1,"tree_width":30,"bookmarks":[],"history":[],'
                 '"roots":[{"id":"lx","name":"Legacy","expanded":true,'
                 '"text":"","children":[]}]}')
     s.send((':o ' + legacy).encode()); s.send(b'\r')
-    s.require('Loaded 1 nodes from', 'unsigned file should still open')
-    s.require('Legacy', 'Legacy node should be visible')
+    s.require('not a Scribbolyth file', 'unsigned file must be rejected')
+    s.forbid('Legacy', 'Legacy node must not load')
 finally:
     s.quit()
 

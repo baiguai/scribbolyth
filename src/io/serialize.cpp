@@ -432,18 +432,20 @@ namespace scribbolyth::io
         return std::string(kFileSignature) + out;
     }
 
+    bool HasFileSignature(const std::string& content)
+    {
+        const std::string sig(kFileSignature);
+        return content.compare(0, sig.size(), sig) == 0;
+    }
+
     bool Deserialize(const std::string& json, std::vector<TreeNode>& roots,
                      int* tree_width, std::vector<bookmark::Bookmark>* bookmarks,
                      std::vector<std::string>* history)
     {
-        // Accept documents with or without the magic signature line, so files
-        // saved before the signature existed still load.
-        std::string body(json);
-        const std::string sig(kFileSignature);
-        if (body.compare(0, sig.size(), sig) == 0)
-        {
-            body.erase(0, sig.size());
-        }
+        // A real Scribbolyth document always carries the magic signature line,
+        // distinguishing it from arbitrary JSON.
+        if (!HasFileSignature(json)) return false;
+        const std::string body(json.substr(std::string(kFileSignature).size()));
         Parser parser(body);
         return parser.Deserialize(roots, tree_width, bookmarks, history);
     }

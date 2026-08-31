@@ -41,8 +41,8 @@ SIGNATURE = '//scribbolyth\n'
 def read_doc(path):
     """Load a saved Scribbolyth JSON document.
 
-    Tolerates the optional signature line at the top (files saved by the app
-    carry it; older files may not) and returns the parsed JSON object.
+    Strips the magic signature line at the top (io/kFileSignature) before
+    parsing the JSON that follows it.
     """
     with open(path, encoding='utf-8') as f:
         content = f.read()

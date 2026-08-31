@@ -22,11 +22,14 @@ namespace scribbolyth::io
     // On success `tree_width` is set only if the document carried one;
     // `bookmarks`/`history` are replaced only if the document carried any.
     // Otherwise they are left untouched (callers should pre-set defaults).
-    // An optional leading kFileSignature line is skipped when present.
+    // The content must begin with the kFileSignature line.
     bool Deserialize(const std::string& json, std::vector<TreeNode>& roots,
                      int* tree_width = nullptr,
                      std::vector<bookmark::Bookmark>* bookmarks = nullptr,
                      std::vector<std::string>* history = nullptr);
+
+    // Whether `content` begins with the Scribbolyth file signature.
+    bool HasFileSignature(const std::string& content);
 
     std::string JsonEscape(const std::string& s);
 
