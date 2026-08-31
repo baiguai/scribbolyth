@@ -429,14 +429,22 @@ namespace scribbolyth::io
             out += (i + 1 < roots.size()) ? ",\n" : "\n";
         }
         out += "  ]\n}\n";
-        return out;
+        return std::string(kFileSignature) + out;
     }
 
     bool Deserialize(const std::string& json, std::vector<TreeNode>& roots,
                      int* tree_width, std::vector<bookmark::Bookmark>* bookmarks,
                      std::vector<std::string>* history)
     {
-        Parser parser(json);
+        // Accept documents with or without the magic signature line, so files
+        // saved before the signature existed still load.
+        std::string body(json);
+        const std::string sig(kFileSignature);
+        if (body.compare(0, sig.size(), sig) == 0)
+        {
+            body.erase(0, sig.size());
+        }
+        Parser parser(body);
         return parser.Deserialize(roots, tree_width, bookmarks, history);
     }
 
