@@ -146,6 +146,31 @@ namespace scribbolyth::editor
             unescape(new_text);
             return true;
         }
+
+        // A transparent leaf node that records the height of the box it is
+        // assigned each frame. Rendered as an overlay share of the editor view,
+        // it reports the editor's viewport height so the trailing scroll-past-
+        // bottom padding can be sized to about half the viewport (Vim-like).
+        class BoxRecorder : public ftxui::Node
+        {
+            public:
+                explicit BoxRecorder(int& out_height) : out_height_(out_height) {}
+
+                void ComputeRequirement() override
+                {
+                    requirement_.min_x = 0;
+                    requirement_.min_y = 0;
+                }
+
+                void SetBox(ftxui::Box box) override
+                {
+                    Node::SetBox(box);
+                    out_height_ = box.y_max - box.y_min + 1;
+                }
+
+            private:
+                int& out_height_;
+        };
     }
 
     class Editor : public ftxui::ComponentBase
@@ -701,7 +726,21 @@ namespace scribbolyth::editor
                     }
                     rows.push_back(ftxui::hbox(std::move(parts)));
                 }
-                return ftxui::vbox(std::move(rows)) | ftxui::frame | ftxui::flex;
+                // Vim-like scroll-past-bottom: append blank lines after the
+                // content so the last line can scroll up to approximately the
+                // vertical center of the viewport instead of hugging the bottom
+                // edge. The viewport height is measured each frame by the
+                // BoxRecorder overlay below.
+                const int padding = std::max(0, viewport_height_ / 2);
+                for (int i = 0; i < padding; ++i)
+                {
+                    rows.push_back(ftxui::text(""));
+                }
+                ftxui::Element content =
+                    ftxui::vbox(std::move(rows)) | ftxui::frame | ftxui::flex;
+                ftxui::Element tracker =
+                    std::make_shared<BoxRecorder>(viewport_height_);
+                return ftxui::dbox({content, tracker});
             }
             bool Focusable() const override
             {
@@ -1933,6 +1972,7 @@ namespace scribbolyth::editor
             int last_col_ = 0;
             int visual_row_ = -1;
             int visual_col_ = -1;
+            int viewport_height_ = 0;
 
             struct BlockInsert
             {
