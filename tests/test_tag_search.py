@@ -23,6 +23,7 @@ try:
         ],
     }
     with open(doc_path, 'w', encoding='utf-8') as f:
+        f.write(harness.SIGNATURE)
         json.dump(doc, f)
 
     s.send((':open %s\r' % doc_path).encode())

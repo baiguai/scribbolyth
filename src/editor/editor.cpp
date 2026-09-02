@@ -431,6 +431,31 @@ namespace scribbolyth::editor
                         state_->status = "Clipboard is empty";
                         return;
                     }
+                    if (IsVisualMode(state_->mode) && visual_row_ >= 0)
+                    {
+                        // In visual mode 'p' replaces the selection with the
+                        // clipboard, as in Vim.
+                        if (state_->mode == Mode::VISUAL_LINE)
+                        {
+                            // Replacing whole lines: splicing the clipboard in
+                            // at the cursor would glue its last line onto the
+                            // next line with PasteText, so insert the pasted
+                            // lines as whole lines where the selection was.
+                            const std::vector<std::string> parts = SplitLines(clip);
+                            if (parts.empty()) return;
+                            DeleteSelection();   // cursor lands at row a, col 0
+                            lines_.insert(lines_.begin() + static_cast<std::ptrdiff_t>(row_),
+                                          parts.begin(), parts.end());
+                            row_ += static_cast<int>(parts.size()) - 1;
+                            col_ = static_cast<int>(parts.back().size());
+                            last_col_ = col_;
+                            Clamp();
+                            Save();
+                            state_->status = "Pasted";
+                            return;
+                        }
+                        DeleteSelection();
+                    }
                     PasteText(clip);
                     Clamp();
                     Save();
