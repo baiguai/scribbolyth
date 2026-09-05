@@ -550,6 +550,37 @@ namespace scribbolyth::html
             ReplaceArray(html, open, close, json);
             return true;
         }
+
+        // The web app renders leading indentation as literal tabs; the editor
+        // uses 4-space indentation (Tab inserts four spaces), so expanding each
+        // tab in the imported note text to four spaces keeps that leading
+        // whitespace from being lost.
+        void ExpandTabs(std::string& s)
+        {
+            std::string out;
+            out.reserve(s.size());
+            for (char c : s)
+            {
+                if (c == '\t')
+                {
+                    out += "    ";
+                }
+                else
+                {
+                    out += c;
+                }
+            }
+            s = std::move(out);
+        }
+
+        void ExpandTabsInNode(TreeNode& node)
+        {
+            ExpandTabs(node.text);
+            for (TreeNode& child : node.children)
+            {
+                ExpandTabsInNode(child);
+            }
+        }
     }
 
     bool ImportHtmlFile(const std::string& path, std::vector<TreeNode>& roots,
@@ -567,6 +598,11 @@ namespace scribbolyth::html
         Parser parser(array);
         std::vector<TreeNode> result;
         if (!parser.ParseArray(result)) return false;
+
+        for (TreeNode& node : result)
+        {
+            ExpandTabsInNode(node);
+        }
 
         if (bookmarks)
         {
