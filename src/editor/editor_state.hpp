@@ -6,6 +6,7 @@
 #include <utility>
 #include <vector>
 #include "../bookmark/bookmark.hpp"
+#include "../html/convert.hpp"
 #include "../mode/mode.hpp"
 #include "../keyboard/keymap.hpp"
 #include "../op/op.hpp"
@@ -44,6 +45,10 @@ struct EditorState {
     std::string template_path;
     std::string init_path;
     std::vector<scribbolyth::bookmark::Bookmark> bookmarks;
+
+    // Theme material captured from a .html import, carried through the session
+    // so a later HTML export reproduces it (colors, grid, custom CSS).
+    scribbolyth::html::HtmlTheme html_theme;
 
     // Viewed-node history: node ids of every selected node that has text,
     // most recent last, deduplicated, capped at kHistoryMax. Populated by
