@@ -862,7 +862,9 @@ namespace scribbolyth::treeview
         std::vector<TreeNode> loaded;
         std::vector<scribbolyth::bookmark::Bookmark> loaded_marks;
         std::vector<std::string> loaded_history;
-        if (!scribbolyth::html::ImportHtmlFile(path, loaded, &loaded_marks, &loaded_history))
+        scribbolyth::html::HtmlTheme theme;
+        if (!scribbolyth::html::ImportHtmlFile(path, loaded, &loaded_marks, &loaded_history,
+                                               &theme))
         {
             state_->status = "Error: could not import " + path;
             return;
@@ -870,6 +872,7 @@ namespace scribbolyth::treeview
         EnsureIds(loaded);
         state_->bookmarks = std::move(loaded_marks);
         state_->history = std::move(loaded_history);
+        state_->html_theme = std::move(theme);
         roots_ = std::move(loaded);
         current_file_.clear();
         selected_ = nullptr;
@@ -910,6 +913,7 @@ namespace scribbolyth::treeview
         state_->treeview_width = kDefaultTreeviewWidth;
         state_->bookmarks.clear();
         state_->history.clear();
+        state_->html_theme = scribbolyth::html::HtmlTheme{};
         ClearUndo();
         PersistLastFile();
         RefreshActiveNode();
@@ -937,7 +941,8 @@ namespace scribbolyth::treeview
         }
         if (!scribbolyth::html::ExportHtmlFile(base, path,
                                                roots_, state_->bookmarks,
-                                               state_->history))
+                                               state_->history,
+                                               &state_->html_theme))
         {
             state_->status = "Error: could not export " + path;
             return;
