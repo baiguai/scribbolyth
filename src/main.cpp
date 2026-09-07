@@ -13,6 +13,7 @@
 #include "config/config.hpp"
 #include "bookmarks/bookmarks.hpp"
 #include "browser/browser.hpp"
+#include "calc/calc.hpp"
 #include "help/help.hpp"
 #include "history/history.hpp"
 #include "recent/recent.hpp"
@@ -62,6 +63,21 @@ int main(int, char** argv) {
     state->operations["quit_force"] = [quit](const std::string&, int) { quit(); };
     state->commands["qa"] = "quit";
     state->commands["qa!"] = "quit_force";
+
+    // :calc evaluates an arithmetic expression and leaves the result in the
+    // command field so it reads like a calculator.
+    state->operations["calc"] = [state](const std::string& args, int)
+    {
+        std::string result;
+        if (!scribbolyth::calc::Evaluate(args, result))
+        {
+            state->status = "Calc error: " + result;
+            return;
+        }
+        state->command_buffer = ":" + result;
+        state->command_cursor = static_cast<int>(state->command_buffer.size());
+        state->command_keep_open = true;
+    };
 
     bool show_help = false;
     state->operations["show_help"] = [&show_help](const std::string&, int) { show_help = true; };
@@ -192,6 +208,13 @@ int main(int, char** argv) {
                     scribbolyth::op::ExecuteSearch(state, buffer);
                 else
                     scribbolyth::op::ExecuteCommand(state, buffer);
+                if (state->command_keep_open)
+                {
+                    // The command made the field show something (e.g. :calc's
+                    // result): keep the command line open on that content.
+                    state->command_keep_open = false;
+                    return true;
+                }
             }
             state->command_buffer.clear();
             state->command_cursor = 0;

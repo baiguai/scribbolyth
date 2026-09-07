@@ -24,6 +24,7 @@ SOURCES=(
     "src/browser/browser.cpp"
     "src/recent/recent.cpp"
     "src/undo/undo.cpp"
+    "src/calc/calc.cpp"
 )
 
 LIBS=(

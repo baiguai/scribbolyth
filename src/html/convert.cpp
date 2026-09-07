@@ -550,11 +550,144 @@ namespace scribbolyth::html
             ReplaceArray(html, open, close, json);
             return true;
         }
+
+        // The web app renders leading indentation as literal tabs; the editor
+        // uses 4-space indentation (Tab inserts four spaces), so expanding each
+        // tab in the imported note text to four spaces keeps that leading
+        // whitespace from being lost.
+        void ExpandTabs(std::string& s)
+        {
+            std::string out;
+            out.reserve(s.size());
+            for (char c : s)
+            {
+                if (c == '\t')
+                {
+                    out += "    ";
+                }
+                else
+                {
+                    out += c;
+                }
+            }
+            s = std::move(out);
+        }
+
+        void ExpandTabsInNode(TreeNode& node)
+        {
+            ExpandTabs(node.text);
+            for (TreeNode& child : node.children)
+            {
+                ExpandTabsInNode(child);
+            }
+        }
+
+        // Locate a `let <keyword> = <value>;` script statement and return the
+        // byte range [start, end) covering the whole statement including the
+        // trailing ';'. The value may be a nested '{...}'/'[...]' literal,
+        // scanned string- and nesting-aware, or a scalar ending at ';'.
+        bool FindJsStatement(const std::string& html, const std::string& keyword,
+                             std::size_t& start, std::size_t& end)
+        {
+            std::size_t pos = 0;
+            for (;;)
+            {
+                std::size_t lt = html.find("let", pos);
+                if (lt == std::string::npos) return false;
+                std::size_t i = lt + 3;
+                while (i < html.size() && (html[i] == ' ' || html[i] == '\t')) ++i;
+                if (html.compare(i, keyword.size(), keyword) != 0) { pos = lt + 3; continue; }
+                i += keyword.size();
+                while (i < html.size() && (html[i] == ' ' || html[i] == '\t')) ++i;
+                if (i >= html.size() || html[i] != '=') { pos = lt + 3; continue; }
+                ++i;
+                while (i < html.size() && (html[i] == ' ' || html[i] == '\t')) ++i;
+
+                start = lt;
+                if (i >= html.size()) return false;
+
+                if (html[i] == '[' || html[i] == '{')
+                {
+                    bool in_string = false;
+                    bool escaped = false;
+                    int depth = 0;
+                    for (std::size_t j = i; j < html.size(); ++j)
+                    {
+                        char ch = html[j];
+                        if (in_string)
+                        {
+                            if (escaped) { escaped = false; continue; }
+                            if (ch == '\\') { escaped = true; continue; }
+                            if (ch == '"') in_string = false;
+                            continue;
+                        }
+                        if (ch == '"') { in_string = true; continue; }
+                        if (ch == '[' || ch == '{') { ++depth; continue; }
+                        if (ch == ']' || ch == '}')
+                        {
+                            --depth;
+                            if (depth == 0)
+                            {
+                                end = j + 1;
+                                while (end < html.size() && (html[end] == ' '
+                                       || html[end] == '\t' || html[end] == '\n'
+                                       || html[end] == '\r')) ++end;
+                                if (end < html.size() && html[end] == ';') ++end;
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
+                }
+
+                // Scalars (null, numbers, strings, booleans): capture through
+                // the terminating ';'.
+                std::size_t semi = html.find(';', i);
+                if (semi == std::string::npos) return false;
+                end = semi + 1;
+                return true;
+            }
+        }
+
+        bool ReplaceJsStatement(std::string& html, const std::string& keyword,
+                                const std::string& statement)
+        {
+            std::size_t start = 0;
+            std::size_t end = 0;
+            if (!FindJsStatement(html, keyword, start, end)) return false;
+            html.replace(start, end - start, statement);
+            return true;
+        }
+
+        const char* kThemeStyleOpen = "<style id=\"theme_styles\">";
+        const char* kThemeStyleClose = "</style>";
+
+        // The inner text of the `<style id="theme_styles">` block.
+        bool FindStyleContent(const std::string& html, std::size_t& open, std::size_t& close)
+        {
+            std::size_t a = html.find(kThemeStyleOpen);
+            if (a == std::string::npos) return false;
+            open = a + std::string(kThemeStyleOpen).size();
+            std::size_t b = html.find(kThemeStyleClose, open);
+            if (b == std::string::npos) return false;
+            close = b;
+            return true;
+        }
+
+        bool ReplaceStyleContent(std::string& html, const std::string& content)
+        {
+            std::size_t open = 0;
+            std::size_t close = 0;
+            if (!FindStyleContent(html, open, close)) return false;
+            html.replace(open, close - open, content);
+            return true;
+        }
     }
 
     bool ImportHtmlFile(const std::string& path, std::vector<TreeNode>& roots,
                         std::vector<bookmark::Bookmark>* bookmarks,
-                        std::vector<std::string>* history)
+                        std::vector<std::string>* history,
+                        HtmlTheme* theme)
     {
         std::string content;
         if (!scribbolyth::io::ReadFile(path, content)) return false;
@@ -567,6 +700,11 @@ namespace scribbolyth::html
         Parser parser(array);
         std::vector<TreeNode> result;
         if (!parser.ParseArray(result)) return false;
+
+        for (TreeNode& node : result)
+        {
+            ExpandTabsInNode(node);
+        }
 
         if (bookmarks)
         {
@@ -600,6 +738,31 @@ namespace scribbolyth::html
             *history = std::move(ids);
         }
 
+        if (theme)
+        {
+            HtmlTheme th;
+            std::size_t start = 0;
+            std::size_t end = 0;
+            if (FindJsStatement(content, "currentTheme", start, end))
+            {
+                th.current_theme = content.substr(start, end - start);
+                th.present = true;
+            }
+            if (FindJsStatement(content, "themes", start, end))
+            {
+                th.themes = content.substr(start, end - start);
+                th.present = true;
+            }
+            std::size_t s_open = 0;
+            std::size_t s_close = 0;
+            if (FindStyleContent(content, s_open, s_close))
+            {
+                th.style_content = content.substr(s_open, s_close - s_open);
+                th.present = true;
+            }
+            *theme = std::move(th);
+        }
+
         roots = std::move(result);
         return true;
     }
@@ -607,13 +770,29 @@ namespace scribbolyth::html
     bool ExportHtmlFile(const std::string& template_path, const std::string& out_path,
                         const std::vector<TreeNode>& roots,
                         const std::vector<bookmark::Bookmark>& bookmarks,
-                        const std::vector<std::string>& history)
+                        const std::vector<std::string>& history,
+                        const HtmlTheme* theme)
     {
         std::string content;
         if (!scribbolyth::io::ReadFile(template_path, content)) return false;
         if (!ReplaceTreeData(content, roots)) return false;
         if (!ReplaceBookmarks(content, bookmarks, roots)) return false;
         if (!ReplaceHistory(content, history, roots)) return false;
+        if (theme && theme->present)
+        {
+            if (!theme->current_theme.empty())
+            {
+                ReplaceJsStatement(content, "currentTheme", theme->current_theme);
+            }
+            if (!theme->themes.empty())
+            {
+                ReplaceJsStatement(content, "themes", theme->themes);
+            }
+            if (!theme->style_content.empty())
+            {
+                ReplaceStyleContent(content, theme->style_content);
+            }
+        }
         return scribbolyth::io::WriteFile(out_path, content);
     }
 }
