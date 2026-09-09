@@ -1280,7 +1280,6 @@ namespace scribbolyth::editor
                         }
                     }
                 }
-                final_rows.push_back("");
 
                 lines_.erase(lines_.begin() + a, lines_.begin() + b + 1);
                 lines_.insert(lines_.begin() + a, final_rows.begin(), final_rows.end());
