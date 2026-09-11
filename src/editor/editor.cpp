@@ -11,6 +11,7 @@
 #include "../clipboard/clipboard.hpp"
 #include "../history/history.hpp"
 #include "../search/search.hpp"
+#include "../text/text.hpp"
 #include "../visual_block/visual_block.hpp"
 
 namespace scribbolyth::editor
@@ -450,7 +451,7 @@ namespace scribbolyth::editor
                 {
                     if (!Editable()) return;
                     LoadIfChanged();
-                    const std::string clip = ReadClipboard();
+                    std::string clip = scribbolyth::text::ToAsciiPunctuation(ReadClipboard());
                     if (clip.empty())
                     {
                         state_->status = "Clipboard is empty";
