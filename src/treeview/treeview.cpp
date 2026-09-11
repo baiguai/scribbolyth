@@ -126,6 +126,11 @@ namespace scribbolyth::treeview
                     if (state_->mode == Mode::TREE) CollapseAll();
                     RefreshActiveNode();
                 };
+                state_->operations["expand_branch"] = [this](const std::string&, int)
+                {
+                    if (state_->mode == Mode::TREE) ExpandSelectedBranch();
+                    RefreshActiveNode();
+                };
                 // Structural edits: add, rename, delete and reorder (a/A/R/D, J/K/H/L).
 
                 state_->operations["new_node"] = [this](const std::string& name, int)
@@ -449,6 +454,7 @@ namespace scribbolyth::treeview
             void OpenSelected();
             void ExpandAll();
             void CollapseAll();
+            void ExpandSelectedBranch();
             void InsertChild(const std::string& name);
             void InsertNode(const std::string& name);
             void DeleteNode();
@@ -1241,6 +1247,13 @@ namespace scribbolyth::treeview
         {
             SetAllExpanded(root, true, false);
         }
+    }
+
+    // Expand the selected node and its entire subtree of children (e).
+    void TreeView::ExpandSelectedBranch()
+    {
+        if (selected_ == nullptr) return;
+        SetAllExpanded(*selected_, true, false);
     }
 
     // Collapse every folder in the tree (C); deselect when the selection ends
