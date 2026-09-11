@@ -76,7 +76,7 @@ namespace scribbolyth::regex
                 entry.example     = fields[2];
                 entry.description = fields[3];
 
-                entry.line = PadRight(entry.category, 10) + " " +
+                entry.line = PadRight(entry.category, 13) + " " +
                              PadRight(entry.pattern, 15) + " " +
                              PadRight(entry.example, 20) + " " +
                              entry.description;
@@ -145,7 +145,7 @@ namespace scribbolyth::regex
             const int count = std::min(kVisibleRows, std::max(0, total - top));
 
             const std::string header =
-                " " + PadRight("CATEGORY", 10) + " " +
+                " " + PadRight("CATEGORY", 13) + " " +
                 PadRight("PATTERN", 15) + " " +
                 PadRight("EXAMPLE", 20) + " " +
                 "DESCRIPTION";
