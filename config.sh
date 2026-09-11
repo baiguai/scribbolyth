@@ -14,6 +14,7 @@ SOURCES=(
     "src/io/serialize.cpp"
     "src/html/convert.cpp"
     "src/help/help.cpp"
+    "src/regex/regex.cpp"
     "src/search/search.cpp"
     "src/visual_block/visual_block.cpp"
     "src/bookmark/bookmark.cpp"

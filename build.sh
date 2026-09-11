@@ -83,6 +83,12 @@ if [ -f "bin/$APP_NAME" ]; then
     else
         echo "Warning: config/init.conf not found - init config not copied"
     fi
+    if [ -f "../config/regex.conf" ]; then
+        cp "../config/regex.conf" "bin/"
+        echo "Regex cheat sheet copied to: $(pwd)/bin/regex.conf"
+    else
+        echo "Warning: config/regex.conf not found - regex cheat sheet not copied"
+    fi
     if [ -d "../build-windows/bin" ]; then
         cp "../config/commands.conf" "../build-windows/bin/" 2>/dev/null || \
             echo "Warning: could not copy config to build-windows/bin/"
@@ -90,6 +96,8 @@ if [ -f "bin/$APP_NAME" ]; then
             echo "Warning: could not copy template to build-windows/bin/"
         cp "../config/init.conf" "../build-windows/bin/" 2>/dev/null || \
             echo "Warning: could not copy init config to build-windows/bin/"
+        cp "../config/regex.conf" "../build-windows/bin/" 2>/dev/null || \
+            echo "Warning: could not copy regex cheat sheet to build-windows/bin/"
     fi
 
     echo "-- Build successful --"
