@@ -15,6 +15,7 @@
 #include "browser/browser.hpp"
 #include "calc/calc.hpp"
 #include "help/help.hpp"
+#include "regex/regex.hpp"
 #include "history/history.hpp"
 #include "recent/recent.hpp"
 #include "links/links.hpp"
@@ -82,6 +83,9 @@ int main(int, char** argv) {
     bool show_help = false;
     state->operations["show_help"] = [&show_help](const std::string&, int) { show_help = true; };
 
+    bool show_regex = false;
+    state->operations["show_regex"] = [&show_regex](const std::string&, int) { show_regex = true; };
+
     bool show_search = false;
     state->operations["search_start"] = [&show_search](const std::string&, int) { show_search = true; };
 
@@ -134,6 +138,12 @@ int main(int, char** argv) {
     if (!fs::exists(config_path))
     {
         config_path = "commands.conf";
+    }
+
+    fs::path regex_path = fs::path(argv[0]).parent_path() / "regex.conf";
+    if (!fs::exists(regex_path))
+    {
+        regex_path = "regex.conf";
     }
     if (!scribbolyth::config::LoadConfig(config_path.string(), state))
     {
@@ -264,6 +274,7 @@ int main(int, char** argv) {
     }, &active_child);
 
     auto help_comp = scribbolyth::help::MakeHelpDialog(state, config_path.string(), &show_help);
+    auto regex_comp = scribbolyth::regex::MakeRegexDialog(state, regex_path.string(), &show_regex);
     auto search_comp = scribbolyth::search::MakeSearchDialog(state, &show_search);
     auto link_picker_comp = scribbolyth::search::MakeSearchDialog(state, &show_link_picker, true);
     auto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);
@@ -275,6 +286,7 @@ int main(int, char** argv) {
     auto browser_comp = scribbolyth::browser::MakeFileBrowserDialog(state, &show_file_browser);
     auto modals = {
         std::tuple(help_comp,        &show_help),
+        std::tuple(regex_comp,       &show_regex),
         std::tuple(search_comp,      &show_search),
         std::tuple(link_picker_comp, &show_link_picker),
         std::tuple(bookmarks_comp,   &show_bookmarks),
