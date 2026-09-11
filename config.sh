@@ -12,6 +12,7 @@ SOURCES=(
     "src/op/op.cpp"
     "src/config/config.cpp"
     "src/io/serialize.cpp"
+    "src/text/text.cpp"
     "src/html/convert.cpp"
     "src/help/help.cpp"
     "src/regex/regex.cpp"
