@@ -196,7 +196,7 @@ namespace scribbolyth::regex
                                     ftxui::separator(),
                                     ftxui::text(PadRight(footer, row_width)) | ftxui::dim,
                                 })) |
-                   ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |
+                   ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 220) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
         }
 
