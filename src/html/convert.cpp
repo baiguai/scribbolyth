@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "../io/serialize.hpp"
+#include "../text/text.hpp"
 
 namespace scribbolyth::html
 {
@@ -582,6 +583,19 @@ namespace scribbolyth::html
             }
         }
 
+        // Convert typographic punctuation in the imported titles and note text
+        // to plain ASCII, mirroring the paste sanitizer, so nothing that the
+        // terminal cannot render ends up in the document.
+        void AsciiPunctuationInNode(TreeNode& node)
+        {
+            node.name = scribbolyth::text::ToAsciiPunctuation(node.name);
+            node.text = scribbolyth::text::ToAsciiPunctuation(node.text);
+            for (TreeNode& child : node.children)
+            {
+                AsciiPunctuationInNode(child);
+            }
+        }
+
         // Locate a `let <keyword> = <value>;` script statement and return the
         // byte range [start, end) covering the whole statement including the
         // trailing ';'. The value may be a nested '{...}'/'[...]' literal,
@@ -704,6 +718,7 @@ namespace scribbolyth::html
         for (TreeNode& node : result)
         {
             ExpandTabsInNode(node);
+            AsciiPunctuationInNode(node);
         }
 
         if (bookmarks)
