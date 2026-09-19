@@ -43,10 +43,11 @@ namespace scribbolyth::search
 
     // Create a new node named "Search results: <query>" whose body holds one
     // `_Title_` link per matching node (entries with no node pointer are
-    // skipped). The node is inserted as a sibling below the tree selection
-    // through the "new_node" op and becomes the active node. Returns the
-    // created node, or nullptr on failure (e.g. no matches to link).
-    // `status` receives a short user-facing message.
+    // skipped). The node is created like a normal new child: as the first
+    // child of the tree selection when one is selected, otherwise as a root
+    // node, and becomes the active node. Returns the created node, or nullptr
+    // on failure (e.g. no matches to link). `status` receives a short
+    // user-facing message.
     scribbolyth::treeview::TreeNode* CreateSearchResults(
         std::shared_ptr<EditorState> state,
         const std::vector<scribbolyth::treeview::TreeNode*>& nodes,

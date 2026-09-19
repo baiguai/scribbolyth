@@ -50,6 +50,9 @@ try:
     s.require('Created search-node with 2 links', 'status reports the created node')
     s.forbid('Search:', 'Enter closes the dialog', rows=DLG)
     s.require('[+]', 'creating the node marks the document changed')
+    # nothing was selected after opening the file -> the node is a ROOT
+    assert s.find('Search results: vodka')[0][1] == 2, \
+        'with no node selected the results node is created as a root'
 
     # ---- 'i' shows the created node in the editor: one link per match ----
     s.send(b'i')
@@ -67,6 +70,9 @@ try:
     s.require('Created search-node with 2 links', 'lime matches Alpha and Gamma')
     s.forbid('Search:', 'dialog closed after creating', rows=DLG)
     s.forbid('\\ Results', 'dialog window is gone')
+    # the vodka-results node is selected -> the new node is its CHILD
+    assert s.find('Search results: lime')[0][1] == 4, \
+        'with a node selected the results node is created as its child'
 
     # the editor now shows the newly created node's links
     s.require('_Gamma_', 'editor shows the lime results node linking Gamma')
@@ -97,6 +103,9 @@ try:
     d.require('Created search-node with 1 link', 'only Alpha matched')
     d.forbid('Search:', 'second Enter creates the node and closes', rows=DLG)
     d.require('[+]', 'document marked changed')
+    # nothing was selected => the node lands at the root level
+    assert d.find('Search results: vodka lime')[0][1] == 2, \
+        'with no node selected the results node is created as a root'
 
 finally:
     d.quit()

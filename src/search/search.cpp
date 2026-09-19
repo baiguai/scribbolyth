@@ -251,7 +251,9 @@ namespace scribbolyth::search
         // The node title carries the (prefix-stripped) search string so it
         // reads as a search-results node: e.g. "Search results: vodka lime".
         const std::string title = "Search results: " + ParseFilter(raw_query).query;
-        const auto it = state->operations.find("new_node");
+        // Created like a normal new child ('A'): under the selected node when
+        // one is selected, expanding it, or as a root node otherwise.
+        const auto it = state->operations.find("new_child");
         if (it == state->operations.end())
         {
             if (status) *status = "Cannot create a node now";
