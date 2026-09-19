@@ -210,6 +210,69 @@ namespace scribbolyth::search
         return out;
     }
 
+    std::vector<treeview::TreeNode*> FindAllMatches(std::shared_ptr<EditorState> state,
+                                                    const std::string& raw_query)
+    {
+        std::vector<treeview::TreeNode*> out;
+        std::vector<std::pair<treeview::TreeNode*, int>> all;
+        if (state->collect_all_nodes)
+        {
+            all = state->collect_all_nodes();
+        }
+        const Filter f = ParseFilter(raw_query);
+        bool regex_error = false;
+        for (const auto& item : all)
+        {
+            if (NodeMatches(*item.first, f, &regex_error))
+            {
+                out.push_back(item.first);
+            }
+        }
+        return out;
+    }
+
+    treeview::TreeNode* CreateSearchResults(std::shared_ptr<EditorState> state,
+                                            const std::vector<treeview::TreeNode*>& nodes,
+                                            const std::string& raw_query,
+                                            std::string* status)
+    {
+        std::string body;
+        for (const treeview::TreeNode* node : nodes)
+        {
+            if (node == nullptr) continue;
+            body += "_" + node->name + "_\n";
+        }
+        if (body.empty())
+        {
+            if (status) *status = "No matches to collect";
+            return nullptr;
+        }
+
+        // The node title carries the (prefix-stripped) search string so it
+        // reads as a search-results node: e.g. "Search results: vodka lime".
+        const std::string title = "Search results: " + ParseFilter(raw_query).query;
+        const auto it = state->operations.find("new_node");
+        if (it == state->operations.end())
+        {
+            if (status) *status = "Cannot create a node now";
+            return nullptr;
+        }
+        it->second(title, 1);
+        if (state->active_node == nullptr)
+        {
+            if (status) *status = "Cannot create a node now";
+            return nullptr;
+        }
+        state->active_node->text = std::move(body);
+        state->changed = true;
+        if (status)
+        {
+            *status = "Created search-node with " + std::to_string(nodes.size())
+                + (nodes.size() == 1 ? " link" : " links");
+        }
+        return state->active_node;
+    }
+
     std::vector<std::pair<int, int>> FindLineMatches(const std::string& line,
                                                      const std::string& raw_query)
     {
@@ -280,10 +343,10 @@ namespace scribbolyth::search
     {
     public:
         SearchDialog(std::shared_ptr<EditorState> state, bool* show,
-                     bool insert_mode)
+                     DialogMode mode)
             : state_(std::move(state)),
               show_(show),
-              insert_mode_(insert_mode) {}
+              mode_(mode) {}
 
         bool Focusable() const override { return true; }
 
@@ -315,7 +378,20 @@ namespace scribbolyth::search
                 {
                     const int sel = std::min(selection_, static_cast<int>(results_.size()) - 1);
                     treeview::TreeNode* node = results_[static_cast<std::size_t>(sel)].node;
-                    if (insert_mode_)
+                    if (mode_ == DialogMode::CreateResults)
+                    {
+                        // Collect every match (not just the selection) into a
+                        // new node whose title shows the search string.
+                        std::vector<treeview::TreeNode*> matches;
+                        for (const auto& r : results_)
+                        {
+                            if (r.node != nullptr) matches.push_back(r.node);
+                        }
+                        std::string status;
+                        CreateSearchResults(state_, matches, filter_, &status);
+                        state_->status = status;
+                    }
+                    else if (mode_ == DialogMode::InsertLink)
                     {
                         if (state_->insert_text_at_cursor && node != nullptr)
                         {
@@ -402,12 +478,19 @@ namespace scribbolyth::search
 
             const std::string footer =
                 "  " + std::to_string(total == 0 ? 0 : sel + 1) + "/" + std::to_string(total) +
-                (insert_mode_
-                     ? "    Up/Down move  Enter insert _Title_  Esc cancel  ':' = titles only  'r:' = regex  '+:' = all words  '#' = tags  "
-                     : "    Up/Down move  Enter jump  Esc cancel  ':' = titles only  'r:' = regex  '+:' = all words  '#' = tags  ") +
+                (mode_ == DialogMode::CreateResults
+                     ? "    Up/Down move  Enter collect  "
+                     : mode_ == DialogMode::InsertLink
+                           ? "    Up/Down move  Enter insert _Title_  "
+                           : "    Up/Down move  Enter jump  ") +
+                "Esc cancel  ':' = titles only  'r:' = regex  '+:' = all words  '#' = tags  " +
                 (IsRegexFilter(filter_) ? "  Enter runs r:/+:  " : "");
 
-            return ftxui::window(ftxui::text(insert_mode_ ? " / Insert Link " : " / Search "),
+            return ftxui::window(ftxui::text(mode_ == DialogMode::InsertLink
+                                                 ? " / Insert Link "
+                                                 : mode_ == DialogMode::CreateResults
+                                                       ? " \\ Results "
+                                                       : " / Search "),
                                 ftxui::vbox({
                                     ftxui::hbox({
                                         ftxui::text(" Search: " + filter_ + "_"),
@@ -536,7 +619,7 @@ namespace scribbolyth::search
 
         std::shared_ptr<EditorState> state_;
         bool* show_;
-        bool insert_mode_;
+        DialogMode mode_ = DialogMode::Jump;
         std::string filter_;
         int selection_ = 0;
         int scroll_ = 0;
@@ -550,8 +633,8 @@ namespace scribbolyth::search
     };
 
     ftxui::Component MakeSearchDialog(std::shared_ptr<EditorState> state, bool* show,
-                                      bool insert_mode)
+                                      DialogMode mode)
     {
-        return ftxui::Make<SearchDialog>(std::move(state), show, insert_mode);
+        return ftxui::Make<SearchDialog>(std::move(state), show, mode);
     }
 }

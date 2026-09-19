@@ -14,6 +14,15 @@ namespace scribbolyth::treeview
 
 namespace scribbolyth::search
 {
+    // How the search dialog's Enter key behaves.
+    enum class DialogMode
+    {
+        Jump,          // Enter jumps to the selected node.
+        InsertLink,    // Enter inserts a _Title_ link at the editor cursor.
+        CreateResults, // Enter creates a new "Search results: <query>" node
+                       // holding one _Title_ link per matching node.
+    };
+
     // Find matches for `raw_query` inside the currently active node only
     // (the same prefix rules as the search dialog apply: a leading "r:" makes
     // it a case-insensitive regex, a leading ":" restricts it to node titles,
@@ -23,23 +32,33 @@ namespace scribbolyth::search
     std::vector<scribbolyth::treeview::TreeNode*> FindMatches(
         std::shared_ptr<EditorState> state, const std::string& raw_query);
 
-    // Ranges [lo, hi) of every occurrence of `raw_query` inside `line`, using
-    // the same prefix rules as FindMatches (a leading "r:" makes it a
-    // case-insensitive regex, a leading ":" restricts it to titles, so a
-    // title-only query never matches content). Empty for no matches, an empty
-    // query, or an invalid regex. Used to highlight matches in the editor text.
     std::vector<std::pair<int, int>> FindLineMatches(const std::string& line,
                                                      const std::string& raw_query);
 
+    // Document-wide search: every node whose title or content satisfies
+    // `raw_query`, in document order, using the same prefix rules as
+    // FindMatches ("r:" regex, "+:" all words, ":" titles only).
+    std::vector<scribbolyth::treeview::TreeNode*> FindAllMatches(
+        std::shared_ptr<EditorState> state, const std::string& raw_query);
+
+    // Create a new node named "Search results: <query>" whose body holds one
+    // `_Title_` link per matching node (entries with no node pointer are
+    // skipped). The node is inserted as a sibling below the tree selection
+    // through the "new_node" op and becomes the active node. Returns the
+    // created node, or nullptr on failure (e.g. no matches to link).
+    // `status` receives a short user-facing message.
+    scribbolyth::treeview::TreeNode* CreateSearchResults(
+        std::shared_ptr<EditorState> state,
+        const std::vector<scribbolyth::treeview::TreeNode*>& nodes,
+        const std::string& raw_query, std::string* status = nullptr);
+
     // Build the node search/filter dialog. While *show is true it consumes
     // every event, so no app key bindings fire. ArrowUp/ArrowDown move the
-    // selection, Enter jumps to the selected node (revealing it in the tree),
-    // Escape cancels. A leading "r:" makes the query a case-insensitive regex;
-    // otherwise it is a case-insensitive substring match against node titles
-    // and content. The dialog keeps a fixed size regardless of result count.
-    // With `insert_mode` set, Enter instead inserts a `_Title_` node link to
-    // the selected node into the currently active node at the editor cursor
-    // (via state->insert_text_at_cursor) and closes.
+    // selection, Enter behaves per `mode` and closes (creating a results node
+    // also collects it), Escape cancels. A leading "r:" makes the query a
+    // case-insensitive regex, "+:" requires every word and ":" restricts the
+    // match to node titles. The dialog keeps a fixed size regardless of
+    // result count.
     ftxui::Component MakeSearchDialog(std::shared_ptr<EditorState> state, bool* show,
-                                      bool insert_mode = false);
+                                      DialogMode mode = DialogMode::Jump);
 }
