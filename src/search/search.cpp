@@ -301,8 +301,8 @@ namespace scribbolyth::search
             const std::string footer =
                 "  " + std::to_string(total == 0 ? 0 : sel + 1) + "/" + std::to_string(total) +
                 (insert_mode_
-                     ? "    Up/Down move  Enter insert _Title_  Esc cancel  ':x' = titles only  'r:' = regex  '#' = tags  "
-                     : "    Up/Down move  Enter jump  Esc cancel  ':x' = titles only  'r:' = regex  '#' = tags  ");
+                     ? "    Up/Down move  Enter insert _Title_  Esc cancel  ':' = titles only  'r:' = regex  '#' = tags  "
+                     : "    Up/Down move  Enter jump  Esc cancel  ':' = titles only  'r:' = regex  '#' = tags  ");
 
             return ftxui::window(ftxui::text(insert_mode_ ? " / Insert Link " : " / Search "),
                                 ftxui::vbox({
