@@ -89,6 +89,10 @@ int main(int, char** argv) {
     bool show_search = false;
     state->operations["search_start"] = [&show_search](const std::string&, int) { show_search = true; };
 
+    bool show_search_results = false;
+    state->operations["search_results_start"] =
+        [&show_search_results](const std::string&, int) { show_search_results = true; };
+
     bool show_link_picker = false;
     state->operations["insert_link"] = [&show_link_picker](const std::string&, int) { show_link_picker = true; };
 
@@ -276,7 +280,8 @@ int main(int, char** argv) {
     auto help_comp = scribbolyth::help::MakeHelpDialog(state, config_path.string(), &show_help);
     auto regex_comp = scribbolyth::regex::MakeRegexDialog(state, regex_path.string(), &show_regex);
     auto search_comp = scribbolyth::search::MakeSearchDialog(state, &show_search);
-    auto link_picker_comp = scribbolyth::search::MakeSearchDialog(state, &show_link_picker, true);
+    auto link_picker_comp = scribbolyth::search::MakeSearchDialog(state, &show_link_picker, scribbolyth::search::DialogMode::InsertLink);
+    auto search_results_comp = scribbolyth::search::MakeSearchDialog(state, &show_search_results, scribbolyth::search::DialogMode::CreateResults);
     auto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);
     auto links_comp = scribbolyth::links::MakeLinksDialog(state, &show_links);
     auto dead_links_comp = scribbolyth::brokenlinks::MakeDeadLinksDialog(state, &show_dead_links);
@@ -288,6 +293,7 @@ int main(int, char** argv) {
         std::tuple(help_comp,        &show_help),
         std::tuple(regex_comp,       &show_regex),
         std::tuple(search_comp,      &show_search),
+        std::tuple(search_results_comp, &show_search_results),
         std::tuple(link_picker_comp, &show_link_picker),
         std::tuple(bookmarks_comp,   &show_bookmarks),
         std::tuple(links_comp,       &show_links),
