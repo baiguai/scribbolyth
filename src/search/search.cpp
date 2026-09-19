@@ -4,6 +4,7 @@
 #include <cctype>
 #include <map>
 #include <regex>
+#include <sstream>
 #include <utility>
 #include <vector>
 
@@ -30,6 +31,39 @@ namespace scribbolyth::search
             return s + std::string(width - s.size(), ' ');
         }
 
+        // Escape the ECMAScript metacharacters so an "all words" search term
+        // keeps its literal meaning inside the generated regex.
+        std::string EscapeRegex(const std::string& s)
+        {
+            static const std::string special = "\\^$.|?*+()[]{}";
+            std::string out;
+            out.reserve(s.size());
+            for (const char c : s)
+            {
+                if (special.find(c) != std::string::npos) out += '\\';
+                out += c;
+            }
+            return out;
+        }
+
+        // Builds `(?=[\s\S]*\bw1\b)(?=[\s\S]*\bw2\b)...(?=[\s\S]*\bwn\b)[\s\S]*`
+        // from the whitespace-separated words of `query`, requiring every word
+        // to be present anywhere in the text (any order, any line). `[\s\S]`
+        // is the ECMAScript stand-in for DOTALL, so words on different lines
+        // still satisfy the lookaheads.
+        std::string AllWordsRegex(const std::string& query)
+        {
+            std::ostringstream re;
+            std::istringstream words(query);
+            std::string word;
+            while (words >> word)
+            {
+                re << "(?=[\\s\\S]*\\b" << EscapeRegex(word) << "\\b)";
+            }
+            re << "[\\s\\S]*";
+            return re.str();
+        }
+
         std::string IndentName(int depth, const std::string& name)
         {
             return std::string(static_cast<std::size_t>(depth) * 2, ' ') + name;
@@ -42,11 +76,13 @@ namespace scribbolyth::search
         };
 
         // Parsed search query: a leading "r:" selects case-insensitive regex
-        // matching and a leading ":" restricts the match to node titles.
+        // matching, a leading ":" restricts the match to node titles and a
+        // leading "+:" requires every word to appear (in any order).
         struct Filter
         {
             std::string query;
             bool is_regex = false;
+            bool all_words = false;
             bool title_only = false;
         };
 
@@ -54,6 +90,11 @@ namespace scribbolyth::search
         {
             Filter f;
             f.query = raw;
+            if (f.query.size() >= 2 && f.query[0] == '+' && f.query[1] == ':')
+            {
+                f.all_words = true;
+                f.query = f.query.substr(2);
+            }
             if (f.query.size() >= 2 && f.query[0] == 'r' && f.query[1] == ':')
             {
                 f.is_regex = true;
@@ -79,6 +120,20 @@ namespace scribbolyth::search
                 try
                 {
                     const std::regex re(f.query, std::regex::icase | std::regex_constants::multiline);
+                    return std::regex_search(node.name, re)
+                        || (!f.title_only && std::regex_search(node.text, re));
+                }
+                catch (const std::regex_error&)
+                {
+                    if (regex_error) *regex_error = true;
+                    return false;
+                }
+            }
+            if (f.all_words)
+            {
+                try
+                {
+                    const std::regex re(AllWordsRegex(f.query), std::regex::icase);
                     return std::regex_search(node.name, re)
                         || (!f.title_only && std::regex_search(node.text, re));
                 }
@@ -152,6 +207,34 @@ namespace scribbolyth::search
         if (f.title_only || f.query.empty()) return {};
 
         std::vector<std::pair<int, int>> out;
+        if (f.all_words)
+        {
+            // A node matches when its words appear anywhere across its lines,
+            // so at the line level each word occurrence is highlighted and
+            // each becomes a target for n/N navigation.
+            try
+            {
+                std::istringstream words(f.query);
+                std::string word;
+                while (words >> word)
+                {
+                    const std::regex re("\\b" + EscapeRegex(word) + "\\b",
+                                        std::regex::icase);
+                    for (std::sregex_iterator it(line.begin(), line.end(), re), end;
+                         it != end; ++it)
+                    {
+                        out.emplace_back(static_cast<int>(it->position()),
+                                         static_cast<int>(it->position() + it->length()));
+                    }
+                }
+                std::sort(out.begin(), out.end());
+            }
+            catch (const std::regex_error&)
+            {
+                return {};
+            }
+            return out;
+        }
         if (f.is_regex)
         {
             try
@@ -301,8 +384,8 @@ namespace scribbolyth::search
             const std::string footer =
                 "  " + std::to_string(total == 0 ? 0 : sel + 1) + "/" + std::to_string(total) +
                 (insert_mode_
-                     ? "    Up/Down move  Enter insert _Title_  Esc cancel  ':' = titles only  'r:' = regex  '#' = tags  "
-                     : "    Up/Down move  Enter jump  Esc cancel  ':' = titles only  'r:' = regex  '#' = tags  ");
+                     ? "    Up/Down move  Enter insert _Title_  Esc cancel  ':' = titles only  'r:' = regex  '+:' = all words  '#' = tags  "
+                     : "    Up/Down move  Enter jump  Esc cancel  ':' = titles only  'r:' = regex  '+:' = all words  '#' = tags  ");
 
             return ftxui::window(ftxui::text(insert_mode_ ? " / Insert Link " : " / Search "),
                                 ftxui::vbox({
