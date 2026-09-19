@@ -108,6 +108,16 @@ namespace scribbolyth::search
             return f;
         }
 
+        // Whether the filter runs a regex-based match ("r:" regex or
+        // "+:" all-words). These are deferred until Return is pressed so
+        // that typing stays responsive instead of re-scanning the tree
+        // (and re-compiling a regex) on every keystroke.
+        bool IsRegexFilter(const std::string& raw)
+        {
+            const Filter f = ParseFilter(raw);
+            return f.is_regex || f.all_words;
+        }
+
         // Case-insensitive match of a node against a parsed filter. An empty
         // query matches everything. When `query` is a regex that fails to
         // compile, returns false and sets `*regex_error`.
@@ -294,6 +304,13 @@ namespace scribbolyth::search
                     Invalidate();
                     return true;
                 }
+                if (IsRegexFilter(filter_) && filter_ != searched_filter_)
+                {
+                    // First Enter runs the deferred search and shows the
+                    // results; a second Enter (or arrow keys + Enter) selects.
+                    Recompute(/*force=*/true);
+                    return true;
+                }
                 if (!results_.empty())
                 {
                     const int sel = std::min(selection_, static_cast<int>(results_.size()) - 1);
@@ -364,6 +381,8 @@ namespace scribbolyth::search
                 std::string msg;
                 if (regex_error_) msg = "  Invalid regex";
                 else if (filter_.empty()) msg = "  No nodes in the document";
+                else if (IsRegexFilter(filter_) && filter_ != searched_filter_)
+                    msg = "  Enter to search";
                 else msg = "  No matches";
                 rows.push_back(ftxui::text(PadRight(msg, row_width)) | ftxui::dim);
             }
@@ -385,7 +404,8 @@ namespace scribbolyth::search
                 "  " + std::to_string(total == 0 ? 0 : sel + 1) + "/" + std::to_string(total) +
                 (insert_mode_
                      ? "    Up/Down move  Enter insert _Title_  Esc cancel  ':' = titles only  'r:' = regex  '+:' = all words  '#' = tags  "
-                     : "    Up/Down move  Enter jump  Esc cancel  ':' = titles only  'r:' = regex  '+:' = all words  '#' = tags  ");
+                     : "    Up/Down move  Enter jump  Esc cancel  ':' = titles only  'r:' = regex  '+:' = all words  '#' = tags  ") +
+                (IsRegexFilter(filter_) ? "  Enter runs r:/+:  " : "");
 
             return ftxui::window(ftxui::text(insert_mode_ ? " / Insert Link " : " / Search "),
                                 ftxui::vbox({
@@ -414,6 +434,7 @@ namespace scribbolyth::search
         {
             *show_ = false;
             filter_.clear();
+            searched_filter_.clear();
             selection_ = 0;
             scroll_ = 0;
             regex_error_ = false;
@@ -428,7 +449,7 @@ namespace scribbolyth::search
             selection_ = std::max(0, std::min(total - 1, selection_ + dir));
         }
 
-        void Recompute()
+        void Recompute(bool force = false)
         {
             results_.clear();
             regex_error_ = false;
@@ -451,6 +472,12 @@ namespace scribbolyth::search
             {
                 RecomputeTags(all);
             }
+            else if (!force && IsRegexFilter(filter_))
+            {
+                // Deferred: don't scan the tree until the user presses
+                // Return; just show a hint.
+                searched_filter_.clear();
+            }
             else
             {
                 const Filter f = ParseFilter(filter_);
@@ -463,6 +490,7 @@ namespace scribbolyth::search
                     }
                 }
                 if (regex_error) regex_error_ = true;
+                searched_filter_ = filter_;
             }
 
             selection_ = 0;
@@ -516,6 +544,7 @@ namespace scribbolyth::search
         bool results_valid_ = false;
         bool regex_error_ = false;
         bool tag_phase_ = false;
+        std::string searched_filter_;
         std::vector<Result> results_;
         static constexpr int kVisibleRows = 18;
     };

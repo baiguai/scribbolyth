@@ -134,14 +134,29 @@ try:
     d.require('/ Search', 'search dialog should open')
     d.send(b'+:pyramid sphinx')
     d.require('Search: +:pyramid sphinx_', 'filter should show the +: query')
-    d.require('Alpha', 'Alpha holds pyramid and sphinx')
-    d.require('Beta', 'Beta holds pyramid and sphinx')
-    d.forbid('Gamma', 'Gamma has no sphinx', rows=range(3, 26))
+    d.require('Enter to search', 'regex/all-words filters defer until Enter')
+    d.forbid('Alpha', 'results must not appear before Enter', rows=range(3, 26))
 
     d.send(b'\x7f' * 7)  # '+:pyramid sphinx' -> '+:pyramid'
     d.send(b' cat')       # '+:pyramid cat'
     d.require('Search: +:pyramid cat_', 'filter should show +:pyramid cat')
+    d.require('Enter to search', 'still deferred while typing')
+    d.send(b'\r')
+    d.require('Search: +:pyramid cat_', 'dialog stays open on no match')
     d.require('No matches', 'no node holds both pyramid and cat')
+
+    # Enter runs the deferred search and lists the matching notes
+    d.send(b'\x7f' * 4)  # '+:pyramid cat' -> '+:pyramid'
+    d.send(b' sphinx')
+    d.require('Search: +:pyramid sphinx_', 'rebuilt the matching query')
+    d.require('Enter to search', 'deferred until Enter')
+    d.send(b'\r')
+    d.require('Alpha', 'Alpha holds pyramid and sphinx')
+    d.require('Beta', 'Beta holds pyramid and sphinx')
+    d.forbid('Gamma', 'Gamma has no sphinx', rows=range(3, 26))
+    d.send(b'\r')
+    d.forbid('Search:', 'Enter on a note should close the dialog',
+             rows=range(3, 26))
     print('ok: the tree dialog applies +: across the whole document')
 finally:
     d.quit()
