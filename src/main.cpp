@@ -30,8 +30,27 @@
 
 using namespace ftxui;
 
+/*[/Introduction]
+Introduction
+Developer documentation for Scribbolyth.
+*/
+
+//[Introduction/Key Codes]
+
+//!_coderoot=/Source Code
+
+/*! main
+main
+Scribbolyth's application entry point.
+*/
 int main(int, char** argv) {
     auto state = std::make_shared<EditorState>();
+
+    /*+ Declarations:
+    * state
+        The application's persistent state.
+
+    */
 
     auto editor_comp = scribbolyth::editor::MakeEditor(state);
     auto treeview_comp = scribbolyth::treeview::MakeTreeView(state);
@@ -56,6 +75,14 @@ int main(int, char** argv) {
     }
 #endif
 
+    /*! quit
+    quit
+    */
+    /*+ quit - If unsaved, stop the exit.
+    */
+    /*+ quit_force - Exit even if there are no unsaved changes.
+    */
+    /*!*/
     state->operations["quit"] = [state, quit](const std::string&, int)
     {
         if (state->changed)
@@ -68,6 +95,9 @@ int main(int, char** argv) {
     state->operations["quit_force"] = [quit](const std::string&, int) { quit(); };
     state->commands["qa"] = "quit";
     state->commands["qa!"] = "quit_force";
+
+    /*+ calc - Performs simple calculator functions.
+    */
 
     // :calc evaluates an arithmetic expression and leaves the result in the
     // command field so it reads like a calculator.
@@ -84,37 +114,61 @@ int main(int, char** argv) {
         state->command_keep_open = true;
     };
 
+    /*+ show_help - Shows the help dialog.
+    */
     bool show_help = false;
     state->operations["show_help"] = [&show_help](const std::string&, int) { show_help = true; };
 
+    /*+ show_regex - Shows the REGEX dialog.
+    */
     bool show_regex = false;
     state->operations["show_regex"] = [&show_regex](const std::string&, int) { show_regex = true; };
 
+    /*+ search_start - Shows the search dialog.
+    */
     bool show_search = false;
     state->operations["search_start"] = [&show_search](const std::string&, int) { show_search = true; };
 
+    /*+ search_results_start - Shows the search results node dialog.
+    */
     bool show_search_results = false;
     state->operations["search_results_start"] =
         [&show_search_results](const std::string&, int) { show_search_results = true; };
 
+    /*+ insert_link - Shows the links picker dialog.
+    */
     bool show_link_picker = false;
     state->operations["insert_link"] = [&show_link_picker](const std::string&, int) { show_link_picker = true; };
 
+    /*+ bookmarks - Shows the bookmarks dialog.
+    */
     bool show_bookmarks = false;
     state->operations["bookmarks"] = [&show_bookmarks](const std::string&, int) { show_bookmarks = true; };
     state->commands["bookmarks"] = "bookmarks";
 
+    /*+ links - Shows the links dialog.
+    */
     bool show_links = false;
     state->operations["links"] = [&show_links](const std::string&, int) { show_links = true; };
     state->commands["links"] = "links";
 
+    /*+ show_broke_links - Shows the broken links dialog.
+    */
     bool show_dead_links = false;
     state->operations["show_broke_links"] = [&show_dead_links](const std::string&, int) { show_dead_links = true; };
     state->commands["show_broke_links"] = "show_broke_links";
 
+    /*+ history - Shows the history dialog.
+    */
     bool show_history = false;
     state->operations["history"] = [&show_history](const std::string&, int) { show_history = true; };
 
+    /*! show_recent
+    show_recent - Shows the recently opened files.
+    */
+    /*+ removed - Remove dead recent paths.
+    */
+    /*!*/
     bool show_recent = false;
     auto recent_force = std::make_shared<bool>(false);
     const auto open_recent = [&show_recent, &state, &recent_force](bool force)
@@ -324,5 +378,10 @@ int main(int, char** argv) {
     state->focus_editor = nullptr;
     state->focus_treeview = nullptr;
 
+    /*!*/
     return 0;
 }
+
+/*[/Contact]
+Contact
+*/
