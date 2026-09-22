@@ -12,6 +12,7 @@
 #include <ftxui/dom/elements.hpp>
 
 #include "../editor/editor_state.hpp"
+#include "../history/history.hpp"
 
 namespace scribbolyth::search
 {
@@ -251,6 +252,7 @@ namespace scribbolyth::search
         // The node title carries the (prefix-stripped) search string so it
         // reads as a search-results node: e.g. "Search results: vodka lime".
         const std::string title = "Search results: " + ParseFilter(raw_query).query;
+
         // Created like a normal new child ('A'): under the selected node when
         // one is selected, expanding it, or as a root node otherwise.
         const auto it = state->operations.find("new_child");
@@ -265,8 +267,13 @@ namespace scribbolyth::search
             if (status) *status = "Cannot create a node now";
             return nullptr;
         }
+
         state->active_node->text = std::move(body);
         state->changed = true;
+        
+        // Ensure the new search results node is in History
+        scribbolyth::history::Record(*state, state->active_node->id);
+
         if (status)
         {
             *status = "Created search-node with " + std::to_string(nodes.size())

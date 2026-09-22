@@ -1,15 +1,19 @@
-#include "main.hpp"
-
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
 #include <memory>
+#include <ftxui/component/screen_interactive.hpp>
+#include <ftxui/component/component.hpp>
+#include <ftxui/dom/elements.hpp>
 
 #ifndef _WIN32
 #include <termios.h>
 #include <unistd.h>
 #endif
 
+#include "editor/editor_state.hpp"
+#include "editor/editor.hpp"
+#include "treeview/treeview.hpp"
 #include "config/config.hpp"
 #include "bookmarks/bookmarks.hpp"
 #include "browser/browser.hpp"
