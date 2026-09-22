@@ -34,6 +34,8 @@ namespace scribbolyth::recent
 
         bool Focusable() const override { return true; }
 
+        bool pending_g_ = false;
+
         bool OnEvent(ftxui::Event event) override
         {
             PickupForce();
@@ -57,6 +59,23 @@ namespace scribbolyth::recent
                     || (event.is_character() && event.character() == "k"))
             {
                 MoveSelection(-1);
+                return true;
+            }
+            if (event.is_character() && event.character() == "g")
+            {
+                if (pending_g_)
+                {
+                    pending_g_ = false;
+                    MoveToStart();
+                    return true;
+                }
+                pending_g_ = true;
+                return true;
+            }
+            if ((event.is_character() && event.character() == "G"))
+            {
+                pending_g_ = false;
+                MoveToEnd();
                 return true;
             }
             if (event.is_character() && event.character() == "D")
@@ -171,6 +190,18 @@ namespace scribbolyth::recent
             {
                 it->second(chosen, 1);
             }
+        }
+
+        void MoveToStart()
+        {
+            selection_ = 0;
+        }
+
+        void MoveToEnd()
+        {
+            const auto& recent = state_->recent_files;
+            if (recent.empty()) return;
+            selection_ = static_cast<int>(recent.size()) -1;
         }
 
         void MoveSelection(int dir)
