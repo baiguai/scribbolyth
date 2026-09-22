@@ -74,5 +74,14 @@ Testing/
 __pycache__/
 *.pyc
 
+# Docs generation virtualenv
+docsgen/.venv/
+
+# Docs generation reference copy (contains saved personal notes; kept local only)
+docsgen/example.html
+
+# opencode session data
+sessions/
+
 *.aider.*
 *coder.db

@@ -1,0 +1,407 @@
+#!/usr/bin/env python3
+"""Harvest Scribbolyth's doc comments and inject them into devnotes.html.
+
+Comment grammar (all harvested from files under src/):
+
+    //!_key=value          config marker. Recognized keys:
+                             coderoot=/path   where source-code nodes live
+                                              (default: /src)
+    //[/path]              folder-only node at the (absolute) note path.
+    /*[/path] <body> */    node at the (absolute) note path with content;
+                           the last path segment is its title.
+    /*! <body> */          source-code doc block. Opens a *region* that stays
+                           open until a /*!*/ marker (the marker is dropped
+                           from the body). Its title is the first content
+                           line.  Doc and sub blocks found inside the open
+                           region nest under it.
+    /*+ <body> */          sub-note. A child of the innermost open doc
+                           region in the same file. Ignored when no doc
+                           region is open.
+    /*!*/                  Closes the innermost open doc region.  Creates
+                           no node of its own.
+
+Every file that contains a /*! */ doc block produces a *folder* node named
+after the file (e.g. editor/editor.cpp -> editor > editor.cpp), hanging off
+the coderoot node.
+
+The output HTML is a full rebuild: config/scribboleth.html is copied fresh,
+its <title> rewritten, and the harvested tree injected into `let treeData`.
+"""
+
+import hashlib
+import json
+import os
+import re
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TEMPLATE = os.path.join(ROOT, "config", "scribboleth.html")
+OUTPUT = os.path.join(ROOT, "developers", "devnotes.html")
+SRC_ROOT = os.path.join(ROOT, "src")
+TITLE = "Scribbolyth Developer Notes"
+
+EXTENSIONS = (".cpp", ".hpp", ".h", ".cc", ".cxx", ".c")
+
+
+# ----------------------------------------------------------------------
+# Comment scanning
+# ----------------------------------------------------------------------
+
+def scan_file(path):
+    """Return source comments as (kind, body, line) in source order.
+
+    kind is "line" for // comments or "block" for /* ... */ comments.
+    Body excludes the // or /* */ delimiters.  Strings and char literals
+    are skipped so // inside them is not mistaken for a comment.
+    """
+    with open(path, "r", encoding="utf-8", errors="replace") as f:
+        src = f.read()
+
+    items = []
+    i, n = 0, len(src)
+    line = 1
+    while i < n:
+        c = src[i]
+        if c in "\"'":
+            quote = c
+            line_start = line
+            i += 1
+            while i < n:
+                if src[i] == "\\":
+                    line += src.count("\n", i, i + 2)
+                    i += 2
+                    continue
+                if src[i] == quote:
+                    i += 1
+                    break
+                if src[i] == "\n":
+                    line += 1
+                i += 1
+            continue
+        if src.startswith("//", i):
+            end = src.find("\n", i)
+            if end == -1:
+                end = n
+            items.append(("line", src[i + 2:end], line))
+            i = end
+            continue
+        if src.startswith("/*", i):
+            start_line = line
+            end = src.find("*/", i + 2)
+            if end == -1:
+                items.append(("block", src[i + 2:], start_line))
+                line += src.count("\n", i, n)
+                i = n
+            else:
+                items.append(("block", src[i + 2:end], start_line))
+                line += src.count("\n", i, end + 2)
+                i = end + 2
+            continue
+        if c == "\n":
+            line += 1
+        i += 1
+    return items
+
+
+def classify(items):
+    """Turn raw comments into structured actions.
+
+    Actions are dicts with a "kind" and the source "line":
+        config {key, value}            from //!_key=value
+        folder {path}                  from //[path]
+        manual {path, body}            from /*[path] body*/
+        doc    {body}                  from /*! body*/  (opens a region)
+        docclose                       from /*!*/        (closes the region)
+        sub    {body}                  from /*+ body*/
+    Doc/sub nesting is resolved by the builder using a region stack.
+    """
+    actions = []
+    doc_open = None
+    for kind, body, line in items:
+        if kind == "line":
+            text = body.strip()
+            m = re.match(r"!_\s*([A-Za-z0-9_]+)\s*=\s*(.*)$", text)
+            if m:
+                actions.append({"kind": "config", "key": m.group(1),
+                                "value": m.group(2).strip(), "line": line})
+                continue
+            if text.startswith("["):
+                end = text.find("]")
+                if end != -1:
+                    actions.append({"kind": "folder",
+                                    "path": text[1:end].strip(),
+                                    "line": line})
+                continue
+            continue
+
+        # block comment
+        if body.startswith("!"):
+            text = strip_marker(body[1:], "/*!")
+            if text.strip():
+                actions.append({"kind": "doc", "body": text, "line": line})
+            else:
+                actions.append({"kind": "docclose", "line": line})
+            continue
+        if body.startswith("+"):
+            text = strip_marker(body[1:], "/*+")
+            if text.strip():
+                actions.append({"kind": "sub", "body": text, "line": line})
+            continue
+        manual = body.lstrip()
+        if manual.startswith("["):
+            end = manual.find("]")
+            if end != -1:
+                actions.append({"kind": "manual",
+                                "path": manual[1:end].strip(),
+                                "body": manual[end + 1:],
+                                "line": line})
+                continue
+    return actions
+
+
+# ----------------------------------------------------------------------
+# Content shaping
+# ----------------------------------------------------------------------
+
+def strip_marker(text, marker):
+    """Drop an explicit end marker (/*!*/ or /*+*/ borders).
+
+    In C the whole block is terminated by the final */, so the body of
+    `/*! ... /*!*/` is `! ... /*!` — the trailing /*! is just the explicit
+    "stop harvesting here" token and must not become content.
+    """
+    trimmed = text.rstrip()
+    if trimmed.endswith(marker):
+        return trimmed[:-len(marker)]
+    return text
+
+def deindent(raw):
+    """Strip the first content line's indentation from every line.
+
+    Leading/trailing blank lines are dropped and trailing spaces trimmed,
+    so extra indentation used for readability in future lines is preserved.
+    """
+    lines = raw.split("\n")
+    i = 0
+    while i < len(lines) and lines[i].strip() == "":
+        i += 1
+    lines = lines[i:]
+    while lines and lines[-1].strip() == "":
+        lines.pop()
+    if not lines:
+        return ""
+    base = lines[0]
+    n = len(base) - len(base.lstrip(" \t"))
+    out = []
+    for ln in lines:
+        k = 0
+        while k < n and k < len(ln) and ln[k] in " \t":
+            k += 1
+        out.append(ln[k:])
+    return "\n".join(out)
+
+
+def first_line(text):
+    """First non-empty, trimmed line (mirrors the app's title sync)."""
+    for line in text.split("\n"):
+        t = line.strip()
+        if t:
+            return t[:80]
+    return ""
+
+
+# ----------------------------------------------------------------------
+# Tree
+# ----------------------------------------------------------------------
+
+class Tree:
+    def __init__(self):
+        self.children = []
+        self.by_path = {}
+        self._ids = {}
+
+    def _node_id(self, key):
+        h = hashlib.sha1(("scribbolyth:" + key).encode("utf-8")).hexdigest()
+        while h[:8] in self._ids and self._ids[h[:8]] != key:
+            h = hashlib.sha1((h + "x").encode("utf-8")).hexdigest()
+        self._ids[h[:8]] = key
+        return h[:8]
+
+    def ensure(self, parts):
+        """Return the node for an absolute '/' path, creating folders as
+        needed.  parts is a tuple of node titles."""
+        node = None
+        for i in range(len(parts)):
+            key = tuple(parts[:i + 1])
+            if key not in self.by_path:
+                n = {"id": self._node_id("/" + "/".join(key)),
+                     "title": parts[i],
+                     "content": "",
+                     "children": [],
+                     "expanded": False}
+                self.by_path[key] = n
+                if i == 0:
+                    self.children.append(n)
+                else:
+                    self.by_path[key[:-1]]["children"].append(n)
+            node = self.by_path[key]
+        return node
+
+
+def split_path(path):
+    """'/Source Code' -> ('Source Code',);  '' -> ()."""
+    return tuple(s.strip() for s in path.split("/") if s.strip())
+
+
+ANCHOR_RE = re.compile(r"\bint\s+main\s*\(")
+
+
+def find_anchor(src_files):
+    """Return (rel_path, line) of the file containing 'int main', or
+    (None, None) if no source file has an entry point."""
+    for path in src_files:
+        with open(path, "r", encoding="utf-8", errors="replace") as f:
+            src = f.read()
+        m = ANCHOR_RE.search(src)
+        if m:
+            rel = os.path.relpath(path, SRC_ROOT).replace(os.sep, "/")
+            return rel, src.count("\n", 0, m.start()) + 1
+    return None, None
+
+
+def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None):
+    tree = Tree()
+    coderoot_parts = split_path(coderoot)
+    made_source_node = False
+
+    def apply_custom(a):
+        if a["kind"] == "manual":
+            node = tree.ensure(split_path(a["path"]))
+            node["content"] = deindent(a["body"])
+        elif a["kind"] == "folder":
+            tree.ensure(split_path(a["path"]))
+
+    # Phase 1: custom nodes defined before 'int main' (in the anchor file)
+    # lead the tree.  Custom nodes from other files are treated as leading
+    # too, so the coderoot section stays anchored to main.cpp's flow.
+    for rel, actions in file_actions:
+        led_anchor = rel == anchor_rel and anchor_line is not None
+        for a in actions:
+            if a["kind"] not in ("manual", "folder"):
+                continue
+            if led_anchor and a.get("line", 1) >= anchor_line:
+                continue
+            apply_custom(a)
+
+    # Phase 2: source-code nodes (coderoot + per-file folders + doc blocks).
+    # Doc regions nest: a /*! opens a region that stays open until the next
+    # /*!*/ , so /*! and /*+ blocks inside it become children.
+    for rel, actions in file_actions:
+        file_parts = tuple(rel.split("/"))
+        stack = []
+        ev = 0
+        for a in actions:
+            if a["kind"] not in ("doc", "docclose", "sub"):
+                continue
+            ev += 1
+            if a["kind"] == "docclose":
+                if stack:
+                    stack.pop()
+                continue
+            if not made_source_node:
+                tree.ensure(coderoot_parts)
+                made_source_node = True
+            if stack:
+                parent = stack[-1]
+            else:
+                parent = tree.ensure(coderoot_parts + file_parts)
+            content = deindent(a["body"])
+            node = {"id": tree._node_id(rel + "#n" + str(ev)),
+                    "title": first_line(content) or "(untitled)",
+                    "content": content,
+                    "children": [],
+                    "expanded": False}
+            parent["children"].append(node)
+            if a["kind"] == "doc":
+                stack.append(node)
+
+    # Phase 3: custom nodes defined after 'int main' trail the tree
+    if anchor_rel is not None and anchor_line is not None:
+        for rel, actions in file_actions:
+            if rel != anchor_rel:
+                continue
+            for a in actions:
+                if a["kind"] not in ("manual", "folder"):
+                    continue
+                if a.get("line", 1) < anchor_line:
+                    continue
+                apply_custom(a)
+    return tree.children
+
+
+# ----------------------------------------------------------------------
+# Main
+# ----------------------------------------------------------------------
+
+def count_nodes(nodes):
+    total = 0
+    for n in nodes:
+        total += 1 + count_nodes(n.get("children", []))
+    return total
+
+
+def main():
+    if not os.path.isfile(TEMPLATE):
+        print("! Error: template not found: %s" % TEMPLATE, file=sys.stderr)
+        return 1
+
+    file_actions = []
+    coderoot = None
+
+    # walk src/ recursively
+    src_files = []
+    for dirpath, dirnames, filenames in os.walk(SRC_ROOT):
+        dirnames[:] = sorted(d for d in dirnames if not d.startswith("."))
+        for fn in sorted(filenames):
+            if fn.lower().endswith(EXTENSIONS):
+                src_files.append(os.path.join(dirpath, fn))
+    src_files.sort()
+
+    for path in src_files:
+        rel = os.path.relpath(path, SRC_ROOT).replace(os.sep, "/")
+        actions = classify(scan_file(path))
+        file_actions.append((rel, actions))
+        for a in actions:
+            if a["kind"] == "config" and a["key"] == "coderoot":
+                coderoot = a["value"]
+
+    if coderoot is None:
+        coderoot = "/src"
+
+    anchor_rel, anchor_line = find_anchor(src_files)
+    nodes = build_tree(file_actions, coderoot, anchor_rel, anchor_line)
+    payload = json.dumps(nodes, indent=2)
+
+    with open(TEMPLATE, "r", encoding="utf-8") as f:
+        html = f.read()
+
+    html = re.sub(r"<title>.*?</title>", lambda m: "<title>%s</title>" % TITLE,
+                  html, count=1)
+    html = re.sub(r"let\s+treeData\s*=\s*\[[\s\S]*?\];",
+                  lambda m: "let treeData = " + payload + ";",
+                  html, count=1)
+
+    os.makedirs(os.path.dirname(OUTPUT), exist_ok=True)
+    with open(OUTPUT, "w", encoding="utf-8") as f:
+        f.write(html)
+
+    print("Generated: %s" % OUTPUT)
+    print("  title:      %s" % TITLE)
+    print("  coderoot:   %s" % coderoot)
+    print("  files:      %d" % len(src_files))
+    print("  doc nodes:  %d" % count_nodes(nodes))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
