@@ -557,7 +557,7 @@ namespace scribbolyth::editor
                 LoadIfChanged();
                 if (active_ == nullptr)
                 {
-                    return ftxui::text("Select a node to edit") | ftxui::dim | ftxui::center;
+                    return ftxui::text("") | ftxui::dim | ftxui::center;
                 }
                 if (state_->search_reveal_pending)
                 {
