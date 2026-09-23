@@ -4,6 +4,10 @@
 
 namespace scribbolyth::bookmark
 {
+    /*!
+        NewId
+        Generates a new random ID for bookmarks.
+    */
     std::string NewId()
     {
         static const char alphabet[] = "abcdefghijklmnopqrstuvwxyz0123456789";

@@ -35,22 +35,27 @@ Introduction
 Developer documentation for Scribbolyth.
 */
 
-//[Introduction/Key Codes]
+/*[/Introduction/Key Codes]
+Key Codes
+
+...
+*/
+
 
 //!_coderoot=/Source Code
 
-/*! main
-main
-Scribbolyth's application entry point.
+/*!
+    main
+    Scribbolyth's application entry point.
 */
 int main(int, char** argv) {
-    auto state = std::make_shared<EditorState>();
-
     /*+ Declarations:
     * state
         The application's persistent state.
 
     */
+    //>>
+    auto state = std::make_shared<EditorState>();
 
     auto editor_comp = scribbolyth::editor::MakeEditor(state);
     auto treeview_comp = scribbolyth::treeview::MakeTreeView(state);
@@ -65,6 +70,7 @@ int main(int, char** argv) {
 
     auto screen = ScreenInteractive::Fullscreen();
     auto quit = screen.ExitLoopClosure();
+    //<<
 
 #ifndef _WIN32
     struct termios term;
