@@ -17,43 +17,100 @@ namespace scribbolyth::bookmarks
 {
     namespace
     {
+        /*!
+            PadRight
+            This indents the bookmarks to match their depth in the treeview.
+        */
         std::string PadRight(const std::string& s, std::size_t width)
         {
             if (s.size() >= width) return s;
             return s + std::string(width - s.size(), ' ');
         }
+        /*!*/
 
+        /*!
+            Entry Struct
+            * node - treeview::TreeNode*
+            * depth - int
+            * line - int
+
+            Used to create the treeview nodes.
+        */
         struct Entry
         {
             treeview::TreeNode* node = nullptr;
             int depth = 0;
             int line = -1;
         };
+        /*!*/
     }
 
+
+    /*!
+        BookmarksDialog Class
+        (ftxui::ComponentBase)
+    */
     class BookmarksDialog : public ftxui::ComponentBase
     {
     public:
+        /*!
+            Public Members
+        */
+        /*!
+            Constructor
+
+        */
+        //>>
         BookmarksDialog(std::shared_ptr<EditorState> state, bool* show)
             : state_(std::move(state)), show_(show) {}
+        //<<
+        /*!*/
 
+        /*!
+            Variables
+
+            ----
+        */
+        //>>
         bool Focusable() const override { return true; }
 
         bool pending_g_ = false;
+        //<<
+        /*!*/
 
+        /*!
+            Event Call
+
+            OnEvent
+            * event - ftxui::Event
+
+            Returns:
+            bool
+
+
+            This is the ftxui Event override.
+            It handles navigation as well as Escape, Return, and deletes.
+
+
+            Examples
+            ----
+        */
         bool OnEvent(ftxui::Event event) override
         {
+            //>>
             if (event == ftxui::Event::Escape)
             {
                 Close();
                 return true;
             }
+            //<<
             if (event == ftxui::Event::Return)
             {
                 Jump();
                 return true;
             }
 
+            //>>
             if (event.is_character() && event.character() == "g")
             {
                 if (pending_g_)
@@ -65,6 +122,7 @@ namespace scribbolyth::bookmarks
                 pending_g_ = true;
                 return true;
             }
+            //<<
             if ((event.is_character() && event.character() == "G"))
             {
                 pending_g_ = false;
@@ -93,7 +151,13 @@ namespace scribbolyth::bookmarks
             }
             return true;
         }
+        /*!*/
 
+        /*!
+            Render
+            Renders the bookmarks dialog.
+            This is an override
+        */
         ftxui::Element Render() override
         {
             Recompute();
@@ -132,6 +196,12 @@ namespace scribbolyth::bookmarks
                 "  " + std::to_string(total == 0 ? 0 : sel + 1) + "/" + std::to_string(total) +
                 "    j/k move  Enter jump  D unbookmark  Esc cancel  ";
 
+            /*|
+                
+                Create the dialog's window:
+
+            */
+            //>>
             return ftxui::window(ftxui::text(" ` Bookmarks "),
                                 ftxui::vbox({
                                     ftxui::separator(),
@@ -141,16 +211,33 @@ namespace scribbolyth::bookmarks
                                 })) |
                    ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
+            //<<
         }
+        /*!*/
+
+        /*!*/
 
     private:
+        /*!
+            Private Members
+        */
+
+        /*!
+            Close
+            Closes the bookmarks dialog.
+        */
         void Close()
         {
             *show_ = false;
             selection_ = 0;
             scroll_ = 0;
         }
+        /*!*/
 
+        /*!
+            Jump
+            Navigates to the selected bookmark's node.
+        */
         void Jump()
         {
             if (entries_.empty()) return;
@@ -172,14 +259,27 @@ namespace scribbolyth::bookmarks
             state_->status = "";
             Close();
         }
+        /*!*/
 
+        /*!
+            MoveSelection
+            * dir - int
+
+            Moves the selection up or down among the bookmarks list.
+        */
         void MoveSelection(int dir)
         {
             if (entries_.empty()) return;
             const int total = static_cast<int>(entries_.size());
             selection_ = std::max(0, std::min(total - 1, selection_ + dir));
         }
+        /*!*/
 
+        /*!
+            Move to Start / End
+            MoveToStart()
+            MoveToEnd()
+        */
         void MoveToStart()
         {
             selection_ = 0;
@@ -192,9 +292,14 @@ namespace scribbolyth::bookmarks
                 selection_ = static_cast<int>(entries_.size()) -1;
             }
         }
+        /*!*/
 
-        // Remove the selected bookmark. entries_ mirrors state_->bookmarks
-        // one-for-one, so the selected row maps directly to a bookmark index.
+        /*!
+            Unbookmark
+            Removes the selected bookmark.
+            The entries_ mirrors state_->bookmarks.
+            This also handles scroll to top.
+        */
         void Unbookmark()
         {
             if (entries_.empty()) return;
@@ -205,7 +310,15 @@ namespace scribbolyth::bookmarks
             scroll_ = 0;
             state_->status = "Bookmark removed";
         }
+        /*!*/
 
+        /*!
+            Recompute
+            Rebuilds the entries_ from the state_->bookmarks.
+            Gathers all the nodes for looking them up by id.
+            Sets the selection_.
+            It also displays the line number if the bookmark is to a specific line of text.
+        */
         void Recompute()
         {
             std::map<std::string, Entry> by_id;
@@ -253,7 +366,14 @@ namespace scribbolyth::bookmarks
 
             selection_ = std::max(0, std::min(selection_, static_cast<int>(entries_.size()) - 1));
         }
+        /*!*/
 
+        /*!
+            Variables
+
+            ----
+        */
+        //>>
         std::shared_ptr<EditorState> state_;
         bool* show_;
         std::vector<Entry> entries_;
@@ -262,10 +382,29 @@ namespace scribbolyth::bookmarks
         int scroll_ = 0;
         int content_width_ = 20;
         static constexpr int kVisibleRows = 18;
-    };
+        //<<
+        /*!*/
 
+        /*!*/
+    };
+    /*!*/
+
+    /*!
+        Create the Dialog
+
+        MakeBookmarksDialog
+        * state - std::shared_ptr<EditorState>
+        * show - bool*
+
+        Return:
+        ftxui::Component
+
+
+        Ftxui Make of type BookmarksDialog.
+    */
     ftxui::Component MakeBookmarksDialog(std::shared_ptr<EditorState> state, bool* show)
     {
         return ftxui::Make<BookmarksDialog>(std::move(state), show);
     }
+    /*!*/
 }

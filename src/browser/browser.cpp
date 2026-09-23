@@ -19,6 +19,11 @@ namespace scribbolyth::browser
 {
     namespace
     {
+        /*!
+            Right Padding
+
+            !_method
+        */
         std::string PadRight(const std::string& s, std::size_t width)
         {
             if (s.size() >= width) return s;

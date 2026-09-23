@@ -979,6 +979,174 @@
               }
             ],
             "expanded": false
+          },
+          {
+            "id": "5b374004",
+            "title": "bookmark.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "0cc94aaf",
+                "title": "Bookmark Struct",
+                "content": "Bookmark Struct\n* id -- string\n* line -- int\n\nIf line == -1 the bookmark targets the node itself.\nIf line >= 0 the bookmark targets a specific line within the node's text",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
+        "id": "8ab28bd4",
+        "title": "bookmarks",
+        "content": "",
+        "children": [
+          {
+            "id": "e95e08c3",
+            "title": "bookmarks.cpp",
+            "content": "",
+            "children": [
+              {
+                "id": "6e263fb9",
+                "title": "PadRight",
+                "content": "PadRight\nThis indents the bookmarks to match their depth in the treeview.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "731cf756",
+                "title": "Entry Struct",
+                "content": "Entry Struct\n* node - treeview::TreeNode*\n* depth - int\n* line - int\n\nUsed to create the treeview nodes.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "f2ffc9b5",
+                "title": "BookmarksDialog Class",
+                "content": "BookmarksDialog Class\n(ftxui::ComponentBase)",
+                "children": [
+                  {
+                    "id": "200c852e",
+                    "title": "Public Members",
+                    "content": "Public Members",
+                    "children": [
+                      {
+                        "id": "276e0339",
+                        "title": "Constructor",
+                        "content": "Constructor\n\nBookmarksDialog(std::shared_ptr<EditorState> state, bool* show)\n    : state_(std::move(state)), show_(show) {}",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "46f73897",
+                        "title": "Variables",
+                        "content": "Variables\n\n--------------------------------------------------------------------------------\n\nbool Focusable() const override { return true; }\n\nbool pending_g_ = false;",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "ae61229c",
+                        "title": "Event Call",
+                        "content": "Event Call\n\nOnEvent\n* event - ftxui::Event\n\nReturns:\nbool\n\n\nThis is the ftxui Event override.\nIt handles navigation as well as Escape, Return, and deletes.\n\n\nExamples\n--------------------------------------------------------------------------------\n\nif (event == ftxui::Event::Escape)\n{\n    Close();\n    return true;\n}\n\nif (event.is_character() && event.character() == \"g\")\n{\n    if (pending_g_)\n    {\n        pending_g_ = false;\n        MoveToStart();\n        return true;\n    }\n    pending_g_ = true;\n    return true;\n}",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "9f7998e5",
+                        "title": "Render",
+                        "content": "Render\nRenders the bookmarks dialog.\nThis is an override\n\nCreate the dialog's window:\n\nreturn ftxui::window(ftxui::text(\" ` Bookmarks \"),\n                    ftxui::vbox({\n                        ftxui::separator(),\n                        ftxui::vbox(std::move(rows)),\n                        ftxui::separator(),\n                        ftxui::text(PadRight(footer, row_width)) | ftxui::dim,\n                    })) |\n       ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |\n       ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  },
+                  {
+                    "id": "4aabdd9b",
+                    "title": "Private Members",
+                    "content": "Private Members",
+                    "children": [
+                      {
+                        "id": "9e869c63",
+                        "title": "Close",
+                        "content": "Close\nCloses the bookmarks dialog.",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "1c3bfc71",
+                        "title": "Jump",
+                        "content": "Jump\nNavigates to the selected bookmark's node.",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "871140ee",
+                        "title": "MoveSelection",
+                        "content": "MoveSelection\n* dir - int\n\nMoves the selection up or down among the bookmarks list.",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "979ca95a",
+                        "title": "Move to Start / End",
+                        "content": "Move to Start / End\nMoveToStart()\nMoveToEnd()",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "ddc57cb4",
+                        "title": "Unbookmark",
+                        "content": "Unbookmark\nRemoves the selected bookmark.\nThe entries_ mirrors state_->bookmarks.\nThis also handles scroll to top.",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "12656e17",
+                        "title": "Recompute",
+                        "content": "Recompute\nRebuilds the entries_ from the state_->bookmarks.\nGathers all the nodes for looking them up by id.\nSets the selection_.\nIt also displays the line number if the bookmark is to a specific line of text.",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "40459064",
+                        "title": "Variables",
+                        "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nstd::vector<Entry> entries_;\nstd::vector<std::string> rendered_;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 20;\nstatic constexpr int kVisibleRows = 18;",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  }
+                ],
+                "expanded": false
+              },
+              {
+                "id": "d97cdff3",
+                "title": "Create the Dialog",
+                "content": "Create the Dialog\n\nMakeBookmarksDialog\n* state - std::shared_ptr<EditorState>\n* show - bool*\n\nReturn:\nftxui::Component\n\n\nFtxui Make of type BookmarksDialog.",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          },
+          {
+            "id": "1fa8e995",
+            "title": "bookmarks.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "5ad8b1c7",
+                "title": "Forward declares the EditorState Struct and MakeBookmarksDialog.",
+                "content": "Forward declares the EditorState Struct and MakeBookmarksDialog.",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
           }
         ],
         "expanded": false
