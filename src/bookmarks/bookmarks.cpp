@@ -60,11 +60,11 @@ namespace scribbolyth::bookmarks
         /*!
             Constructor
 
+            !_ctor
+
         */
-        //>>
         BookmarksDialog(std::shared_ptr<EditorState> state, bool* show)
             : state_(std::move(state)), show_(show) {}
-        //<<
         /*!*/
 
         /*!

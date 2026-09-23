@@ -97,6 +97,8 @@ namespace scribbolyth::browser
         */
         /*!
             Constructor
+
+            !_ctor
         */
         FileBrowserDialog(std::shared_ptr<EditorState> state, bool* show)
             : state_(std::move(state)), show_(show) {}
@@ -293,14 +295,23 @@ namespace scribbolyth::browser
         /*!*/
 
     private:
+        /*!
+            Public Members
+        */
         static constexpr int kVisibleRows = 16;
 
+        /*!
+            Entry Struct
+
+        */
+        //>>
         struct Entry
         {
             bool is_dir = false;
             std::string display;
             std::string path;
         };
+        //<<
 
         void Close()
         {
@@ -520,6 +531,12 @@ namespace scribbolyth::browser
             selection_ = std::max(0, std::min(selection_, total - 1));
         }
 
+        /*!
+            Variables
+
+            ----
+        */
+        //>>
         std::shared_ptr<EditorState> state_;
         bool* show_;
         ftxui::Box box_;
@@ -535,6 +552,10 @@ namespace scribbolyth::browser
         int scroll_ = 0;
         int content_width_ = 24;
         bool pending_g_ = false;
+        //<<
+        /*!*/
+
+        /*!*/
     };
     /*!*/
 

@@ -1035,7 +1035,7 @@
                       {
                         "id": "276e0339",
                         "title": "Constructor",
-                        "content": "Constructor\n\nBookmarksDialog(std::shared_ptr<EditorState> state, bool* show)\n    : state_(std::move(state)), show_(show) {}",
+                        "content": "Constructor\n\nSignature: BookmarksDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: BookmarksDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
                         "children": [],
                         "expanded": false
                       },
@@ -1209,7 +1209,7 @@
                       {
                         "id": "c8ec3c4a",
                         "title": "Constructor",
-                        "content": "Constructor",
+                        "content": "Constructor\n\nSignature: FileBrowserDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: FileBrowserDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
                         "children": [],
                         "expanded": false
                       },
@@ -1232,6 +1232,29 @@
                         "title": "Render the Element",
                         "content": "Render the Element\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
                         "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  },
+                  {
+                    "id": "36a0cf51",
+                    "title": "Public Members",
+                    "content": "Public Members",
+                    "children": [
+                      {
+                        "id": "f2256427",
+                        "title": "Entry Struct",
+                        "content": "Entry Struct\n\nstruct Entry\n{\n    bool is_dir = false;\n    std::string display;\n    std::string path;\n};",
+                        "children": [
+                          {
+                            "id": "e560cf9b",
+                            "title": "Variables",
+                            "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nftxui::Box box_;\nstd::string dir_;\nstd::string start_dir_;\nbool needs_refresh_ = true;\nstd::vector<Entry> entries_;\nstd::vector<std::size_t> visible_;\nstd::string filter_;\nstd::string last_filter_;\nbool filter_active_ = false;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 24;\nbool pending_g_ = false;",
+                            "children": [],
+                            "expanded": false
+                          }
+                        ],
                         "expanded": false
                       }
                     ],

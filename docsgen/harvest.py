@@ -32,6 +32,9 @@ Comment grammar (all harvested from files under src/):
                            parameters of the function definition that
                            immediately follows the comment (left as-is when
                            no definition follows).
+    !_ctor                 Marker inside a doc comment, like !_method but for
+                           a constructor definition; also lists the initializer
+                           members (and qualifiers such as explicit/noexcept).
 
 Within any comment body, a line containing just dashes (e.g. ----) is
 expanded to an 80-character horizontal rule.  Raw code captured by
@@ -65,6 +68,7 @@ EXTENSIONS = (".cpp", ".hpp", ".h", ".cc", ".cxx", ".c")
 # ----------------------------------------------------------------------
 
 METHOD_MARK_RE = re.compile(r"^[ \t]*!_method[ \t]*$", re.M)
+CTOR_MARK_RE = re.compile(r"^[ \t]*!_ctor[ \t]*$", re.M)
 
 
 def extract_signature(src, pos):
@@ -133,14 +137,29 @@ def split_top_level(text):
     return parts
 
 
-def describe_signature(sig):
-    """Break a collapsed signature into (name, returns, params, quals) or
+def matching_paren(sig, open_):
+    depth = 0
+    for i in range(open_, len(sig)):
+        c = sig[i]
+        if c == "(":
+            depth += 1
+        elif c == ")":
+            depth -= 1
+            if depth == 0:
+                return i
+    return -1
+
+
+def describe_signature(sig, ctor=False):
+    """Break a collapsed signature into (name, returns, params, tail) or
     return None when it does not look like a function/method."""
-    open_ = sig.rfind("(")
-    if open_ == -1:
-        return None
-    close_ = sig.find(")", open_)
-    if close_ == -1:
+    if ctor:
+        open_ = sig.find("(")
+        close_ = matching_paren(sig, open_) if open_ != -1 else -1
+    else:
+        open_ = sig.rfind("(")
+        close_ = sig.find(")", open_) if open_ != -1 else -1
+    if open_ == -1 or close_ == -1:
         return None
     decl = sig[:open_].strip()
     param_text = sig[open_ + 1:close_].strip()
@@ -174,6 +193,35 @@ def describe_signature(sig):
     return name, returns, params, quals
 
 
+def member_inits(tail):
+    """Split a constructor tail `: a(x), b({...})` into init-list members.
+    Returns (members, qualifiers).  A qualifier prefix (e.g. `noexcept : ...`)
+    is peeled off before the ':'."""
+    t = tail.strip()
+    colon = t.find(":")
+    if colon == -1:
+        return [], t
+    quals = t[:colon].strip()
+    members = [p.strip() for p in split_top_level(t[colon + 1:]) if p.strip()]
+    return members, quals
+
+
+def render_members(members):
+    """Render ctor initializers as an aligned `name  args` column."""
+    rows = []
+    for m in members:
+        o = m.find("(")
+        if o != -1 and m.endswith(")"):
+            rows.append((m[:o].strip(), m[o + 1:-1].strip()))
+        else:
+            rows.append((m, ""))
+    w = max(len(a) for a, b in rows)
+    out = []
+    for a, b in rows:
+        out.append("    " + a.ljust(w + 1) + b if b else "    " + a)
+    return out
+
+
 def _content_base(body):
     """Leading-whitespace count of the first content line, measured the same
     way deindent will measure it (i.e. after the doc/sub marker char)."""
@@ -188,38 +236,53 @@ def _content_base(body):
     return 0
 
 
-def method_description(src, code_pos, body):
-    """Replace an `!_method` marker line in a comment body with a
-    description of the function definition that immediately follows the
-    comment.  Leaves the marker untouched when no definition follows."""
-    if not METHOD_MARK_RE.search(body):
+def callable_description(src, code_pos, body):
+    """Replace a `!_method` / `!_ctor` marker line in a comment body with a
+    description of the function/constructor definition immediately following
+    the comment.  Leaves the marker untouched when no definition follows."""
+    kinds = [("ctor", CTOR_MARK_RE) if rx is CTOR_MARK_RE else ("method", rx)
+             for rx in (CTOR_MARK_RE, METHOD_MARK_RE) if rx.search(body)]
+    if not kinds:
         return body
     found = extract_signature(src, code_pos)
     if not found or not found[1]:
         return body
-    described = describe_signature(found[0])
+    kind, rx = kinds[0]
+    described = describe_signature(found[0], ctor=kind == "ctor")
     if described is None:
         return body
-    name, returns, params, quals = described
+    name, returns, params, tail = described
     lines = ["Signature: " + found[0]]
-    lines.append("Method: " + (name or "?"))
-    if returns:
-        lines.append("Returns: " + returns)
-    if quals:
-        lines.append("Qualifiers: " + quals)
+    if kind == "ctor":
+        members, quals = member_inits(tail)
+        specs = [returns] if returns in ("explicit", "inline") else []
+        if specs:
+            quals = " ".join(specs + ([quals] if quals else []))
+        lines.append("Constructor: " + (name or "?"))
+        if quals:
+            lines.append("Qualifiers: " + quals)
+    else:
+        members, quals = [], tail
+        lines.append("Method: " + (name or "?"))
+        if returns:
+            lines.append("Returns: " + returns)
+        if quals:
+            lines.append("Qualifiers: " + quals)
     if params:
         width = max(len(nm) for ty, nm in params if nm)
         lines.append("Parameters:")
         for ty, nm in params:
             pad = nm.ljust(width + 1) if nm else " " * (width + 1)
             lines.append("    " + pad + ty)
+    if kind == "ctor" and members:
+        lines.append("Initializers:")
+        lines.extend(render_members(members))
     base = _content_base(body)
     ind = " " * base
     # The body is de-indented later by base, so pad every inserted line by
-    # base: the 4-space param indent then survives in the final content.
-    return METHOD_MARK_RE.sub(lambda m: "\n".join(
-        ind + ln if ln else "" for ln in lines
-    ), body)
+    # base: the inner indents then survive in the final content.
+    return kinds[0][1].sub(
+        lambda m: "\n".join(ind + ln if ln else "" for ln in lines), body)
 
 
 def scan_file(path):
@@ -292,7 +355,7 @@ def scan_file(path):
                 line += src.count("\n", i, n)
                 i = n
             else:
-                body = method_description(src, end + 2, src[i + 2:end])
+                body = callable_description(src, end + 2, src[i + 2:end])
                 items.append(("block", body, start_line))
                 line += src.count("\n", i, end + 2)
                 i = end + 2
