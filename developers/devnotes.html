@@ -988,7 +988,7 @@
               {
                 "id": "0cc94aaf",
                 "title": "Bookmark Struct",
-                "content": "Bookmark Struct\n* id -- string\n* line -- int\n\nIf line == -1 the bookmark targets the node itself.\nIf line >= 0 the bookmark targets a specific line within the node's text",
+                "content": "Bookmark Struct\n\nstruct Bookmark\n{\n    std::string id;\n    int line = -1;\n};",
                 "children": [],
                 "expanded": false
               }
@@ -1010,15 +1010,15 @@
             "children": [
               {
                 "id": "6e263fb9",
-                "title": "PadRight",
-                "content": "PadRight\nThis indents the bookmarks to match their depth in the treeview.",
+                "title": "Right Padding",
+                "content": "Right Padding\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t\n\nThis indents the bookmarks to match their depth in the treeview.",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "731cf756",
                 "title": "Entry Struct",
-                "content": "Entry Struct\n* node - treeview::TreeNode*\n* depth - int\n* line - int\n\nUsed to create the treeview nodes.",
+                "content": "Entry Struct\nUsed to create the treeview nodes.\n\nstruct Entry\n{\n    treeview::TreeNode* node = nullptr;\n    int depth = 0;\n    int line = -1;\n};",
                 "children": [],
                 "expanded": false
               },
@@ -1049,7 +1049,7 @@
                       {
                         "id": "ae61229c",
                         "title": "Event Call",
-                        "content": "Event Call\n\nOnEvent\n* event - ftxui::Event\n\nReturns:\nbool\n\n\nThis is the ftxui Event override.\nIt handles navigation as well as Escape, Return, and deletes.\n\n\nExamples\n--------------------------------------------------------------------------------\n\nif (event == ftxui::Event::Escape)\n{\n    Close();\n    return true;\n}\n\nif (event.is_character() && event.character() == \"g\")\n{\n    if (pending_g_)\n    {\n        pending_g_ = false;\n        MoveToStart();\n        return true;\n    }\n    pending_g_ = true;\n    return true;\n}",
+                        "content": "Event Call\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event\n\n\nThis is the ftxui Event override.\nIt handles navigation as well as Escape, Return, and deletes.\n\n\nExamples\n--------------------------------------------------------------------------------\n\nif (event == ftxui::Event::Escape)\n{\n    Close();\n    return true;\n}\n\nif (event.is_character() && event.character() == \"g\")\n{\n    if (pending_g_)\n    {\n        pending_g_ = false;\n        MoveToStart();\n        return true;\n    }\n    pending_g_ = true;\n    return true;\n}",
                         "children": [],
                         "expanded": false
                       },
@@ -1084,8 +1084,8 @@
                       },
                       {
                         "id": "871140ee",
-                        "title": "MoveSelection",
-                        "content": "MoveSelection\n* dir - int\n\nMoves the selection up or down among the bookmarks list.",
+                        "title": "Move Selection",
+                        "content": "Move Selection\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int\n\n\nMoves the selection up or down among the bookmarks list.",
                         "children": [],
                         "expanded": false
                       },
@@ -1126,7 +1126,7 @@
               {
                 "id": "d97cdff3",
                 "title": "Create the Dialog",
-                "content": "Create the Dialog\n\nMakeBookmarksDialog\n* state - std::shared_ptr<EditorState>\n* show - bool*\n\nReturn:\nftxui::Component\n\n\nFtxui Make of type BookmarksDialog.",
+                "content": "Create the Dialog\n\nSignature: ftxui::Component MakeBookmarksDialog(std::shared_ptr<EditorState> state, bool* show)\nMethod: MakeBookmarksDialog\nReturns: ftxui::Component\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\n\n\nFtxui Make of type BookmarksDialog.",
                 "children": [],
                 "expanded": false
               }
@@ -1152,6 +1152,101 @@
         "expanded": false
       },
       {
+        "id": "6fc03e26",
+        "title": "browser",
+        "content": "",
+        "children": [
+          {
+            "id": "e8a5a9ef",
+            "title": "browser.cpp",
+            "content": "",
+            "children": [
+              {
+                "id": "b2745d40",
+                "title": "Right Padding",
+                "content": "Right Padding\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "4a92b96e",
+                "title": "Tailing",
+                "content": "Tailing\n\nSignature: std::string Tail(const std::string& s, std::size_t width)\nMethod: Tail\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "74225a0b",
+                "title": "To Lower Case",
+                "content": "To Lower Case\n\nSignature: std::string Lower(const std::string& s)\nMethod: Lower\nReturns: std::string\nParameters:\n    s const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "20d051b4",
+                "title": "Case Insensitive Less Check",
+                "content": "Case Insensitive Less Check\n\nSignature: bool NoCaseLess(const std::string& a, const std::string& b)\nMethod: NoCaseLess\nReturns: bool\nParameters:\n    a const std::string&\n    b const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "9cd32dc3",
+                "title": "Path Check",
+                "content": "Path Check\n\nSignature: std::string Normalize(const std::string& path)\nMethod: Normalize\nReturns: std::string\nParameters:\n    path const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "40a0ed0b",
+                "title": "FileBrowserDialog Class",
+                "content": "FileBrowserDialog Class\n(ftxui::ComponentBase)",
+                "children": [
+                  {
+                    "id": "2704b157",
+                    "title": "Public Members",
+                    "content": "Public Members",
+                    "children": [
+                      {
+                        "id": "c8ec3c4a",
+                        "title": "Constructor",
+                        "content": "Constructor",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "325b5754",
+                        "title": "Variables",
+                        "content": "Variables\n\n--------------------------------------------------------------------------------\n\nbool Focusable() const override { return true; }",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "bf824ad1",
+                        "title": "Ftxui Event",
+                        "content": "Ftxui Event\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "3d07040f",
+                        "title": "Render the Element",
+                        "content": "Render the Element\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  }
+                ],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
         "id": "ae2c4610",
         "title": "main.cpp",
         "content": "",
@@ -1159,12 +1254,12 @@
           {
             "id": "886fe746",
             "title": "Main",
-            "content": "Main\nScribbolyth's application entry point.\n\nint main(int, char** argv)",
+            "content": "Main\nScribbolyth's application entry point.\n\nSignature: int main(int, char** argv)\nMethod: main\nReturns: int\nParameters:\n         int\n    argv char**",
             "children": [
               {
                 "id": "33648a43",
-                "title": "Declarations",
-                "content": "Declarations\nConstructs the persistent editor state as well as the editor and treeview elements.\n\n--------------------------------------------------------------------------------\n\nauto state = std::make_shared<EditorState>();\n\nauto editor_comp = scribbolyth::editor::MakeEditor(state);\nauto treeview_comp = scribbolyth::treeview::MakeTreeView(state);\n\nstate->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };\nstate->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };\n\nauto treeview_wrap = treeview_comp;\nauto editor_wrap = editor_comp;\n\nauto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);\n\nauto screen = ScreenInteractive::Fullscreen();\nauto quit = screen.ExitLoopClosure();\n\n--------------------------------------------------------------------------------",
+                "title": "Variables",
+                "content": "Variables\nConstructs the persistent editor state as well as the editor and treeview elements.\n\n--------------------------------------------------------------------------------\n\nauto state = std::make_shared<EditorState>();\n\nauto editor_comp = scribbolyth::editor::MakeEditor(state);\nauto treeview_comp = scribbolyth::treeview::MakeTreeView(state);\n\nstate->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };\nstate->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };\n\nauto treeview_wrap = treeview_comp;\nauto editor_wrap = editor_comp;\n\nauto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);\n\nauto screen = ScreenInteractive::Fullscreen();\nauto quit = screen.ExitLoopClosure();\n\n--------------------------------------------------------------------------------",
                 "children": [],
                 "expanded": false
               },

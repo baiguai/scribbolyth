@@ -29,13 +29,25 @@ namespace scribbolyth::browser
             if (s.size() >= width) return s;
             return s + std::string(width - s.size(), ' ');
         }
+        /*!*/
 
+        /*!
+            Tailing
+
+            !_method
+        */
         std::string Tail(const std::string& s, std::size_t width)
         {
             if (s.size() <= width) return s;
             return s.substr(s.size() - width);
         }
+        /*!*/
 
+        /*!
+            To Lower Case
+
+            !_method
+        */
         std::string Lower(const std::string& s)
         {
             std::string out = s;
@@ -45,12 +57,24 @@ namespace scribbolyth::browser
             }
             return out;
         }
+        /*!*/
 
+        /*!
+            Case Insensitive Less Check
+
+            !_method
+        */
         bool NoCaseLess(const std::string& a, const std::string& b)
         {
             return Lower(a) < Lower(b);
         }
+        /*!*/
 
+        /*!
+            Path Check
+
+            !_method
+        */
         std::string Normalize(const std::string& path)
         {
             std::error_code ec;
@@ -58,16 +82,41 @@ namespace scribbolyth::browser
             if (ec) return path;
             return abs.string();
         }
+        /*!*/
     }
 
+    /*!
+        FileBrowserDialog Class
+        (ftxui::ComponentBase)
+    */
     class FileBrowserDialog : public ftxui::ComponentBase
     {
     public:
+        /*!
+            Public Members
+        */
+        /*!
+            Constructor
+        */
         FileBrowserDialog(std::shared_ptr<EditorState> state, bool* show)
             : state_(std::move(state)), show_(show) {}
+        /*!*/
 
+        /*!
+            Variables
+
+            ----
+        */
+        //>>
         bool Focusable() const override { return true; }
+        //<<
+        /*!*/
 
+        /*!
+            Ftxui Event
+
+            !_method
+        */
         bool OnEvent(ftxui::Event event) override
         {
             if (filter_active_) return OnFilterEvent(event);
@@ -145,7 +194,13 @@ namespace scribbolyth::browser
             pending_g_ = false;
             return true;
         }
+        /*!*/
 
+        /*!
+            Render the Element
+
+            !_method
+        */
         ftxui::Element Render() override
         {
             Recompute();
@@ -233,6 +288,9 @@ namespace scribbolyth::browser
                    ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
         }
+        /*!*/
+
+        /*!*/
 
     private:
         static constexpr int kVisibleRows = 16;
@@ -478,6 +536,7 @@ namespace scribbolyth::browser
         int content_width_ = 24;
         bool pending_g_ = false;
     };
+    /*!*/
 
     ftxui::Component MakeFileBrowserDialog(std::shared_ptr<EditorState> state, bool* show)
     {

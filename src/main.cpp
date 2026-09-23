@@ -48,11 +48,11 @@ Key codes are defined within the ./config/commands.conf file.
     Main
     Scribbolyth's application entry point.
 
-    int main(int, char** argv)
+    !_method
 */
 int main(int, char** argv) {
     /*!
-        Declarations
+        Variables
         Constructs the persistent editor state as well as the editor and treeview elements.
 
         ----

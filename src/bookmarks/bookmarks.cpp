@@ -18,7 +18,10 @@ namespace scribbolyth::bookmarks
     namespace
     {
         /*!
-            PadRight
+            Right Padding
+
+            !_method
+
             This indents the bookmarks to match their depth in the treeview.
         */
         std::string PadRight(const std::string& s, std::size_t width)
@@ -30,18 +33,16 @@ namespace scribbolyth::bookmarks
 
         /*!
             Entry Struct
-            * node - treeview::TreeNode*
-            * depth - int
-            * line - int
-
             Used to create the treeview nodes.
         */
+        //>>
         struct Entry
         {
             treeview::TreeNode* node = nullptr;
             int depth = 0;
             int line = -1;
         };
+        //<<
         /*!*/
     }
 
@@ -81,11 +82,7 @@ namespace scribbolyth::bookmarks
         /*!
             Event Call
 
-            OnEvent
-            * event - ftxui::Event
-
-            Returns:
-            bool
+            !_method
 
 
             This is the ftxui Event override.
@@ -262,8 +259,10 @@ namespace scribbolyth::bookmarks
         /*!*/
 
         /*!
-            MoveSelection
-            * dir - int
+            Move Selection
+
+            !_method
+
 
             Moves the selection up or down among the bookmarks list.
         */
@@ -392,12 +391,7 @@ namespace scribbolyth::bookmarks
     /*!
         Create the Dialog
 
-        MakeBookmarksDialog
-        * state - std::shared_ptr<EditorState>
-        * show - bool*
-
-        Return:
-        ftxui::Component
+        !_method
 
 
         Ftxui Make of type BookmarksDialog.

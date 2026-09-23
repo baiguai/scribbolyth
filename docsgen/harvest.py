@@ -27,6 +27,11 @@ Comment grammar (all harvested from files under src/):
     /*| <body> */          Appends its body text to the current
                            documentation node's content (same attachment
                            rules as the //>> ... //<< snippet).
+    !_method               Marker inside a doc comment.  Replaced with the
+                           signature, method name, return type and
+                           parameters of the function definition that
+                           immediately follows the comment (left as-is when
+                           no definition follows).
 
 Within any comment body, a line containing just dashes (e.g. ----) is
 expanded to an 80-character horizontal rule.  Raw code captured by
@@ -58,6 +63,164 @@ EXTENSIONS = (".cpp", ".hpp", ".h", ".cc", ".cxx", ".c")
 # ----------------------------------------------------------------------
 # Comment scanning
 # ----------------------------------------------------------------------
+
+METHOD_MARK_RE = re.compile(r"^[ \t]*!_method[ \t]*$", re.M)
+
+
+def extract_signature(src, pos):
+    """Scan src[pos:] for a function/method declaration right after a doc
+    comment.  Whitespace and comments are skipped; scanning stops at the
+    first '{' or ';' at parenthesis-depth 0.  Returns
+        (signature_text, is_definition)
+    with signature_text whitespace-collapsed, or None when no signature
+    is found before the end of the file."""
+    n = len(src)
+    i = pos
+    depth = 0
+    buf = []
+    while i < n:
+        if src.startswith("//", i):
+            j = src.find("\n", i)
+            i = n if j == -1 else j
+            buf.append(" ")
+            continue
+        if src.startswith("/*", i):
+            j = src.find("*/", i + 2)
+            i = n if j == -1 else j + 2
+            buf.append(" ")
+            continue
+        c = src[i]
+        if c in "\"'":
+            q = c
+            i += 1
+            while i < n:
+                if src[i] == "\\":
+                    i += 2
+                    continue
+                if src[i] == q:
+                    i += 1
+                    break
+                i += 1
+            buf.append(" ")
+            continue
+        if c == "(":
+            depth += 1
+        elif c == ")":
+            depth = max(0, depth - 1)
+        elif c in "{;":
+            if depth == 0:
+                return " ".join("".join(buf).split()), c == "{"
+        buf.append(c)
+        i += 1
+    return None
+
+
+def split_top_level(text):
+    """Split text on commas that are not nested inside (), [], or <>."""
+    parts, depth, cur = [], 0, []
+    for ch in text:
+        if ch in "<([":
+            depth += 1
+        elif ch in ">)]":
+            depth = max(0, depth - 1)
+        if ch == "," and depth == 0:
+            parts.append("".join(cur).strip())
+            cur = []
+        else:
+            cur.append(ch)
+    if cur:
+        parts.append("".join(cur).strip())
+    return parts
+
+
+def describe_signature(sig):
+    """Break a collapsed signature into (name, returns, params, quals) or
+    return None when it does not look like a function/method."""
+    open_ = sig.rfind("(")
+    if open_ == -1:
+        return None
+    close_ = sig.find(")", open_)
+    if close_ == -1:
+        return None
+    decl = sig[:open_].strip()
+    param_text = sig[open_ + 1:close_].strip()
+    quals = sig[close_ + 1:].strip()
+    returns = decl
+    name = None
+    op = re.search(r"\boperator\b", decl)
+    if op:
+        name = decl[op.start():].strip()
+        returns = decl[:op.start()].strip()
+    else:
+        m = re.search(r"[A-Za-z_~][A-Za-z0-9_]*\s*$", decl)
+        if m:
+            name = m.group(0).strip()
+            returns = decl[:m.start()].strip()
+            if returns.endswith("::"):
+                returns = returns[:-2].strip()
+    params = []
+    if param_text:
+        for p in split_top_level(param_text):
+            p = p.strip()
+            if not p:
+                continue
+            if "=" in p:
+                p = p.split("=", 1)[0].strip()
+            pm = re.search(r"[A-Za-z_][A-Za-z0-9_]*\s*$", p)
+            if pm:
+                nm = pm.group(0).strip()
+                ty = p[:pm.start()].strip()
+                params.append((ty, nm) if ty else (nm, ""))
+    return name, returns, params, quals
+
+
+def _content_base(body):
+    """Leading-whitespace count of the first content line, measured the same
+    way deindent will measure it (i.e. after the doc/sub marker char)."""
+    txt = body
+    lead = len(txt) - len(txt.lstrip(" \t"))
+    if txt[lead:lead + 1] in ("!", "+"):
+        txt = txt[lead + 1:]
+    for ln in txt.split("\n"):
+        t = ln.lstrip(" \t")
+        if t:
+            return len(ln) - len(t)
+    return 0
+
+
+def method_description(src, code_pos, body):
+    """Replace an `!_method` marker line in a comment body with a
+    description of the function definition that immediately follows the
+    comment.  Leaves the marker untouched when no definition follows."""
+    if not METHOD_MARK_RE.search(body):
+        return body
+    found = extract_signature(src, code_pos)
+    if not found or not found[1]:
+        return body
+    described = describe_signature(found[0])
+    if described is None:
+        return body
+    name, returns, params, quals = described
+    lines = ["Signature: " + found[0]]
+    lines.append("Method: " + (name or "?"))
+    if returns:
+        lines.append("Returns: " + returns)
+    if quals:
+        lines.append("Qualifiers: " + quals)
+    if params:
+        width = max(len(nm) for ty, nm in params if nm)
+        lines.append("Parameters:")
+        for ty, nm in params:
+            pad = nm.ljust(width + 1) if nm else " " * (width + 1)
+            lines.append("    " + pad + ty)
+    base = _content_base(body)
+    ind = " " * base
+    # The body is de-indented later by base, so pad every inserted line by
+    # base: the 4-space param indent then survives in the final content.
+    return METHOD_MARK_RE.sub(lambda m: "\n".join(
+        ind + ln if ln else "" for ln in lines
+    ), body)
+
 
 def scan_file(path):
     """Return source comments/segments as (kind, body, line) in source order.
@@ -129,7 +292,8 @@ def scan_file(path):
                 line += src.count("\n", i, n)
                 i = n
             else:
-                items.append(("block", src[i + 2:end], start_line))
+                body = method_description(src, end + 2, src[i + 2:end])
+                items.append(("block", body, start_line))
                 line += src.count("\n", i, end + 2)
                 i = end + 2
             continue
