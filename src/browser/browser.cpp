@@ -296,9 +296,18 @@ namespace scribbolyth::browser
 
     private:
         /*!
-            Public Members
+            Private Members
         */
+
+        /*!
+            Constants
+
+            ----
+        */
+        //>>
         static constexpr int kVisibleRows = 16;
+        //<<
+        /*!*/
 
         /*!
             Entry Struct
@@ -312,7 +321,11 @@ namespace scribbolyth::browser
             std::string path;
         };
         //<<
+        /*!*/
 
+        /*!
+            Close the Dialog
+        */
         void Close()
         {
             *show_ = false;
@@ -325,21 +338,37 @@ namespace scribbolyth::browser
             start_dir_.clear();
             needs_refresh_ = true;
         }
+        /*!*/
 
+        /*!
+            Set the Directory
+
+            !_method
+        */
         void SetDir(const std::string& path)
         {
             dir_ = Normalize(path);
             needs_refresh_ = true;
             pending_g_ = false;
         }
+        /*!*/
 
+        /*!
+            Navigate Items
+
+            !_method
+        */
         void MoveSelection(int dir)
         {
             if (visible_.empty()) return;
             const int total = static_cast<int>(visible_.size());
             selection_ = std::max(0, std::min(total - 1, selection_ + dir));
         }
+        /*!*/
 
+        /*!
+            Jump to Top / Bottom
+        */
         void JumpToTop()
         {
             if (visible_.empty()) return;
@@ -353,7 +382,11 @@ namespace scribbolyth::browser
             selection_ = static_cast<int>(visible_.size()) - 1;
             pending_g_ = false;
         }
+        /*!*/
 
+        /*!
+            Move Up a Directory
+        */
         void GoUp()
         {
             const fs::path current(dir_);
@@ -362,12 +395,19 @@ namespace scribbolyth::browser
             SetDir(parent.string());
             ClearFilter();
         }
+        /*!*/
 
+        /*!
+            Pick a File
+        */
         void Activate()
         {
             EnterAt(/*pick_file=*/true);
         }
-
+        /*|
+            
+            !_method
+        */
         void EnterAt(bool pick_file)
         {
             if (visible_.empty()) return;
@@ -401,14 +441,24 @@ namespace scribbolyth::browser
             Close();
             callback(picked);
         }
+        /*!*/
 
+        /*!
+            Clear the Filter
+        */
         void ClearFilter()
         {
             filter_.clear();
             filter_active_ = false;
             selection_ = 0;
         }
+        /*!*/
 
+        /*!
+            Compute the Top
+
+            !_method
+        */
         int ComputeTop(int sel, int total) const
         {
             const int max_top = std::max(0, total - kVisibleRows);
@@ -417,7 +467,13 @@ namespace scribbolyth::browser
             if (sel >= top + kVisibleRows) top = sel - kVisibleRows + 1;
             return std::max(0, std::min(top, max_top));
         }
+        /*!*/
 
+        /*!
+            Handle Filter Event
+
+            !_method
+        */
         bool OnFilterEvent(ftxui::Event event)
         {
             if (event == ftxui::Event::Escape)
@@ -445,7 +501,13 @@ namespace scribbolyth::browser
             }
             return true;
         }
+        /*!*/
 
+        /*!
+            Recompute
+
+            * Refresh this dialog via the state_
+        */
         void Recompute()
         {
             if (state_->browser_start_dir != start_dir_)
@@ -513,7 +575,11 @@ namespace scribbolyth::browser
 
             ApplyFilter();
         }
+        /*!*/
 
+        /*!
+            Apply the Filter
+        */
         void ApplyFilter()
         {
             last_filter_ = filter_;
@@ -530,6 +596,7 @@ namespace scribbolyth::browser
             const int total = static_cast<int>(visible_.size());
             selection_ = std::max(0, std::min(selection_, total - 1));
         }
+        /*!*/
 
         /*!
             Variables

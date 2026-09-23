@@ -1239,22 +1239,105 @@
                   },
                   {
                     "id": "36a0cf51",
-                    "title": "Public Members",
-                    "content": "Public Members",
+                    "title": "Private Members",
+                    "content": "Private Members",
                     "children": [
                       {
                         "id": "f2256427",
+                        "title": "Constants",
+                        "content": "Constants\n\n--------------------------------------------------------------------------------\n\nstatic constexpr int kVisibleRows = 16;",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "aa09f907",
                         "title": "Entry Struct",
                         "content": "Entry Struct\n\nstruct Entry\n{\n    bool is_dir = false;\n    std::string display;\n    std::string path;\n};",
-                        "children": [
-                          {
-                            "id": "e560cf9b",
-                            "title": "Variables",
-                            "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nftxui::Box box_;\nstd::string dir_;\nstd::string start_dir_;\nbool needs_refresh_ = true;\nstd::vector<Entry> entries_;\nstd::vector<std::size_t> visible_;\nstd::string filter_;\nstd::string last_filter_;\nbool filter_active_ = false;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 24;\nbool pending_g_ = false;",
-                            "children": [],
-                            "expanded": false
-                          }
-                        ],
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "a81fbfe7",
+                        "title": "Close the Dialog",
+                        "content": "Close the Dialog",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "99679b1c",
+                        "title": "Set the Directory",
+                        "content": "Set the Directory\n\nSignature: void SetDir(const std::string& path)\nMethod: SetDir\nReturns: void\nParameters:\n    path const std::string&",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "8ff6e388",
+                        "title": "Navigate Items",
+                        "content": "Navigate Items\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "67d292f6",
+                        "title": "Jump to Top / Bottom",
+                        "content": "Jump to Top / Bottom",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "eeb48cff",
+                        "title": "Move Up a Directory",
+                        "content": "Move Up a Directory",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "0191a615",
+                        "title": "Pick a File",
+                        "content": "Pick a File\n\nSignature: void EnterAt(bool pick_file)\nMethod: EnterAt\nReturns: void\nParameters:\n    pick_file bool",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "75253f27",
+                        "title": "Clear the Filter",
+                        "content": "Clear the Filter",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "f4e3e181",
+                        "title": "Compute the Top",
+                        "content": "Compute the Top\n\nSignature: int ComputeTop(int sel, int total) const\nMethod: ComputeTop\nReturns: int\nQualifiers: const\nParameters:\n    sel   int\n    total int",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "5bf4a573",
+                        "title": "Handle Filter Event",
+                        "content": "Handle Filter Event\n\nSignature: bool OnFilterEvent(ftxui::Event event)\nMethod: OnFilterEvent\nReturns: bool\nParameters:\n    event ftxui::Event",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "eea6bf61",
+                        "title": "Recompute",
+                        "content": "Recompute\n\n* Refresh this dialog via the state_",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "a7d75041",
+                        "title": "Apply the Filter",
+                        "content": "Apply the Filter",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "a40e9de6",
+                        "title": "Variables",
+                        "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nftxui::Box box_;\nstd::string dir_;\nstd::string start_dir_;\nbool needs_refresh_ = true;\nstd::vector<Entry> entries_;\nstd::vector<std::size_t> visible_;\nstd::string filter_;\nstd::string last_filter_;\nbool filter_active_ = false;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 24;\nbool pending_g_ = false;",
+                        "children": [],
                         "expanded": false
                       }
                     ],
