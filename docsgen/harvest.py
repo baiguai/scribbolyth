@@ -19,6 +19,14 @@ Comment grammar (all harvested from files under src/):
                            region is open.
     /*!*/                  Closes the innermost open doc region.  Creates
                            no node of its own.
+    //>> ... //<<          Raw source snippet.  The markers sit on their own
+                           lines; the code between them is appended verbatim
+                           to the current documentation node (the innermost
+                           open doc region; if none is open, the most recent
+                           doc/sub node in the same file).
+    /*| <body> */          Appends its body text to the current
+                           documentation node's content (same attachment
+                           rules as the //>> ... //<< snippet).
 
 Every file that contains a /*! */ doc block produces a *folder* node named
 after the file (e.g. editor/editor.cpp -> editor > editor.cpp), hanging off
@@ -48,11 +56,13 @@ EXTENSIONS = (".cpp", ".hpp", ".h", ".cc", ".cxx", ".c")
 # ----------------------------------------------------------------------
 
 def scan_file(path):
-    """Return source comments as (kind, body, line) in source order.
+    """Return source comments/segments as (kind, body, line) in source order.
 
-    kind is "line" for // comments or "block" for /* ... */ comments.
-    Body excludes the // or /* */ delimiters.  Strings and char literals
-    are skipped so // inside them is not mistaken for a comment.
+    kind is "line" for // comments, "block" for /* ... */ comments, or
+    "code" for the raw source captured between a `//>>` and `//<<` line
+    (each on its own line).  Body excludes the // or /* */ delimiters.
+    Strings and char literals are skipped so // inside them is not
+    mistaken for a comment.
     """
     with open(path, "r", encoding="utf-8", errors="replace") as f:
         src = f.read()
@@ -82,6 +92,28 @@ def scan_file(path):
             end = src.find("\n", i)
             if end == -1:
                 end = n
+            if src[i + 2:end].strip() == ">>":
+                # Capture raw source until a `//<<` line (both markers sit
+                # on their own lines); the captured text lands in the
+                # current documentation node as a code snippet.
+                j = end + 1
+                seg = []
+                while j < n:
+                    lf = src.find("\n", j)
+                    if lf == -1:
+                        lf = n
+                    if src[j:lf].strip().startswith("//<<"):
+                        items.append(("code", "\n".join(seg), line))
+                        line += 1
+                        i = n if lf == n else lf + 1
+                        break
+                    seg.append(src[j:lf].rstrip())
+                    line += 1
+                    j = n if lf == n else lf + 1
+                else:
+                    items.append(("code", "\n".join(seg), line))
+                    i = n
+                continue
             items.append(("line", src[i + 2:end], line))
             i = end
             continue
@@ -113,11 +145,17 @@ def classify(items):
         doc    {body}                  from /*! body*/  (opens a region)
         docclose                       from /*!*/        (closes the region)
         sub    {body}                  from /*+ body*/
-    Doc/sub nesting is resolved by the builder using a region stack.
+        code   {body}                  from //>> ... //<< (raw source)
+        append {body}                  from /*| body*/
+    Doc/sub/code/append nesting is resolved by the builder using a region
+    stack.
     """
     actions = []
     doc_open = None
     for kind, body, line in items:
+        if kind == "code":
+            actions.append({"kind": "code", "body": body, "line": line})
+            continue
         if kind == "line":
             text = body.strip()
             m = re.match(r"!_\s*([A-Za-z0-9_]+)\s*=\s*(.*)$", text)
@@ -146,6 +184,11 @@ def classify(items):
             text = strip_marker(body[1:], "/*+")
             if text.strip():
                 actions.append({"kind": "sub", "body": text, "line": line})
+            continue
+        if body.startswith("|"):
+            text = body[1:]
+            if text.strip():
+                actions.append({"kind": "append", "body": text, "line": line})
             continue
         manual = body.lstrip()
         if manual.startswith("["):
@@ -295,12 +338,22 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None):
 
     # Phase 2: source-code nodes (coderoot + per-file folders + doc blocks).
     # Doc regions nest: a /*! opens a region that stays open until the next
-    # /*!*/ , so /*! and /*+ blocks inside it become children.
+    # /*!*/ , so /*! and /*+ blocks inside it become children.  Raw code
+    # captured with //>> ... //<< is appended to the current doc node.
     for rel, actions in file_actions:
         file_parts = tuple(rel.split("/"))
         stack = []
+        last = None
         ev = 0
         for a in actions:
+            if a["kind"] in ("code", "append"):
+                body = deindent(a["body"])
+                if not body:
+                    continue
+                current = stack[-1] if stack else last
+                if current is not None:
+                    current["content"] = (current["content"] + "\n\n" if current["content"] else "") + body
+                continue
             if a["kind"] not in ("doc", "docclose", "sub"):
                 continue
             ev += 1
@@ -322,6 +375,7 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None):
                     "children": [],
                     "expanded": False}
             parent["children"].append(node)
+            last = node
             if a["kind"] == "doc":
                 stack.append(node)
 

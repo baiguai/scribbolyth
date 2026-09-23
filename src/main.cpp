@@ -38,7 +38,8 @@ Developer documentation for Scribbolyth.
 /*[/Introduction/Key Codes]
 Key Codes
 
-...
+Key codes are defined within the ./config/commands.conf file.
+
 */
 
 
@@ -49,10 +50,11 @@ Key Codes
     Scribbolyth's application entry point.
 */
 int main(int, char** argv) {
-    /*+ Declarations:
-    * state
-        The application's persistent state.
+    /*!
+        Declarations:
+        Constructs the persistent editor state as well as the editor and treeview elements.
 
+        --------------------------------------------------------------------------------
     */
     //>>
     auto state = std::make_shared<EditorState>();
@@ -71,18 +73,30 @@ int main(int, char** argv) {
     auto screen = ScreenInteractive::Fullscreen();
     auto quit = screen.ExitLoopClosure();
     //<<
+    /*|
+        --------------------------------------------------------------------------------
+    */
+    /*!*/
 
 #ifndef _WIN32
+    /*!
+        WIN32
+        For Windows, a termios struct is used.
+
+    */
+    //>>
     struct termios term;
     if (tcgetattr(STDIN_FILENO, &term) == 0)
     {
         term.c_lflag &= ~ISIG;
         tcsetattr(STDIN_FILENO, TCSANOW, &term);
     }
+    //<<
+    /*!*/
 #endif
 
-    /*! quit
-    quit
+    /*!
+        quit
     */
     /*+ quit - If unsaved, stop the exit.
     */
@@ -102,11 +116,10 @@ int main(int, char** argv) {
     state->commands["qa"] = "quit";
     state->commands["qa!"] = "quit_force";
 
-    /*+ calc - Performs simple calculator functions.
+    /*+
+        calc
+        Performs simple calculator functions and outputs the result to the command field.
     */
-
-    // :calc evaluates an arithmetic expression and leaves the result in the
-    // command field so it reads like a calculator.
     state->operations["calc"] = [state](const std::string& args, int)
     {
         std::string result;

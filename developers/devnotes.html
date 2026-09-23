@@ -948,7 +948,7 @@
       {
         "id": "8b019cc8",
         "title": "Key Codes",
-        "content": "Key Codes\n\n...",
+        "content": "Key Codes\n\nKey codes are defined within the ./config/commands.conf file.",
         "children": [],
         "expanded": false
       }
@@ -996,24 +996,31 @@
               {
                 "id": "33648a43",
                 "title": "Declarations:",
-                "content": "Declarations:\n   * state\n       The application's persistent state.",
+                "content": "Declarations:\nConstructs the persistent editor state as well as the editor and treeview elements.\n\n--------------------------------------------------------------------------------\n\nauto state = std::make_shared<EditorState>();\n\nauto editor_comp = scribbolyth::editor::MakeEditor(state);\nauto treeview_comp = scribbolyth::treeview::MakeTreeView(state);\n\nstate->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };\nstate->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };\n\nauto treeview_wrap = treeview_comp;\nauto editor_wrap = editor_comp;\n\nauto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);\n\nauto screen = ScreenInteractive::Fullscreen();\nauto quit = screen.ExitLoopClosure();\n\n--------------------------------------------------------------------------------",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "54af4659",
+                "id": "4302445e",
+                "title": "WIN32",
+                "content": "WIN32\nFor Windows, a termios struct is used.\n\nstruct termios term;\nif (tcgetattr(STDIN_FILENO, &term) == 0)\n{\n    term.c_lflag &= ~ISIG;\n    tcsetattr(STDIN_FILENO, TCSANOW, &term);\n}",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "1e0a460c",
                 "title": "quit",
-                "content": "quit\n   quit",
+                "content": "quit",
                 "children": [
                   {
-                    "id": "4302445e",
+                    "id": "19d04705",
                     "title": "quit - If unsaved, stop the exit.",
                     "content": "quit - If unsaved, stop the exit.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "fb8beac6",
+                    "id": "7c5eb9a8",
                     "title": "quit_force - Exit even if there are no unsaved changes.",
                     "content": "quit_force - Exit even if there are no unsaved changes.",
                     "children": [],
@@ -1023,82 +1030,82 @@
                 "expanded": false
               },
               {
-                "id": "19d04705",
-                "title": "calc - Performs simple calculator functions.",
-                "content": "calc - Performs simple calculator functions.",
+                "id": "cbfbe940",
+                "title": "calc",
+                "content": "calc\nPerforms simple calculator functions and outputs the result to the command field.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "7c5eb9a8",
+                "id": "d954ca81",
                 "title": "show_help - Shows the help dialog.",
                 "content": "show_help - Shows the help dialog.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "4fe6346e",
+                "id": "c5c6c9a9",
                 "title": "show_regex - Shows the REGEX dialog.",
                 "content": "show_regex - Shows the REGEX dialog.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "cbfbe940",
+                "id": "920f700a",
                 "title": "search_start - Shows the search dialog.",
                 "content": "search_start - Shows the search dialog.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "d954ca81",
+                "id": "35a17595",
                 "title": "search_results_start - Shows the search results node dialog.",
                 "content": "search_results_start - Shows the search results node dialog.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "c5c6c9a9",
+                "id": "e594c73b",
                 "title": "insert_link - Shows the links picker dialog.",
                 "content": "insert_link - Shows the links picker dialog.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "920f700a",
+                "id": "d78377b3",
                 "title": "bookmarks - Shows the bookmarks dialog.",
                 "content": "bookmarks - Shows the bookmarks dialog.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "35a17595",
+                "id": "974db498",
                 "title": "links - Shows the links dialog.",
                 "content": "links - Shows the links dialog.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "e594c73b",
+                "id": "5eff0529",
                 "title": "show_broke_links - Shows the broken links dialog.",
                 "content": "show_broke_links - Shows the broken links dialog.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "d78377b3",
+                "id": "58b5c626",
                 "title": "history - Shows the history dialog.",
                 "content": "history - Shows the history dialog.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "974db498",
+                "id": "00c4e256",
                 "title": "show_recent",
                 "content": "show_recent\n   show_recent - Shows the recently opened files.",
                 "children": [
                   {
-                    "id": "5eff0529",
+                    "id": "6a3d0036",
                     "title": "removed - Remove dead recent paths.",
                     "content": "removed - Remove dead recent paths.",
                     "children": [],
