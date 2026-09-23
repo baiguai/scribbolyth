@@ -28,6 +28,10 @@ Comment grammar (all harvested from files under src/):
                            documentation node's content (same attachment
                            rules as the //>> ... //<< snippet).
 
+Within any comment body, a line containing just dashes (e.g. ----) is
+expanded to an 80-character horizontal rule.  Raw code captured by
+//>> ... //<< is never rewritten.
+
 Every file that contains a /*! */ doc block produces a *folder* node named
 after the file (e.g. editor/editor.cpp -> editor > editor.cpp), hanging off
 the coderoot node.
@@ -244,6 +248,26 @@ def deindent(raw):
     return "\n".join(out)
 
 
+DASH_RULE_RE = re.compile(r"^[ \t]*-{3,}[ \t]*$")
+
+
+def expand_rules(text):
+    """Rewrite a line of just dashes (e.g. ----) as a full-width (80-char)
+    horizontal rule."""
+    out = []
+    for ln in text.split("\n"):
+        if DASH_RULE_RE.match(ln):
+            out.append("-" * 80)
+        else:
+            out.append(ln)
+    return "\n".join(out)
+
+
+def doc_text(raw):
+    """Shaped content for a doc-comment body (deindented + rule expansion)."""
+    return expand_rules(deindent(raw))
+
+
 def first_line(text):
     """First non-empty, trimmed line (mirrors the app's title sync)."""
     for line in text.split("\n"):
@@ -320,7 +344,7 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None):
     def apply_custom(a):
         if a["kind"] == "manual":
             node = tree.ensure(split_path(a["path"]))
-            node["content"] = deindent(a["body"])
+            node["content"] = doc_text(a["body"])
         elif a["kind"] == "folder":
             tree.ensure(split_path(a["path"]))
 
@@ -347,7 +371,8 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None):
         ev = 0
         for a in actions:
             if a["kind"] in ("code", "append"):
-                body = deindent(a["body"])
+                body = (deindent(a["body"]) if a["kind"] == "code"
+                        else expand_rules(deindent(a["body"])))
                 if not body:
                     continue
                 current = stack[-1] if stack else last
@@ -368,7 +393,7 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None):
                 parent = stack[-1]
             else:
                 parent = tree.ensure(coderoot_parts + file_parts)
-            content = deindent(a["body"])
+            content = doc_text(a["body"])
             node = {"id": tree._node_id(rel + "#n" + str(ev)),
                     "title": first_line(content) or "(untitled)",
                     "content": content,

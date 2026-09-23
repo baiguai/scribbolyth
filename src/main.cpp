@@ -39,22 +39,23 @@ Developer documentation for Scribbolyth.
 Key Codes
 
 Key codes are defined within the ./config/commands.conf file.
-
 */
 
 
 //!_coderoot=/Source Code
 
 /*!
-    main
+    Main
     Scribbolyth's application entry point.
+
+    int main(int, char** argv)
 */
 int main(int, char** argv) {
     /*!
-        Declarations:
+        Declarations
         Constructs the persistent editor state as well as the editor and treeview elements.
 
-        --------------------------------------------------------------------------------
+        ----
     */
     //>>
     auto state = std::make_shared<EditorState>();
@@ -74,7 +75,7 @@ int main(int, char** argv) {
     auto quit = screen.ExitLoopClosure();
     //<<
     /*|
-        --------------------------------------------------------------------------------
+        ----
     */
     /*!*/
 
@@ -96,13 +97,12 @@ int main(int, char** argv) {
 #endif
 
     /*!
-        quit
+        Operations
+        All of the key binding operations are declared here.
+
+        Examples:
     */
-    /*+ quit - If unsaved, stop the exit.
-    */
-    /*+ quit_force - Exit even if there are no unsaved changes.
-    */
-    /*!*/
+    //>>
     state->operations["quit"] = [state, quit](const std::string&, int)
     {
         if (state->changed)
@@ -115,11 +115,8 @@ int main(int, char** argv) {
     state->operations["quit_force"] = [quit](const std::string&, int) { quit(); };
     state->commands["qa"] = "quit";
     state->commands["qa!"] = "quit_force";
+    //<<
 
-    /*+
-        calc
-        Performs simple calculator functions and outputs the result to the command field.
-    */
     state->operations["calc"] = [state](const std::string& args, int)
     {
         std::string result;
@@ -133,61 +130,41 @@ int main(int, char** argv) {
         state->command_keep_open = true;
     };
 
-    /*+ show_help - Shows the help dialog.
-    */
+    //>>
     bool show_help = false;
     state->operations["show_help"] = [&show_help](const std::string&, int) { show_help = true; };
+    //<<
 
-    /*+ show_regex - Shows the REGEX dialog.
-    */
     bool show_regex = false;
     state->operations["show_regex"] = [&show_regex](const std::string&, int) { show_regex = true; };
 
-    /*+ search_start - Shows the search dialog.
-    */
     bool show_search = false;
     state->operations["search_start"] = [&show_search](const std::string&, int) { show_search = true; };
 
-    /*+ search_results_start - Shows the search results node dialog.
-    */
     bool show_search_results = false;
     state->operations["search_results_start"] =
         [&show_search_results](const std::string&, int) { show_search_results = true; };
 
-    /*+ insert_link - Shows the links picker dialog.
-    */
     bool show_link_picker = false;
     state->operations["insert_link"] = [&show_link_picker](const std::string&, int) { show_link_picker = true; };
 
-    /*+ bookmarks - Shows the bookmarks dialog.
-    */
     bool show_bookmarks = false;
     state->operations["bookmarks"] = [&show_bookmarks](const std::string&, int) { show_bookmarks = true; };
     state->commands["bookmarks"] = "bookmarks";
 
-    /*+ links - Shows the links dialog.
-    */
+    //>>
     bool show_links = false;
     state->operations["links"] = [&show_links](const std::string&, int) { show_links = true; };
     state->commands["links"] = "links";
+    //<<
 
-    /*+ show_broke_links - Shows the broken links dialog.
-    */
     bool show_dead_links = false;
     state->operations["show_broke_links"] = [&show_dead_links](const std::string&, int) { show_dead_links = true; };
     state->commands["show_broke_links"] = "show_broke_links";
 
-    /*+ history - Shows the history dialog.
-    */
     bool show_history = false;
     state->operations["history"] = [&show_history](const std::string&, int) { show_history = true; };
 
-    /*! show_recent
-    show_recent - Shows the recently opened files.
-    */
-    /*+ removed - Remove dead recent paths.
-    */
-    /*!*/
     bool show_recent = false;
     auto recent_force = std::make_shared<bool>(false);
     const auto open_recent = [&show_recent, &state, &recent_force](bool force)
@@ -213,7 +190,13 @@ int main(int, char** argv) {
 
     bool show_file_browser = false;
     state->show_file_browser = &show_file_browser;
+    /*!*/
 
+    /*!
+        Config Paths
+        Set the commands, regex, html template, and init config paths.
+    */
+    //>>
     namespace fs = std::filesystem;
     fs::path config_path = fs::path(argv[0]).parent_path() / "commands.conf";
     if (!fs::exists(config_path))
@@ -226,19 +209,23 @@ int main(int, char** argv) {
     {
         regex_path = "regex.conf";
     }
+    //<<
     if (!scribbolyth::config::LoadConfig(config_path.string(), state))
     {
         std::cerr << "Warning: could not load config from " << config_path.string() << "\n";
         std::cerr << "Only the built-in ':qa' command is available.\n";
     }
 
+    //>>
     fs::path template_path = fs::path(argv[0]).parent_path() / "scribboleth.html";
     if (!fs::exists(template_path))
     {
         template_path = "scribboleth.html";
     }
     state->template_path = template_path.string();
+    //<<
 
+    //>>
     fs::path init_path;
     if (const char* env = std::getenv("SCRIBBOLYTH_INIT"); env != nullptr && *env != '\0')
     {
@@ -249,7 +236,13 @@ int main(int, char** argv) {
         init_path = fs::path(argv[0]).parent_path() / "init.conf";
     }
     state->init_path = init_path.string();
+    //<<
+    /*!*/
 
+    /*!
+        Recent Files
+        Recent file handling is done here - including cleaning out dead links.
+    */
     std::string last_file;
     if (scribbolyth::config::ReadInit(init_path.string(), last_file, state->recent_files) && !last_file.empty())
     {
@@ -267,7 +260,12 @@ int main(int, char** argv) {
                   << (removed == 1 ? "y" : "ies") << " from init.conf\n";
         scribbolyth::config::WriteInit(init_path.string(), last_file, state->recent_files);
     }
+    /*!*/
 
+    /*!
+        Command
+        The command input is caught here, including Escape and Return.
+    */
     InputOption command_option;
     command_option.transform = [](InputState state)
     {
@@ -324,7 +322,16 @@ int main(int, char** argv) {
         }
         return false;
     });
+    /*!*/
 
+    /*!
+        Ftxui
+        Handles the active child in the state.
+        Creates the containers to build the TUI.
+        Creates the various dialogs and adds them to a modals list:
+        Handles the showing of modal dialogs and the Screen loop.
+
+    */
     auto status_bar = Renderer([state]
     {
         std::string mode_str = ModeName(state->mode);
@@ -348,12 +355,18 @@ int main(int, char** argv) {
     int active_child = 0;
     state->active_child = &active_child;
 
+    //>>
     auto container = Container::Vertical({
         main_split | flex,
         command_handler,
         status_bar,
     }, &active_child);
+    //<<
 
+    /*|
+
+    */
+    //>>
     auto help_comp = scribbolyth::help::MakeHelpDialog(state, config_path.string(), &show_help);
     auto regex_comp = scribbolyth::regex::MakeRegexDialog(state, regex_path.string(), &show_regex);
     auto search_comp = scribbolyth::search::MakeSearchDialog(state, &show_search);
@@ -386,6 +399,7 @@ int main(int, char** argv) {
     {
         root = Modal(root, comp, show);
     }
+    //<<
 
     screen.Loop(root);
 
@@ -396,6 +410,7 @@ int main(int, char** argv) {
     state->operations.clear();
     state->focus_editor = nullptr;
     state->focus_treeview = nullptr;
+    /*!*/
 
     /*!*/
     return 0;

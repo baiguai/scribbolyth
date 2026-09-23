@@ -973,7 +973,7 @@
               {
                 "id": "cf8b9eff",
                 "title": "NewId",
-                "content": "NewId\nGenerates a new random ID for bookmarks.",
+                "content": "NewId\nGenerates a new random ID for bookmarks using an alphabet char array.\n\nstatic const char alphabet[] = \"abcdefghijklmnopqrstuvwxyz0123456789\";\n\nMersenne Twister logic:\n\nstd::random_device rd;\nstd::mt19937 gen(rd());\nstd::uniform_int_distribution<int> dist(0, static_cast<int>(sizeof(alphabet)) - 2);\nstd::string id;\nid.reserve(8);\nfor (int i = 0; i < 8; ++i) id += alphabet[dist(gen)];",
                 "children": [],
                 "expanded": false
               }
@@ -990,13 +990,13 @@
         "children": [
           {
             "id": "886fe746",
-            "title": "main",
-            "content": "main\nScribbolyth's application entry point.",
+            "title": "Main",
+            "content": "Main\nScribbolyth's application entry point.\n\nint main(int, char** argv)",
             "children": [
               {
                 "id": "33648a43",
-                "title": "Declarations:",
-                "content": "Declarations:\nConstructs the persistent editor state as well as the editor and treeview elements.\n\n--------------------------------------------------------------------------------\n\nauto state = std::make_shared<EditorState>();\n\nauto editor_comp = scribbolyth::editor::MakeEditor(state);\nauto treeview_comp = scribbolyth::treeview::MakeTreeView(state);\n\nstate->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };\nstate->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };\n\nauto treeview_wrap = treeview_comp;\nauto editor_wrap = editor_comp;\n\nauto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);\n\nauto screen = ScreenInteractive::Fullscreen();\nauto quit = screen.ExitLoopClosure();\n\n--------------------------------------------------------------------------------",
+                "title": "Declarations",
+                "content": "Declarations\nConstructs the persistent editor state as well as the editor and treeview elements.\n\n--------------------------------------------------------------------------------\n\nauto state = std::make_shared<EditorState>();\n\nauto editor_comp = scribbolyth::editor::MakeEditor(state);\nauto treeview_comp = scribbolyth::treeview::MakeTreeView(state);\n\nstate->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };\nstate->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };\n\nauto treeview_wrap = treeview_comp;\nauto editor_wrap = editor_comp;\n\nauto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);\n\nauto screen = ScreenInteractive::Fullscreen();\nauto quit = screen.ExitLoopClosure();\n\n--------------------------------------------------------------------------------",
                 "children": [],
                 "expanded": false
               },
@@ -1009,109 +1009,37 @@
               },
               {
                 "id": "1e0a460c",
-                "title": "quit",
-                "content": "quit",
-                "children": [
-                  {
-                    "id": "19d04705",
-                    "title": "quit - If unsaved, stop the exit.",
-                    "content": "quit - If unsaved, stop the exit.",
-                    "children": [],
-                    "expanded": false
-                  },
-                  {
-                    "id": "7c5eb9a8",
-                    "title": "quit_force - Exit even if there are no unsaved changes.",
-                    "content": "quit_force - Exit even if there are no unsaved changes.",
-                    "children": [],
-                    "expanded": false
-                  }
-                ],
-                "expanded": false
-              },
-              {
-                "id": "cbfbe940",
-                "title": "calc",
-                "content": "calc\nPerforms simple calculator functions and outputs the result to the command field.",
+                "title": "Operations",
+                "content": "Operations\nAll of the key binding operations are declared here.\n\nExamples:\n\nstate->operations[\"quit\"] = [state, quit](const std::string&, int)\n{\n    if (state->changed)\n    {\n        state->status = \"Unsaved changes - use :w to save or :qa! to quit without saving\";\n        return;\n    }\n    quit();\n};\nstate->operations[\"quit_force\"] = [quit](const std::string&, int) { quit(); };\nstate->commands[\"qa\"] = \"quit\";\nstate->commands[\"qa!\"] = \"quit_force\";\n\nbool show_help = false;\nstate->operations[\"show_help\"] = [&show_help](const std::string&, int) { show_help = true; };\n\nbool show_links = false;\nstate->operations[\"links\"] = [&show_links](const std::string&, int) { show_links = true; };\nstate->commands[\"links\"] = \"links\";",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "d954ca81",
-                "title": "show_help - Shows the help dialog.",
-                "content": "show_help - Shows the help dialog.",
+                "id": "7c5eb9a8",
+                "title": "Config Paths",
+                "content": "Config Paths\nSet the commands, regex, html template, and init config paths.\n\nnamespace fs = std::filesystem;\nfs::path config_path = fs::path(argv[0]).parent_path() / \"commands.conf\";\nif (!fs::exists(config_path))\n{\n    config_path = \"commands.conf\";\n}\n\nfs::path regex_path = fs::path(argv[0]).parent_path() / \"regex.conf\";\nif (!fs::exists(regex_path))\n{\n    regex_path = \"regex.conf\";\n}\n\nfs::path template_path = fs::path(argv[0]).parent_path() / \"scribboleth.html\";\nif (!fs::exists(template_path))\n{\n    template_path = \"scribboleth.html\";\n}\nstate->template_path = template_path.string();\n\nfs::path init_path;\nif (const char* env = std::getenv(\"SCRIBBOLYTH_INIT\"); env != nullptr && *env != '\\0')\n{\n    init_path = env;\n}\nelse\n{\n    init_path = fs::path(argv[0]).parent_path() / \"init.conf\";\n}\nstate->init_path = init_path.string();",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "cbfbe940",
+                "title": "Recent Files",
+                "content": "Recent Files\nRecent file handling is done here - including cleaning out dead links.",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "c5c6c9a9",
-                "title": "show_regex - Shows the REGEX dialog.",
-                "content": "show_regex - Shows the REGEX dialog.",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "920f700a",
-                "title": "search_start - Shows the search dialog.",
-                "content": "search_start - Shows the search dialog.",
+                "title": "Command",
+                "content": "Command\nThe command input is caught here, including Escape and Return.",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "35a17595",
-                "title": "search_results_start - Shows the search results node dialog.",
-                "content": "search_results_start - Shows the search results node dialog.",
+                "title": "Ftxui",
+                "content": "Ftxui\nHandles the active child in the state.\nCreates the containers to build the TUI.\nCreates the various dialogs and adds them to a modals list:\nHandles the showing of modal dialogs and the Screen loop.\n\nauto container = Container::Vertical({\n    main_split | flex,\n    command_handler,\n    status_bar,\n}, &active_child);\n\nauto help_comp = scribbolyth::help::MakeHelpDialog(state, config_path.string(), &show_help);\nauto regex_comp = scribbolyth::regex::MakeRegexDialog(state, regex_path.string(), &show_regex);\nauto search_comp = scribbolyth::search::MakeSearchDialog(state, &show_search);\nauto link_picker_comp = scribbolyth::search::MakeSearchDialog(state, &show_link_picker, scribbolyth::search::DialogMode::InsertLink);\nauto search_results_comp = scribbolyth::search::MakeSearchDialog(state, &show_search_results, scribbolyth::search::DialogMode::CreateResults);\nauto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);\nauto links_comp = scribbolyth::links::MakeLinksDialog(state, &show_links);\nauto dead_links_comp = scribbolyth::brokenlinks::MakeDeadLinksDialog(state, &show_dead_links);\nauto history_comp = scribbolyth::history::MakeHistoryDialog(state, &show_history);\nauto recent_comp = scribbolyth::recent::MakeRecentDialog(state, &show_recent, recent_force);\nauto undo_comp = scribbolyth::undo::MakeUndoDialog(state, &show_undo);\nauto browser_comp = scribbolyth::browser::MakeFileBrowserDialog(state, &show_file_browser);\nauto modals = {\n    std::tuple(help_comp,        &show_help),\n    std::tuple(regex_comp,       &show_regex),\n    std::tuple(search_comp,      &show_search),\n    std::tuple(search_results_comp, &show_search_results),\n    std::tuple(link_picker_comp, &show_link_picker),\n    std::tuple(bookmarks_comp,   &show_bookmarks),\n    std::tuple(links_comp,       &show_links),\n    std::tuple(dead_links_comp,  &show_dead_links),\n    std::tuple(history_comp,     &show_history),\n    std::tuple(recent_comp,      &show_recent),\n    std::tuple(undo_comp,        &show_undo),\n    std::tuple(browser_comp,     &show_file_browser),\n};\n\nauto root = container;\nfor (auto& [comp, show] : modals)\n{\n    root = Modal(root, comp, show);\n}",
                 "children": [],
-                "expanded": false
-              },
-              {
-                "id": "e594c73b",
-                "title": "insert_link - Shows the links picker dialog.",
-                "content": "insert_link - Shows the links picker dialog.",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "d78377b3",
-                "title": "bookmarks - Shows the bookmarks dialog.",
-                "content": "bookmarks - Shows the bookmarks dialog.",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "974db498",
-                "title": "links - Shows the links dialog.",
-                "content": "links - Shows the links dialog.",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "5eff0529",
-                "title": "show_broke_links - Shows the broken links dialog.",
-                "content": "show_broke_links - Shows the broken links dialog.",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "58b5c626",
-                "title": "history - Shows the history dialog.",
-                "content": "history - Shows the history dialog.",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "00c4e256",
-                "title": "show_recent",
-                "content": "show_recent\n   show_recent - Shows the recently opened files.",
-                "children": [
-                  {
-                    "id": "6a3d0036",
-                    "title": "removed - Remove dead recent paths.",
-                    "content": "removed - Remove dead recent paths.",
-                    "children": [],
-                    "expanded": false
-                  }
-                ],
                 "expanded": false
               }
             ],
