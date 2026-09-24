@@ -14,6 +14,11 @@
 
 namespace scribbolyth::history
 {
+    /*!
+        Record History String
+
+        !_method
+    */
     void Record(EditorState& state, const std::string& id)
     {
         if (id.empty()) return;
@@ -27,32 +32,72 @@ namespace scribbolyth::history
                           history.end() - EditorState::kHistoryMax);
         }
     }
+    //!
 
     namespace
     {
+        /*!
+            Pad Right
+
+            !_method
+        */
         std::string PadRight(const std::string& s, std::size_t width)
         {
             if (s.size() >= width) return s;
             return s + std::string(width - s.size(), ' ');
         }
+        //!
 
+        /*!
+            Entry Struct
+
+        */
+        //>>
         struct Entry
         {
             treeview::TreeNode* node = nullptr;
             int depth = 0;
         };
+        //<<
+        //!
     }
 
+    /*!
+        History Dialog Class
+    */
     class HistoryDialog : public ftxui::ComponentBase
     {
     public:
+        /*!
+            Public Members
+        */
+
+        /*!
+            History Dialog Constructor
+
+            !_ctor
+        */
         HistoryDialog(std::shared_ptr<EditorState> state, bool* show)
             : state_(std::move(state)), show_(show) {}
+        //!
 
+        /*!
+            Variables
+
+            ----
+        */
+        //>>
         bool Focusable() const override { return true; }
 
         bool pending_g_ = false;
+        //<<
+        //!
 
+        /*!
+            Ftxui Event
+
+            !_method
+        */
         bool OnEvent(ftxui::Event event) override
         {
             if (event == ftxui::Event::Escape)
@@ -100,7 +145,13 @@ namespace scribbolyth::history
             }
             return true;
         }
+        //!
 
+        /*!
+            Render
+
+            !_method
+        */
         ftxui::Element Render() override
         {
             Recompute();
@@ -150,15 +201,33 @@ namespace scribbolyth::history
                    ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
         }
+        //!
+
+        //!
 
     private:
+        /*!
+            Private Members
+        */
+
+        /*!
+            Close the Dialog
+
+            !_method
+        */
         void Close()
         {
             *show_ = false;
             selection_ = 0;
             scroll_ = 0;
         }
+        //!
 
+        /*!
+            Jump to Tree Node
+
+            !_method
+        */
         void Jump()
         {
             if (entries_.empty()) return;
@@ -171,12 +240,24 @@ namespace scribbolyth::history
             state_->status = "";
             Close();
         }
+        //!
 
+        /*!
+            Move Selection to Start
+
+            !_method
+        */
         void MoveToStart()
         {
             selection_ = 0;
         }
+        //!
 
+        /*!
+            Move Selection to End
+
+            !_method
+        */
         void MoveToEnd()
         {
             if (!entries_.empty())
@@ -184,14 +265,28 @@ namespace scribbolyth::history
                 selection_ = static_cast<int>(entries_.size()) -1;
             }
         }
+        //!
 
+        /*!
+            Change Selection Up / Down
+
+            !_method
+        */
         void MoveSelection(int dir)
         {
             if (entries_.empty()) return;
             const int total = static_cast<int>(entries_.size());
             selection_ = std::max(0, std::min(total - 1, selection_ + dir));
         }
+        //!
 
+        /*!
+            Recompute
+
+            !_method
+
+            Recomputes values etc from the state_
+        */
         void Recompute()
         {
             std::map<std::string, Entry> by_id;
@@ -235,7 +330,14 @@ namespace scribbolyth::history
 
             selection_ = std::max(0, std::min(selection_, static_cast<int>(entries_.size()) - 1));
         }
+        //!
 
+        /*!
+            Variables
+
+            ----
+        */
+        //>>
         std::shared_ptr<EditorState> state_;
         bool* show_;
         std::vector<Entry> entries_;
@@ -244,10 +346,21 @@ namespace scribbolyth::history
         int scroll_ = 0;
         int content_width_ = 20;
         static constexpr int kVisibleRows = 18;
-    };
+        //<<
+        //!
 
+        //!
+    };
+    //!
+
+    /*!
+        Make History Dialog
+
+        !_method
+    */
     ftxui::Component MakeHistoryDialog(std::shared_ptr<EditorState> state, bool* show)
     {
         return ftxui::Make<HistoryDialog>(std::move(state), show);
     }
+    //!
 }
