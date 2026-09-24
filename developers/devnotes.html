@@ -2117,6 +2117,97 @@
                     "content": "Treeview Related\n\n--------------------------------------------------------------------------------\n\nint treeview_width = kDefaultTreeviewWidth;\n\nscribbolyth::treeview::TreeNode* active_node = nullptr;\nstd::string status;\nstd::string template_path;\nstd::string init_path;\nstd::vector<scribbolyth::bookmark::Bookmark> bookmarks;",
                     "children": [],
                     "expanded": false
+                  },
+                  {
+                    "id": "35ff38d9",
+                    "title": "Theme Material",
+                    "content": "Theme Material\n\nTheme material captured from a .html import, carried through the session\nso a later HTML export reproduces it (colors, grid, custom CSS).\n\n--------------------------------------------------------------------------------\n\nscribbolyth::html::HtmlTheme html_theme;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "ce10f919",
+                    "title": "Viewed Node History",
+                    "content": "Viewed Node History\n\nViewed-node history: node ids of every selected node that has text,\nmost recent last, deduplicated, capped at kHistoryMax. Populated by\nthe treeview; the history dialog resolves ids to live nodes.\n\n--------------------------------------------------------------------------------\n\nstd::vector<std::string> history;\nstatic constexpr std::size_t kHistoryMax = 30;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "f5966244",
+                    "title": "Recent Files",
+                    "content": "Recent Files\n\n--------------------------------------------------------------------------------\n\nstd::vector<std::string> recent_files;\nstatic constexpr std::size_t kRecentMax = 20;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "044c3ae9",
+                    "title": "Node Undo History",
+                    "content": "Node Undo History\n\nDocument undo history. A snapshot is pushed before every content\nmutation (tree edits and text edits); `undo_stack` is newest last,\n`redo_stack` newest first. `snapshot_undo`/`apply_undo`/`clear_undo`\nare installed by the treeview. The undo dialog reads the stacks\ndirectly and applies a rollback through `apply_undo`.\n\n--------------------------------------------------------------------------------\n\nstd::vector<UndoState> undo_stack;\nstd::vector<UndoState> redo_stack;\nstatic constexpr std::size_t kUndoMax = 50;\n\nstd::function<void()> snapshot_undo;\n// `index` 0 = newest snapshot.\nstd::function<void(std::size_t index)> apply_undo;\nstd::function<void()> clear_undo;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "6c0d499e",
+                    "title": "File Browser Related",
+                    "content": "File Browser Related\n\nFile browser dialog. `show_file_browser` is the Modal visibility flag;\n`browser_start_dir` is the directory to open in; `browser_pick` is\ninvoked with the chosen file's path when the user presses Enter.\n`browser_command` is the `:command` name of the invoking op for\nsave/export-style ops: when non-empty, Enter on a folder closes the\ndialog and reopens the command line prefilled with that folder so the\nuser can type a filename (open/import-style ops leave it empty and\nEnter on a folder simply navigates into it).\n\n--------------------------------------------------------------------------------\n\nbool* show_file_browser = nullptr;\nstd::string browser_start_dir;\nstd::string browser_command;\nstd::function<void(const std::string&)> browser_pick;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "b9534292",
+                    "title": "Focus",
+                    "content": "Focus\n\n--------------------------------------------------------------------------------\n\nstd::function<void()> focus_editor;\nstd::function<void()> focus_treeview;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "6e90fb60",
+                    "title": "Getting All Nodes",
+                    "content": "Getting All Nodes\n\nFlat enumeration of the document: (node pointer, depth) in document\norder, ignoring expansion state. Set by the treeview.\n\n--------------------------------------------------------------------------------\n\nstd::function<std::vector<std::pair<scribbolyth::treeview::TreeNode*, int>>()> collect_all_nodes;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "4be4f201",
+                    "title": "Expand to Node",
+                    "content": "Expand to Node\n\nSelect `node` in the tree, expanding every ancestor so it is visible.\nSet by the treeview.\n\n--------------------------------------------------------------------------------\n\nstd::function<void(scribbolyth::treeview::TreeNode*)> reveal_node;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "73783b1f",
+                    "title": "Reset Cursor Position",
+                    "content": "Reset Cursor Position\n\nPosition the editor cursor on a 0-based line of the currently active\nnode. Set by the editor.\n\n--------------------------------------------------------------------------------\n\nstd::function<void(int)> reveal_line;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "13dc4c67",
+                    "title": "Text Insertion",
+                    "content": "Text Insertion\n\nInsert `text` into the currently active node at the editor cursor, as a\nsingle undoable edit. Set by the editor; used by dialogs to inject text\n(e.g. a node link picked from a search) at the cursor.\n\n--------------------------------------------------------------------------------\n\nstd::function<void(const std::string&)> insert_text_at_cursor;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "341b2976",
+                    "title": "Find in Node Related",
+                    "content": "Find in Node Related\n\nVim-style find state (the last '/' search). `search_matches` holds the\nnodes that matched the last query, in document order; `search_index` is\nthe currently selected match (n/N move it, wrapping). `search_active`\nis cleared by ':noh' to hide the match highlight; the query and match\nlist are kept so n/N keep working, as in Vim.\n\n--------------------------------------------------------------------------------\n\nstd::string search_query;\nstd::vector<scribbolyth::treeview::TreeNode*> search_matches;\nint search_index = -1;\nbool search_active = false;\n\n// Set when a '/' find executes; the editor consumes it to move its cursor\n// to the first occurrence in the (possibly unchanged) active node so the\n// match is revealed in the text, as in Vim.\nbool search_reveal_pending = false;\n\n// Step to the next (dir > 0) or previous (dir < 0) find result. Set by the\n// editor: it moves the cursor through the occurrences of the query inside\n// the active node's text (wrapping within the node), as in Vim.\nstd::function<void(int)> search_jump;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "8afacbc9",
+                    "title": "Operations and Commands",
+                    "content": "Operations and Commands\n\n--------------------------------------------------------------------------------\n\nstd::map<std::string, scribbolyth::op::Operation> operations;\nstd::map<std::string, std::string> commands;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "3fbceae2",
+                    "title": "Key Map Related",
+                    "content": "Key Map Related\n\n--------------------------------------------------------------------------------\n\nKeymap normal_keymap;\nKeymap insert_keymap;\nKeymap visual_keymap;\nKeymap visual_block_keymap;\nKeymap tree_keymap;\n\nKeymap& ActiveKeymap() {\n    switch (mode) {\n        case Mode::TREE:            return tree_keymap;\n        case Mode::INSERT:          return insert_keymap;\n        case Mode::VISUAL:\n        case Mode::VISUAL_LINE:     return visual_keymap;\n        case Mode::VISUAL_BLOCK:    return visual_block_keymap;\n        case Mode::COMMAND:         return normal_keymap;\n        default:                    return normal_keymap;\n    }\n}",
+                    "children": [],
+                    "expanded": false
                   }
                 ],
                 "expanded": false
