@@ -19,6 +19,13 @@ namespace scribbolyth::editor
 
     namespace
     {
+        /*!
+            Is Blank
+
+            !_method
+
+            This is a helper method for when the editor is seeking for the end of words etc.
+        */
         bool IsBlank(const std::string& s)
         {
             for (char c : s)
@@ -27,12 +34,26 @@ namespace scribbolyth::editor
             }
             return true;
         }
+        //!
 
+        /*!
+            Is Editor in Visual Mode
+
+            !_method
+        */
         bool IsVisualMode(Mode m)
         {
             return m == Mode::VISUAL || m == Mode::VISUAL_LINE || m == Mode::VISUAL_BLOCK;
         }
+        //!
 
+        /*!
+            Full Trim
+
+            !_method
+
+            Trims both ends of a string.
+        */
         std::string TrimBoth(const std::string& s)
         {
             std::size_t start = 0;
@@ -41,9 +62,16 @@ namespace scribbolyth::editor
             while (end > start && (s[end - 1] == ' ' || s[end - 1] == '\t')) --end;
             return s.substr(start, end - start);
         }
+        //!
 
-        // A markdown table separator row: "| --- | --- |", "+-----+-----+" or
-        // a bare "----" (the web app's dividerPattern).
+        /*!
+            Table Divider Line Check
+
+            !_method
+
+            A markdown table separator row: "| --- | --- |", "+-----+-----+" or
+            a bare "----" (the web app's dividerPattern).
+        */
         bool IsDividerLine(const std::string& s)
         {
             std::string t;
@@ -63,7 +91,16 @@ namespace scribbolyth::editor
             while (i < t.size() && t[i] == '-') ++i;
             return i == t.size();
         }
+        //!
 
+
+        /*!
+            Split Line Into Cells
+
+            !_method
+
+            This is used when creating / updating tables.
+        */
         std::vector<std::string> SplitCells(const std::string& line)
         {
             std::vector<std::string> cells;
@@ -89,26 +126,47 @@ namespace scribbolyth::editor
             }
             return cells;
         }
+        //!
 
-        // Read the system clipboard (Win32 API on Windows, wl-paste/xclip/xsel
-        // on POSIX). Returns "" when nothing is available or the clipboard is
-        // empty.
+        /*!
+            Read Clipboard
+
+            !_method
+
+            Read the system clipboard (Win32 API on Windows, wl-paste/xclip/xsel
+            on POSIX). Returns "" when nothing is available or the clipboard is
+            empty.
+        */
         std::string ReadClipboard()
         {
             return scribbolyth::clipboard::Read();
         }
+        //!
 
-        // Write to the system clipboard (Win32 API on Windows,
-        // wl-copy/xclip/xsel on POSIX). Returns false when no tool is
-        // available.
+        /*!
+            Write to the Clipboard
+
+            !_method
+
+            Write to the system clipboard (Win32 API on Windows,
+            wl-copy/xclip/xsel on POSIX). Returns false when no tool is
+            available.
+        */
         bool WriteClipboard(const std::string& text)
         {
             return scribbolyth::clipboard::Write(text);
         }
+        //!
 
-        // Split "old/new" at the first unescaped '/'. A backslash-slash
-        // ("\/") is a literal slash and is unescaped in both parts. Returns
-        // false when no separator is present.
+        /*!
+            Parse Replacement Arguments
+
+            !_method
+
+            Split "old/new" at the first unescaped '/'. A backslash-slash
+            ("\/") is a literal slash and is unescaped in both parts. Returns
+            false when no separator is present.
+        */
         bool ParseReplaceArgs(const std::string& args, std::string& old_text,
                               std::string& new_text)
         {
@@ -147,11 +205,19 @@ namespace scribbolyth::editor
             unescape(new_text);
             return true;
         }
+        //!
 
-        // A transparent leaf node that records the height of the box it is
-        // assigned each frame. Rendered as an overlay share of the editor view,
-        // it reports the editor's viewport height so the trailing scroll-past-
-        // bottom padding can be sized to about half the viewport (Vim-like).
+        /*!
+            Scroll Past Helper
+
+            !_method
+
+
+            A transparent leaf node that records the height of the box it is
+            assigned each frame. Rendered as an overlay share of the editor view,
+            it reports the editor's viewport height so the trailing scroll-past-
+            bottom padding can be sized to about half the viewport (Vim-like).
+        */
         class BoxRecorder : public ftxui::Node
         {
             public:
@@ -172,11 +238,24 @@ namespace scribbolyth::editor
             private:
                 int& out_height_;
         };
+        //!
     }
 
+    /*!
+        The Editor Class
+    */
     class Editor : public ftxui::ComponentBase
     {
         public:
+            /*!
+                Public Members
+            */
+
+            /*!
+                Constructor
+
+                !_ctor
+            */
             Editor(std::shared_ptr<EditorState> state) : state_(std::move(state))
             {
                 state_->operations["cursor_up"] = [this](const std::string&, int count)
@@ -552,6 +631,13 @@ namespace scribbolyth::editor
                     }
                 };
             }
+            //!
+
+            /*!
+                Render the Editor
+
+                !_method
+            */
             ftxui::Element Render() override
             {
                 LoadIfChanged();
@@ -743,10 +829,25 @@ namespace scribbolyth::editor
                     std::make_shared<BoxRecorder>(viewport_height_);
                 return ftxui::dbox({content, tracker});
             }
+            //!
+
+            /*!
+                Focusable Const
+
+            */
+            //>>
             bool Focusable() const override
             {
                 return true;
             }
+            //<<
+            //!
+
+            /*!
+                Ftxui Event
+
+                !_method
+            */
             bool OnEvent(ftxui::Event event) override
             {
                 const bool visual_before = IsVisualMode(state_->mode);
@@ -803,8 +904,20 @@ namespace scribbolyth::editor
                 }
                 return false;
             }
+            //!
+
+            //!
 
         private:
+            /*!
+                Private Members
+            */
+
+            /*!
+                Editable Flag
+
+                !_method
+            */
             bool Editable()
             {
                 LoadIfChanged();
@@ -812,12 +925,24 @@ namespace scribbolyth::editor
                     && state_->mode != Mode::TREE
                     && state_->mode != Mode::COMMAND;
             }
+            //!
 
+            /*!
+                Load if Changed
+
+                !_method
+            */
             void LoadIfChanged()
             {
-                // Compare by id, not just pointer: nodes live in std::vectors,
-                // so erasing one (e.g. deleting a node) can leave a different
-                // node at the same address as the previously loaded one.
+                /*|
+
+                    How Comparison is Done:
+
+                    Compare by id, not just pointer: nodes live in std::vectors,
+                    so erasing one (e.g. deleting a node) can leave a different
+                    node at the same address as the previously loaded one.
+
+                //!
                 const std::string cur_id = state_->active_node
                                                ? state_->active_node->id : "";
                 if (active_ == state_->active_node && active_id_ == cur_id) return;
@@ -839,10 +964,17 @@ namespace scribbolyth::editor
                 last_col_ = 0;
                 JumpToFirstSearchMatch();
             }
+            //!
 
-            // Move the cursor to the first occurrence of the active search
-            // query in the freshly loaded node, so the '/' find and n/N
-            // navigation reveal the match in the editor (as in Vim).
+            /*!
+                Select First Search Match
+
+                !_method
+
+                Move the cursor to the first occurrence of the active search
+                query in the freshly loaded node, so the '/' find and n/N
+                navigation reveal the match in the editor (as in Vim).
+            */
             void JumpToFirstSearchMatch()
             {
                 if (!state_->search_active || active_ == nullptr) return;
@@ -864,8 +996,15 @@ namespace scribbolyth::editor
                     }
                 }
             }
+            //!
 
-            // Place the cursor on (row, col), clamped to the document.
+            /*!
+                Move Cursor to Position
+
+                !_method
+
+                Place the cursor on (row, col), clamped to the document.
+            */
             void SetCursor(int row, int col)
             {
                 if (lines_.empty()) return;
@@ -875,12 +1014,19 @@ namespace scribbolyth::editor
                 visual_row_ = -1;
                 visual_col_ = -1;
             }
+            //!
 
-            // Step the cursor to the next (dir > 0) or previous (dir < 0)
-            // occurrence of the active search query inside the current node's
-            // text, wrapping around like Vim's n/N. Also works while the
-            // highlight is hidden by ':noh' (the query is kept). Does nothing
-            // when there is no search or the node has no occurrences.
+            /*!
+                Search Results Navigation
+
+                !_method
+
+                Step the cursor to the next (dir > 0) or previous (dir < 0)
+                occurrence of the active search query inside the current node's
+                text, wrapping around like Vim's n/N. Also works while the
+                highlight is hidden by ':noh' (the query is kept). Does nothing
+                when there is no search or the node has no occurrences.
+            */
             void StepSearchOccurrence(int dir)
             {
                 if (active_ == nullptr) return;
@@ -937,10 +1083,17 @@ namespace scribbolyth::editor
                     SetCursor(occs.back().line, occs.back().col);
                 }
             }
+            //!
 
-            // The word (letters, digits, '_') under the editor cursor, as Vim
-            // defines it for '*'. When the cursor sits right after a word,
-            // that word is used.
+            /*!
+                Get Word Under Cursor
+
+                !_method
+
+                The word (letters, digits, '_') under the editor cursor, as Vim
+                defines it for '*'. When the cursor sits right after a word,
+                that word is used.
+            */
             std::string WordUnderCursor() const
             {
                 if (lines_.empty()) return "";
@@ -970,11 +1123,18 @@ namespace scribbolyth::editor
                 return line.substr(static_cast<std::size_t>(start),
                                    static_cast<std::size_t>(end - start));
             }
+            //!
 
-            // Vim '*': search for the word under the cursor and jump to its
-            // next occurrence (wrapping). The word becomes the active find
-            // query, so n/N continue stepping through it and the highlight
-            // shows every node that contains it.
+            /*!
+                Search Word Under Cursor
+
+                !_method
+
+                Vim '*': search for the word under the cursor and jump to its
+                next occurrence (wrapping). The word becomes the active find
+                query, so n/N continue stepping through it and the highlight
+                shows every node that contains it.
+            */
             void SearchWordUnderCursor()
             {
                 if (active_ == nullptr) return;
@@ -995,9 +1155,16 @@ namespace scribbolyth::editor
                     : static_cast<int>(it - state_->search_matches.begin());
                 StepSearchOccurrence(+1);
             }
+            //!
 
-            // Replace every occurrence of `old_text` in `line` with `new_text`,
-            // counting the replacements.
+            /*!
+                Replace All Text
+
+                !_method
+
+                Replace every occurrence of `old_text` in `line` with `new_text`,
+                counting the replacements.
+            */
             void ReplaceAllInString(std::string& line, const std::string& old_text,
                                     const std::string& new_text, int& count)
             {
@@ -1010,8 +1177,15 @@ namespace scribbolyth::editor
                     ++count;
                 }
             }
+            //!
 
-            // Replace within the half-open column range [lo, hi) of `line`.
+            /*!
+                Replace Text in Range
+
+                !_method
+
+                Replace within the half-open column range [lo, hi) of `line`.
+            */
             void ReplaceRange(std::string& line, int lo, int hi,
                               const std::string& old_text,
                               const std::string& new_text, int& count)
@@ -1025,7 +1199,13 @@ namespace scribbolyth::editor
                 line.replace(static_cast<std::size_t>(lo),
                              static_cast<std::size_t>(hi - lo), seg);
             }
+            //!
 
+            /*!
+                Replaced Message
+
+                !_method
+            */
             void FinishReplace(int count)
             {
                 if (count > 0)
@@ -1038,12 +1218,19 @@ namespace scribbolyth::editor
                     state_->status = "No matches replaced";
                 }
             }
+            //!
 
-            // Vim ':replace old/new' (also bound to 'R'): literal, global
-            // replace of `old` with `new` inside the current node's text. In
-            // NORMAL mode the whole node text is processed (like :%s/../g);
-            // in VISUAL/VISUAL_LINE/VISUAL_BLOCK only the selected range is
-            // touched. Only this node's text is ever changed.
+            /*!
+                Replace Text
+
+                !_method
+
+                Vim ':replace old/new' (also bound to 'R'): literal, global
+                replace of `old` with `new` inside the current node's text. In
+                NORMAL mode the whole node text is processed (like :%s/../g);
+                in VISUAL/VISUAL_LINE/VISUAL_BLOCK only the selected range is
+                touched. Only this node's text is ever changed.
+            */
             void ReplaceText(const std::string& args)
             {
                 if (active_ == nullptr) return;
@@ -1145,7 +1332,13 @@ namespace scribbolyth::editor
                 Save();
                 FinishReplace(count);
             }
+            //!
 
+            /*!
+                Save Current File
+
+                !_method
+            */
             void Save()
             {
                 if (active_ == nullptr) return;
@@ -1166,10 +1359,17 @@ namespace scribbolyth::editor
                     scribbolyth::history::Record(*state_, active_->id);
                 }
             }
+            //!
 
-            // Rebuild the selected rows (or the current line when no VISUAL
-            // selection is active) into a padded markdown table with a
-            // "+---+" separator, mirroring the web app's formatMarkdownTable.
+            /*!
+                Rebuild Table
+
+                !_method
+
+                Rebuild the selected rows (or the current line when no VISUAL
+                selection is active) into a padded markdown table with a
+                "+---+" separator, mirroring the web app's formatMarkdownTable.
+            */
             void FormatTable()
             {
                 if (active_ == nullptr) return;
@@ -1292,7 +1492,13 @@ namespace scribbolyth::editor
                 Save();
                 state_->status = "Table updated";
             }
+            //!
 
+            /*!
+                Split Lines
+
+                !_method
+            */
             static std::vector<std::string> SplitLines(const std::string& text)
             {
                 std::vector<std::string> out;
@@ -1311,20 +1517,36 @@ namespace scribbolyth::editor
                 if (out.empty()) out.push_back("");
                 return out;
             }
+            //!
 
-            // ASCII-only case folding: the editor is byte-oriented (columns =
-            // bytes), so folding a full byte would corrupt UTF-8 text. Other
-            // bytes (letters with diacritics, CJK, emoji, ...) are left as-is.
+            /*!
+                To Upper / To Lower
+
+                !_method
+            */
             static char ToUpperAscii(char c)
             {
                 return (c >= 'a' && c <= 'z') ? static_cast<char>(c - 'a' + 'A') : c;
             }
+            /*|
 
+                !_method
+
+                ASCII-only case folding: the editor is byte-oriented (columns =
+                bytes), so folding a full byte would corrupt UTF-8 text. Other
+                bytes (letters with diacritics, CJK, emoji, ...) are left as-is.
+            */
             static char ToLowerAscii(char c)
             {
                 return (c >= 'A' && c <= 'Z') ? static_cast<char>(c - 'A' + 'a') : c;
             }
+            //!
 
+            /*!
+                Clamp
+
+                !_method
+            */
             void Clamp()
             {
                 if (lines_.empty()) lines_.push_back("");
@@ -1332,7 +1554,13 @@ namespace scribbolyth::editor
                 if (state_->mode != Mode::VISUAL_BLOCK)
                     col_ = std::max(0, std::min(col_, static_cast<int>(lines_[row_].size())));
             }
+            //!
 
+            /*!
+                Move Cursor Up
+
+                !_method
+            */
             void CursorUp()
             {
                 if (row_ > 0)
@@ -1347,7 +1575,13 @@ namespace scribbolyth::editor
                     col_ = 0;
                 }
             }
+            //!
 
+            /*!
+                Move Cursor Down
+
+                !_method
+            */
             void CursorDown()
             {
                 if (row_ < static_cast<int>(lines_.size()) - 1)
@@ -1358,7 +1592,13 @@ namespace scribbolyth::editor
                         col_ = std::min(last_col_, static_cast<int>(lines_[row_].size()));
                 }
             }
+            //!
 
+            /*!
+                Move Cursor Left
+
+                !_method
+            */
             void CursorLeft()
             {
                 if (state_->mode == Mode::VISUAL_BLOCK)
@@ -1376,7 +1616,13 @@ namespace scribbolyth::editor
                     col_ = static_cast<int>(lines_[row_].size());
                 }
             }
+            //!
 
+            /*!
+                Move Cursor Right
+
+                !_method
+            */
             void CursorRight()
             {
                 if (state_->mode == Mode::VISUAL_BLOCK)
@@ -1394,31 +1640,61 @@ namespace scribbolyth::editor
                     col_ = 0;
                 }
             }
+            //!
 
+            /*!
+                Page Up
+
+                !_method
+            */
             void CursorPageUp()
             {
                 for (int i = 0; i < 10; ++i) CursorUp();
             }
+            //!
 
+            /*!
+                Page Down
+
+                !_method
+            */
             void CursorPageDown()
             {
                 for (int i = 0; i < 10; ++i) CursorDown();
             }
+            //!
 
+            /*!
+                Move Forward Word
+
+                !_method
+            */
             void CursorWordForward()
             {
                 auto& line = lines_[row_];
                 while (col_ < static_cast<int>(line.size()) && line[col_] != ' ') ++col_;
                 while (col_ < static_cast<int>(line.size()) && line[col_] == ' ') ++col_;
             }
+            //!
 
+            /*!
+                Move Back Word
+
+                !_method
+            */
             void CursorWordBack()
             {
                 auto& line = lines_[row_];
                 while (col_ > 0 && line[col_ - 1] == ' ') --col_;
                 while (col_ > 0 && line[col_ - 1] != ' ') --col_;
             }
+            //!
 
+            /*!
+                Move to Word End
+
+                !_method
+            */
             void CursorWordEnd()
             {
                 auto& line = lines_[row_];
@@ -1434,7 +1710,13 @@ namespace scribbolyth::editor
                 }
                 while (col_ + 1 < size && line[col_] != ' ' && line[col_ + 1] != ' ') ++col_;
             }
+            //!
 
+            /*!
+                Select Inner Word
+
+                !_method
+            */
             void SelectInnerWord()
             {
                 auto& line = lines_[row_];
@@ -1461,10 +1743,17 @@ namespace scribbolyth::editor
                 visual_col_ = start;
                 col_ = end -1;
             }
+            //!
 
-            // Delete the inner word under the cursor (diw): the word's
-            // characters only, keeping surrounding whitespace, mirroring the
-            // bounds chosen by SelectInnerWord().
+            /*!
+                Delete Inner Word
+
+                !_method
+
+                Delete the inner word under the cursor (diw): the word's
+                characters only, keeping surrounding whitespace, mirroring the
+                bounds chosen by SelectInnerWord().
+            */
             void DeleteInnerWord()
             {
                 auto& line = lines_[row_];
@@ -1491,7 +1780,13 @@ namespace scribbolyth::editor
                 col_ = start;
                 last_col_ = col_;
             }
+            //!
 
+            /*!
+                Delete Word Back
+
+                !_method
+            */
             void DeleteWordBack()
             {
                 auto& line = lines_[row_];
@@ -1505,7 +1800,13 @@ namespace scribbolyth::editor
                 col_ = end;
                 last_col_ = end;
             }
+            //!
 
+            /*!
+                Delete Word Forward
+
+                !_method
+            */
             void DeleteWordForward()
             {
                 auto& line = lines_[row_];
@@ -1519,14 +1820,27 @@ namespace scribbolyth::editor
                            static_cast<std::size_t>(end - col_));
                 last_col_ = col_;
             }
+            //!
 
+            /*!
+                Insert Text
+
+                !_method
+            */
             void InsertText(const std::string& text)
             {
                 lines_[row_].insert(static_cast<std::size_t>(col_), text);
                 col_ += static_cast<int>(text.size());
             }
+            //!
 
-            // Insert clipboard-style text (possibly multi-line) at the cursor.
+            /*!
+                Paste Text
+
+                !_method
+
+                Insert clipboard-style text (possibly multi-line) at the cursor.
+            */
             void PasteText(const std::string& text)
             {
                 std::vector<std::string> parts = SplitLines(text);
@@ -1552,6 +1866,7 @@ namespace scribbolyth::editor
                 col_ = static_cast<int>(parts.back().size());
                 last_col_ = col_;
             }
+            //!
 
             void InsertNewline()
             {
@@ -1983,11 +2298,19 @@ namespace scribbolyth::editor
                 std::string pending;
             };
             BlockInsert block_insert_;
+            //!
     };
+    //!
 
+    /*!
+        Make the Editor
+
+        !_method
+    */
     ftxui::Component MakeEditor(std::shared_ptr<EditorState> state)
     {
         return ftxui::Make<Editor>(std::move(state));
     }
+    //!
 
 }

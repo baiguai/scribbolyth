@@ -29,7 +29,7 @@ namespace scribbolyth::browser
             if (s.size() >= width) return s;
             return s + std::string(width - s.size(), ' ');
         }
-        /*!*/
+        //!
 
         /*!
             Tailing
@@ -41,7 +41,7 @@ namespace scribbolyth::browser
             if (s.size() <= width) return s;
             return s.substr(s.size() - width);
         }
-        /*!*/
+        //!
 
         /*!
             To Lower Case
@@ -57,7 +57,7 @@ namespace scribbolyth::browser
             }
             return out;
         }
-        /*!*/
+        //!
 
         /*!
             Case Insensitive Less Check
@@ -68,7 +68,7 @@ namespace scribbolyth::browser
         {
             return Lower(a) < Lower(b);
         }
-        /*!*/
+        //!
 
         /*!
             Path Check
@@ -82,7 +82,7 @@ namespace scribbolyth::browser
             if (ec) return path;
             return abs.string();
         }
-        /*!*/
+        //!
     }
 
     /*!
@@ -102,7 +102,7 @@ namespace scribbolyth::browser
         */
         FileBrowserDialog(std::shared_ptr<EditorState> state, bool* show)
             : state_(std::move(state)), show_(show) {}
-        /*!*/
+        //!
 
         /*!
             Variables
@@ -112,7 +112,7 @@ namespace scribbolyth::browser
         //>>
         bool Focusable() const override { return true; }
         //<<
-        /*!*/
+        //!
 
         /*!
             Ftxui Event
@@ -196,7 +196,7 @@ namespace scribbolyth::browser
             pending_g_ = false;
             return true;
         }
-        /*!*/
+        //!
 
         /*!
             Render the Element
@@ -290,9 +290,9 @@ namespace scribbolyth::browser
                    ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
         }
-        /*!*/
+        //!
 
-        /*!*/
+        //!
 
     private:
         /*!
@@ -307,7 +307,7 @@ namespace scribbolyth::browser
         //>>
         static constexpr int kVisibleRows = 16;
         //<<
-        /*!*/
+        //!
 
         /*!
             Entry Struct
@@ -321,10 +321,12 @@ namespace scribbolyth::browser
             std::string path;
         };
         //<<
-        /*!*/
+        //!
 
         /*!
             Close the Dialog
+
+            !_method
         */
         void Close()
         {
@@ -338,7 +340,7 @@ namespace scribbolyth::browser
             start_dir_.clear();
             needs_refresh_ = true;
         }
-        /*!*/
+        //!
 
         /*!
             Set the Directory
@@ -351,7 +353,7 @@ namespace scribbolyth::browser
             needs_refresh_ = true;
             pending_g_ = false;
         }
-        /*!*/
+        //!
 
         /*!
             Navigate Items
@@ -364,10 +366,12 @@ namespace scribbolyth::browser
             const int total = static_cast<int>(visible_.size());
             selection_ = std::max(0, std::min(total - 1, selection_ + dir));
         }
-        /*!*/
+        //!
 
         /*!
             Jump to Top / Bottom
+
+            !_method
         */
         void JumpToTop()
         {
@@ -376,16 +380,22 @@ namespace scribbolyth::browser
             pending_g_ = false;
         }
 
+        /*|
+
+          !_method
+        */
         void JumpToBottom()
         {
             if (visible_.empty()) return;
             selection_ = static_cast<int>(visible_.size()) - 1;
             pending_g_ = false;
         }
-        /*!*/
+        //!
 
         /*!
             Move Up a Directory
+
+            !_method
         */
         void GoUp()
         {
@@ -395,10 +405,12 @@ namespace scribbolyth::browser
             SetDir(parent.string());
             ClearFilter();
         }
-        /*!*/
+        //!
 
         /*!
             Pick a File
+
+            !_method
         */
         void Activate()
         {
@@ -441,10 +453,12 @@ namespace scribbolyth::browser
             Close();
             callback(picked);
         }
-        /*!*/
+        //!
 
         /*!
             Clear the Filter
+
+            !_method
         */
         void ClearFilter()
         {
@@ -452,7 +466,7 @@ namespace scribbolyth::browser
             filter_active_ = false;
             selection_ = 0;
         }
-        /*!*/
+        //!
 
         /*!
             Compute the Top
@@ -467,7 +481,7 @@ namespace scribbolyth::browser
             if (sel >= top + kVisibleRows) top = sel - kVisibleRows + 1;
             return std::max(0, std::min(top, max_top));
         }
-        /*!*/
+        //!
 
         /*!
             Handle Filter Event
@@ -501,12 +515,14 @@ namespace scribbolyth::browser
             }
             return true;
         }
-        /*!*/
+        //!
 
         /*!
             Recompute
 
             * Refresh this dialog via the state_
+
+            !_method
         */
         void Recompute()
         {
@@ -526,6 +542,11 @@ namespace scribbolyth::browser
             if (last_filter_ != filter_) ApplyFilter();
         }
 
+        /*|
+
+            !_method
+
+        */
         void Relist()
         {
             entries_.clear();
@@ -575,10 +596,12 @@ namespace scribbolyth::browser
 
             ApplyFilter();
         }
-        /*!*/
+        //!
 
         /*!
             Apply the Filter
+
+            !_method
         */
         void ApplyFilter()
         {
@@ -596,7 +619,7 @@ namespace scribbolyth::browser
             const int total = static_cast<int>(visible_.size());
             selection_ = std::max(0, std::min(selection_, total - 1));
         }
-        /*!*/
+        //!
 
         /*!
             Variables
@@ -620,11 +643,11 @@ namespace scribbolyth::browser
         int content_width_ = 24;
         bool pending_g_ = false;
         //<<
-        /*!*/
+        //!
 
-        /*!*/
+        //!
     };
-    /*!*/
+    //!
 
     ftxui::Component MakeFileBrowserDialog(std::shared_ptr<EditorState> state, bool* show)
     {

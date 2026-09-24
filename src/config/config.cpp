@@ -15,6 +15,11 @@ namespace scribbolyth::config
     {
         using ftxui::Event;
 
+        /*!
+            Split Each Row Into Fields
+
+            !_method
+        */
         std::vector<std::string> SplitFields(const std::string& line)
         {
             std::vector<std::string> fields;
@@ -43,7 +48,13 @@ namespace scribbolyth::config
             }
             return fields;
         }
+        //!
 
+        /*!
+            Translate Tokens Into Keys
+
+            !_method
+        */
         bool ParseKey(const std::string& token, Event& out)
         {
             if (token == "Esc")         { out = Event::Escape;    return true; }
@@ -73,7 +84,13 @@ namespace scribbolyth::config
             if (token.size() == 1)      { out = Event::Character(token[0]); return true; }
             return false;
         }
+        //!
 
+        /*!
+            Translate Modes Into State Modes
+
+            !_method
+        */
         Keymap& ModeKeymap(std::shared_ptr<EditorState> state, const std::string& mode)
         {
             if (mode == "TREE")          return state->tree_keymap;
@@ -82,8 +99,14 @@ namespace scribbolyth::config
             if (mode == "VISUAL_BLOCK")  return state->visual_block_keymap;
             return state->visual_keymap; // VISUAL, VISUAL_LINE
         }
+        //!
     }
 
+    /*!
+        Load Config and Set Keymap Objects
+
+        !_method
+    */
     bool LoadConfig(const std::string& path, std::shared_ptr<EditorState> state)
     {
         std::ifstream file(path);
@@ -134,7 +157,13 @@ namespace scribbolyth::config
         }
         return true;
     }
+    //!
 
+    /*!
+        Read the Init Config
+
+        !_method
+    */
     bool ReadInit(const std::string& path, std::string& last_file, std::vector<std::string>& recent_files)
     {
         std::ifstream file(path);
@@ -179,7 +208,13 @@ namespace scribbolyth::config
         }
         return true;
     }
+    //!
 
+    /*!
+        Update the Init Config
+
+        !_method
+    */
     bool WriteInit(const std::string& path, const std::string& last_file, const std::vector<std::string>& recent_files)
     {
         std::ofstream file(path, std::ios::binary);
@@ -194,7 +229,13 @@ namespace scribbolyth::config
         }
         return static_cast<bool>(file);
     }
+    //!
 
+    /*!
+        Update the Recent Files List
+
+        !_method
+    */
     bool WriteRecentFiles(const std::string& path, const std::vector<std::string>& recent_files)
     {
         std::string last_file;
@@ -202,4 +243,5 @@ namespace scribbolyth::config
         ReadInit(path, last_file, ignored);
         return WriteInit(path, last_file, recent_files);
     }
+    //!
 }

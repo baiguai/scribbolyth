@@ -18,5 +18,5 @@ namespace scribbolyth::bookmark
     //<<
 
     std::string NewId();
-    /*!*/
+    //!
 }

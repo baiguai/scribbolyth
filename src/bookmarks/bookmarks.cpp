@@ -29,7 +29,7 @@ namespace scribbolyth::bookmarks
             if (s.size() >= width) return s;
             return s + std::string(width - s.size(), ' ');
         }
-        /*!*/
+        //!
 
         /*!
             Entry Struct
@@ -43,7 +43,7 @@ namespace scribbolyth::bookmarks
             int line = -1;
         };
         //<<
-        /*!*/
+        //!
     }
 
 
@@ -65,7 +65,7 @@ namespace scribbolyth::bookmarks
         */
         BookmarksDialog(std::shared_ptr<EditorState> state, bool* show)
             : state_(std::move(state)), show_(show) {}
-        /*!*/
+        //!
 
         /*!
             Variables
@@ -77,7 +77,7 @@ namespace scribbolyth::bookmarks
 
         bool pending_g_ = false;
         //<<
-        /*!*/
+        //!
 
         /*!
             Event Call
@@ -148,7 +148,7 @@ namespace scribbolyth::bookmarks
             }
             return true;
         }
-        /*!*/
+        //!
 
         /*!
             Render
@@ -210,9 +210,9 @@ namespace scribbolyth::bookmarks
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
             //<<
         }
-        /*!*/
+        //!
 
-        /*!*/
+        //!
 
     private:
         /*!
@@ -229,7 +229,7 @@ namespace scribbolyth::bookmarks
             selection_ = 0;
             scroll_ = 0;
         }
-        /*!*/
+        //!
 
         /*!
             Jump
@@ -256,7 +256,7 @@ namespace scribbolyth::bookmarks
             state_->status = "";
             Close();
         }
-        /*!*/
+        //!
 
         /*!
             Move Selection
@@ -272,7 +272,7 @@ namespace scribbolyth::bookmarks
             const int total = static_cast<int>(entries_.size());
             selection_ = std::max(0, std::min(total - 1, selection_ + dir));
         }
-        /*!*/
+        //!
 
         /*!
             Move to Start / End
@@ -291,7 +291,7 @@ namespace scribbolyth::bookmarks
                 selection_ = static_cast<int>(entries_.size()) -1;
             }
         }
-        /*!*/
+        //!
 
         /*!
             Unbookmark
@@ -309,7 +309,7 @@ namespace scribbolyth::bookmarks
             scroll_ = 0;
             state_->status = "Bookmark removed";
         }
-        /*!*/
+        //!
 
         /*!
             Recompute
@@ -365,7 +365,7 @@ namespace scribbolyth::bookmarks
 
             selection_ = std::max(0, std::min(selection_, static_cast<int>(entries_.size()) - 1));
         }
-        /*!*/
+        //!
 
         /*!
             Variables
@@ -382,11 +382,11 @@ namespace scribbolyth::bookmarks
         int content_width_ = 20;
         static constexpr int kVisibleRows = 18;
         //<<
-        /*!*/
+        //!
 
-        /*!*/
+        //!
     };
-    /*!*/
+    //!
 
     /*!
         Create the Dialog
@@ -400,5 +400,5 @@ namespace scribbolyth::bookmarks
     {
         return ftxui::Make<BookmarksDialog>(std::move(state), show);
     }
-    /*!*/
+    //!
 }

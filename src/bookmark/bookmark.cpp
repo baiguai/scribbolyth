@@ -28,5 +28,5 @@ namespace scribbolyth::bookmark
         //<<
         return id;
     }
-    /*!*/
+    //!
 }

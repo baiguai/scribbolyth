@@ -9,11 +9,28 @@ namespace scribbolyth::calc
 {
     namespace
     {
+        /*!
+            Evaluator Class
+        */
         class Evaluator
         {
             public:
-                explicit Evaluator(const std::string& s) : s_(s) {}
+                /*!
+                    Public Members
+                */
+                /*!
+                    Constructor
 
+                    !_ctor
+                */
+                explicit Evaluator(const std::string& s) : s_(s) {}
+                //!
+
+                /*!
+                    Run the Evaluation
+
+                    !_method
+                */
                 bool Run(std::string& result)
                 {
                     SkipWs();
@@ -33,26 +50,58 @@ namespace scribbolyth::calc
                     result = Format(value);
                     return true;
                 }
+                //!
+
+                //!
 
             private:
+                /*!
+                    Private Members
+                */
+
+                /*!
+                    Skip White Space
+
+                    !_method
+                */
                 void SkipWs()
                 {
                     while (pos_ < s_.size() && (s_[pos_] == ' ' || s_[pos_] == '\t')) ++pos_;
                 }
+                //!
 
+                /*!
+                    Consume Character
+
+                    !_method
+                */
                 bool Consume(char c)
                 {
                     if (pos_ < s_.size() && s_[pos_] == c) { ++pos_; return true; }
                     return false;
                 }
+                //!
 
+                /*!
+                    Error Message
+
+                    !_method
+                */
                 bool Fail(const std::string& msg)
                 {
                     if (error_.empty()) error_ = msg;
                     return false;
                 }
+                //!
 
-                // expr := term (('+' | '-') term)*
+                /*!
+                    Expression
+
+                    !_method
+
+                    Example:
+                    expr := term (('+' | '-') term)*
+                */
                 double Expr(bool* ok)
                 {
                     double left = Term(ok);
@@ -67,8 +116,16 @@ namespace scribbolyth::calc
                     }
                     return left;
                 }
+                //!
 
-                // term := factor (('*' | '/' | '%' | juxtaposition) factor)*
+                /*!
+                    Term Expression
+
+                    !_method
+
+                    Example:
+                    term := factor (('*' | '/' | '%' | juxtaposition) factor)*
+                */
                 double Term(bool* ok)
                 {
                     double left = Factor(ok);
@@ -112,8 +169,16 @@ namespace scribbolyth::calc
                     }
                     return left;
                 }
+                //!
 
-                // factor := unary ('^' factor)?  (right-associative exponent)
+                /*!
+                    Factor Expression
+
+                    !_method
+
+                    Example:
+                    factor := unary ('^' factor)?  (right-associative exponent)
+                */
                 double Factor(bool* ok)
                 {
                     const double base = Unary(ok);
@@ -127,7 +192,13 @@ namespace scribbolyth::calc
                     }
                     return base;
                 }
+                //!
 
+                /*!
+                    Unary Expression
+
+                    !_method
+                */
                 double Unary(bool* ok)
                 {
                     SkipWs();
@@ -140,15 +211,29 @@ namespace scribbolyth::calc
                     if (s_[pos_] == '+') { ++pos_; return Unary(ok); }
                     return Primary(ok);
                 }
+                //!
 
+                /*!
+                    Start Primary
+
+                    !_method
+                */
                 bool StartsPrimary()
                 {
                     if (pos_ >= s_.size()) return false;
                     const char c = s_[pos_];
                     return c == '(' || (c >= '0' && c <= '9') || c == '.';
                 }
+                //!
 
-                // primary := number | '(' expr ')'
+                /*!
+                    Primary Check
+
+                    !_method
+
+                    Example:
+                    primary := number | '(' expr ')'
+                */
                 double Primary(bool* ok)
                 {
                     SkipWs();
@@ -192,7 +277,13 @@ namespace scribbolyth::calc
                     *ok = Fail(std::string("Unexpected '") + c + "'");
                     return 0.0;
                 }
+                //!
 
+                /*!
+                    Format Value
+
+                    !_method
+                */
                 std::string Format(double v)
                 {
                     if (std::isnan(v)) return "NaN";
@@ -208,11 +299,23 @@ namespace scribbolyth::calc
                     }
                     return buf;
                 }
+                //!
 
+                /*!
+                    Variables
+
+                    ----
+                */
+                //>>
                 const std::string& s_;
                 std::size_t pos_ = 0;
                 std::string error_;
+                //<<
+                //!
+
+                //!
         };
+        //!
     }
 
     bool Evaluate(const std::string& expr, std::string& result)

@@ -14,10 +14,21 @@
 namespace scribbolyth::clipboard
 {
 
+    /*!
+        Reading the Clipboard
+
+    */
 inline std::string Read()
 {
 #ifdef _WIN32
+
+    /*!
+        Windows - Use OpenClipboard
+
+    */
+    //>>
     if (!OpenClipboard(nullptr)) return "";
+    //<<
     std::string result;
 
     if (HANDLE h = GetClipboardData(CF_UNICODETEXT))
@@ -59,12 +70,21 @@ inline std::string Read()
 
     CloseClipboard();
     return result;
+
+    //!
 #else
+
+    /*!
+        Linux - Use Xclip
+
+    */
+    //>>
     const char* commands[] = {
         "wl-paste --no-newline 2>/dev/null",
         "xclip -o -selection clipboard 2>/dev/null",
         "xsel -o --clipboard 2>/dev/null",
     };
+    //<<
     for (const char* cmd : commands)
     {
         FILE* pipe = popen(cmd, "r");
@@ -80,12 +100,27 @@ inline std::string Read()
         if (rc == 0 && !data.empty()) return data;
     }
     return "";
-#endif
-}
 
+    //!
+#endif
+
+}
+    //!
+
+
+    /*!
+        Storing in the Clipboard
+
+    */
 inline bool Write(const std::string& text)
 {
 #ifdef _WIN32
+
+    /*!
+        Windows - Use OpenClipboard
+
+    */
+    //>>
     const int wlen = MultiByteToWideChar(CP_UTF8, 0, text.c_str(), -1, nullptr, 0);
     if (wlen <= 1) return false;
     std::wstring wide(static_cast<std::size_t>(wlen), 0);
@@ -97,6 +132,7 @@ inline bool Write(const std::string& text)
         CloseClipboard();
         return false;
     }
+    //<<
 
     const std::size_t bytes = static_cast<std::size_t>(wlen) * sizeof(wchar_t);
     HGLOBAL h = GlobalAlloc(GMEM_MOVEABLE, bytes);
@@ -123,7 +159,15 @@ inline bool Write(const std::string& text)
     }
     CloseClipboard();
     return true;
+
+    //!
 #else
+
+    /*!
+        Linux - Use Xclip
+
+    */
+    //>>
     const char* commands[] = {
         "wl-copy 2>/dev/null",
         "xclip -i -selection clipboard 2>/dev/null",
@@ -137,8 +181,12 @@ inline bool Write(const std::string& text)
         const int rc = pclose(pipe);
         if (rc == 0) return true;
     }
+    //<<
     return false;
+
+    //!
 #endif
 }
+    //!
 
-}  // namespace scribbolyth::clipboard
+}

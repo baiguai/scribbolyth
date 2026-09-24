@@ -1259,7 +1259,7 @@
                       {
                         "id": "a81fbfe7",
                         "title": "Close the Dialog",
-                        "content": "Close the Dialog",
+                        "content": "Close the Dialog\n\nSignature: void Close()\nMethod: Close\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
@@ -1280,28 +1280,28 @@
                       {
                         "id": "67d292f6",
                         "title": "Jump to Top / Bottom",
-                        "content": "Jump to Top / Bottom",
+                        "content": "Jump to Top / Bottom\n\nSignature: void JumpToTop()\nMethod: JumpToTop\nReturns: void\n\nSignature: void JumpToBottom()\nMethod: JumpToBottom\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
                         "id": "eeb48cff",
                         "title": "Move Up a Directory",
-                        "content": "Move Up a Directory",
+                        "content": "Move Up a Directory\n\nSignature: void GoUp()\nMethod: GoUp\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
                         "id": "0191a615",
                         "title": "Pick a File",
-                        "content": "Pick a File\n\nSignature: void EnterAt(bool pick_file)\nMethod: EnterAt\nReturns: void\nParameters:\n    pick_file bool",
+                        "content": "Pick a File\n\nSignature: void Activate()\nMethod: Activate\nReturns: void\n\nSignature: void EnterAt(bool pick_file)\nMethod: EnterAt\nReturns: void\nParameters:\n    pick_file bool",
                         "children": [],
                         "expanded": false
                       },
                       {
                         "id": "75253f27",
                         "title": "Clear the Filter",
-                        "content": "Clear the Filter",
+                        "content": "Clear the Filter\n\nSignature: void ClearFilter()\nMethod: ClearFilter\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
@@ -1322,14 +1322,14 @@
                       {
                         "id": "eea6bf61",
                         "title": "Recompute",
-                        "content": "Recompute\n\n* Refresh this dialog via the state_",
+                        "content": "Recompute\n\n* Refresh this dialog via the state_\n\nSignature: void Recompute()\nMethod: Recompute\nReturns: void\n\nSignature: void Relist()\nMethod: Relist\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
                         "id": "a7d75041",
                         "title": "Apply the Filter",
-                        "content": "Apply the Filter",
+                        "content": "Apply the Filter\n\nSignature: void ApplyFilter()\nMethod: ApplyFilter\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
@@ -1344,6 +1344,385 @@
                     "expanded": false
                   }
                 ],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
+        "id": "16f38c7d",
+        "title": "calc",
+        "content": "",
+        "children": [
+          {
+            "id": "8836d263",
+            "title": "calc.cpp",
+            "content": "",
+            "children": [
+              {
+                "id": "4054175d",
+                "title": "Evaluator Class",
+                "content": "Evaluator Class",
+                "children": [
+                  {
+                    "id": "0f464fab",
+                    "title": "Public Members",
+                    "content": "Public Members",
+                    "children": [
+                      {
+                        "id": "f28cf7db",
+                        "title": "Constructor",
+                        "content": "Constructor\n\nSignature: explicit Evaluator(const std::string& s) : s_(s)\nConstructor: Evaluator\nQualifiers: explicit\nParameters:\n    s const std::string&\nInitializers:\n    s_ s",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "87407db6",
+                        "title": "Run the Evaluation",
+                        "content": "Run the Evaluation\n\nSignature: bool Run(std::string& result)\nMethod: Run\nReturns: bool\nParameters:\n    result std::string&",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  },
+                  {
+                    "id": "97aacb99",
+                    "title": "Private Members",
+                    "content": "Private Members",
+                    "children": [
+                      {
+                        "id": "d9afec7b",
+                        "title": "Skip White Space",
+                        "content": "Skip White Space\n\nSignature: void SkipWs()\nMethod: SkipWs\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "65112634",
+                        "title": "Consume Character",
+                        "content": "Consume Character\n\nSignature: bool Consume(char c)\nMethod: Consume\nReturns: bool\nParameters:\n    c char",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "4766654f",
+                        "title": "Error Message",
+                        "content": "Error Message\n\nSignature: bool Fail(const std::string& msg)\nMethod: Fail\nReturns: bool\nParameters:\n    msg const std::string&",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "e2c47ede",
+                        "title": "Expression",
+                        "content": "Expression\n\nSignature: double Expr(bool* ok)\nMethod: Expr\nReturns: double\nParameters:\n    ok bool*\n\nExample:\nexpr := term (('+' | '-') term)*",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "781e2a07",
+                        "title": "Term Expression",
+                        "content": "Term Expression\n\nSignature: double Term(bool* ok)\nMethod: Term\nReturns: double\nParameters:\n    ok bool*\n\nExample:\nterm := factor (('*' | '/' | '%' | juxtaposition) factor)*",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "640f0f93",
+                        "title": "Factor Expression",
+                        "content": "Factor Expression\n\nSignature: double Factor(bool* ok)\nMethod: Factor\nReturns: double\nParameters:\n    ok bool*\n\nExample:\nfactor := unary ('^' factor)?  (right-associative exponent)",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "a2806ba4",
+                        "title": "Unary Expression",
+                        "content": "Unary Expression\n\nSignature: double Unary(bool* ok)\nMethod: Unary\nReturns: double\nParameters:\n    ok bool*",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "98460baf",
+                        "title": "Start Primary",
+                        "content": "Start Primary\n\nSignature: bool StartsPrimary()\nMethod: StartsPrimary\nReturns: bool",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "6beb51be",
+                        "title": "Primary Check",
+                        "content": "Primary Check\n\nSignature: double Primary(bool* ok)\nMethod: Primary\nReturns: double\nParameters:\n    ok bool*\n\nExample:\nprimary := number | '(' expr ')'",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "7e1ea86e",
+                        "title": "Format Value",
+                        "content": "Format Value\n\nSignature: std::string Format(double v)\nMethod: Format\nReturns: std::string\nParameters:\n    v double",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "7d1ceb6b",
+                        "title": "Variables",
+                        "content": "Variables\n\n--------------------------------------------------------------------------------\n\nconst std::string& s_;\nstd::size_t pos_ = 0;\nstd::string error_;",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  }
+                ],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          },
+          {
+            "id": "89a510f8",
+            "title": "calc.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "1ba3bb74",
+                "title": "Evaluate Forward Declaration",
+                "content": "Evaluate Forward Declaration\n\n!_method\n\n\nEvaluate a simple arithmetic expression, e.g. \"2(1+3)/4\" or \"7 * 3\".\nSupports + - * / % ^, parentheses, unary plus/minus, implicit\nmultiplication (\"2(1+3)\") and decimal numbers.\n\nOn success returns true and the formatted result in `result`; on\nfailure returns false and an explanation in `result`.",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
+        "id": "213f3ac2",
+        "title": "clipboard",
+        "content": "",
+        "children": [
+          {
+            "id": "837d12ab",
+            "title": "clipboard.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "8d0c63e8",
+                "title": "Reading the Clipboard",
+                "content": "Reading the Clipboard",
+                "children": [
+                  {
+                    "id": "2da147ae",
+                    "title": "Windows - Use OpenClipboard",
+                    "content": "Windows - Use OpenClipboard\n\nif (!OpenClipboard(nullptr)) return \"\";",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "3c7ba4f2",
+                    "title": "Linux - Use Xclip",
+                    "content": "Linux - Use Xclip\n\nconst char* commands[] = {\n    \"wl-paste --no-newline 2>/dev/null\",\n    \"xclip -o -selection clipboard 2>/dev/null\",\n    \"xsel -o --clipboard 2>/dev/null\",\n};",
+                    "children": [],
+                    "expanded": false
+                  }
+                ],
+                "expanded": false
+              },
+              {
+                "id": "6c6fdf00",
+                "title": "Storing in the Clipboard",
+                "content": "Storing in the Clipboard",
+                "children": [
+                  {
+                    "id": "bb2cf5ce",
+                    "title": "Windows - Use OpenClipboard",
+                    "content": "Windows - Use OpenClipboard\n\nconst int wlen = MultiByteToWideChar(CP_UTF8, 0, text.c_str(), -1, nullptr, 0);\nif (wlen <= 1) return false;\nstd::wstring wide(static_cast<std::size_t>(wlen), 0);\nMultiByteToWideChar(CP_UTF8, 0, text.c_str(), -1, &wide[0], wlen);\n\nif (!OpenClipboard(nullptr)) return false;\nif (!EmptyClipboard())\n{\n    CloseClipboard();\n    return false;\n}",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "1b756736",
+                    "title": "Linux - Use Xclip",
+                    "content": "Linux - Use Xclip\n\nconst char* commands[] = {\n    \"wl-copy 2>/dev/null\",\n    \"xclip -i -selection clipboard 2>/dev/null\",\n    \"xsel --input --clipboard 2>/dev/null\",\n};\nfor (const char* cmd : commands)\n{\n    FILE* pipe = popen(cmd, \"w\");\n    if (pipe == nullptr) continue;\n    std::fwrite(text.data(), 1, text.size(), pipe);\n    const int rc = pclose(pipe);\n    if (rc == 0) return true;\n}",
+                    "children": [],
+                    "expanded": false
+                  }
+                ],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
+        "id": "a83cd58c",
+        "title": "config",
+        "content": "",
+        "children": [
+          {
+            "id": "93afd639",
+            "title": "config.cpp",
+            "content": "",
+            "children": [
+              {
+                "id": "c54a8361",
+                "title": "Split Each Row Into Fields",
+                "content": "Split Each Row Into Fields\n\nSignature: std::vector<std::string> SplitFields(const std::string& line)\nMethod: SplitFields\nReturns: std::vector<std::string>\nParameters:\n    line const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "9e398829",
+                "title": "Translate Tokens Into Keys",
+                "content": "Translate Tokens Into Keys\n\nSignature: bool ParseKey(const std::string& token, Event& out)\nMethod: ParseKey\nReturns: bool\nParameters:\n    token const std::string&\n    out   Event&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "e522f452",
+                "title": "Translate Modes Into State Modes",
+                "content": "Translate Modes Into State Modes\n\nSignature: Keymap& ModeKeymap(std::shared_ptr<EditorState> state, const std::string& mode)\nMethod: ModeKeymap\nReturns: Keymap&\nParameters:\n    state std::shared_ptr<EditorState>\n    mode  const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "b885e0f9",
+                "title": "Load Config and Set Keymap Objects",
+                "content": "Load Config and Set Keymap Objects\n\nSignature: bool LoadConfig(const std::string& path, std::shared_ptr<EditorState> state)\nMethod: LoadConfig\nReturns: bool\nParameters:\n    path  const std::string&\n    state std::shared_ptr<EditorState>",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "a766b9c4",
+                "title": "Read the Init Config",
+                "content": "Read the Init Config\n\nSignature: bool ReadInit(const std::string& path, std::string& last_file, std::vector<std::string>& recent_files)\nMethod: ReadInit\nReturns: bool\nParameters:\n    path         const std::string&\n    last_file    std::string&\n    recent_files std::vector<std::string>&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "2394ceac",
+                "title": "Update the Init Config",
+                "content": "Update the Init Config\n\nSignature: bool WriteInit(const std::string& path, const std::string& last_file, const std::vector<std::string>& recent_files)\nMethod: WriteInit\nReturns: bool\nParameters:\n    path         const std::string&\n    last_file    const std::string&\n    recent_files const std::vector<std::string>&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "1e4389eb",
+                "title": "Update the Recent Files List",
+                "content": "Update the Recent Files List\n\nSignature: bool WriteRecentFiles(const std::string& path, const std::vector<std::string>& recent_files)\nMethod: WriteRecentFiles\nReturns: bool\nParameters:\n    path         const std::string&\n    recent_files const std::vector<std::string>&",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
+        "id": "6d5e5660",
+        "title": "editor",
+        "content": "",
+        "children": [
+          {
+            "id": "8d8e4b53",
+            "title": "editor.cpp",
+            "content": "",
+            "children": [
+              {
+                "id": "2148b72b",
+                "title": "Is Blank",
+                "content": "Is Blank\n\nSignature: bool IsBlank(const std::string& s)\nMethod: IsBlank\nReturns: bool\nParameters:\n    s const std::string&\n\nThis is a helper method for when the editor is seeking for the end of words etc.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "3e4b15ee",
+                "title": "Is Editor in Visual Mode",
+                "content": "Is Editor in Visual Mode\n\nSignature: bool IsVisualMode(Mode m)\nMethod: IsVisualMode\nReturns: bool\nParameters:\n    m Mode",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "847c939d",
+                "title": "Full Trim",
+                "content": "Full Trim\n\nSignature: std::string TrimBoth(const std::string& s)\nMethod: TrimBoth\nReturns: std::string\nParameters:\n    s const std::string&\n\nTrims both ends of a string.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "bb6b7abd",
+                "title": "Table Divider Line Check",
+                "content": "Table Divider Line Check\n\nSignature: bool IsDividerLine(const std::string& s)\nMethod: IsDividerLine\nReturns: bool\nParameters:\n    s const std::string&\n\nA markdown table separator row: \"| --- | --- |\", \"+-----+-----+\" or\na bare \"----\" (the web app's dividerPattern).",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "65d7a389",
+                "title": "Split Line Into Cells",
+                "content": "Split Line Into Cells\n\nSignature: std::vector<std::string> SplitCells(const std::string& line)\nMethod: SplitCells\nReturns: std::vector<std::string>\nParameters:\n    line const std::string&\n\nThis is used when creating / updating tables.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "8c5d1e9a",
+                "title": "Read Clipboard",
+                "content": "Read Clipboard\n\nSignature: std::string ReadClipboard()\nMethod: ReadClipboard\nReturns: std::string\n\nRead the system clipboard (Win32 API on Windows, wl-paste/xclip/xsel\non POSIX). Returns \"\" when nothing is available or the clipboard is\nempty.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "e0ffc710",
+                "title": "Write to the Clipboard",
+                "content": "Write to the Clipboard\n\nSignature: bool WriteClipboard(const std::string& text)\nMethod: WriteClipboard\nReturns: bool\nParameters:\n    text const std::string&\n\nWrite to the system clipboard (Win32 API on Windows,\nwl-copy/xclip/xsel on POSIX). Returns false when no tool is\navailable.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "96cd3a8f",
+                "title": "Parse Replacement Arguments",
+                "content": "Parse Replacement Arguments\n\nSignature: bool ParseReplaceArgs(const std::string& args, std::string& old_text, std::string& new_text)\nMethod: ParseReplaceArgs\nReturns: bool\nParameters:\n    args     const std::string&\n    old_text std::string&\n    new_text std::string&\n\nSplit \"old/new\" at the first unescaped '/'. A backslash-slash\n(\"\\/\") is a literal slash and is unescaped in both parts. Returns\nfalse when no separator is present.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "323ca9bf",
+                "title": "Scroll Past Helper",
+                "content": "Scroll Past Helper\n\n!_method\n\n\nA transparent leaf node that records the height of the box it is\nassigned each frame. Rendered as an overlay share of the editor view,\nit reports the editor's viewport height so the trailing scroll-past-\nbottom padding can be sized to about half the viewport (Vim-like).",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "073e6359",
+                "title": "The Editor Class",
+                "content": "The Editor Class",
+                "children": [
+                  {
+                    "id": "1ac8444a",
+                    "title": "Public Members",
+                    "content": "Public Members",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "b4332f69",
+                    "title": "Private Members",
+                    "content": "Private Members",
+                    "children": [],
+                    "expanded": false
+                  }
+                ],
+                "expanded": false
+              },
+              {
+                "id": "b5b7722d",
+                "title": "Make the Editor",
+                "content": "Make the Editor\n\nSignature: ftxui::Component MakeEditor(std::shared_ptr<EditorState> state)\nMethod: MakeEditor\nReturns: ftxui::Component\nParameters:\n    state std::shared_ptr<EditorState>",
+                "children": [],
                 "expanded": false
               }
             ],

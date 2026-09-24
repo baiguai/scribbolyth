@@ -17,7 +17,7 @@ Comment grammar (all harvested from files under src/):
     /*+ <body> */          sub-note. A child of the innermost open doc
                            region in the same file. Ignored when no doc
                            region is open.
-    /*!*/                  Closes the innermost open doc region.  Creates
+    /*!*/  (or a //! line)   Closes the innermost open doc region.  Creates
                            no node of its own.
     //>> ... //<<          Raw source snippet.  The markers sit on their own
                            lines; the code between them is appended verbatim
@@ -389,6 +389,9 @@ def classify(items):
             continue
         if kind == "line":
             text = body.strip()
+            if text == "!":
+                actions.append({"kind": "docclose", "line": line})
+                continue
             m = re.match(r"!_\s*([A-Za-z0-9_]+)\s*=\s*(.*)$", text)
             if m:
                 actions.append({"kind": "config", "key": m.group(1),
