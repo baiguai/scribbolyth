@@ -150,6 +150,25 @@ def matching_paren(sig, open_):
     return -1
 
 
+def param_parens(sig):
+    """The parameter list is the one whose closing ')' is the signature's
+    last top-level ')'.  Backtrack from it to its matching '('.  Returns
+    (open_pos, close_pos) or (-1, -1)."""
+    close_ = sig.rfind(")")
+    if close_ == -1:
+        return -1, -1
+    depth = 0
+    for i in range(close_, -1, -1):
+        c = sig[i]
+        if c == ")":
+            depth += 1
+        elif c == "(":
+            depth -= 1
+            if depth == 0:
+                return i, close_
+    return -1, -1
+
+
 def describe_signature(sig, ctor=False):
     """Break a collapsed signature into (name, returns, params, tail) or
     return None when it does not look like a function/method."""
@@ -157,8 +176,7 @@ def describe_signature(sig, ctor=False):
         open_ = sig.find("(")
         close_ = matching_paren(sig, open_) if open_ != -1 else -1
     else:
-        open_ = sig.rfind("(")
-        close_ = sig.find(")", open_) if open_ != -1 else -1
+        open_, close_ = param_parens(sig)
     if open_ == -1 or close_ == -1:
         return None
     decl = sig[:open_].strip()

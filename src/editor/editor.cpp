@@ -1868,6 +1868,11 @@ namespace scribbolyth::editor
             }
             //!
 
+            /*!
+                Insert New Line
+
+                !_method
+            */
             void InsertNewline()
             {
                 std::string& line = lines_[row_];
@@ -1886,7 +1891,13 @@ namespace scribbolyth::editor
                 ++row_;
                 col_ = static_cast<int>(ws);
             }
+            //!
 
+            /*!
+                Handle Backspace
+
+                !_method
+            */
             void Backspace()
             {
                 if (col_ > 0)
@@ -1902,11 +1913,18 @@ namespace scribbolyth::editor
                     --row_;
                 }
             }
+            //!
 
-            // Enter INSERT mode with a pending block insert (Vim Ctrl+V then
-            // I/A). The text the user types is accumulated in block_insert_ and
-            // shown live on the top row; ApplyBlockInsert() replays it on the
-            // remaining rows when Esc is pressed.
+            /*!
+                Enter Block Insert Mode
+
+                !_method
+
+                Enter INSERT mode with a pending block insert (Vim Ctrl+V then
+                I/A). The text the user types is accumulated in block_insert_ and
+                shown live on the top row; ApplyBlockInsert() replays it on the
+                remaining rows when Esc is pressed.
+            */
             void EnterBlockInsert(bool at_end)
             {
                 if (!(state_->mode == Mode::VISUAL_BLOCK
@@ -1936,7 +1954,13 @@ namespace scribbolyth::editor
                 visual_col_ = -1;
                 state_->mode = Mode::INSERT;
             }
+            //!
 
+            /*!
+                Apply the Block Insert
+
+                !_method
+            */
             void ApplyBlockInsert()
             {
                 if (!block_insert_.active) return;
@@ -1972,7 +1996,13 @@ namespace scribbolyth::editor
                 block_insert_.pending.clear();
                 block_insert_.rows.clear();
             }
+            //!
 
+            /*!
+                Delete Character
+
+                !_method
+            */
             void DeleteChar()
             {
                 auto& line = lines_[row_];
@@ -1986,7 +2016,13 @@ namespace scribbolyth::editor
                     lines_.erase(lines_.begin() + row_ + 1);
                 }
             }
+            //!
 
+            /*!
+                Delete Line
+
+                !_method
+            */
             void DeleteLine()
             {
                 if (lines_.size() == 1)
@@ -1998,9 +2034,16 @@ namespace scribbolyth::editor
                 lines_.erase(lines_.begin() + row_);
                 if (row_ >= static_cast<int>(lines_.size())) --row_;
             }
+            //!
 
-            // Vim 'D' = 'd$': delete from the cursor to the end of the line,
-            // leaving the line itself (and the newline) in place.
+            /*!
+                Delete to End of Line
+
+                !_method
+
+                Vim 'D' = 'd$': delete from the cursor to the end of the line,
+                leaving the line itself (and the newline) in place.
+            */
             void DeleteToEol()
             {
                 auto& line = lines_[row_];
@@ -2009,9 +2052,16 @@ namespace scribbolyth::editor
                     line.erase(static_cast<std::size_t>(col_));
                 }
             }
+            //!
 
-            // Vim-style line move: swap the current line with the one above
-            // (dir < 0) or below (dir > 0), carrying the cursor with it.
+            /*!
+                Move Line
+
+                !_method
+
+                Vim-style line move: swap the current line with the one above
+                (dir < 0) or below (dir > 0), carrying the cursor with it.
+            */
             void MoveLine(int dir)
             {
                 const int target = row_ + dir;
@@ -2020,11 +2070,18 @@ namespace scribbolyth::editor
                           lines_[static_cast<std::size_t>(target)]);
                 row_ = target;
             }
+            //!
 
-            // The text currently under a VISUAL/VISUAL_LINE selection, or the
-            // current line when no selection is active (NORMAL/INSERT).
-            // Line-based copies include a trailing newline so a cut+paste
-            // round-trip reproduces the lines.
+            /*!
+                Select Text
+
+                !_method
+
+                The text currently under a VISUAL/VISUAL_LINE selection, or the
+                current line when no selection is active (NORMAL/INSERT).
+                Line-based copies include a trailing newline so a cut+paste
+                round-trip reproduces the lines.
+            */
             std::string SelectionText() const
             {
                 std::string out;
@@ -2085,7 +2142,13 @@ namespace scribbolyth::editor
                 }
                 return out;
             }
+            //!
 
+            /*!
+                Delete Selection
+
+                !_method
+            */
             void DeleteSelection()
             {
                 if (active_ == nullptr) return;
@@ -2172,24 +2235,44 @@ namespace scribbolyth::editor
                 Save();
                 state_->status = "Selection deleted";
             }
+            //!
 
-            // Vim 'U' (VISUAL): uppercase the selected text. Folding never
-            // changes line count or line length, so nothing is erased or
-            // reassembled; the cursor is placed at the start of the selection
-            // and the mode returns to NORMAL.
+            /*!
+                Selection to Upper
+
+                !_method
+
+                Vim 'U' (VISUAL): uppercase the selected text. Folding never
+                changes line count or line length, so nothing is erased or
+                reassembled; the cursor is placed at the start of the selection
+                and the mode returns to NORMAL.
+            */
             void UpperSelection()
             {
                 TransformSelection([](char c) { return ToUpperAscii(c); },
                                    "Selection uppercased");
             }
+            //!
 
-            // Vim 'u' (VISUAL): lowercase the selected text.
+            /*!
+                Selection to Lower
+
+                !_method
+
+                Vim 'u' (VISUAL): lowercase the selected text.
+            */
             void LowerSelection()
             {
                 TransformSelection([](char c) { return ToLowerAscii(c); },
                                    "Selection lowercased");
             }
+            //!
 
+            /*!
+                Transform Selection
+
+                !_method
+            */
             void TransformSelection(char (*fold)(char), const char* status_msg)
             {
                 if (active_ == nullptr) return;
@@ -2277,7 +2360,14 @@ namespace scribbolyth::editor
                 Save();
                 state_->status = status_msg;
             }
+            //!
 
+            /*!
+                Variables
+
+                ----
+            */
+            //>>
             std::shared_ptr<EditorState> state_;
             scribbolyth::treeview::TreeNode* active_ = nullptr;
             std::string active_id_;
@@ -2288,7 +2378,14 @@ namespace scribbolyth::editor
             int visual_row_ = -1;
             int visual_col_ = -1;
             int viewport_height_ = 0;
+            //<<
+            //!
 
+            /*!
+                Block Insert Struct
+
+            */
+            //>>
             struct BlockInsert
             {
                 bool active = false;
@@ -2297,6 +2394,9 @@ namespace scribbolyth::editor
                 std::vector<int> rows;
                 std::string pending;
             };
+            //<<
+            //!
+
             BlockInsert block_insert_;
             //!
     };

@@ -16,28 +16,70 @@ inline constexpr int kDefaultTreeviewWidth = 30;
 inline constexpr int kMinTreeviewWidth = 10;
 inline constexpr int kMaxTreeviewWidth = 200;
 
-// A single undoable point-in-time snapshot of the document. `json` is the
-// full serialized state (tree + bookmarks + history + width); `preview` is
-// a short human label for the undo dialog's list.
+/*!
+    Undo State Struct
+
+    A single undoable point-in-time snapshot of the document. `json` is the
+    full serialized state (tree + bookmarks + history + width); `preview` is
+    a short human label for the undo dialog's list.
+
+*/
+//>>
 struct UndoState {
     std::string json;
     std::string preview;
 };
+//<<
+//!
 
+/*!
+    Editor State Struct
+*/
 struct EditorState {
+    /*!
+        Mode-Related Variables
+
+        ----
+    */
+    //>>
     Mode mode = Mode::TREE;
     std::string command_buffer;
     int command_cursor = 0;
     int* active_child = nullptr;
     Mode mode_before_command = Mode::TREE;
+    //<<
+    //!
 
-    // When a command sets this on Enter (e.g. :calc leaving its result in the
-    // field), the command line stays open with the buffer the command wrote
-    // instead of closing. The Enter handler consumes and resets it.
+    /*!
+        Keep Command Open
+
+        When a command sets this on Enter (e.g. :calc leaving its result in the
+        field), the command line stays open with the buffer the command wrote
+        instead of closing. The Enter handler consumes and resets it.
+
+        ----
+    */
+    //>>
     bool command_keep_open = false;
+    //<<
+    //!
 
+    /*!
+        Tracking Changes
+
+        ----
+    */
+    //>>
     bool changed = false;
+    //<<
+    //!
 
+    /*!
+        Treeview Related
+
+        ----
+    */
+    //>>
     int treeview_width = kDefaultTreeviewWidth;
 
     scribbolyth::treeview::TreeNode* active_node = nullptr;
@@ -45,6 +87,8 @@ struct EditorState {
     std::string template_path;
     std::string init_path;
     std::vector<scribbolyth::bookmark::Bookmark> bookmarks;
+    //<<
+    //!
 
     // Theme material captured from a .html import, carried through the session
     // so a later HTML export reproduces it (colors, grid, custom CSS).
@@ -147,3 +191,4 @@ struct EditorState {
         }
     }
 };
+//!
