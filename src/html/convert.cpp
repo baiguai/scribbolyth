@@ -11,11 +11,29 @@ namespace scribbolyth::html
 {
     namespace
     {
+        /*!
+            Parser Class
+        */
         class Parser
         {
             public:
-                explicit Parser(const std::string& s) : s_(s) {}
+                /*!
+                    Public Members
+                */
 
+                /*!
+                    Constructor
+
+                    !_ctor
+                */
+                explicit Parser(const std::string& s) : s_(s) {}
+                //!
+
+                /*!
+                    Parse the Array
+
+                    !_method
+                */
                 bool ParseArray(std::vector<TreeNode>& arr)
                 {
                     if (!Consume('[')) return false;
@@ -33,7 +51,13 @@ namespace scribbolyth::html
                         return false;
                     }
                 }
+                //!
 
+                /*!
+                    Parse the Bookmarks
+
+                    !_method
+                */
                 bool ParseBookmarks(std::vector<bookmark::Bookmark>& marks)
                 {
                     if (!Consume('[')) return false;
@@ -51,7 +75,13 @@ namespace scribbolyth::html
                         return false;
                     }
                 }
+                //!
 
+                /*!
+                    Parse a Bookmark
+
+                    !_method
+                */
                 bool ParseBookmark(bookmark::Bookmark& mark)
                 {
                     if (!Consume('{')) return false;
@@ -85,7 +115,13 @@ namespace scribbolyth::html
                         return false;
                     }
                 }
+                //!
 
+                /*!
+                    Parse History
+
+                    !_method
+                */
                 bool ParseHistory(std::vector<std::string>& ids)
                 {
                     if (!Consume('[')) return false;
@@ -127,23 +163,55 @@ namespace scribbolyth::html
                         return false;
                     }
                 }
+                //!
+
+                //!
 
             private:
+                /*!
+                    Private Members
+                */
+
+                /*!
+                    Variables
+
+                    ----
+                */
+                //>>
                 const std::string& s_;
                 std::size_t i_ = 0;
+                //<<
+                //!
 
+                /*!
+                    Skip White Space
+
+                    !_method
+                */
                 void SkipWs()
                 {
                     while (i_ < s_.size() && (s_[i_] == ' ' || s_[i_] == '\t'
                            || s_[i_] == '\n' || s_[i_] == '\r')) ++i_;
                 }
+                //!
 
+                /*!
+                    Utilize the Char
+
+                    !_method
+                */
                 bool Consume(char c)
                 {
                     if (i_ < s_.size() && s_[i_] == c) { ++i_; return true; }
                     return false;
                 }
+                //!
 
+                /*!
+                    Parse the String
+
+                    !_method
+                */
                 bool ParseString(std::string& out)
                 {
                     if (!Consume('"')) return false;
@@ -200,14 +268,26 @@ namespace scribbolyth::html
                     }
                     return false;
                 }
+                //!
 
+                /*!
+                    Parse Boolean
+
+                    !_method
+                */
                 bool ParseBool(bool& out)
                 {
                     if (s_.compare(i_, 4, "true") == 0)  { i_ += 4; out = true;  return true; }
                     if (s_.compare(i_, 5, "false") == 0) { i_ += 5; out = false; return true; }
                     return false;
                 }
+                //!
 
+                /*!
+                    Parse Number
+
+                    !_method
+                */
                 bool ParseNumber(int& out)
                 {
                     bool neg = false;
@@ -219,7 +299,13 @@ namespace scribbolyth::html
                     out = neg ? -value : value;
                     return true;
                 }
+                //!
 
+                /*!
+                    Skip Value
+
+                    !_method
+                */
                 bool SkipValue()
                 {
                     SkipWs();
@@ -268,7 +354,13 @@ namespace scribbolyth::html
                     }
                     return false;
                 }
+                //!
 
+                /*!
+                    Parse Object
+
+                    !_method
+                */
                 bool ParseObject(TreeNode& node)
                 {
                     node = TreeNode{};
@@ -297,12 +389,22 @@ namespace scribbolyth::html
                         return false;
                     }
                 }
-        };
+                //!
 
-        // Locate the '[' that opens the `let <keyword> = [ ... ];` array and the
-        // index of its matching ']' (string- and nesting-aware). The keyword is
-        // matched as a JS variable declaration so mentions of it in comments or
-        // help text never confuse the search.
+                //!
+        };
+        //!
+
+        /*!
+            Find JS Array
+
+            !_method
+
+            Locate the '[' that opens the `let <keyword> = [ ... ];` array and the
+            index of its matching ']' (string- and nesting-aware). The keyword is
+            matched as a JS variable declaration so mentions of it in comments or
+            help text never confuse the search.
+        */
         bool FindJsArray(const std::string& html, const std::string& keyword,
                          std::size_t& open, std::size_t& close)
         {
@@ -347,11 +449,18 @@ namespace scribbolyth::html
             }
             return false;
         }
+        //!
 
-        // The exported content keeps the note's text, but if its first line is
-        // not already the node's name, the name is prepended on its own line so
-        // every note reads as a titled section in the rendered HTML. Notes
-        // with no text are left untouched (no title line is invented for them).
+        /*!
+            Export Content
+
+            !_method
+
+            The exported content keeps the note's text, but if its first line is
+            not already the node's name, the name is prepended on its own line so
+            every note reads as a titled section in the rendered HTML. Notes
+            with no text are left untouched (no title line is invented for them).
+        */
         std::string ExportContent(const TreeNode& node)
         {
             if (node.name.empty() || node.text.empty()) return node.text;
@@ -371,6 +480,7 @@ namespace scribbolyth::html
             if (trim(first_line) == trim(node.name)) return node.text;
             return node.name + "\n\n" + node.text;
         }
+        //!
 
         void AppendNode(std::string& out, const TreeNode& node, int depth)
         {

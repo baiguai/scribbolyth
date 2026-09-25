@@ -2510,6 +2510,151 @@
         "expanded": false
       },
       {
+        "id": "c4d6fb75",
+        "title": "html",
+        "content": "",
+        "children": [
+          {
+            "id": "f4088a1b",
+            "title": "convert.cpp",
+            "content": "",
+            "children": [
+              {
+                "id": "ad2df6d5",
+                "title": "Parser Class",
+                "content": "Parser Class",
+                "children": [
+                  {
+                    "id": "a86a9184",
+                    "title": "Public Members",
+                    "content": "Public Members",
+                    "children": [
+                      {
+                        "id": "70702d8b",
+                        "title": "Constructor",
+                        "content": "Constructor\n\nSignature: explicit Parser(const std::string& s) : s_(s)\nConstructor: Parser\nQualifiers: explicit\nParameters:\n    s const std::string&\nInitializers:\n    s_ s",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "93e517be",
+                        "title": "Parse the Array",
+                        "content": "Parse the Array\n\nSignature: bool ParseArray(std::vector<TreeNode>& arr)\nMethod: ParseArray\nReturns: bool\nParameters:\n    arr std::vector<TreeNode>&",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "aa7e719e",
+                        "title": "Parse the Bookmarks",
+                        "content": "Parse the Bookmarks\n\nSignature: bool ParseBookmarks(std::vector<bookmark::Bookmark>& marks)\nMethod: ParseBookmarks\nReturns: bool\nParameters:\n    marks std::vector<bookmark::Bookmark>&",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "7a34e9d9",
+                        "title": "Parse a Bookmark",
+                        "content": "Parse a Bookmark\n\nSignature: bool ParseBookmark(bookmark::Bookmark& mark)\nMethod: ParseBookmark\nReturns: bool\nParameters:\n    mark bookmark::Bookmark&",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "c4265fe3",
+                        "title": "Parse History",
+                        "content": "Parse History\n\nSignature: bool ParseHistory(std::vector<std::string>& ids)\nMethod: ParseHistory\nReturns: bool\nParameters:\n    ids std::vector<std::string>&",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  },
+                  {
+                    "id": "044fdcdb",
+                    "title": "Private Members",
+                    "content": "Private Members",
+                    "children": [
+                      {
+                        "id": "188eb9b3",
+                        "title": "Variables",
+                        "content": "Variables\n\n--------------------------------------------------------------------------------\n\nconst std::string& s_;\nstd::size_t i_ = 0;",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "c68e97f6",
+                        "title": "Skip White Space",
+                        "content": "Skip White Space\n\nSignature: void SkipWs()\nMethod: SkipWs\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "2e38a3b1",
+                        "title": "Utilize the Char",
+                        "content": "Utilize the Char\n\nSignature: bool Consume(char c)\nMethod: Consume\nReturns: bool\nParameters:\n    c char",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "c0d71e33",
+                        "title": "Parse the String",
+                        "content": "Parse the String\n\nSignature: bool ParseString(std::string& out)\nMethod: ParseString\nReturns: bool\nParameters:\n    out std::string&",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "f689e0d0",
+                        "title": "Parse Boolean",
+                        "content": "Parse Boolean\n\nSignature: bool ParseBool(bool& out)\nMethod: ParseBool\nReturns: bool\nParameters:\n    out bool&",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "33438254",
+                        "title": "Parse Number",
+                        "content": "Parse Number\n\nSignature: bool ParseNumber(int& out)\nMethod: ParseNumber\nReturns: bool\nParameters:\n    out int&",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "afadf68e",
+                        "title": "Skip Value",
+                        "content": "Skip Value\n\nSignature: bool SkipValue()\nMethod: SkipValue\nReturns: bool",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "5aa0484e",
+                        "title": "Parse Object",
+                        "content": "Parse Object\n\nSignature: bool ParseObject(TreeNode& node)\nMethod: ParseObject\nReturns: bool\nParameters:\n    node TreeNode&",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  }
+                ],
+                "expanded": false
+              },
+              {
+                "id": "a2b3ab97",
+                "title": "Find JS Array",
+                "content": "Find JS Array\n\nSignature: bool FindJsArray(const std::string& html, const std::string& keyword, std::size_t& open, std::size_t& close)\nMethod: FindJsArray\nReturns: bool\nParameters:\n    html    const std::string&\n    keyword const std::string&\n    open    std::size_t&\n    close   std::size_t&\n\nLocate the '[' that opens the `let <keyword> = [ ... ];` array and the\nindex of its matching ']' (string- and nesting-aware). The keyword is\nmatched as a JS variable declaration so mentions of it in comments or\nhelp text never confuse the search.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "b6de4007",
+                "title": "Export Content",
+                "content": "Export Content\n\nSignature: std::string ExportContent(const TreeNode& node)\nMethod: ExportContent\nReturns: std::string\nParameters:\n    node const TreeNode&\n\nThe exported content keeps the note's text, but if its first line is\nnot already the node's name, the name is prepended on its own line so\nevery note reads as a titled section in the rendered HTML. Notes\nwith no text are left untouched (no title line is invented for them).",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
         "id": "ae2c4610",
         "title": "main.cpp",
         "content": "",
