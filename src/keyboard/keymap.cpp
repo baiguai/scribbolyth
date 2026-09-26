@@ -2,11 +2,20 @@
 
 #include <algorithm>
 
+/*!
+    Single Keymap Bind Call
+    This is a single binding.
+*/
 void Keymap::Bind(ftxui::Event event, Binding binding)
 {
     single_bindings_[event.input()] = std::move(binding);
 }
+//!
 
+/*!
+    Multiple Keymap Bind Call
+    This is a key sequence binding.
+*/
 void Keymap::Bind(std::vector<ftxui::Event> sequence, Binding binding)
 {
     std::vector<std::string> keys;
@@ -14,7 +23,11 @@ void Keymap::Bind(std::vector<ftxui::Event> sequence, Binding binding)
     for (auto& e : sequence) keys.push_back(e.input());
     sequence_bindings_[keys] = std::move(binding);
 }
+//!
 
+/*!
+    Keymap Handle Call
+*/
 Keymap::Result Keymap::Handle(ftxui::Event event)
 {
     auto& input = event.input();
@@ -78,3 +91,4 @@ Keymap::Result Keymap::Handle(ftxui::Event event)
     count_ = 0;
     return {"", "", "", false};
 }
+//!

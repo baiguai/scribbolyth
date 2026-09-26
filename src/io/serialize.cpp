@@ -8,6 +8,11 @@ namespace scribbolyth::io
 {
     namespace
     {
+        /*!
+            Escape
+
+            !_method
+        */
         std::string Escape(const std::string& s)
         {
             std::string out;
@@ -40,7 +45,13 @@ namespace scribbolyth::io
             out += '"';
             return out;
         }
+        //!
 
+        /*!
+            Append Node
+
+            !_method
+        */
         void AppendNode(std::string& out, const TreeNode& node, int depth)
         {
             std::string pad(depth * 2, ' ');
@@ -60,12 +71,31 @@ namespace scribbolyth::io
             out += pad2 + "]\n";
             out += pad + "}";
         }
+        //!
 
+        /*!
+            Parser Class
+        */
         class Parser
         {
             public:
-                explicit Parser(const std::string& s) : s_(s) {}
+                /*!
+                    Public Members
+                */
 
+                /*!
+                    Constructor
+
+                    !_ctor
+                */
+                explicit Parser(const std::string& s) : s_(s) {}
+                //!
+
+                /*!
+                    Deserialize
+
+                    !_method
+                */
                 bool Deserialize(std::vector<TreeNode>& roots, int* tree_width,
                                  std::vector<bookmark::Bookmark>* bookmarks,
                                  std::vector<std::string>* history)
@@ -142,23 +172,55 @@ namespace scribbolyth::io
                     if (have_history && history) *history = std::move(hist);
                     return true;
                 }
+                //!
+
+                //!
 
             private:
+                /*!
+                    Private Members
+                */
+
+                /*!
+                    Variables
+
+                    ----
+                */
+                //>>
                 const std::string& s_;
                 std::size_t i_ = 0;
+                //<<
+                //!
 
+                /*!
+                    Skip White Space
+
+                    !_method
+                */
                 void SkipWs()
                 {
                     while (i_ < s_.size() && (s_[i_] == ' ' || s_[i_] == '\t'
                            || s_[i_] == '\n' || s_[i_] == '\r')) ++i_;
                 }
+                //!
 
+                /*!
+                    Consume Char
+
+                    !_method
+                */
                 bool Consume(char c)
                 {
                     if (i_ < s_.size() && s_[i_] == c) { ++i_; return true; }
                     return false;
                 }
+                //!
 
+                /*!
+                    Parse String
+
+                    !_method
+                */
                 bool ParseString(std::string& out)
                 {
                     if (!Consume('"')) return false;
@@ -215,14 +277,26 @@ namespace scribbolyth::io
                     }
                     return false;
                 }
+                //!
 
+                /*!
+                    Parse Boolean
+
+                    !_method
+                */
                 bool ParseBool(bool& out)
                 {
                     if (s_.compare(i_, 4, "true") == 0)  { i_ += 4; out = true;  return true; }
                     if (s_.compare(i_, 5, "false") == 0) { i_ += 5; out = false; return true; }
                     return false;
                 }
+                //!
 
+                /*!
+                    Parse Number
+
+                    !_method
+                */
                 bool ParseNumber(int& out)
                 {
                     bool neg = false;
@@ -234,7 +308,13 @@ namespace scribbolyth::io
                     out = neg ? -value : value;
                     return true;
                 }
+                //!
 
+                /*!
+                    Parse Array
+
+                    !_method
+                */
                 bool ParseArray(std::vector<TreeNode>& arr)
                 {
                     if (!Consume('[')) return false;
@@ -252,7 +332,13 @@ namespace scribbolyth::io
                         return false;
                     }
                 }
+                //!
 
+                /*!
+                    Parse Bookmarks
+
+                    !_method
+                */
                 bool ParseBookmarks(std::vector<bookmark::Bookmark>& marks)
                 {
                     if (!Consume('[')) return false;
@@ -270,7 +356,13 @@ namespace scribbolyth::io
                         return false;
                     }
                 }
+                //!
 
+                /*!
+                    Parse History
+
+                    !_method
+                */
                 bool ParseHistory(std::vector<std::string>& ids)
                 {
                     if (!Consume('[')) return false;
@@ -288,7 +380,13 @@ namespace scribbolyth::io
                         return false;
                     }
                 }
+                //!
 
+                /*!
+                    Parse Bookmark
+
+                    !_method
+                */
                 bool ParseBookmark(bookmark::Bookmark& mark)
                 {
                     if (!Consume('{')) return false;
@@ -313,7 +411,13 @@ namespace scribbolyth::io
                         return false;
                     }
                 }
+                //!
 
+                /*!
+                    Parse Object
+
+                    !_method
+                */
                 bool ParseObject(TreeNode& node)
                 {
                     node = TreeNode{};
@@ -342,7 +446,13 @@ namespace scribbolyth::io
                         return false;
                     }
                 }
+                //!
 
+                /*!
+                    Skip Value
+
+                    !_method
+                */
                 bool SkipValue()
                 {
                     SkipWs();
@@ -391,14 +501,29 @@ namespace scribbolyth::io
                     }
                     return false;
                 }
+                //!
+
+                //!
         };
+        //!
     }
 
+    /*!
+        Json Escape
+
+        !_method
+    */
     std::string JsonEscape(const std::string& s)
     {
         return Escape(s);
     }
+    //!
 
+    /*!
+        Serialize
+
+        !_method
+    */
     std::string Serialize(const std::vector<TreeNode>& roots, int tree_width,
                           const std::vector<bookmark::Bookmark>& bookmarks,
                           const std::vector<std::string>& history)
@@ -431,13 +556,25 @@ namespace scribbolyth::io
         out += "  ]\n}\n";
         return std::string(kFileSignature) + out;
     }
+    //!
 
+    /*!
+        Has File Signature
+
+        !_method
+    */
     bool HasFileSignature(const std::string& content)
     {
         const std::string sig(kFileSignature);
         return content.compare(0, sig.size(), sig) == 0;
     }
+    //!
 
+    /*!
+        Deserialize
+
+        !_method
+    */
     bool Deserialize(const std::string& json, std::vector<TreeNode>& roots,
                      int* tree_width, std::vector<bookmark::Bookmark>* bookmarks,
                      std::vector<std::string>* history)
@@ -449,7 +586,13 @@ namespace scribbolyth::io
         Parser parser(body);
         return parser.Deserialize(roots, tree_width, bookmarks, history);
     }
+    //!
 
+    /*!
+        Write to File
+
+        !_method
+    */
     bool WriteFile(const std::string& path, const std::string& content)
     {
         std::ofstream out(path, std::ios::binary);
@@ -457,7 +600,13 @@ namespace scribbolyth::io
         out.write(content.data(), static_cast<std::streamsize>(content.size()));
         return static_cast<bool>(out);
     }
+    //!
 
+    /*!
+        Read from File
+
+        !_method
+    */
     bool ReadFile(const std::string& path, std::string& content)
     {
         std::ifstream in(path, std::ios::binary);
@@ -468,4 +617,5 @@ namespace scribbolyth::io
         content = ss.str();
         return true;
     }
+    //!
 }

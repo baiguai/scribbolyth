@@ -2647,6 +2647,604 @@
                 "content": "Export Content\n\nSignature: std::string ExportContent(const TreeNode& node)\nMethod: ExportContent\nReturns: std::string\nParameters:\n    node const TreeNode&\n\nThe exported content keeps the note's text, but if its first line is\nnot already the node's name, the name is prepended on its own line so\nevery note reads as a titled section in the rendered HTML. Notes\nwith no text are left untouched (no title line is invented for them).",
                 "children": [],
                 "expanded": false
+              },
+              {
+                "id": "97bcaaee",
+                "title": "Append Node",
+                "content": "Append Node\n\nSignature: void AppendNode(std::string& out, const TreeNode& node, int depth)\nMethod: AppendNode\nReturns: void\nParameters:\n    out   std::string&\n    node  const TreeNode&\n    depth int",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "8c8754bd",
+                "title": "Replace Array",
+                "content": "Replace Array\n\nSignature: void ReplaceArray(std::string& html, std::size_t open, std::size_t close, const std::string& json)\nMethod: ReplaceArray\nReturns: void\nParameters:\n    html  std::string&\n    open  std::size_t\n    close std::size_t\n    json  const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "28e1e195",
+                "title": "Replace Tree Data",
+                "content": "Replace Tree Data\n\nSignature: bool ReplaceTreeData(std::string& html, const std::vector<TreeNode>& roots)\nMethod: ReplaceTreeData\nReturns: bool\nParameters:\n    html  std::string&\n    roots const std::vector<TreeNode>&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "c9075132",
+                "title": "Find Node by Id",
+                "content": "Find Node by Id",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "2f0ec292",
+                "title": "Join Path",
+                "content": "Join Path\n\nSignature: std::string JoinPath(const std::vector<std::string>& path)\nMethod: JoinPath\nReturns: std::string\nParameters:\n    path const std::vector<std::string>&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "78dff0bd",
+                "title": "Append Bookmark.",
+                "content": "Append Bookmark.\n\nSignature: void AppendBookmarksJson(std::string& out, const std::vector<bookmark::Bookmark>& bookmarks, const std::vector<TreeNode>& roots)\nMethod: AppendBookmarksJson\nReturns: void\nParameters:\n    out       std::string&\n    bookmarks const std::vector<bookmark::Bookmark>&\n    roots     const std::vector<TreeNode>&\n\nSerialize bookmarks into the HTML app's format:\n  { \"id\", \"caption\", \"path\", \"line\"? }  with `line` being 1-based.\nBookmarks whose target node no longer exists are skipped.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "6ae0ba9d",
+                "title": "Replace Bookmarks",
+                "content": "Replace Bookmarks\n\nSignature: bool ReplaceBookmarks(std::string& html, const std::vector<bookmark::Bookmark>& bookmarks, const std::vector<TreeNode>& roots)\nMethod: ReplaceBookmarks\nReturns: bool\nParameters:\n    html      std::string&\n    bookmarks const std::vector<bookmark::Bookmark>&\n    roots     const std::vector<TreeNode>&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "1a6c442a",
+                "title": "Append History Json",
+                "content": "Append History Json\n\nSignature: void AppendHistoryJson(std::string& out, const std::vector<std::string>& history, const std::vector<TreeNode>& roots)\nMethod: AppendHistoryJson\nReturns: void\nParameters:\n    out     std::string&\n    history const std::vector<std::string>&\n    roots   const std::vector<TreeNode>&\n\nSerialize the viewed-node history into the HTML app's format:\n  { \"id\", \"title\" }  one entry per id, most recent last.\nEntries whose target node no longer exists are skipped.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "fcd03358",
+                "title": "Replace History",
+                "content": "Replace History\n\nSignature: bool ReplaceHistory(std::string& html, const std::vector<std::string>& history, const std::vector<TreeNode>& roots)\nMethod: ReplaceHistory\nReturns: bool\nParameters:\n    html    std::string&\n    history const std::vector<std::string>&\n    roots   const std::vector<TreeNode>&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "8e898875",
+                "title": "Expand Tabs",
+                "content": "Expand Tabs\n\nSignature: void ExpandTabs(std::string& s)\nMethod: ExpandTabs\nReturns: void\nParameters:\n    s std::string&\n\nThe web app renders leading indentation as literal tabs; the editor\nuses 4-space indentation (Tab inserts four spaces), so expanding each\ntab in the imported note text to four spaces keeps that leading\nwhitespace from being lost.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "38357821",
+                "title": "ExpandTabsInNode",
+                "content": "ExpandTabsInNode\n\nSignature: void ExpandTabsInNode(TreeNode& node)\nMethod: ExpandTabsInNode\nReturns: void\nParameters:\n    node TreeNode&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "b64caf86",
+                "title": "AsciiPunctuationInNode",
+                "content": "AsciiPunctuationInNode\n\nSignature: void AsciiPunctuationInNode(TreeNode& node)\nMethod: AsciiPunctuationInNode\nReturns: void\nParameters:\n    node TreeNode&\n\nConvert typographic punctuation in the imported titles and note text\nto plain ASCII, mirroring the paste sanitizer, so nothing that the\nterminal cannot render ends up in the document.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "4d99ab3b",
+                "title": "Find JS Statement",
+                "content": "Find JS Statement\n\nSignature: bool FindJsStatement(const std::string& html, const std::string& keyword, std::size_t& start, std::size_t& end)\nMethod: FindJsStatement\nReturns: bool\nParameters:\n    html    const std::string&\n    keyword const std::string&\n    start   std::size_t&\n    end     std::size_t&\n\nLocate a `let <keyword> = <value>;` script statement and return the\nbyte range [start, end) covering the whole statement including the\ntrailing ';'. The value may be a nested '{...}'/'[...]' literal,\nscanned string- and nesting-aware, or a scalar ending at ';'.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "17877a36",
+                "title": "Replace JS Statement",
+                "content": "Replace JS Statement\n\nSignature: bool ReplaceJsStatement(std::string& html, const std::string& keyword, const std::string& statement)\nMethod: ReplaceJsStatement\nReturns: bool\nParameters:\n    html      std::string&\n    keyword   const std::string&\n    statement const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "41ddefed",
+                "title": "Const Variables",
+                "content": "Const Variables\n\n--------------------------------------------------------------------------------\n\nconst char* kThemeStyleOpen = \"<style id=\\\"theme_styles\\\">\";\nconst char* kThemeStyleClose = \"</style>\";",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "d82797e7",
+                "title": "Find Style Content",
+                "content": "Find Style Content\n\nSignature: bool FindStyleContent(const std::string& html, std::size_t& open, std::size_t& close)\nMethod: FindStyleContent\nReturns: bool\nParameters:\n    html  const std::string&\n    open  std::size_t&\n    close std::size_t&\n\nThe inner text of the `<style id=\"theme_styles\">` block.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "3b8a4d0f",
+                "title": "Replace Style Content",
+                "content": "Replace Style Content\n\nSignature: bool ReplaceStyleContent(std::string& html, const std::string& content)\nMethod: ReplaceStyleContent\nReturns: bool\nParameters:\n    html    std::string&\n    content const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "9de63308",
+                "title": "Import Html File",
+                "content": "Import Html File\n\nSignature: bool ImportHtmlFile(const std::string& path, std::vector<TreeNode>& roots, std::vector<bookmark::Bookmark>* bookmarks, std::vector<std::string>* history, HtmlTheme* theme)\nMethod: ImportHtmlFile\nReturns: bool\nParameters:\n    path      const std::string&\n    roots     std::vector<TreeNode>&\n    bookmarks std::vector<bookmark::Bookmark>*\n    history   std::vector<std::string>*\n    theme     HtmlTheme*",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "52fe2848",
+                "title": "Export Html File",
+                "content": "Export Html File\n\nSignature: bool ExportHtmlFile(const std::string& template_path, const std::string& out_path, const std::vector<TreeNode>& roots, const std::vector<bookmark::Bookmark>& bookmarks, const std::vector<std::string>& history, const HtmlTheme* theme)\nMethod: ExportHtmlFile\nReturns: bool\nParameters:\n    template_path const std::string&\n    out_path      const std::string&\n    roots         const std::vector<TreeNode>&\n    bookmarks     const std::vector<bookmark::Bookmark>&\n    history       const std::vector<std::string>&\n    theme         const HtmlTheme*",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          },
+          {
+            "id": "13b2f738",
+            "title": "convert.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "1ce3732b",
+                "title": "Html Theme Struct",
+                "content": "Html Theme Struct\n\nstruct HtmlTheme\n{\n    bool present = false;\n    std::string current_theme;\n    std::string themes;\n    std::string style_content;\n};\n\nThe theme material of an imported HTML file, captured verbatim from the\nweb app's own script declarations so a later export can reproduce it.\n`current_theme` and `themes` hold the full `let currentTheme = ...;` /\n`let themes = [...];` statements; `style_content` is the inner text of\nthe `<style id=\"theme_styles\">` block. Empty strings mean the piece was\nabsent from the source; `present` is true when any piece was found.",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
+        "id": "e3593b0e",
+        "title": "io",
+        "content": "",
+        "children": [
+          {
+            "id": "c9bdfdb0",
+            "title": "serialize.cpp",
+            "content": "",
+            "children": [
+              {
+                "id": "e89f7433",
+                "title": "Escape",
+                "content": "Escape\n\nSignature: std::string Escape(const std::string& s)\nMethod: Escape\nReturns: std::string\nParameters:\n    s const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "72410a42",
+                "title": "Append Node",
+                "content": "Append Node\n\nSignature: void AppendNode(std::string& out, const TreeNode& node, int depth)\nMethod: AppendNode\nReturns: void\nParameters:\n    out   std::string&\n    node  const TreeNode&\n    depth int",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "0932b2e1",
+                "title": "Parser Class",
+                "content": "Parser Class",
+                "children": [
+                  {
+                    "id": "07e40b47",
+                    "title": "Public Members",
+                    "content": "Public Members",
+                    "children": [
+                      {
+                        "id": "0a993552",
+                        "title": "Constructor",
+                        "content": "Constructor\n\nSignature: explicit Parser(const std::string& s) : s_(s)\nConstructor: Parser\nQualifiers: explicit\nParameters:\n    s const std::string&\nInitializers:\n    s_ s",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "fc63461b",
+                        "title": "Deserialize",
+                        "content": "Deserialize\n\nSignature: bool Deserialize(std::vector<TreeNode>& roots, int* tree_width, std::vector<bookmark::Bookmark>* bookmarks, std::vector<std::string>* history)\nMethod: Deserialize\nReturns: bool\nParameters:\n    roots      std::vector<TreeNode>&\n    tree_width int*\n    bookmarks  std::vector<bookmark::Bookmark>*\n    history    std::vector<std::string>*",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  },
+                  {
+                    "id": "9ee03b39",
+                    "title": "Private Members",
+                    "content": "Private Members",
+                    "children": [
+                      {
+                        "id": "432aef42",
+                        "title": "Variables",
+                        "content": "Variables\n\n--------------------------------------------------------------------------------\n\nconst std::string& s_;\nstd::size_t i_ = 0;",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "c36492f6",
+                        "title": "Skip White Space",
+                        "content": "Skip White Space\n\nSignature: void SkipWs()\nMethod: SkipWs\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "977bf8b1",
+                        "title": "Consume Char",
+                        "content": "Consume Char\n\nSignature: bool Consume(char c)\nMethod: Consume\nReturns: bool\nParameters:\n    c char",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "d555fc0b",
+                        "title": "Parse String",
+                        "content": "Parse String\n\nSignature: bool ParseString(std::string& out)\nMethod: ParseString\nReturns: bool\nParameters:\n    out std::string&",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "13dc29e7",
+                        "title": "Parse Boolean",
+                        "content": "Parse Boolean\n\nSignature: bool ParseBool(bool& out)\nMethod: ParseBool\nReturns: bool\nParameters:\n    out bool&",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "741c2815",
+                        "title": "Parse Number",
+                        "content": "Parse Number\n\nSignature: bool ParseNumber(int& out)\nMethod: ParseNumber\nReturns: bool\nParameters:\n    out int&",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "b7400cb6",
+                        "title": "Parse Array",
+                        "content": "Parse Array\n\nSignature: bool ParseArray(std::vector<TreeNode>& arr)\nMethod: ParseArray\nReturns: bool\nParameters:\n    arr std::vector<TreeNode>&",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "984662cd",
+                        "title": "Parse Bookmarks",
+                        "content": "Parse Bookmarks\n\nSignature: bool ParseBookmarks(std::vector<bookmark::Bookmark>& marks)\nMethod: ParseBookmarks\nReturns: bool\nParameters:\n    marks std::vector<bookmark::Bookmark>&",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "57cdb2e4",
+                        "title": "Parse History",
+                        "content": "Parse History\n\nSignature: bool ParseHistory(std::vector<std::string>& ids)\nMethod: ParseHistory\nReturns: bool\nParameters:\n    ids std::vector<std::string>&",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "c004fb02",
+                        "title": "Parse Bookmark",
+                        "content": "Parse Bookmark\n\nSignature: bool ParseBookmark(bookmark::Bookmark& mark)\nMethod: ParseBookmark\nReturns: bool\nParameters:\n    mark bookmark::Bookmark&",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "e3d2b579",
+                        "title": "Parse Object",
+                        "content": "Parse Object\n\nSignature: bool ParseObject(TreeNode& node)\nMethod: ParseObject\nReturns: bool\nParameters:\n    node TreeNode&",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "aba81a37",
+                        "title": "Skip Value",
+                        "content": "Skip Value\n\nSignature: bool SkipValue()\nMethod: SkipValue\nReturns: bool",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  }
+                ],
+                "expanded": false
+              },
+              {
+                "id": "a2779976",
+                "title": "Json Escape",
+                "content": "Json Escape\n\nSignature: std::string JsonEscape(const std::string& s)\nMethod: JsonEscape\nReturns: std::string\nParameters:\n    s const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "51373bfd",
+                "title": "Serialize",
+                "content": "Serialize\n\nSignature: std::string Serialize(const std::vector<TreeNode>& roots, int tree_width, const std::vector<bookmark::Bookmark>& bookmarks, const std::vector<std::string>& history)\nMethod: Serialize\nReturns: std::string\nParameters:\n    roots      const std::vector<TreeNode>&\n    tree_width int\n    bookmarks  const std::vector<bookmark::Bookmark>&\n    history    const std::vector<std::string>&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "4ef10986",
+                "title": "Has File Signature",
+                "content": "Has File Signature\n\nSignature: bool HasFileSignature(const std::string& content)\nMethod: HasFileSignature\nReturns: bool\nParameters:\n    content const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "67ff9ab9",
+                "title": "Deserialize",
+                "content": "Deserialize\n\nSignature: bool Deserialize(const std::string& json, std::vector<TreeNode>& roots, int* tree_width, std::vector<bookmark::Bookmark>* bookmarks, std::vector<std::string>* history)\nMethod: Deserialize\nReturns: bool\nParameters:\n    json       const std::string&\n    roots      std::vector<TreeNode>&\n    tree_width int*\n    bookmarks  std::vector<bookmark::Bookmark>*\n    history    std::vector<std::string>*",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "3e9b015d",
+                "title": "Write to File",
+                "content": "Write to File\n\nSignature: bool WriteFile(const std::string& path, const std::string& content)\nMethod: WriteFile\nReturns: bool\nParameters:\n    path    const std::string&\n    content const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "0d6f387a",
+                "title": "Read from File",
+                "content": "Read from File\n\nSignature: bool ReadFile(const std::string& path, std::string& content)\nMethod: ReadFile\nReturns: bool\nParameters:\n    path    const std::string&\n    content std::string&",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
+        "id": "d3e3e6e5",
+        "title": "keyboard",
+        "content": "",
+        "children": [
+          {
+            "id": "147aedaa",
+            "title": "keymap.cpp",
+            "content": "",
+            "children": [
+              {
+                "id": "3c39a563",
+                "title": "Single Keymap Bind Call",
+                "content": "Single Keymap Bind Call\nThis is a single binding.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "2ae09014",
+                "title": "Multiple Keymap Bind Call",
+                "content": "Multiple Keymap Bind Call\nThis is a key sequence binding.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "78eff515",
+                "title": "Keymap Handle Call",
+                "content": "Keymap Handle Call",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          },
+          {
+            "id": "9c651246",
+            "title": "keymap.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "020471a0",
+                "title": "Binding Struct",
+                "content": "Binding Struct\n\n--------------------------------------------------------------------------------\n\nstruct Binding\n{\n    std::string op;\n    std::string command;\n    std::string args;\n    bool can_repeat = false;\n};",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "854481b5",
+                "title": "Keymap Class",
+                "content": "Keymap Class",
+                "children": [
+                  {
+                    "id": "fcfa8278",
+                    "title": "Public Members",
+                    "content": "Public Members",
+                    "children": [
+                      {
+                        "id": "075e2c00",
+                        "title": "Ftxui Event Wrappers",
+                        "content": "Ftxui Event Wrappers\n\n--------------------------------------------------------------------------------\n\nvoid Bind(ftxui::Event event, Binding binding);\nvoid Bind(std::vector<ftxui::Event> sequence, Binding binding);",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "dede42ea",
+                        "title": "Result Struct",
+                        "content": "Result Struct\n\nstruct Result\n{\n    std::string op;\n    std::string command;\n    std::string args;\n    bool pending = false;\n    int count = 1;\n};",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "8bd4b1e9",
+                        "title": "Forward Definitions",
+                        "content": "Forward Definitions\n\nResult Handle(ftxui::Event event);\nvoid ResetPending() { pending_.clear(); }\nvoid EnableCounts() { enable_count_ = true; }",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  },
+                  {
+                    "id": "e8f88ab5",
+                    "title": "Private Members",
+                    "content": "Private Members",
+                    "children": [
+                      {
+                        "id": "ee800319",
+                        "title": "Variables",
+                        "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::map<std::string, Binding> single_bindings_;\nstd::map<std::vector<std::string>, Binding> sequence_bindings_;\nstd::vector<std::string> pending_;\nbool enable_count_ = false;\nint count_ = 0;",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  }
+                ],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
+        "id": "1ea52bbf",
+        "title": "links",
+        "content": "",
+        "children": [
+          {
+            "id": "c085b12c",
+            "title": "brokelinks.cpp",
+            "content": "",
+            "children": [
+              {
+                "id": "92fcf7b2",
+                "title": "Pad Right",
+                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "cd7b4a11",
+                "title": "First Occurrence in Line",
+                "content": "First Occurrence in Line\n\nSignature: int FirstOccurrenceLine(const std::string& text, const std::string& target)\nMethod: FirstOccurrenceLine\nReturns: int\nParameters:\n    text   const std::string&\n    target const std::string&\n\n0-based line of the first real occurrence of `target` (a `_Title_`\nreference) in `text`. A candidate counts only when its neighbours\nare not word characters, mirroring the `_Note_` scanning rules.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "7afb3deb",
+                "title": "Dead Link Dialog Class",
+                "content": "Dead Link Dialog Class",
+                "children": [
+                  {
+                    "id": "535a4961",
+                    "title": "Public Members",
+                    "content": "Public Members",
+                    "children": [
+                      {
+                        "id": "106002a3",
+                        "title": "Constructor",
+                        "content": "Constructor\n\nSignature: DeadLinksDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: DeadLinksDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "29434a4a",
+                        "title": "Focusable Variable",
+                        "content": "Focusable Variable\n\nbool Focusable() const override { return true; }",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "0921f1bf",
+                        "title": "Ftxui Event Call",
+                        "content": "Ftxui Event Call",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "f2f8b7d2",
+                        "title": "Ftxui Render Call",
+                        "content": "Ftxui Render Call",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  },
+                  {
+                    "id": "920cfda6",
+                    "title": "Private Members",
+                    "content": "Private Members",
+                    "children": [
+                      {
+                        "id": "9fc290b0",
+                        "title": "Entry Struct",
+                        "content": "Entry Struct\n\nstruct Entry\n{\n    std::string target;\n    treeview::TreeNode* node = nullptr;\n    int line = 0;\n};",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "a533f609",
+                        "title": "Variables",
+                        "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstatic constexpr int kVisibleRows = 18;\nstatic constexpr int kDoubleClickMs = 500;",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "dd8976de",
+                        "title": "On Mouse",
+                        "content": "On Mouse\n\nSignature: bool OnMouse(ftxui::Mouse mouse)\nMethod: OnMouse\nReturns: bool\nParameters:\n    mouse ftxui::Mouse",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "71d73004",
+                        "title": "Close",
+                        "content": "Close\n\nSignature: void Close()\nMethod: Close\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "5edaca6e",
+                        "title": "Activate",
+                        "content": "Activate\n\nSignature: void Activate()\nMethod: Activate\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "2a2002c3",
+                        "title": "Select Next/Previous Item",
+                        "content": "Select Next/Previous Item\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "193148e7",
+                        "title": "Compute the Top",
+                        "content": "Compute the Top\n\nSignature: int ComputeTop(int sel, int total) const\nMethod: ComputeTop\nReturns: int\nQualifiers: const\nParameters:\n    sel   int\n    total int",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "3e351b1d",
+                        "title": "Recompute",
+                        "content": "Recompute\n\nSignature: void Recompute()\nMethod: Recompute\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "8d37149f",
+                        "title": "Variables",
+                        "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nftxui::Box box_;\nstd::vector<Entry> entries_;\nstd::vector<std::string> rendered_;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 20;\nint last_click_index_ = -1;\nstd::chrono::steady_clock::time_point last_click_time_;",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  }
+                ],
+                "expanded": false
+              },
+              {
+                "id": "f7764a48",
+                "title": "Make Dead Link Dialog",
+                "content": "Make Dead Link Dialog\n\nSignature: ftxui::Component MakeDeadLinksDialog(std::shared_ptr<EditorState> state, bool* show)\nMethod: MakeDeadLinksDialog\nReturns: ftxui::Component\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*",
+                "children": [],
+                "expanded": false
               }
             ],
             "expanded": false
