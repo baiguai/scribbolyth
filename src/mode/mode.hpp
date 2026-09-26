@@ -2,6 +2,10 @@
 
 #include <string>
 
+/*!
+    Mode Enum
+*/
+//>>
 enum class Mode
 {
     TREE,
@@ -12,7 +16,14 @@ enum class Mode
     VISUAL_BLOCK,
     COMMAND
 };
+//<<
+//!
 
+/*!
+    Mode Name
+
+    !_method
+*/
 inline std::string ModeName(Mode m)
 {
     switch(m)
@@ -27,3 +38,4 @@ inline std::string ModeName(Mode m)
     }
     return "???";
 }
+//!

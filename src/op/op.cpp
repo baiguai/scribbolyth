@@ -13,6 +13,11 @@ namespace scribbolyth::op
 {
     namespace
     {
+        /*!
+            Is Path Command
+
+            !_method
+        */
         bool IsPathCommand(const std::string& name)
         {
             return name == "open" || name == "o" || name == "o!"
@@ -20,6 +25,7 @@ namespace scribbolyth::op
                 || name == "U" || name == "X" || name == "x"
                 || name == "export_note_txt" || name == "export_tree_txt";
         }
+        //!
 
         void CollectPathMatches(const std::string& arg, std::vector<std::string>& matches)
         {

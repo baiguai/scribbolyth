@@ -3248,6 +3248,249 @@
               }
             ],
             "expanded": false
+          },
+          {
+            "id": "8eb32552",
+            "title": "links.cpp",
+            "content": "",
+            "children": [
+              {
+                "id": "ecef2a09",
+                "title": "Pad Right",
+                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "6377b628",
+                "title": "Trim",
+                "content": "Trim\n\nSignature: std::string Trim(const std::string& s)\nMethod: Trim\nReturns: std::string\nParameters:\n    s const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "24379e48",
+                "title": "Lower",
+                "content": "Lower\n\nSignature: std::string Lower(const std::string& s)\nMethod: Lower\nReturns: std::string\nParameters:\n    s const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "96a24701",
+                "title": "Is Note Target",
+                "content": "Is Note Target\n\nSignature: bool IsNoteTarget(const std::string& target)\nMethod: IsNoteTarget\nReturns: bool\nParameters:\n    target const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "d7943fbc",
+                "title": "Is Url Target",
+                "content": "Is Url Target\n\nSignature: bool IsUrlTarget(const std::string& target)\nMethod: IsUrlTarget\nReturns: bool\nParameters:\n    target const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "0af63c98",
+                "title": "Note Title",
+                "content": "Note Title\n\nSignature: std::string NoteTitle(const std::string& target)\nMethod: NoteTitle\nReturns: std::string\nParameters:\n    target const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "4320097b",
+                "title": "Constants",
+                "content": "Constants\n\n--------------------------------------------------------------------------------\n\nconst std::regex kMarkdownRegex(\n    R\"(\\[([^\\]]+)\\](?:[ \\t]*\\r?\\n[ \\t]*|[ \\t]*)(https?://\\S+|file://\\S+|_[^_]+_))\",\n    std::regex_constants::icase);\nconst std::regex kUrlRegex(R\"(\\b(?:https?|file)://[^\\s]+)\",\n                           std::regex_constants::icase);\nconst std::regex kNoteRegex(\n    R\"((?:^|\\s|\\()_([^_]|[^_].*?[^_])_(?=\\s|[.,!?;:)]|$))\");",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "8549a575",
+                "title": "Collect Links",
+                "content": "Collect Links\n\nSignature: void CollectLinks(const std::string& content, std::vector<Link>& out)\nMethod: CollectLinks\nReturns: void\nParameters:\n    content const std::string&\n    out     std::vector<Link>&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "7a8a87cb",
+                "title": "Open External",
+                "content": "Open External\n\nSignature: void OpenExternal(const std::string& url)\nMethod: OpenExternal\nReturns: void\nParameters:\n    url const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "047be61b",
+                "title": "Copy to Clipboard",
+                "content": "Copy to Clipboard\n\nSignature: bool CopyToClipboard(const std::string& text)\nMethod: CopyToClipboard\nReturns: bool\nParameters:\n    text const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "52f69581",
+                "title": "Links Dialog Class",
+                "content": "Links Dialog Class",
+                "children": [
+                  {
+                    "id": "b302c5f3",
+                    "title": "Public Members",
+                    "content": "Public Members",
+                    "children": [
+                      {
+                        "id": "5d216d7f",
+                        "title": "Constructor",
+                        "content": "Constructor\n\nSignature: LinksDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: LinksDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "f16ae7a3",
+                        "title": "Variables",
+                        "content": "Variables\n\n--------------------------------------------------------------------------------\n\nbool Focusable() const override { return true; }\n\nbool pending_g_ = false;",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "334fa214",
+                        "title": "Ftxui Event Call",
+                        "content": "Ftxui Event Call\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "cd2a63d7",
+                        "title": "Ftxui Render Call",
+                        "content": "Ftxui Render Call\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  },
+                  {
+                    "id": "92430517",
+                    "title": "Private Members",
+                    "content": "Private Members",
+                    "children": [
+                      {
+                        "id": "c87db8b7",
+                        "title": "Static Variables",
+                        "content": "Static Variables\n\n--------------------------------------------------------------------------------\n\nstatic constexpr int kVisibleRows = 18;\nstatic constexpr int kDoubleClickMs = 500;",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "c6e8deec",
+                        "title": "On Mouse",
+                        "content": "On Mouse\n\nSignature: bool OnMouse(ftxui::Mouse mouse)\nMethod: OnMouse\nReturns: bool\nParameters:\n    mouse ftxui::Mouse",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "2e1dc3e8",
+                        "title": "Close",
+                        "content": "Close\n\nSignature: void Close()\nMethod: Close\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "81ba27ed",
+                        "title": "Activate",
+                        "content": "Activate\n\nSignature: void Activate()\nMethod: Activate\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "a8e874a5",
+                        "title": "Move Selection Up/Down",
+                        "content": "Move Selection Up/Down\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "c2a65f3e",
+                        "title": "Move To Start",
+                        "content": "Move To Start\n\nSignature: void MoveToStart()\nMethod: MoveToStart\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "49af98ad",
+                        "title": "Move To End",
+                        "content": "Move To End\n\nSignature: void MoveToEnd()\nMethod: MoveToEnd\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "18aa5235",
+                        "title": "Copy Selected",
+                        "content": "Copy Selected\n\nSignature: void CopySelected()\nMethod: CopySelected\nReturns: void\n\nMirror of the HTML app's `y` key: copy a URL verbatim, or a note\nlink as its `_Title_` reference. Missing notes copy nothing.",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "f7c1bda6",
+                        "title": "Compute Top",
+                        "content": "Compute Top\n\nSignature: int ComputeTop(int sel, int total) const\nMethod: ComputeTop\nReturns: int\nQualifiers: const\nParameters:\n    sel   int\n    total int",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "5132d756",
+                        "title": "Recompute",
+                        "content": "Recompute\n\nSignature: void Recompute()\nMethod: Recompute\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "a11e8a65",
+                        "title": "Variables",
+                        "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nftxui::Box box_;\nstd::vector<Link> entries_;\nstd::vector<std::string> rendered_;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 20;\nint last_click_index_ = -1;\nstd::chrono::steady_clock::time_point last_click_time_;",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  }
+                ],
+                "expanded": false
+              },
+              {
+                "id": "5a9c204f",
+                "title": "Make Links Dialog",
+                "content": "Make Links Dialog\n\nSignature: ftxui::Component MakeLinksDialog(std::shared_ptr<EditorState> state, bool* show)\nMethod: MakeLinksDialog\nReturns: ftxui::Component\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          },
+          {
+            "id": "ece661bf",
+            "title": "links.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "666b9ab3",
+                "title": "Link Struct",
+                "content": "Link Struct\n\nstruct Link\n{\n    std::string label;\n    std::string target;\n    treeview::TreeNode* node = nullptr;\n    bool from_markdown = false;\n    bool ok = true;\n};\n\nA link found in a note's text: `label` is the display text (markdown\nlabel, or the target itself), `target` is the raw reference (a URL or a\n`_Title_`), `node` is the resolved target node once `Recompute` fills it\nin, and `ok` says whether the target resolves. `from_markdown` marks\n`[label](target)` style links.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "344d1261",
+                "title": "Variables",
+                "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::string Trim(const std::string& s);\nstd::string Lower(const std::string& s);\nbool IsUrlTarget(const std::string& target);\nbool IsNoteTarget(const std::string& target);\nstd::string NoteTitle(const std::string& target);",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "83db20ea",
+                "title": "Collect Links",
+                "content": "Collect Links\n\n!_method\n\nCollect every link in `content`, deduplicated by target, in order.\nMirrors the HTML app's openLinksDialog() scanning rules.",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
           }
         ],
         "expanded": false
@@ -3308,6 +3551,59 @@
                 "id": "35a17595",
                 "title": "Ftxui",
                 "content": "Ftxui\nHandles the active child in the state.\nCreates the containers to build the TUI.\nCreates the various dialogs and adds them to a modals list:\nHandles the showing of modal dialogs and the Screen loop.\n\nauto container = Container::Vertical({\n    main_split | flex,\n    command_handler,\n    status_bar,\n}, &active_child);\n\nauto help_comp = scribbolyth::help::MakeHelpDialog(state, config_path.string(), &show_help);\nauto regex_comp = scribbolyth::regex::MakeRegexDialog(state, regex_path.string(), &show_regex);\nauto search_comp = scribbolyth::search::MakeSearchDialog(state, &show_search);\nauto link_picker_comp = scribbolyth::search::MakeSearchDialog(state, &show_link_picker, scribbolyth::search::DialogMode::InsertLink);\nauto search_results_comp = scribbolyth::search::MakeSearchDialog(state, &show_search_results, scribbolyth::search::DialogMode::CreateResults);\nauto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);\nauto links_comp = scribbolyth::links::MakeLinksDialog(state, &show_links);\nauto dead_links_comp = scribbolyth::brokenlinks::MakeDeadLinksDialog(state, &show_dead_links);\nauto history_comp = scribbolyth::history::MakeHistoryDialog(state, &show_history);\nauto recent_comp = scribbolyth::recent::MakeRecentDialog(state, &show_recent, recent_force);\nauto undo_comp = scribbolyth::undo::MakeUndoDialog(state, &show_undo);\nauto browser_comp = scribbolyth::browser::MakeFileBrowserDialog(state, &show_file_browser);\nauto modals = {\n    std::tuple(help_comp,        &show_help),\n    std::tuple(regex_comp,       &show_regex),\n    std::tuple(search_comp,      &show_search),\n    std::tuple(search_results_comp, &show_search_results),\n    std::tuple(link_picker_comp, &show_link_picker),\n    std::tuple(bookmarks_comp,   &show_bookmarks),\n    std::tuple(links_comp,       &show_links),\n    std::tuple(dead_links_comp,  &show_dead_links),\n    std::tuple(history_comp,     &show_history),\n    std::tuple(recent_comp,      &show_recent),\n    std::tuple(undo_comp,        &show_undo),\n    std::tuple(browser_comp,     &show_file_browser),\n};\n\nauto root = container;\nfor (auto& [comp, show] : modals)\n{\n    root = Modal(root, comp, show);\n}",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
+        "id": "0a5142ca",
+        "title": "mode",
+        "content": "",
+        "children": [
+          {
+            "id": "c801452d",
+            "title": "mode.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "cfe1134b",
+                "title": "Mode Enum",
+                "content": "Mode Enum\n\nenum class Mode\n{\n    TREE,\n    NORMAL,\n    INSERT,\n    VISUAL,\n    VISUAL_LINE,\n    VISUAL_BLOCK,\n    COMMAND\n};",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "f417d790",
+                "title": "Mode Name",
+                "content": "Mode Name\n\nSignature: inline std::string ModeName(Mode m)\nMethod: ModeName\nReturns: inline std::string\nParameters:\n    m Mode",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
+        "id": "713c9a1e",
+        "title": "op",
+        "content": "",
+        "children": [
+          {
+            "id": "f140fa48",
+            "title": "op.cpp",
+            "content": "",
+            "children": [
+              {
+                "id": "f42fe01f",
+                "title": "Is Path Command",
+                "content": "Is Path Command\n\nSignature: bool IsPathCommand(const std::string& name)\nMethod: IsPathCommand\nReturns: bool\nParameters:\n    name const std::string&",
                 "children": [],
                 "expanded": false
               }
