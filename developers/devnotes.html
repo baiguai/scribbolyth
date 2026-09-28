@@ -4017,6 +4017,192 @@
           }
         ],
         "expanded": false
+      },
+      {
+        "id": "1e8d9764",
+        "title": "search",
+        "content": "",
+        "children": [
+          {
+            "id": "621fdb24",
+            "title": "search.cpp",
+            "content": "",
+            "children": [
+              {
+                "id": "1e8ae06e",
+                "title": "To Lower",
+                "content": "To Lower\n\nSignature: std::string Lower(std::string s)\nMethod: Lower\nReturns: std::string\nParameters:\n    s std::string",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "fb4551b5",
+                "title": "Pad Right",
+                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "6fc5e374",
+                "title": "Escape Regex",
+                "content": "Escape Regex\n\nSignature: std::string EscapeRegex(const std::string& s)\nMethod: EscapeRegex\nReturns: std::string\nParameters:\n    s const std::string&\n\nEscape the ECMAScript metacharacters so an \"all words\" search term\nkeeps its literal meaning inside the generated regex.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "3b17656f",
+                "title": "All Words Regex",
+                "content": "All Words Regex\n\nSignature: std::string AllWordsRegex(const std::string& query)\nMethod: AllWordsRegex\nReturns: std::string\nParameters:\n    query const std::string&\n\nBuilds `(?=[\\s\\S]*\\bw1\\b)(?=[\\s\\S]*\\bw2\\b)...(?=[\\s\\S]*\\bwn\\b)[\\s\\S]*`\nfrom the whitespace-separated words of `query`, requiring every word\nto be present anywhere in the text (any order, any line). `[\\s\\S]`\nis the ECMAScript stand-in for DOTALL, so words on different lines\nstill satisfy the lookaheads.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "0189a9bf",
+                "title": "Indent Name",
+                "content": "Indent Name\n\nSignature: std::string IndentName(int depth, const std::string& name)\nMethod: IndentName\nReturns: std::string\nParameters:\n    depth int\n    name  const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "bc74a7c2",
+                "title": "Result Struct",
+                "content": "Result Struct\n\nstruct Result\n{\n    treeview::TreeNode* node;\n    std::string line;\n};",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "df0cac25",
+                "title": "Filter",
+                "content": "Filter\n\n!_method\n\nParsed search query: a leading \"r:\" selects case-insensitive regex\nmatching, a leading \":\" restricts the match to node titles and a\nleading \"+:\" requires every word to appear (in any order).",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "b749e04c",
+                "title": "Parse Filter",
+                "content": "Parse Filter\n\nSignature: Filter ParseFilter(const std::string& raw)\nMethod: ParseFilter\nReturns: Filter\nParameters:\n    raw const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "e0496dfc",
+                "title": "Is Regex Filter",
+                "content": "Is Regex Filter\n\nSignature: bool IsRegexFilter(const std::string& raw)\nMethod: IsRegexFilter\nReturns: bool\nParameters:\n    raw const std::string&\n\nWhether the filter runs a regex-based match (\"r:\" regex or\n\"+:\" all-words). These are deferred until Return is pressed so\nthat typing stays responsive instead of re-scanning the tree\n(and re-compiling a regex) on every keystroke.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "5a762413",
+                "title": "Node Matches",
+                "content": "Node Matches\n\nSignature: bool NodeMatches(const treeview::TreeNode& node, const Filter& f, bool* regex_error)\nMethod: NodeMatches\nReturns: bool\nParameters:\n    node        const treeview::TreeNode&\n    f           const Filter&\n    regex_error bool*\n\nCase-insensitive match of a node against a parsed filter. An empty\nquery matches everything. When `query` is a regex that fails to\ncompile, returns false and sets `*regex_error`.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "c5a444d6",
+                "title": "Is Hex Color",
+                "content": "Is Hex Color\n\nSignature: bool IsHexColor(const std::string& tag)\nMethod: IsHexColor\nReturns: bool\nParameters:\n    tag const std::string&\n\nA tag that is purely hex digits of length 3, 4, 6 or 8 (e.g. \"#fff\"\nor \"#ff8800\") is an HTML color, not a tag.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "6bf99daf",
+                "title": "Collect Tags",
+                "content": "Collect Tags\n\nSignature: void CollectTags(const std::string& text, std::map<std::string, int>& counts)\nMethod: CollectTags\nReturns: void\nParameters:\n    text   const std::string&\n    counts std::map<std::string, int>&\n\nCollect `#tag` tokens from `text` into `counts` (keyed by lowercase\ntag, so the map iteration is sorted and de-duplicated). HTML color\ncodes such as \"#fff\" or \"#ff8800\" are ignored.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "6e655bed",
+                "title": "Contains Tag",
+                "content": "Contains Tag\n\nSignature: bool ContainsTag(const std::string& text, const std::string& tag)\nMethod: ContainsTag\nReturns: bool\nParameters:\n    text const std::string&\n    tag  const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "2532e7a1",
+                "title": "Find Matches",
+                "content": "Find Matches\n\nSignature: std::vector<treeview::TreeNode*> FindMatches(std::shared_ptr<EditorState> state, const std::string& raw_query)\nMethod: FindMatches\nReturns: std::vector<treeview::TreeNode*>\nParameters:\n    state     std::shared_ptr<EditorState>\n    raw_query const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "aed5c9ce",
+                "title": "Find All Matches",
+                "content": "Find All Matches\n\nSignature: std::vector<treeview::TreeNode*> FindAllMatches(std::shared_ptr<EditorState> state, const std::string& raw_query)\nMethod: FindAllMatches\nReturns: std::vector<treeview::TreeNode*>\nParameters:\n    state     std::shared_ptr<EditorState>\n    raw_query const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "6f6ee854",
+                "title": "Create Search Results",
+                "content": "Create Search Results\n\nSignature: treeview::TreeNode* CreateSearchResults(std::shared_ptr<EditorState> state, const std::vector<treeview::TreeNode*>& nodes, const std::string& raw_query, std::string* status)\nMethod: CreateSearchResults\nReturns: treeview::TreeNode*\nParameters:\n    state     std::shared_ptr<EditorState>\n    nodes     const std::vector<treeview::TreeNode*>&\n    raw_query const std::string&\n    status    std::string*",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "2c5c8140",
+                "title": "Find Line Matches",
+                "content": "Find Line Matches\n\nSignature: std::vector<std::pair<int, int>> FindLineMatches(const std::string& line, const std::string& raw_query)\nMethod: FindLineMatches\nReturns: std::vector<std::pair<int, int>>\nParameters:\n    line      const std::string&\n    raw_query const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "750d0797",
+                "title": "Search Dialog Class",
+                "content": "Search Dialog Class",
+                "children": [
+                  {
+                    "id": "c4d8e6c3",
+                    "title": "Public Members",
+                    "content": "Public Members",
+                    "children": [
+                      {
+                        "id": "184cabce",
+                        "title": "Constructor",
+                        "content": "Constructor\n\nSignature: SearchDialog(std::shared_ptr<EditorState> state, bool* show, DialogMode mode) : state_(std::move(state)), show_(show), mode_(mode)\nConstructor: SearchDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\n    mode  DialogMode\nInitializers:\n    state_ std::move(state)\n    show_  show\n    mode_  mode",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "68cd15b3",
+                        "title": "Variables",
+                        "content": "Variables\n\n--------------------------------------------------------------------------------\n\nbool Focusable() const override { return true; }",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "3da861ca",
+                        "title": "Ftxui Event Method",
+                        "content": "Ftxui Event Method\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "73a6ff4b",
+                        "title": "Ftxui Render Method",
+                        "content": "Ftxui Render Method\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  },
+                  {
+                    "id": "ce7788f9",
+                    "title": "Private Members",
+                    "content": "Private Members",
+                    "children": [],
+                    "expanded": false
+                  }
+                ],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
       }
     ],
     "expanded": false
