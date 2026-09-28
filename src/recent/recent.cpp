@@ -18,24 +18,56 @@ namespace scribbolyth::recent
 {
     namespace
     {
+        /*!
+            Pad Right
+
+            !_method
+        */
         std::string PadRight(const std::string& s, std::size_t width)
         {
             if (s.size() >= width) return s;
             return s + std::string(width - s.size(), ' ');
         }
+        //!
     }
 
+    /*!
+        Recent Dialog Class
+    */
     class RecentDialog : public ftxui::ComponentBase
     {
     public:
+        /*!
+            Public Members
+        */
+
+        /*!
+            Constructor
+
+            !_cstor
+        */
         RecentDialog(std::shared_ptr<EditorState> state, bool* show,
                      std::shared_ptr<bool> force)
             : state_(std::move(state)), show_(show), force_flag_(std::move(force)) {}
+        //!
 
+        /*!
+            Variables
+
+            ----
+        */
+        //>>
         bool Focusable() const override { return true; }
 
         bool pending_g_ = false;
+        //<<
+        //!
 
+        /*!
+            Ftxui Event Handler
+
+            !_method
+        */
         bool OnEvent(ftxui::Event event) override
         {
             PickupForce();
@@ -102,7 +134,13 @@ namespace scribbolyth::recent
             }
             return true; // consume everything else
         }
+        //!
 
+        /*!
+            Ftxui Render Method
+
+            !_method
+        */
         ftxui::Element Render() override
         {
             PickupForce();
@@ -157,8 +195,20 @@ namespace scribbolyth::recent
                    ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
         }
+        //!
+
+        //!
 
     private:
+        /*!
+            Private Members
+        */
+
+        /*!
+            Force Flag
+
+            !_method
+        */
         void PickupForce()
         {
             if (force_flag_ && *force_flag_)
@@ -167,7 +217,13 @@ namespace scribbolyth::recent
                 *force_flag_ = false;
             }
         }
+        //!
 
+        /*!
+            Close Recent Dialog
+
+            !_method
+        */
         void Close()
         {
             *show_ = false;
@@ -175,7 +231,13 @@ namespace scribbolyth::recent
             scroll_ = 0;
             force_ = false;
         }
+        //!
 
+        /*!
+            Open Recent Dialog
+
+            !_method
+        */
         void Open()
         {
             const auto& recent = state_->recent_files;
@@ -191,19 +253,37 @@ namespace scribbolyth::recent
                 it->second(chosen, 1);
             }
         }
+        //!
 
+        /*!
+            Move Selection to Top
+
+            !_method
+        */
         void MoveToStart()
         {
             selection_ = 0;
         }
+        //!
 
+        /*!
+            Move Selection to Bottom
+
+            !_method
+        */
         void MoveToEnd()
         {
             const auto& recent = state_->recent_files;
             if (recent.empty()) return;
             selection_ = static_cast<int>(recent.size()) -1;
         }
+        //!
 
+        /*!
+            Move Selection Up / Down
+
+            !_method
+        */
         void MoveSelection(int dir)
         {
             const auto& recent = state_->recent_files;
@@ -211,7 +291,13 @@ namespace scribbolyth::recent
             const int total = static_cast<int>(recent.size());
             selection_ = std::max(0, std::min(total - 1, selection_ + dir));
         }
+        //!
+ 
+        /*!
+            Remove Selected Item
 
+            !_method
+        */
         void RemoveSelected()
         {
             auto& recent = state_->recent_files;
@@ -226,7 +312,13 @@ namespace scribbolyth::recent
             }
             state_->status = "Recent entry removed";
         }
+        //!
 
+        /*!
+            Move Selected Entry
+
+            !_method
+        */
         void MoveEntry(int dir)
         {
             auto& recent = state_->recent_files;
@@ -242,7 +334,14 @@ namespace scribbolyth::recent
                 scribbolyth::config::WriteRecentFiles(state_->init_path, recent);
             }
         }
+        //!
 
+        /*!
+            Variables
+
+            ----
+        */
+        //>>
         std::shared_ptr<EditorState> state_;
         bool* show_;
         std::shared_ptr<bool> force_flag_;
@@ -251,14 +350,30 @@ namespace scribbolyth::recent
         bool force_ = false;
         static constexpr int kVisibleRows = 18;
         static constexpr std::size_t kMaxContent = 88;
-    };
+        //<<
+        //!
 
+        //!
+    };
+    //!
+
+    /*!
+        Ftxui Make Dialog
+
+        !_method
+    */
     ftxui::Component MakeRecentDialog(std::shared_ptr<EditorState> state, bool* show,
                                       std::shared_ptr<bool> force)
     {
         return ftxui::Make<RecentDialog>(std::move(state), show, std::move(force));
     }
+    //!
 
+    /*!
+        Limit Recent List Size
+
+        !_method
+    */
     std::size_t PruneRecentFiles(std::vector<std::string>& recent_files)
     {
         const std::size_t before = recent_files.size();
@@ -272,4 +387,5 @@ namespace scribbolyth::recent
                 recent_files.end());
         return before - recent_files.size();
     }
+    //!
 }

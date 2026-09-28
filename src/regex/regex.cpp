@@ -14,6 +14,11 @@ namespace scribbolyth::regex
 {
     namespace
     {
+        /*!
+            Split Row Fields
+
+            !_method
+        */
         std::vector<std::string> SplitFields(const std::string& line)
         {
             std::vector<std::string> fields;
@@ -41,13 +46,25 @@ namespace scribbolyth::regex
             }
             return fields;
         }
+        //!
 
+        /*!
+            Pad Right
+
+            !_method
+        */
         std::string PadRight(const std::string& s, std::size_t width)
         {
             if (s.size() >= width) return s;
             return s + std::string(width - s.size(), ' ');
         }
+        //!
 
+        /*!
+            To Lower
+
+            !_method
+        */
         std::string Lower(std::string s)
         {
             std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
@@ -55,7 +72,13 @@ namespace scribbolyth::regex
             });
             return s;
         }
+        //!
 
+        /*!
+            Parse Entries
+
+            !_method
+        */
         void ParseEntries(const std::string& path, std::vector<RegexEntry>& out)
         {
             std::ifstream file(path);
@@ -83,11 +106,24 @@ namespace scribbolyth::regex
                 out.push_back(std::move(entry));
             }
         }
+        //!
     }
 
+    /*!
+        Regex Dialog Class
+    */
     class RegexDialog : public ftxui::ComponentBase
     {
     public:
+        /*!
+            Public Members
+        */
+
+        /*!
+            Constructor
+
+            !_ctor
+        */
         RegexDialog(std::shared_ptr<EditorState> state, const std::string& path, bool* show)
             : state_(std::move(state)), show_(show)
         {
@@ -97,9 +133,23 @@ namespace scribbolyth::regex
                 content_width_ = std::max(content_width_, static_cast<int>(e.line.size()));
             }
         }
+        //!
 
+        /*!
+            Variables
+
+            ----
+        */
+        //>>
         bool Focusable() const override { return true; }
+        //<<
+        //!
 
+        /*!
+            Ftxui Event Handler
+
+            !_method
+        */
         bool OnEvent(ftxui::Event event) override
         {
             if (event == ftxui::Event::Escape)
@@ -136,7 +186,13 @@ namespace scribbolyth::regex
             }
             return true;
         }
+        //!
 
+        /*!
+            Ftxui Render
+
+            !_method
+        */
         ftxui::Element Render() override
         {
             const std::vector<int> filtered = Filtered();
@@ -199,13 +255,31 @@ namespace scribbolyth::regex
                    ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 220) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
         }
+        //!
+
+        //!
 
     private:
+        /*!
+            Private Members
+        */
+
+        /*!
+            Max Top
+
+            !_method
+        */
         int MaxTop() const
         {
             return std::max(0, static_cast<int>(Filtered().size()) - kVisibleRows);
         }
+        //!
 
+        /*!
+            Filtered
+
+            !_method
+        */
         std::vector<int> Filtered() const
         {
             std::vector<int> result;
@@ -221,7 +295,14 @@ namespace scribbolyth::regex
             }
             return result;
         }
+        //!
 
+        /*!
+            Variables
+
+            ----
+        */
+        //>
         std::shared_ptr<EditorState> state_;
         bool* show_;
         std::vector<RegexEntry> entries_;
@@ -229,12 +310,23 @@ namespace scribbolyth::regex
         int scroll_ = 0;
         int content_width_ = 92;
         static constexpr int kVisibleRows = 17;
-    };
+        //<<
+        //!
 
+        //!
+    };
+    //!
+
+    /*!
+        Ftxui Make Dialog
+
+        !_method
+    */
     ftxui::Component MakeRegexDialog(std::shared_ptr<EditorState> state,
                                      const std::string& config_path,
                                      bool* show)
     {
         return ftxui::Make<RegexDialog>(std::move(state), config_path, show);
     }
+    //!
 }
