@@ -7,8 +7,13 @@ Comment grammar (all harvested from files under src/):
                              coderoot=/path   where source-code nodes live
                                               (default: /src)
     //[/path]              folder-only node at the (absolute) note path.
+                           A leading './' makes the path relative to the
+                           current file's folder under the source-code root
+                           (e.g. in treeview/treeview.cpp, ./Introduction ->
+                           <coderoot>/treeview/treeview.cpp/Introduction).
     /*[/path] <body> */    node at the (absolute) note path with content;
-                           the last path segment is its title.
+                           the last path segment is its title.  './'-relative
+                           paths work here too.
     /*! <body> */          source-code doc block. Opens a *region* that stays
                            open until a /*!*/ marker (the marker is dropped
                            from the body). Its title is the first content
@@ -589,24 +594,33 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None):
     coderoot_parts = split_path(coderoot)
     made_source_node = False
 
-    def apply_custom(a):
+    def apply_custom(a, file_parts):
+        p = a["path"].strip()
+        if p.startswith("./"):
+            # A './'-prefixed path is relative to the current file's node
+            # under the source-code root (e.g. ./Introduction lands on
+            # <coderoot>/treeview/treeview.cpp/Introduction).
+            parts = coderoot_parts + file_parts + split_path(p[2:])
+        else:
+            parts = split_path(p)
         if a["kind"] == "manual":
-            node = tree.ensure(split_path(a["path"]))
+            node = tree.ensure(parts)
             node["content"] = doc_text(a["body"])
         elif a["kind"] == "folder":
-            tree.ensure(split_path(a["path"]))
+            tree.ensure(parts)
 
     # Phase 1: custom nodes defined before 'int main' (in the anchor file)
     # lead the tree.  Custom nodes from other files are treated as leading
     # too, so the coderoot section stays anchored to main.cpp's flow.
     for rel, actions in file_actions:
+        file_parts = tuple(rel.split("/"))
         led_anchor = rel == anchor_rel and anchor_line is not None
         for a in actions:
             if a["kind"] not in ("manual", "folder"):
                 continue
             if led_anchor and a.get("line", 1) >= anchor_line:
                 continue
-            apply_custom(a)
+            apply_custom(a, file_parts)
 
     # Phase 2: source-code nodes (coderoot + per-file folders + doc blocks).
     # Doc regions nest: a /*! opens a region that stays open until the next
@@ -662,7 +676,7 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None):
                     continue
                 if a.get("line", 1) < anchor_line:
                     continue
-                apply_custom(a)
+                apply_custom(a, tuple(rel.split("/")))
     return tree.children
 
 

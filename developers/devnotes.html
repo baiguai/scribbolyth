@@ -961,6 +961,44 @@
     "content": "",
     "children": [
       {
+        "id": "3578f956",
+        "title": "treeview",
+        "content": "",
+        "children": [
+          {
+            "id": "71858e59",
+            "title": "treeview.cpp",
+            "content": "",
+            "children": [
+              {
+                "id": "ca37fe8e",
+                "title": "Introduction",
+                "content": "TreeView is the notes sidebar tree: an FTXUI component that owns the\ndocument's node tree, the current selection, and all tree-mode behavior:\n\n  - selection / cursor movement across the visible tree (j/k, gg/G, /find)\n  - structural edits: add, rename, delete and move nodes, expand & collapse\n  - document persistence: open, save, import and export\n  - undo history, scoped to the currently selected node\n  - the record of viewed nodes that powers the history dialog\n\nTreeView installs callbacks into EditorState.operations under formal op\nnames (\"move_up\", \"new_node\", ...). The tree keymap in commands.conf maps\nkeys to those names and op::HandleKey()/op::Dispatch() invoke the matching\ncallback, so this file contains no key-decoding logic of its own.",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          },
+          {
+            "id": "ccd3a286",
+            "title": "tree_node.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "0ab1dee5",
+                "title": "Tree Node Struct",
+                "content": "Tree Node Struct\n\nstruct TreeNode\n{\n    std::string id;\n    std::string name;\n    bool expanded = false;\n    std::string text;\n    std::vector<TreeNode> children;\n};",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
         "id": "91fec9af",
         "title": "bookmark",
         "content": "",
@@ -4192,10 +4230,149 @@
                     "id": "ce7788f9",
                     "title": "Private Members",
                     "content": "Private Members",
+                    "children": [
+                      {
+                        "id": "e6bd6bbf",
+                        "title": "Invalidate",
+                        "content": "Invalidate\n\nSignature: void Invalidate()\nMethod: Invalidate\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "061bf55b",
+                        "title": "Close",
+                        "content": "Close\n\nSignature: void Close()\nMethod: Close\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "417566b2",
+                        "title": "Move Selection Up / Down",
+                        "content": "Move Selection Up / Down\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "cb506583",
+                        "title": "Recompute from state_",
+                        "content": "Recompute from state_\n\nSignature: void Recompute(bool force = false)\nMethod: Recompute\nReturns: void\nParameters:\n    force bool",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "53b8c430",
+                        "title": "Recompute Tags",
+                        "content": "Recompute Tags\n\nSignature: void RecomputeTags(const std::vector<std::pair<treeview::TreeNode*, int>>& all)\nMethod: RecomputeTags\nReturns: void\nParameters:\n    all const std::vector<std::pair<treeview::TreeNode*, int>>&\n\nTag search: a leading '#' lists matching tags; picking one (or an\nexact match) lists the nodes whose content carries that tag.",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "909cb308",
+                        "title": "Variables",
+                        "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nDialogMode mode_ = DialogMode::Jump;\nstd::string filter_;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 72;\nbool results_valid_ = false;\nbool regex_error_ = false;\nbool tag_phase_ = false;\nstd::string searched_filter_;\nstd::vector<Result> results_;\nstatic constexpr int kVisibleRows = 18;",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  }
+                ],
+                "expanded": false
+              },
+              {
+                "id": "88aa80a6",
+                "title": "Ftxui Make Dialog",
+                "content": "Ftxui Make Dialog\n\nSignature: ftxui::Component MakeSearchDialog(std::shared_ptr<EditorState> state, bool* show, DialogMode mode)\nMethod: MakeSearchDialog\nReturns: ftxui::Component\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\n    mode  DialogMode",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          },
+          {
+            "id": "232eb493",
+            "title": "search.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "cb2d7c57",
+                "title": "Dialog Mode Enum",
+                "content": "Dialog Mode Enum\n\nHow the search dialog's Enter key behaves.\n\nenum class DialogMode\n{\n    Jump,          // Enter jumps to the selected node.\n    InsertLink,    // Enter inserts a _Title_ link at the editor cursor.\n    CreateResults, // Enter creates a new \"Search results: <query>\" node\n                   // holding one _Title_ link per matching node.\n};",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "ddb357c5",
+                "title": "Find Matches",
+                "content": "Find Matches\n\nstd::vector<scribbolyth::treeview::TreeNode*> FindMatches(\n    std::shared_ptr<EditorState> state, const std::string& raw_query);\n\nstd::vector<std::pair<int, int>> FindLineMatches(const std::string& line,\n                                                 const std::string& raw_query);\n\nFind matches for `raw_query` inside the currently active node only\n(the same prefix rules as the search dialog apply: a leading \"r:\" makes\nit a case-insensitive regex, a leading \":\" restricts it to node titles,\notherwise it is a case-insensitive substring match). Returns either the\nactive node (when it matches) or nothing, so the Vim-style '/' find and\nn/N navigation stay confined to the node being edited.",
+                "children": [
+                  {
+                    "id": "d7aca825",
+                    "title": "Find All Matches",
+                    "content": "Find All Matches\n\n!_method\n\nDocument-wide search: every node whose title or content satisfies\n`raw_query`, in document order, using the same prefix rules as\nFindMatches (\"r:\" regex, \"+:\" all words, \":\" titles only).",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "2544a033",
+                    "title": "Create Search Results",
+                    "content": "Create Search Results\n\n!_method\n\nCreate a new node named \"Search results: <query>\" whose body holds one\n`_Title_` link per matching node (entries with no node pointer are\nskipped). The node is created like a normal new child: as the first\nchild of the tree selection when one is selected, otherwise as a root\nnode, and becomes the active node. Returns the created node, or nullptr\non failure (e.g. no matches to link). `status` receives a short\nuser-facing message.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "9ea7005e",
+                    "title": "Make Search Dialog",
+                    "content": "Make Search Dialog\n\n!_method\n\nBuild the node search/filter dialog. While *show is true it consumes\nevery event, so no app key bindings fire. ArrowUp/ArrowDown move the\nselection, Enter behaves per `mode` and closes (creating a results node\nalso collects it), Escape cancels. A leading \"r:\" makes the query a\ncase-insensitive regex, \"+:\" requires every word and \":\" restricts the\nmatch to node titles. The dialog keeps a fixed size regardless of\nresult count.",
                     "children": [],
                     "expanded": false
                   }
                 ],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
+        "id": "e6d5c8c8",
+        "title": "text",
+        "content": "",
+        "children": [
+          {
+            "id": "d81de6bf",
+            "title": "text.cpp",
+            "content": "",
+            "children": [
+              {
+                "id": "b9c1d8c8",
+                "title": "Punctuation Vector",
+                "content": "Punctuation Vector\n\n--------------------------------------------------------------------------------\n\nconst std::vector<std::pair<std::string, std::string>>& PunctuationMap()\n{\n    static const std::vector<std::pair<std::string, std::string>> kMap = {\n        {\"\\xE2\\x80\\x98\", \"'\"},    // U+2018 left single quote\n        {\"\\xE2\\x80\\x99\", \"'\"},    // U+2019 right single quote\n        {\"\\xE2\\x80\\x9A\", \"'\"},    // U+201A low single quote\n        {\"\\xE2\\x80\\x9C\", \"\\\"\"},   // U+201C left double quote\n        {\"\\xE2\\x80\\x9D\", \"\\\"\"},   // U+201D right double quote\n        {\"\\xE2\\x80\\x9E\", \"\\\"\"},   // U+201E low double quote\n        {\"\\xE2\\x80\\x93\", \"-\"},    // U+2013 en dash\n        {\"\\xE2\\x80\\x94\", \"-\"},    // U+2014 em dash\n        {\"\\xE2\\x80\\xA6\", \"...\"},  // U+2026 ellipsis\n        {\"\\xE2\\x88\\x92\", \"-\"},    // U+2212 minus sign\n    };\n    return kMap;\n}",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "584b1213",
+                "title": "To Ascii Punctuation",
+                "content": "To Ascii Punctuation\n\nSignature: std::string ToAsciiPunctuation(const std::string& text)\nMethod: ToAsciiPunctuation\nReturns: std::string\nParameters:\n    text const std::string&\n\nReplaces special characters with their ASCII equivalents.",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          },
+          {
+            "id": "86f8f810",
+            "title": "text.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "2a99ba0c",
+                "title": "Ascii to Punctuation",
+                "content": "Ascii to Punctuation\n\n!_method\n\nReplace typographic (smart) punctuation with plain ASCII equivalents so\nthe result is always renderable in the terminal (\"smart\" quote/dash\ncharacters often do not display). Only the exact UTF-8 sequences of the\nmapped characters are consumed; every other byte, including other\nmulti-byte characters, passes through untouched.",
+                "children": [],
                 "expanded": false
               }
             ],

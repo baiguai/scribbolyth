@@ -662,13 +662,25 @@ namespace scribbolyth::search
         /*!
             Private Members
         */
+
+        /*!
+            Invalidate
+
+            !_method
+        */
         void Invalidate()
         {
             results_valid_ = false;
             selection_ = 0;
             scroll_ = 0;
         }
+        //!
 
+        /*!
+            Close
+
+            !_method
+        */
         void Close()
         {
             *show_ = false;
@@ -680,14 +692,26 @@ namespace scribbolyth::search
             tag_phase_ = false;
             results_valid_ = false;
         }
+        //!
 
+        /*!
+            Move Selection Up / Down
+
+            !_method
+        */
         void MoveSelection(int dir)
         {
             if (results_.empty()) return;
             const int total = static_cast<int>(results_.size());
             selection_ = std::max(0, std::min(total - 1, selection_ + dir));
         }
+        //!
 
+        /*!
+            Recompute from state_
+
+            !_method
+        */
         void Recompute(bool force = false)
         {
             results_.clear();
@@ -736,9 +760,16 @@ namespace scribbolyth::search
             scroll_ = 0;
             results_valid_ = true;
         }
+        //!
 
-        // Tag search: a leading '#' lists matching tags; picking one (or an
-        // exact match) lists the nodes whose content carries that tag.
+        /*!
+            Recompute Tags
+
+            !_method
+
+            Tag search: a leading '#' lists matching tags; picking one (or an
+            exact match) lists the nodes whose content carries that tag.
+        */
         void RecomputeTags(const std::vector<std::pair<treeview::TreeNode*, int>>& all)
         {
             const std::string typed = Lower(filter_.substr(1));
@@ -772,7 +803,14 @@ namespace scribbolyth::search
                 }
             }
         }
+        //!
 
+        /*!
+            Variables
+
+            ----
+        */
+        //>>
         std::shared_ptr<EditorState> state_;
         bool* show_;
         DialogMode mode_ = DialogMode::Jump;
@@ -786,14 +824,22 @@ namespace scribbolyth::search
         std::string searched_filter_;
         std::vector<Result> results_;
         static constexpr int kVisibleRows = 18;
+        //<<
+        //!
 
         //!
     };
     //!
 
+    /*!
+        Ftxui Make Dialog
+
+        !_method
+    */
     ftxui::Component MakeSearchDialog(std::shared_ptr<EditorState> state, bool* show,
                                       DialogMode mode)
     {
         return ftxui::Make<SearchDialog>(std::move(state), show, mode);
     }
+    //!
 }

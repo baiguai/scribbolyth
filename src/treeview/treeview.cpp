@@ -1,16 +1,18 @@
-// TreeView is the notes sidebar tree: an FTXUI component that owns the
-// document's node tree, the current selection, and all tree-mode behavior:
-//
-//   - selection / cursor movement across the visible tree (j/k, gg/G, /find)
-//   - structural edits: add, rename, delete and move nodes, expand & collapse
-//   - document persistence: open, save, import and export
-//   - undo history, scoped to the currently selected node
-//   - the record of viewed nodes that powers the history dialog
-//
-// TreeView installs callbacks into EditorState.operations under formal op
-// names ("move_up", "new_node", ...). The tree keymap in commands.conf maps
-// keys to those names and op::HandleKey()/op::Dispatch() invoke the matching
-// callback, so this file contains no key-decoding logic of its own.
+/*[./Introduction]
+    TreeView is the notes sidebar tree: an FTXUI component that owns the
+    document's node tree, the current selection, and all tree-mode behavior:
+
+      - selection / cursor movement across the visible tree (j/k, gg/G, /find)
+      - structural edits: add, rename, delete and move nodes, expand & collapse
+      - document persistence: open, save, import and export
+      - undo history, scoped to the currently selected node
+      - the record of viewed nodes that powers the history dialog
+
+    TreeView installs callbacks into EditorState.operations under formal op
+    names ("move_up", "new_node", ...). The tree keymap in commands.conf maps
+    keys to those names and op::HandleKey()/op::Dispatch() invoke the matching
+    callback, so this file contains no key-decoding logic of its own.
+*/
 #include "treeview.hpp"
 
 #include <algorithm>

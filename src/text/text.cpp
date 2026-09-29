@@ -8,6 +8,12 @@ namespace scribbolyth::text
 {
     namespace
     {
+        /*!
+            Punctuation Vector
+
+            ----
+        */
+        //>>
         const std::vector<std::pair<std::string, std::string>>& PunctuationMap()
         {
             static const std::vector<std::pair<std::string, std::string>> kMap = {
@@ -24,8 +30,17 @@ namespace scribbolyth::text
             };
             return kMap;
         }
+        //<<
+        //!
     }
 
+    /*!
+        To Ascii Punctuation
+
+        !_method
+
+        Replaces special characters with their ASCII equivalents.
+    */
     std::string ToAsciiPunctuation(const std::string& text)
     {
         const auto& kMap = PunctuationMap();
@@ -53,4 +68,5 @@ namespace scribbolyth::text
         }
         return out;
     }
+    //!
 }
