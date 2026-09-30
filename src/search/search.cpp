@@ -18,6 +18,11 @@ namespace scribbolyth::search
 {
     namespace
     {
+        /*!
+            To Lower
+
+            !_method
+        */
         std::string Lower(std::string s)
         {
             std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
@@ -25,15 +30,28 @@ namespace scribbolyth::search
             });
             return s;
         }
+        //!
 
+        /*!
+            Pad Right
+
+            !_method
+        */
         std::string PadRight(const std::string& s, std::size_t width)
         {
             if (s.size() >= width) return s;
             return s + std::string(width - s.size(), ' ');
         }
+        //!
 
-        // Escape the ECMAScript metacharacters so an "all words" search term
-        // keeps its literal meaning inside the generated regex.
+        /*!
+            Escape Regex
+
+            !_method
+
+            Escape the ECMAScript metacharacters so an "all words" search term
+            keeps its literal meaning inside the generated regex.
+        */
         std::string EscapeRegex(const std::string& s)
         {
             static const std::string special = "\\^$.|?*+()[]{}";
@@ -46,12 +64,19 @@ namespace scribbolyth::search
             }
             return out;
         }
+        //!
 
-        // Builds `(?=[\s\S]*\bw1\b)(?=[\s\S]*\bw2\b)...(?=[\s\S]*\bwn\b)[\s\S]*`
-        // from the whitespace-separated words of `query`, requiring every word
-        // to be present anywhere in the text (any order, any line). `[\s\S]`
-        // is the ECMAScript stand-in for DOTALL, so words on different lines
-        // still satisfy the lookaheads.
+        /*!
+            All Words Regex
+
+            !_method
+
+            Builds `(?=[\s\S]*\bw1\b)(?=[\s\S]*\bw2\b)...(?=[\s\S]*\bwn\b)[\s\S]*`
+            from the whitespace-separated words of `query`, requiring every word
+            to be present anywhere in the text (any order, any line). `[\s\S]`
+            is the ECMAScript stand-in for DOTALL, so words on different lines
+            still satisfy the lookaheads.
+        */
         std::string AllWordsRegex(const std::string& query)
         {
             std::ostringstream re;
@@ -64,21 +89,40 @@ namespace scribbolyth::search
             re << "[\\s\\S]*";
             return re.str();
         }
+        //!
 
+        /*!
+            Indent Name
+
+            !_method
+        */
         std::string IndentName(int depth, const std::string& name)
         {
             return std::string(static_cast<std::size_t>(depth) * 2, ' ') + name;
         }
+        //!
 
+        /*!
+            Result Struct
+        */
+        //>>
         struct Result
         {
             treeview::TreeNode* node;
             std::string line;
         };
+        //<<
+        //!
 
-        // Parsed search query: a leading "r:" selects case-insensitive regex
-        // matching, a leading ":" restricts the match to node titles and a
-        // leading "+:" requires every word to appear (in any order).
+        /*!
+             Filter
+
+             !_method
+
+            Parsed search query: a leading "r:" selects case-insensitive regex
+            matching, a leading ":" restricts the match to node titles and a
+            leading "+:" requires every word to appear (in any order).
+        */
         struct Filter
         {
             std::string query;
@@ -86,7 +130,13 @@ namespace scribbolyth::search
             bool all_words = false;
             bool title_only = false;
         };
+        //!
 
+        /*!
+            Parse Filter
+
+            !_method
+        */
         Filter ParseFilter(const std::string& raw)
         {
             Filter f;
@@ -108,20 +158,34 @@ namespace scribbolyth::search
             }
             return f;
         }
+        //!
 
-        // Whether the filter runs a regex-based match ("r:" regex or
-        // "+:" all-words). These are deferred until Return is pressed so
-        // that typing stays responsive instead of re-scanning the tree
-        // (and re-compiling a regex) on every keystroke.
+        /*!
+            Is Regex Filter
+
+            !_method
+
+            Whether the filter runs a regex-based match ("r:" regex or
+            "+:" all-words). These are deferred until Return is pressed so
+            that typing stays responsive instead of re-scanning the tree
+            (and re-compiling a regex) on every keystroke.
+        */
         bool IsRegexFilter(const std::string& raw)
         {
             const Filter f = ParseFilter(raw);
             return f.is_regex || f.all_words;
         }
+        //!
 
-        // Case-insensitive match of a node against a parsed filter. An empty
-        // query matches everything. When `query` is a regex that fails to
-        // compile, returns false and sets `*regex_error`.
+        /*!
+            Node Matches
+
+            !_method
+
+            Case-insensitive match of a node against a parsed filter. An empty
+            query matches everything. When `query` is a regex that fails to
+            compile, returns false and sets `*regex_error`.
+        */
         bool NodeMatches(const treeview::TreeNode& node, const Filter& f,
                          bool* regex_error)
         {
@@ -158,9 +222,16 @@ namespace scribbolyth::search
             return Lower(node.name).find(needle) != std::string::npos
                 || (!f.title_only && Lower(node.text).find(needle) != std::string::npos);
         }
+        //!
 
-        // A tag that is purely hex digits of length 3, 4, 6 or 8 (e.g. "#fff"
-        // or "#ff8800") is an HTML color, not a tag.
+        /*!
+            Is Hex Color
+
+            !_method
+
+            A tag that is purely hex digits of length 3, 4, 6 or 8 (e.g. "#fff"
+            or "#ff8800") is an HTML color, not a tag.
+        */
         bool IsHexColor(const std::string& tag)
         {
             const std::size_t n = tag.size();
@@ -169,10 +240,17 @@ namespace scribbolyth::search
                 return std::isxdigit(c) != 0;
             });
         }
+        //!
 
-        // Collect `#tag` tokens from `text` into `counts` (keyed by lowercase
-        // tag, so the map iteration is sorted and de-duplicated). HTML color
-        // codes such as "#fff" or "#ff8800" are ignored.
+        /*!
+            Collect Tags
+
+            !_method
+
+            Collect `#tag` tokens from `text` into `counts` (keyed by lowercase
+            tag, so the map iteration is sorted and de-duplicated). HTML color
+            codes such as "#fff" or "#ff8800" are ignored.
+        */
         void CollectTags(const std::string& text, std::map<std::string, int>& counts)
         {
             static const std::regex kTagRegex(R"(#[\w-]+)");
@@ -184,7 +262,13 @@ namespace scribbolyth::search
                 ++counts[tag];
             }
         }
+        //!
 
+        /*!
+            Contains Tag
+
+            !_method
+        */
         bool ContainsTag(const std::string& text, const std::string& tag)
         {
             static const std::regex kTagRegex(R"(#[\w-]+)");
@@ -195,8 +279,14 @@ namespace scribbolyth::search
             }
             return false;
         }
+        //!
     }
 
+    /*!
+        Find Matches
+
+        !_method
+    */
     std::vector<treeview::TreeNode*> FindMatches(std::shared_ptr<EditorState> state,
                                                  const std::string& raw_query)
     {
@@ -210,7 +300,13 @@ namespace scribbolyth::search
         }
         return out;
     }
+    //!
 
+    /*!
+        Find All Matches
+
+        !_method
+    */
     std::vector<treeview::TreeNode*> FindAllMatches(std::shared_ptr<EditorState> state,
                                                     const std::string& raw_query)
     {
@@ -231,7 +327,13 @@ namespace scribbolyth::search
         }
         return out;
     }
+    //!
 
+    /*!
+        Create Search Results
+
+        !_method
+    */
     treeview::TreeNode* CreateSearchResults(std::shared_ptr<EditorState> state,
                                             const std::vector<treeview::TreeNode*>& nodes,
                                             const std::string& raw_query,
@@ -281,7 +383,13 @@ namespace scribbolyth::search
         }
         return state->active_node;
     }
+    //!
 
+    /*!
+        Find Line Matches
+
+        !_method
+    */
     std::vector<std::pair<int, int>> FindLineMatches(const std::string& line,
                                                      const std::string& raw_query)
     {
@@ -347,18 +455,45 @@ namespace scribbolyth::search
         }
         return out;
     }
+    //!
 
+    /*!
+        Search Dialog Class
+    */
     class SearchDialog : public ftxui::ComponentBase
     {
     public:
+        /*!
+            Public Members
+        */
+
+        /*!
+            Constructor
+
+            !_ctor
+        */
         SearchDialog(std::shared_ptr<EditorState> state, bool* show,
                      DialogMode mode)
             : state_(std::move(state)),
               show_(show),
               mode_(mode) {}
+        //!
 
+        /*!
+            Variables
+
+            ----
+        */
+        //>>
         bool Focusable() const override { return true; }
+        //<<
+        //!
 
+        /*!
+            Ftxui Event Method
+
+            !_method
+        */
         bool OnEvent(ftxui::Event event) override
         {
             if (event == ftxui::Event::Escape)
@@ -444,7 +579,13 @@ namespace scribbolyth::search
             }
             return true;
         }
+        //!
 
+        /*!
+            Ftxui Render Method
+
+            !_method
+        */
         ftxui::Element Render() override
         {
             if (!results_valid_) Recompute();
@@ -513,15 +654,33 @@ namespace scribbolyth::search
                    ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 190) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
         }
+        //!
+
+        //!
 
     private:
+        /*!
+            Private Members
+        */
+
+        /*!
+            Invalidate
+
+            !_method
+        */
         void Invalidate()
         {
             results_valid_ = false;
             selection_ = 0;
             scroll_ = 0;
         }
+        //!
 
+        /*!
+            Close
+
+            !_method
+        */
         void Close()
         {
             *show_ = false;
@@ -533,14 +692,26 @@ namespace scribbolyth::search
             tag_phase_ = false;
             results_valid_ = false;
         }
+        //!
 
+        /*!
+            Move Selection Up / Down
+
+            !_method
+        */
         void MoveSelection(int dir)
         {
             if (results_.empty()) return;
             const int total = static_cast<int>(results_.size());
             selection_ = std::max(0, std::min(total - 1, selection_ + dir));
         }
+        //!
 
+        /*!
+            Recompute from state_
+
+            !_method
+        */
         void Recompute(bool force = false)
         {
             results_.clear();
@@ -589,9 +760,16 @@ namespace scribbolyth::search
             scroll_ = 0;
             results_valid_ = true;
         }
+        //!
 
-        // Tag search: a leading '#' lists matching tags; picking one (or an
-        // exact match) lists the nodes whose content carries that tag.
+        /*!
+            Recompute Tags
+
+            !_method
+
+            Tag search: a leading '#' lists matching tags; picking one (or an
+            exact match) lists the nodes whose content carries that tag.
+        */
         void RecomputeTags(const std::vector<std::pair<treeview::TreeNode*, int>>& all)
         {
             const std::string typed = Lower(filter_.substr(1));
@@ -625,7 +803,14 @@ namespace scribbolyth::search
                 }
             }
         }
+        //!
 
+        /*!
+            Variables
+
+            ----
+        */
+        //>>
         std::shared_ptr<EditorState> state_;
         bool* show_;
         DialogMode mode_ = DialogMode::Jump;
@@ -639,11 +824,22 @@ namespace scribbolyth::search
         std::string searched_filter_;
         std::vector<Result> results_;
         static constexpr int kVisibleRows = 18;
-    };
+        //<<
+        //!
 
+        //!
+    };
+    //!
+
+    /*!
+        Ftxui Make Dialog
+
+        !_method
+    */
     ftxui::Component MakeSearchDialog(std::shared_ptr<EditorState> state, bool* show,
                                       DialogMode mode)
     {
         return ftxui::Make<SearchDialog>(std::move(state), show, mode);
     }
+    //!
 }

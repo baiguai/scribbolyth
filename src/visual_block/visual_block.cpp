@@ -4,6 +4,11 @@
 
 namespace scribbolyth::visual_block
 {
+    /*!
+        Line Span 
+
+        !_method
+    */
     bool LineSpan(const std::vector<std::string>& lines, const Block& b, int row,
                   int& lo, int& hi)
     {
@@ -13,7 +18,13 @@ namespace scribbolyth::visual_block
         hi = std::min(b.col_hi + 1, size);
         return lo < hi;
     }
+    //!
 
+    /*!
+        Extract 
+
+        !_method
+    */
     std::string Extract(const std::vector<std::string>& lines, const Block& b)
     {
         std::string out;
@@ -27,7 +38,13 @@ namespace scribbolyth::visual_block
         }
         return out;
     }
+    //!
 
+    /*!
+        Erase 
+
+        !_method
+    */
     void Erase(std::vector<std::string>& lines, const Block& b)
     {
         for (int r = b.row_lo; r <= b.row_hi; ++r)
@@ -38,7 +55,13 @@ namespace scribbolyth::visual_block
                 static_cast<std::size_t>(lo), static_cast<std::size_t>(hi - lo));
         }
     }
+    //!
 
+    /*!
+        Transform
+
+        !_method
+    */
     void Transform(std::vector<std::string>& lines, const Block& b,
                    char (*fold)(char))
     {
@@ -53,7 +76,13 @@ namespace scribbolyth::visual_block
             }
         }
     }
+    //!
 
+    /*!
+        Insert 
+
+        !_method
+    */
     void Insert(std::vector<std::string>& lines, const Block& b,
                 const std::string& text, bool at_end)
     {
@@ -78,4 +107,5 @@ namespace scribbolyth::visual_block
             }
         }
     }
+    //!
 }

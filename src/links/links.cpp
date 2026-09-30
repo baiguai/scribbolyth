@@ -20,12 +20,23 @@
 
 namespace scribbolyth::links
 {
+    /*!
+        Pad Right
+
+        !_method
+    */
     std::string PadRight(const std::string& s, std::size_t width)
     {
         if (s.size() >= width) return s;
         return s + std::string(width - s.size(), ' ');
     }
+    //!
 
+    /*!
+        Trim
+
+        !_method
+    */
     std::string Trim(const std::string& s)
     {
         std::size_t first = s.find_first_not_of(" \t\r\n");
@@ -33,7 +44,13 @@ namespace scribbolyth::links
         std::size_t last = s.find_last_not_of(" \t\r\n");
         return s.substr(first, last - first + 1);
     }
+    //!
 
+    /*!
+        Lower
+
+        !_method
+    */
     std::string Lower(const std::string& s)
     {
         std::string out = s;
@@ -43,12 +60,24 @@ namespace scribbolyth::links
         }
         return out;
     }
+    //!
 
+    /*!
+        Is Note Target
+
+        !_method
+    */
     bool IsNoteTarget(const std::string& target)
     {
         return target.size() >= 3 && target.front() == '_' && target.back() == '_';
     }
+    //!
 
+    /*!
+        Is Url Target
+
+        !_method
+    */
     bool IsUrlTarget(const std::string& target)
     {
         return target.size() >= 7 &&
@@ -56,13 +85,25 @@ namespace scribbolyth::links
                 target.rfind("https://", 0) == 0 ||
                 target.rfind("file://", 0) == 0);
     }
+    //!
 
+    /*!
+        Note Title
+
+        !_method
+    */
     std::string NoteTitle(const std::string& target)
     {
         return target.substr(1, target.size() - 2);
     }
+    //!
 
-    // Mirrors the three regexes of the HTML app's openLinksDialog().
+    /*!
+        Constants
+
+        ----
+    */
+    //>>
     const std::regex kMarkdownRegex(
         R"(\[([^\]]+)\](?:[ \t]*\r?\n[ \t]*|[ \t]*)(https?://\S+|file://\S+|_[^_]+_))",
         std::regex_constants::icase);
@@ -70,7 +111,14 @@ namespace scribbolyth::links
                                std::regex_constants::icase);
     const std::regex kNoteRegex(
         R"((?:^|\s|\()_([^_]|[^_].*?[^_])_(?=\s|[.,!?;:)]|$))");
+    //<<
+    //!
 
+    /*!
+        Collect Links
+
+        !_method
+    */
     void CollectLinks(const std::string& content, std::vector<Link>& out)
     {
         // Markdown-style: [Label] optionally followed by whitespace/newline
@@ -124,9 +172,15 @@ namespace scribbolyth::links
             }
         }
     }
+    //!
 
     namespace
     {
+        /*!
+            Open External
+
+            !_method
+        */
         void OpenExternal(const std::string& url)
         {
             std::string escaped;
@@ -144,23 +198,56 @@ namespace scribbolyth::links
             const int rc = std::system(command.c_str());
             (void)rc;
         }
+        //!
 
+        /*!
+            Copy to Clipboard
+
+            !_method
+        */
         bool CopyToClipboard(const std::string& text)
         {
             return scribbolyth::clipboard::Write(text);
         }
+        //!
     }
 
+    /*!
+        Links Dialog Class
+    */
     class LinksDialog : public ftxui::ComponentBase
     {
     public:
+        /*!
+            Public Members
+        */
+
+        /*!
+            Constructor
+
+            !_ctor
+        */
         LinksDialog(std::shared_ptr<EditorState> state, bool* show)
             : state_(std::move(state)), show_(show) {}
+        //!
 
+        /*!
+            Variables
+
+            ----
+        */
+        //>>
         bool Focusable() const override { return true; }
 
         bool pending_g_ = false;
+        //<<
+        //!
 
+        /*!
+            Ftxui Event Call
+
+            !_method
+        */
         bool OnEvent(ftxui::Event event) override
         {
             if (event.is_mouse())
@@ -218,7 +305,13 @@ namespace scribbolyth::links
 
             return true;
         }
+        //!
 
+        /*!
+            Ftxui Render Call
+
+            !_method
+        */
         ftxui::Element Render() override
         {
             Recompute();
@@ -269,11 +362,31 @@ namespace scribbolyth::links
                    ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
         }
+        //!
+
+        //!
 
     private:
+        /*!
+            Private Members
+        */
+
+        /*!
+            Static Variables
+
+            ----
+        */
+        //>>
         static constexpr int kVisibleRows = 18;
         static constexpr int kDoubleClickMs = 500;
+        //<<
+        //!
 
+        /*!
+            On Mouse
+
+            !_method
+        */
         bool OnMouse(ftxui::Mouse mouse)
         {
             const auto now = std::chrono::steady_clock::now();
@@ -310,7 +423,13 @@ namespace scribbolyth::links
             }
             return true;
         }
+        //!
 
+        /*!
+            Close
+
+            !_method
+        */
         void Close()
         {
             *show_ = false;
@@ -318,7 +437,13 @@ namespace scribbolyth::links
             scroll_ = 0;
             last_click_index_ = -1;
         }
+        //!
 
+        /*!
+            Activate
+
+            !_method
+        */
         void Activate()
         {
             if (entries_.empty()) return;
@@ -343,19 +468,37 @@ namespace scribbolyth::links
             state_->status = "";
             Close();
         }
+        //!
 
+        /*!
+            Move Selection Up/Down
+
+            !_method
+        */
         void MoveSelection(int dir)
         {
             if (entries_.empty()) return;
             const int total = static_cast<int>(entries_.size());
             selection_ = std::max(0, std::min(total - 1, selection_ + dir));
         }
+        //!
 
+        /*!
+            Move To Start
+
+            !_method
+        */
         void MoveToStart()
         {
             selection_ = 0;
         }
+        //!
 
+        /*!
+            Move To End
+
+            !_method
+        */
         void MoveToEnd()
         {
             if (!entries_.empty())
@@ -363,9 +506,16 @@ namespace scribbolyth::links
                 selection_ = static_cast<int>(entries_.size()) -1;
             }
         }
+        //!
 
-        // Mirror of the HTML app's `y` key: copy a URL verbatim, or a note
-        // link as its `_Title_` reference. Missing notes copy nothing.
+        /*!
+            Copy Selected
+
+            !_method
+
+            Mirror of the HTML app's `y` key: copy a URL verbatim, or a note
+            link as its `_Title_` reference. Missing notes copy nothing.
+        */
         void CopySelected()
         {
             if (entries_.empty()) return;
@@ -392,7 +542,13 @@ namespace scribbolyth::links
                 state_->status = "Clipboard unavailable";
             }
         }
+        //!
 
+        /*!
+            Compute Top
+
+            !_method
+        */
         int ComputeTop(int sel, int total) const
         {
             const int max_top = std::max(0, total - kVisibleRows);
@@ -401,7 +557,13 @@ namespace scribbolyth::links
             if (sel >= top + kVisibleRows) top = sel - kVisibleRows + 1;
             return std::max(0, std::min(top, max_top));
         }
+        //!
 
+        /*!
+            Recompute
+
+            !_method
+        */
         void Recompute()
         {
             entries_.clear();
@@ -458,7 +620,14 @@ namespace scribbolyth::links
 
             selection_ = std::max(0, std::min(selection_, static_cast<int>(entries_.size()) - 1));
         }
+        //!
 
+        /*!
+            Variables
+
+            ----
+        */
+        //>>
         std::shared_ptr<EditorState> state_;
         bool* show_;
         ftxui::Box box_;
@@ -469,10 +638,21 @@ namespace scribbolyth::links
         int content_width_ = 20;
         int last_click_index_ = -1;
         std::chrono::steady_clock::time_point last_click_time_;
-    };
+        //<<
+        //!
 
+        //!
+    };
+    //!
+
+    /*!
+        Make Links Dialog
+
+        !_method
+    */
     ftxui::Component MakeLinksDialog(std::shared_ptr<EditorState> state, bool* show)
     {
         return ftxui::Make<LinksDialog>(std::move(state), show);
     }
+    //!
 }

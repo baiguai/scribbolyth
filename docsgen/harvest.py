@@ -7,8 +7,13 @@ Comment grammar (all harvested from files under src/):
                              coderoot=/path   where source-code nodes live
                                               (default: /src)
     //[/path]              folder-only node at the (absolute) note path.
+                           A leading './' makes the path relative to the
+                           current file's folder under the source-code root
+                           (e.g. in treeview/treeview.cpp, ./Introduction ->
+                           <coderoot>/treeview/treeview.cpp/Introduction).
     /*[/path] <body> */    node at the (absolute) note path with content;
-                           the last path segment is its title.
+                           the last path segment is its title.  './'-relative
+                           paths work here too.
     /*! <body> */          source-code doc block. Opens a *region* that stays
                            open until a /*!*/ marker (the marker is dropped
                            from the body). Its title is the first content
@@ -17,8 +22,28 @@ Comment grammar (all harvested from files under src/):
     /*+ <body> */          sub-note. A child of the innermost open doc
                            region in the same file. Ignored when no doc
                            region is open.
-    /*!*/                  Closes the innermost open doc region.  Creates
+    /*!*/  (or a //! line)   Closes the innermost open doc region.  Creates
                            no node of its own.
+    //>> ... //<<          Raw source snippet.  The markers sit on their own
+                           lines; the code between them is appended verbatim
+                           to the current documentation node (the innermost
+                           open doc region; if none is open, the most recent
+                           doc/sub node in the same file).
+    /*| <body> */          Appends its body text to the current
+                           documentation node's content (same attachment
+                           rules as the //>> ... //<< snippet).
+    !_method               Marker inside a doc comment.  Replaced with the
+                           signature, method name, return type and
+                           parameters of the function definition that
+                           immediately follows the comment (left as-is when
+                           no definition follows).
+    !_ctor                 Marker inside a doc comment, like !_method but for
+                           a constructor definition; also lists the initializer
+                           members (and qualifiers such as explicit/noexcept).
+
+Within any comment body, a line containing just dashes (e.g. ----) is
+expanded to an 80-character horizontal rule.  Raw code captured by
+//>> ... //<< is never rewritten.
 
 Every file that contains a /*! */ doc block produces a *folder* node named
 after the file (e.g. editor/editor.cpp -> editor > editor.cpp), hanging off
@@ -47,12 +72,250 @@ EXTENSIONS = (".cpp", ".hpp", ".h", ".cc", ".cxx", ".c")
 # Comment scanning
 # ----------------------------------------------------------------------
 
-def scan_file(path):
-    """Return source comments as (kind, body, line) in source order.
+METHOD_MARK_RE = re.compile(r"^[ \t]*!_method[ \t]*$", re.M)
+CTOR_MARK_RE = re.compile(r"^[ \t]*!_ctor[ \t]*$", re.M)
 
-    kind is "line" for // comments or "block" for /* ... */ comments.
-    Body excludes the // or /* */ delimiters.  Strings and char literals
-    are skipped so // inside them is not mistaken for a comment.
+
+def extract_signature(src, pos):
+    """Scan src[pos:] for a function/method declaration right after a doc
+    comment.  Whitespace and comments are skipped; scanning stops at the
+    first '{' or ';' at parenthesis-depth 0.  Returns
+        (signature_text, is_definition)
+    with signature_text whitespace-collapsed, or None when no signature
+    is found before the end of the file."""
+    n = len(src)
+    i = pos
+    depth = 0
+    buf = []
+    while i < n:
+        if src.startswith("//", i):
+            j = src.find("\n", i)
+            i = n if j == -1 else j
+            buf.append(" ")
+            continue
+        if src.startswith("/*", i):
+            j = src.find("*/", i + 2)
+            i = n if j == -1 else j + 2
+            buf.append(" ")
+            continue
+        c = src[i]
+        if c in "\"'":
+            q = c
+            i += 1
+            while i < n:
+                if src[i] == "\\":
+                    i += 2
+                    continue
+                if src[i] == q:
+                    i += 1
+                    break
+                i += 1
+            buf.append(" ")
+            continue
+        if c == "(":
+            depth += 1
+        elif c == ")":
+            depth = max(0, depth - 1)
+        elif c in "{;":
+            if depth == 0:
+                return " ".join("".join(buf).split()), c == "{"
+        buf.append(c)
+        i += 1
+    return None
+
+
+def split_top_level(text):
+    """Split text on commas that are not nested inside (), [], or <>."""
+    parts, depth, cur = [], 0, []
+    for ch in text:
+        if ch in "<([":
+            depth += 1
+        elif ch in ">)]":
+            depth = max(0, depth - 1)
+        if ch == "," and depth == 0:
+            parts.append("".join(cur).strip())
+            cur = []
+        else:
+            cur.append(ch)
+    if cur:
+        parts.append("".join(cur).strip())
+    return parts
+
+
+def matching_paren(sig, open_):
+    depth = 0
+    for i in range(open_, len(sig)):
+        c = sig[i]
+        if c == "(":
+            depth += 1
+        elif c == ")":
+            depth -= 1
+            if depth == 0:
+                return i
+    return -1
+
+
+def param_parens(sig):
+    """The parameter list is the one whose closing ')' is the signature's
+    last top-level ')'.  Backtrack from it to its matching '('.  Returns
+    (open_pos, close_pos) or (-1, -1)."""
+    close_ = sig.rfind(")")
+    if close_ == -1:
+        return -1, -1
+    depth = 0
+    for i in range(close_, -1, -1):
+        c = sig[i]
+        if c == ")":
+            depth += 1
+        elif c == "(":
+            depth -= 1
+            if depth == 0:
+                return i, close_
+    return -1, -1
+
+
+def describe_signature(sig, ctor=False):
+    """Break a collapsed signature into (name, returns, params, tail) or
+    return None when it does not look like a function/method."""
+    if ctor:
+        open_ = sig.find("(")
+        close_ = matching_paren(sig, open_) if open_ != -1 else -1
+    else:
+        open_, close_ = param_parens(sig)
+    if open_ == -1 or close_ == -1:
+        return None
+    decl = sig[:open_].strip()
+    param_text = sig[open_ + 1:close_].strip()
+    quals = sig[close_ + 1:].strip()
+    returns = decl
+    name = None
+    op = re.search(r"\boperator\b", decl)
+    if op:
+        name = decl[op.start():].strip()
+        returns = decl[:op.start()].strip()
+    else:
+        m = re.search(r"[A-Za-z_~][A-Za-z0-9_]*\s*$", decl)
+        if m:
+            name = m.group(0).strip()
+            returns = decl[:m.start()].strip()
+            if returns.endswith("::"):
+                returns = returns[:-2].strip()
+    params = []
+    if param_text:
+        for p in split_top_level(param_text):
+            p = p.strip()
+            if not p:
+                continue
+            if "=" in p:
+                p = p.split("=", 1)[0].strip()
+            pm = re.search(r"[A-Za-z_][A-Za-z0-9_]*\s*$", p)
+            if pm:
+                nm = pm.group(0).strip()
+                ty = p[:pm.start()].strip()
+                params.append((ty, nm) if ty else (nm, ""))
+    return name, returns, params, quals
+
+
+def member_inits(tail):
+    """Split a constructor tail `: a(x), b({...})` into init-list members.
+    Returns (members, qualifiers).  A qualifier prefix (e.g. `noexcept : ...`)
+    is peeled off before the ':'."""
+    t = tail.strip()
+    colon = t.find(":")
+    if colon == -1:
+        return [], t
+    quals = t[:colon].strip()
+    members = [p.strip() for p in split_top_level(t[colon + 1:]) if p.strip()]
+    return members, quals
+
+
+def render_members(members):
+    """Render ctor initializers as an aligned `name  args` column."""
+    rows = []
+    for m in members:
+        o = m.find("(")
+        if o != -1 and m.endswith(")"):
+            rows.append((m[:o].strip(), m[o + 1:-1].strip()))
+        else:
+            rows.append((m, ""))
+    w = max(len(a) for a, b in rows)
+    out = []
+    for a, b in rows:
+        out.append("    " + a.ljust(w + 1) + b if b else "    " + a)
+    return out
+
+
+def _content_base(body):
+    """Leading-whitespace count of the first content line, measured the same
+    way deindent will measure it (i.e. after the doc/sub marker char)."""
+    txt = body
+    lead = len(txt) - len(txt.lstrip(" \t"))
+    if txt[lead:lead + 1] in ("!", "+"):
+        txt = txt[lead + 1:]
+    for ln in txt.split("\n"):
+        t = ln.lstrip(" \t")
+        if t:
+            return len(ln) - len(t)
+    return 0
+
+
+def callable_description(src, code_pos, body):
+    """Replace a `!_method` / `!_ctor` marker line in a comment body with a
+    description of the function/constructor definition immediately following
+    the comment.  Leaves the marker untouched when no definition follows."""
+    kinds = [("ctor", CTOR_MARK_RE) if rx is CTOR_MARK_RE else ("method", rx)
+             for rx in (CTOR_MARK_RE, METHOD_MARK_RE) if rx.search(body)]
+    if not kinds:
+        return body
+    found = extract_signature(src, code_pos)
+    if not found or not found[1]:
+        return body
+    kind, rx = kinds[0]
+    described = describe_signature(found[0], ctor=kind == "ctor")
+    if described is None:
+        return body
+    name, returns, params, tail = described
+    lines = ["Signature: " + found[0]]
+    if kind == "ctor":
+        members, quals = member_inits(tail)
+        specs = [returns] if returns in ("explicit", "inline") else []
+        if specs:
+            quals = " ".join(specs + ([quals] if quals else []))
+        lines.append("Constructor: " + (name or "?"))
+        if quals:
+            lines.append("Qualifiers: " + quals)
+    else:
+        members, quals = [], tail
+        lines.append("Method: " + (name or "?"))
+        if returns:
+            lines.append("Returns: " + returns)
+        if quals:
+            lines.append("Qualifiers: " + quals)
+    if params:
+        width = max(len(nm) for ty, nm in params if nm)
+        lines.append("Parameters:")
+        for ty, nm in params:
+            pad = nm.ljust(width + 1) if nm else " " * (width + 1)
+            lines.append("    " + pad + ty)
+    if kind == "ctor" and members:
+        lines.append("Initializers:")
+        lines.extend(render_members(members))
+    base = _content_base(body)
+    ind = " " * base
+    # The body is de-indented later by base, so pad every inserted line by
+    # base: the inner indents then survive in the final content.
+    return kinds[0][1].sub(
+        lambda m: "\n".join(ind + ln if ln else "" for ln in lines), body)
+
+
+def scan_file(path):
+    """Return source comments/segments as (kind, body, line) in source order.
+
+    kind is "line" for // comments, "block" for /* ... */ comments, or
+    "code" for the raw source captured between a `//>>` and `//<<` line
+    (each on its own line).  Body excludes the // or /* */ delimiters.
+    Strings and char literals are skipped so // inside them is not
+    mistaken for a comment.
     """
     with open(path, "r", encoding="utf-8", errors="replace") as f:
         src = f.read()
@@ -82,6 +345,28 @@ def scan_file(path):
             end = src.find("\n", i)
             if end == -1:
                 end = n
+            if src[i + 2:end].strip() == ">>":
+                # Capture raw source until a `//<<` line (both markers sit
+                # on their own lines); the captured text lands in the
+                # current documentation node as a code snippet.
+                j = end + 1
+                seg = []
+                while j < n:
+                    lf = src.find("\n", j)
+                    if lf == -1:
+                        lf = n
+                    if src[j:lf].strip().startswith("//<<"):
+                        items.append(("code", "\n".join(seg), line))
+                        line += 1
+                        i = n if lf == n else lf + 1
+                        break
+                    seg.append(src[j:lf].rstrip())
+                    line += 1
+                    j = n if lf == n else lf + 1
+                else:
+                    items.append(("code", "\n".join(seg), line))
+                    i = n
+                continue
             items.append(("line", src[i + 2:end], line))
             i = end
             continue
@@ -93,7 +378,8 @@ def scan_file(path):
                 line += src.count("\n", i, n)
                 i = n
             else:
-                items.append(("block", src[i + 2:end], start_line))
+                body = callable_description(src, end + 2, src[i + 2:end])
+                items.append(("block", body, start_line))
                 line += src.count("\n", i, end + 2)
                 i = end + 2
             continue
@@ -113,13 +399,22 @@ def classify(items):
         doc    {body}                  from /*! body*/  (opens a region)
         docclose                       from /*!*/        (closes the region)
         sub    {body}                  from /*+ body*/
-    Doc/sub nesting is resolved by the builder using a region stack.
+        code   {body}                  from //>> ... //<< (raw source)
+        append {body}                  from /*| body*/
+    Doc/sub/code/append nesting is resolved by the builder using a region
+    stack.
     """
     actions = []
     doc_open = None
     for kind, body, line in items:
+        if kind == "code":
+            actions.append({"kind": "code", "body": body, "line": line})
+            continue
         if kind == "line":
             text = body.strip()
+            if text == "!":
+                actions.append({"kind": "docclose", "line": line})
+                continue
             m = re.match(r"!_\s*([A-Za-z0-9_]+)\s*=\s*(.*)$", text)
             if m:
                 actions.append({"kind": "config", "key": m.group(1),
@@ -146,6 +441,11 @@ def classify(items):
             text = strip_marker(body[1:], "/*+")
             if text.strip():
                 actions.append({"kind": "sub", "body": text, "line": line})
+            continue
+        if body.startswith("|"):
+            text = body[1:]
+            if text.strip():
+                actions.append({"kind": "append", "body": text, "line": line})
             continue
         manual = body.lstrip()
         if manual.startswith("["):
@@ -199,6 +499,26 @@ def deindent(raw):
             k += 1
         out.append(ln[k:])
     return "\n".join(out)
+
+
+DASH_RULE_RE = re.compile(r"^[ \t]*-{3,}[ \t]*$")
+
+
+def expand_rules(text):
+    """Rewrite a line of just dashes (e.g. ----) as a full-width (80-char)
+    horizontal rule."""
+    out = []
+    for ln in text.split("\n"):
+        if DASH_RULE_RE.match(ln):
+            out.append("-" * 80)
+        else:
+            out.append(ln)
+    return "\n".join(out)
+
+
+def doc_text(raw):
+    """Shaped content for a doc-comment body (deindented + rule expansion)."""
+    return expand_rules(deindent(raw))
 
 
 def first_line(text):
@@ -274,33 +594,53 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None):
     coderoot_parts = split_path(coderoot)
     made_source_node = False
 
-    def apply_custom(a):
+    def apply_custom(a, file_parts):
+        p = a["path"].strip()
+        if p.startswith("./"):
+            # A './'-prefixed path is relative to the current file's node
+            # under the source-code root (e.g. ./Introduction lands on
+            # <coderoot>/treeview/treeview.cpp/Introduction).
+            parts = coderoot_parts + file_parts + split_path(p[2:])
+        else:
+            parts = split_path(p)
         if a["kind"] == "manual":
-            node = tree.ensure(split_path(a["path"]))
-            node["content"] = deindent(a["body"])
+            node = tree.ensure(parts)
+            node["content"] = doc_text(a["body"])
         elif a["kind"] == "folder":
-            tree.ensure(split_path(a["path"]))
+            tree.ensure(parts)
 
     # Phase 1: custom nodes defined before 'int main' (in the anchor file)
     # lead the tree.  Custom nodes from other files are treated as leading
     # too, so the coderoot section stays anchored to main.cpp's flow.
     for rel, actions in file_actions:
+        file_parts = tuple(rel.split("/"))
         led_anchor = rel == anchor_rel and anchor_line is not None
         for a in actions:
             if a["kind"] not in ("manual", "folder"):
                 continue
             if led_anchor and a.get("line", 1) >= anchor_line:
                 continue
-            apply_custom(a)
+            apply_custom(a, file_parts)
 
     # Phase 2: source-code nodes (coderoot + per-file folders + doc blocks).
     # Doc regions nest: a /*! opens a region that stays open until the next
-    # /*!*/ , so /*! and /*+ blocks inside it become children.
+    # /*!*/ , so /*! and /*+ blocks inside it become children.  Raw code
+    # captured with //>> ... //<< is appended to the current doc node.
     for rel, actions in file_actions:
         file_parts = tuple(rel.split("/"))
         stack = []
+        last = None
         ev = 0
         for a in actions:
+            if a["kind"] in ("code", "append"):
+                body = (deindent(a["body"]) if a["kind"] == "code"
+                        else expand_rules(deindent(a["body"])))
+                if not body:
+                    continue
+                current = stack[-1] if stack else last
+                if current is not None:
+                    current["content"] = (current["content"] + "\n\n" if current["content"] else "") + body
+                continue
             if a["kind"] not in ("doc", "docclose", "sub"):
                 continue
             ev += 1
@@ -315,13 +655,14 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None):
                 parent = stack[-1]
             else:
                 parent = tree.ensure(coderoot_parts + file_parts)
-            content = deindent(a["body"])
+            content = doc_text(a["body"])
             node = {"id": tree._node_id(rel + "#n" + str(ev)),
                     "title": first_line(content) or "(untitled)",
                     "content": content,
                     "children": [],
                     "expanded": False}
             parent["children"].append(node)
+            last = node
             if a["kind"] == "doc":
                 stack.append(node)
 
@@ -335,7 +676,7 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None):
                     continue
                 if a.get("line", 1) < anchor_line:
                     continue
-                apply_custom(a)
+                apply_custom(a, tuple(rel.split("/")))
     return tree.children
 
 

@@ -14,6 +14,11 @@ namespace scribbolyth::help
 {
     namespace
     {
+        /*!
+            Split Fields
+
+            !_method
+        */
         std::vector<std::string> SplitFields(const std::string& line)
         {
             std::vector<std::string> fields;
@@ -41,13 +46,25 @@ namespace scribbolyth::help
             }
             return fields;
         }
+        //!
 
+        /*!
+            Pad Right
+
+            !_method
+        */
         std::string PadRight(const std::string& s, std::size_t width)
         {
             if (s.size() >= width) return s;
             return s + std::string(width - s.size(), ' ');
         }
+        //!
 
+        /*!
+            To Lower
+
+            !_method
+        */
         std::string Lower(std::string s)
         {
             std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) {
@@ -55,7 +72,13 @@ namespace scribbolyth::help
             });
             return s;
         }
+        //!
 
+        /*!
+            Parse Entries
+
+            !_method
+        */
         void ParseEntries(const std::string& path, std::vector<HelpEntry>& out)
         {
             std::ifstream file(path);
@@ -93,11 +116,24 @@ namespace scribbolyth::help
                 out.push_back(std::move(entry));
             }
         }
+        //!
     }
 
+    /*!
+        Help Dialog Class
+    */
     class HelpDialog : public ftxui::ComponentBase
     {
     public:
+        /*!
+            Public Members
+        */
+
+        /*!
+            Constructor
+
+            !_ctor
+        */
         HelpDialog(std::shared_ptr<EditorState> state, const std::string& path, bool* show)
             : state_(std::move(state)), show_(show)
         {
@@ -107,9 +143,22 @@ namespace scribbolyth::help
                 content_width_ = std::max(content_width_, static_cast<int>(e.line.size()));
             }
         }
+        //!
 
+        /*!
+            Focusable Const
+
+        */
+        //>>
         bool Focusable() const override { return true; }
+        //<<
+        //!
 
+        /*!
+            Event Handler
+
+            !_method
+        */
         bool OnEvent(ftxui::Event event) override
         {
             if (event == ftxui::Event::Escape)
@@ -146,7 +195,13 @@ namespace scribbolyth::help
             }
             return true;
         }
+        //!
 
+        /*!
+            Render
+
+            !_method
+        */
         ftxui::Element Render() override
         {
             const std::vector<int> filtered = Filtered();
@@ -201,13 +256,31 @@ namespace scribbolyth::help
                    ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
         }
+        //!
+
+        //!
 
     private:
+        /*!
+            Private Members
+        */
+
+        /*!
+            Max Top Const
+
+            !_method
+        */
         int MaxTop() const
         {
             return std::max(0, static_cast<int>(Filtered().size()) - kVisibleRows);
         }
+        //!
 
+        /*!
+            Filtered Vector
+
+        */
+        //>>
         std::vector<int> Filtered() const
         {
             std::vector<int> result;
@@ -230,7 +303,15 @@ namespace scribbolyth::help
             }
             return result;
         }
+        //<<
+        //!
 
+        /*!
+            Variables
+
+            ----
+        */
+        //>>
         std::shared_ptr<EditorState> state_;
         bool* show_;
         std::vector<HelpEntry> entries_;
@@ -238,12 +319,23 @@ namespace scribbolyth::help
         int scroll_ = 0;
         int content_width_ = 72;
         static constexpr int kVisibleRows = 18;
-    };
+        //<<
+        //!
 
+        //!
+    };
+    //!
+
+    /*!
+        Make Help Dialog
+
+        !_method
+    */
     ftxui::Component MakeHelpDialog(std::shared_ptr<EditorState> state,
                                     const std::string& config_path,
                                     bool* show)
     {
         return ftxui::Make<HelpDialog>(std::move(state), config_path, show);
     }
+    //!
 }

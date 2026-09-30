@@ -13,6 +13,11 @@ namespace scribbolyth::op
 {
     namespace
     {
+        /*!
+            Is Path Command
+
+            !_method
+        */
         bool IsPathCommand(const std::string& name)
         {
             return name == "open" || name == "o" || name == "o!"
@@ -20,7 +25,13 @@ namespace scribbolyth::op
                 || name == "U" || name == "X" || name == "x"
                 || name == "export_note_txt" || name == "export_tree_txt";
         }
+        //!
 
+        /*!
+            Collect Path Matches
+
+            !_method
+        */
         void CollectPathMatches(const std::string& arg, std::vector<std::string>& matches)
         {
             namespace fs = std::filesystem;
@@ -71,7 +82,13 @@ namespace scribbolyth::op
             }
             std::sort(matches.begin(), matches.end());
         }
+        //!
 
+        /*!
+            Common Prefix
+
+            !_method
+        */
         std::string CommonPrefix(const std::vector<std::string>& items)
         {
             if (items.empty()) return "";
@@ -84,7 +101,13 @@ namespace scribbolyth::op
             }
             return common;
         }
+        //!
 
+        /*!
+            Join
+
+            !_method
+        */
         std::string Join(const std::vector<std::string>& items)
         {
             std::string out;
@@ -95,8 +118,14 @@ namespace scribbolyth::op
             }
             return out;
         }
+        //!
     }
 
+    /*!
+        Complete Command
+
+        !_method
+    */
     void CompleteCommand(std::shared_ptr<EditorState> state)
     {
         std::string cmd = state->command_buffer;
@@ -157,7 +186,13 @@ namespace scribbolyth::op
         state->command_buffer = ":" + name + " " + completed;
         state->command_cursor = static_cast<int>(state->command_buffer.size());
     }
+    //!
 
+    /*!
+        Open Command Line
+
+        !_method
+    */
     void OpenCommandLine(std::shared_ptr<EditorState> state, const std::string& command)
     {
         state->mode_before_command = state->mode;
@@ -166,7 +201,13 @@ namespace scribbolyth::op
         state->command_cursor = static_cast<int>(state->command_buffer.size());
         if (state->active_child) *state->active_child = 1;
     }
+    //!
 
+    /*!
+        Open Search Command
+
+        !_method
+    */
     void OpenSearchCommand(std::shared_ptr<EditorState> state)
     {
         state->mode_before_command = state->mode;
@@ -175,7 +216,13 @@ namespace scribbolyth::op
         state->command_cursor = static_cast<int>(state->command_buffer.size());
         if (state->active_child) *state->active_child = 1;
     }
+    //!
 
+    /*!
+        Open Command Line With Args
+
+        !_method
+    */
     void OpenCommandLineWithArgs(std::shared_ptr<EditorState> state,
                                  const std::string& command, const std::string& args)
     {
@@ -185,7 +232,13 @@ namespace scribbolyth::op
         state->command_cursor = static_cast<int>(state->command_buffer.size());
         if (state->active_child) *state->active_child = 1;
     }
+    //!
 
+    /*!
+        Execute Command
+
+        !_method
+    */
     bool ExecuteCommand(std::shared_ptr<EditorState> state, const std::string& input)
     {
         std::string cmd = input;
@@ -206,7 +259,13 @@ namespace scribbolyth::op
         op_it->second(args, 1);
         return true;
     }
+    //!
 
+    /*!
+        Execute Search
+
+        !_method
+    */
     bool ExecuteSearch(std::shared_ptr<EditorState> state, const std::string& input)
     {
         if (input.empty() || input[0] != '/') return false;
@@ -241,12 +300,24 @@ namespace scribbolyth::op
         state->status = "Match 1 of " + std::to_string(state->search_matches.size());
         return true;
     }
+    //!
 
+    /*!
+        Resolve
+
+        !_method
+    */
     Keymap::Result Resolve(std::shared_ptr<EditorState> state, ftxui::Event event)
     {
         return state->ActiveKeymap().Handle(event);
     }
+    //!
 
+    /*!
+        Dispatch
+
+        !_method
+    */
     bool Dispatch(std::shared_ptr<EditorState> state, const Keymap::Result& result)
     {
         if (result.pending)
@@ -266,7 +337,14 @@ namespace scribbolyth::op
         it->second((result.args == "-") ? "" : result.args, result.count);
         return true;
     }
+    //!
 
+
+    /*!
+        Handle Key
+
+        !_method
+    */
     bool HandleKey(std::shared_ptr<EditorState> state, ftxui::Event event)
     {
         // Some terminals deliver Enter as an ESC sequence instead of CR/LF:
@@ -279,4 +357,5 @@ namespace scribbolyth::op
         }
         return Dispatch(state, Resolve(state, event));
     }
+    //!
 }
