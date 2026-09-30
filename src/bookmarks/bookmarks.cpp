@@ -233,7 +233,7 @@ namespace scribbolyth::bookmarks
 
         /*!
             Close
-            Closes the bookmarks dialog.
+            Closes the bookmarks dialog by updating the related variables.
         */
         void Close()
         {
@@ -245,7 +245,9 @@ namespace scribbolyth::bookmarks
 
         /*!
             Jump
+
             Navigates to the selected bookmark's node.
+            If it is a line specific bookmark, it navigates to that particular line.
         */
         void Jump()
         {
