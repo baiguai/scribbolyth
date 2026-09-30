@@ -2190,319 +2190,326 @@
                       {
                         "id": "cefb667a",
                         "title": "Load if Changed",
-                        "content": "Load if Changed\n\nSignature: void LoadIfChanged()\nMethod: LoadIfChanged\nReturns: void\n\nHow Comparison is Done:\n\nCompare by id, not just pointer: nodes live in std::vectors,\nso erasing one (e.g. deleting a node) can leave a different\nnode at the same address as the previously loaded one.\n\n//!\nconst std::string cur_id = state_->active_node\n                           ? state_->active_node->id : \"\";\nif (active_ == state_->active_node && active_id_ == cur_id) return;\nactive_ = state_->active_node;\nactive_id_ = cur_id;\nvisual_row_ = -1;\nvisual_col_ = -1;\nif (active_ == nullptr)\n{\nlines_.clear();\nrow_ = 0;\ncol_ = 0;\nlast_col_ = 0;\nreturn;\n}\nlines_ = SplitLines(active_->text);\nrow_ = 0;\ncol_ = 0;\nlast_col_ = 0;\nJumpToFirstSearchMatch();\n}\n//!\n\n/*!\nSelect First Search Match\n\nSignature: void JumpToFirstSearchMatch()\nMethod: JumpToFirstSearchMatch\nReturns: void\n\nMove the cursor to the first occurrence of the active search\nquery in the freshly loaded node, so the '/' find and n/N\nnavigation reveal the match in the editor (as in Vim).",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "514e462d",
-                        "title": "Move Cursor to Position",
-                        "content": "Move Cursor to Position\n\nSignature: void SetCursor(int row, int col)\nMethod: SetCursor\nReturns: void\nParameters:\n    row int\n    col int\n\nPlace the cursor on (row, col), clamped to the document.",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "39cf9c0d",
-                        "title": "Search Results Navigation",
-                        "content": "Search Results Navigation\n\nSignature: void StepSearchOccurrence(int dir)\nMethod: StepSearchOccurrence\nReturns: void\nParameters:\n    dir int\n\nStep the cursor to the next (dir > 0) or previous (dir < 0)\noccurrence of the active search query inside the current node's\ntext, wrapping around like Vim's n/N. Also works while the\nhighlight is hidden by ':noh' (the query is kept). Does nothing\nwhen there is no search or the node has no occurrences.",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "aa81938d",
-                        "title": "Get Word Under Cursor",
-                        "content": "Get Word Under Cursor\n\nSignature: std::string WordUnderCursor() const\nMethod: WordUnderCursor\nReturns: std::string\nQualifiers: const\n\nThe word (letters, digits, '_') under the editor cursor, as Vim\ndefines it for '*'. When the cursor sits right after a word,\nthat word is used.",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "f4b1fbf9",
-                        "title": "Search Word Under Cursor",
-                        "content": "Search Word Under Cursor\n\nSignature: void SearchWordUnderCursor()\nMethod: SearchWordUnderCursor\nReturns: void\n\nVim '*': search for the word under the cursor and jump to its\nnext occurrence (wrapping). The word becomes the active find\nquery, so n/N continue stepping through it and the highlight\nshows every node that contains it.",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "6bbedd83",
-                        "title": "Replace All Text",
-                        "content": "Replace All Text\n\nSignature: void ReplaceAllInString(std::string& line, const std::string& old_text, const std::string& new_text, int& count)\nMethod: ReplaceAllInString\nReturns: void\nParameters:\n    line     std::string&\n    old_text const std::string&\n    new_text const std::string&\n    count    int&\n\nReplace every occurrence of `old_text` in `line` with `new_text`,\ncounting the replacements.",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "8cfd0c49",
-                        "title": "Replace Text in Range",
-                        "content": "Replace Text in Range\n\nSignature: void ReplaceRange(std::string& line, int lo, int hi, const std::string& old_text, const std::string& new_text, int& count)\nMethod: ReplaceRange\nReturns: void\nParameters:\n    line     std::string&\n    lo       int\n    hi       int\n    old_text const std::string&\n    new_text const std::string&\n    count    int&\n\nReplace within the half-open column range [lo, hi) of `line`.",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "345019b6",
-                        "title": "Replaced Message",
-                        "content": "Replaced Message\n\nSignature: void FinishReplace(int count)\nMethod: FinishReplace\nReturns: void\nParameters:\n    count int",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "128a096b",
-                        "title": "Replace Text",
-                        "content": "Replace Text\n\nSignature: void ReplaceText(const std::string& args)\nMethod: ReplaceText\nReturns: void\nParameters:\n    args const std::string&\n\nVim ':replace old/new' (also bound to 'R'): literal, global\nreplace of `old` with `new` inside the current node's text. In\nNORMAL mode the whole node text is processed (like :%s/../g);\nin VISUAL/VISUAL_LINE/VISUAL_BLOCK only the selected range is\ntouched. Only this node's text is ever changed.",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "933867f3",
-                        "title": "Save Current File",
-                        "content": "Save Current File\n\nSignature: void Save()\nMethod: Save\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "72cea560",
-                        "title": "Rebuild Table",
-                        "content": "Rebuild Table\n\nSignature: void FormatTable()\nMethod: FormatTable\nReturns: void\n\nRebuild the selected rows (or the current line when no VISUAL\nselection is active) into a padded markdown table with a\n\"+---+\" separator, mirroring the web app's formatMarkdownTable.",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "a8897fba",
-                        "title": "Split Lines",
-                        "content": "Split Lines\n\nSignature: static std::vector<std::string> SplitLines(const std::string& text)\nMethod: SplitLines\nReturns: static std::vector<std::string>\nParameters:\n    text const std::string&",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "6811164d",
-                        "title": "To Upper / To Lower",
-                        "content": "To Upper / To Lower\n\nSignature: static char ToUpperAscii(char c)\nMethod: ToUpperAscii\nReturns: static char\nParameters:\n    c char\n\nSignature: static char ToLowerAscii(char c)\nMethod: ToLowerAscii\nReturns: static char\nParameters:\n    c char\n\n                ASCII-only case folding: the editor is byte-oriented (columns =\n                bytes), so folding a full byte would corrupt UTF-8 text. Other\n                bytes (letters with diacritics, CJK, emoji, ...) are left as-is.",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "6f058de9",
-                        "title": "Clamp",
-                        "content": "Clamp\n\nSignature: void Clamp()\nMethod: Clamp\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "a507df2e",
-                        "title": "Move Cursor Up",
-                        "content": "Move Cursor Up\n\nSignature: void CursorUp()\nMethod: CursorUp\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "557b8c39",
-                        "title": "Move Cursor Down",
-                        "content": "Move Cursor Down\n\nSignature: void CursorDown()\nMethod: CursorDown\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "c50a7843",
-                        "title": "Move Cursor Left",
-                        "content": "Move Cursor Left\n\nSignature: void CursorLeft()\nMethod: CursorLeft\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "f903fe12",
-                        "title": "Move Cursor Right",
-                        "content": "Move Cursor Right\n\nSignature: void CursorRight()\nMethod: CursorRight\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "397e726b",
-                        "title": "Page Up",
-                        "content": "Page Up\n\nSignature: void CursorPageUp()\nMethod: CursorPageUp\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "597e500a",
-                        "title": "Page Down",
-                        "content": "Page Down\n\nSignature: void CursorPageDown()\nMethod: CursorPageDown\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "b81302a3",
-                        "title": "Move Forward Word",
-                        "content": "Move Forward Word\n\nSignature: void CursorWordForward()\nMethod: CursorWordForward\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "1cf57512",
-                        "title": "Move Back Word",
-                        "content": "Move Back Word\n\nSignature: void CursorWordBack()\nMethod: CursorWordBack\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "224d2532",
-                        "title": "Move to Word End",
-                        "content": "Move to Word End\n\nSignature: void CursorWordEnd()\nMethod: CursorWordEnd\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "95f5a204",
-                        "title": "Select Inner Word",
-                        "content": "Select Inner Word\n\nSignature: void SelectInnerWord()\nMethod: SelectInnerWord\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "b8d87c98",
-                        "title": "Delete Inner Word",
-                        "content": "Delete Inner Word\n\nSignature: void DeleteInnerWord()\nMethod: DeleteInnerWord\nReturns: void\n\nDelete the inner word under the cursor (diw): the word's\ncharacters only, keeping surrounding whitespace, mirroring the\nbounds chosen by SelectInnerWord().",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "ae04ce81",
-                        "title": "Delete Word Back",
-                        "content": "Delete Word Back\n\nSignature: void DeleteWordBack()\nMethod: DeleteWordBack\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "365fc884",
-                        "title": "Delete Word Forward",
-                        "content": "Delete Word Forward\n\nSignature: void DeleteWordForward()\nMethod: DeleteWordForward\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "4fb214c3",
-                        "title": "Insert Text",
-                        "content": "Insert Text\n\nSignature: void InsertText(const std::string& text)\nMethod: InsertText\nReturns: void\nParameters:\n    text const std::string&",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "37192608",
-                        "title": "Paste Text",
-                        "content": "Paste Text\n\nSignature: void PasteText(const std::string& text)\nMethod: PasteText\nReturns: void\nParameters:\n    text const std::string&\n\nInsert clipboard-style text (possibly multi-line) at the cursor.",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "6feb8377",
-                        "title": "Insert New Line",
-                        "content": "Insert New Line\n\nSignature: void InsertNewline()\nMethod: InsertNewline\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "831f5ed5",
-                        "title": "Handle Backspace",
-                        "content": "Handle Backspace\n\nSignature: void Backspace()\nMethod: Backspace\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "05ab5b5d",
-                        "title": "Enter Block Insert Mode",
-                        "content": "Enter Block Insert Mode\n\nSignature: void EnterBlockInsert(bool at_end)\nMethod: EnterBlockInsert\nReturns: void\nParameters:\n    at_end bool\n\nEnter INSERT mode with a pending block insert (Vim Ctrl+V then\nI/A). The text the user types is accumulated in block_insert_ and\nshown live on the top row; ApplyBlockInsert() replays it on the\nremaining rows when Esc is pressed.",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "97471f26",
-                        "title": "Apply the Block Insert",
-                        "content": "Apply the Block Insert\n\nSignature: void ApplyBlockInsert()\nMethod: ApplyBlockInsert\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "07ca3edd",
-                        "title": "Delete Character",
-                        "content": "Delete Character\n\nSignature: void DeleteChar()\nMethod: DeleteChar\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "ce73495f",
-                        "title": "Delete Line",
-                        "content": "Delete Line\n\nSignature: void DeleteLine()\nMethod: DeleteLine\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "607ce7ef",
-                        "title": "Delete to End of Line",
-                        "content": "Delete to End of Line\n\nSignature: void DeleteToEol()\nMethod: DeleteToEol\nReturns: void\n\nVim 'D' = 'd$': delete from the cursor to the end of the line,\nleaving the line itself (and the newline) in place.",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "1d87ac95",
-                        "title": "Move Line",
-                        "content": "Move Line\n\nSignature: void MoveLine(int dir)\nMethod: MoveLine\nReturns: void\nParameters:\n    dir int\n\nVim-style line move: swap the current line with the one above\n(dir < 0) or below (dir > 0), carrying the cursor with it.",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "03488513",
-                        "title": "Select Text",
-                        "content": "Select Text\n\nSignature: std::string SelectionText() const\nMethod: SelectionText\nReturns: std::string\nQualifiers: const\n\nThe text currently under a VISUAL/VISUAL_LINE selection, or the\ncurrent line when no selection is active (NORMAL/INSERT).\nLine-based copies include a trailing newline so a cut+paste\nround-trip reproduces the lines.",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "b82b11ee",
-                        "title": "Delete Selection",
-                        "content": "Delete Selection\n\nSignature: void DeleteSelection()\nMethod: DeleteSelection\nReturns: void",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "9f0a63b4",
-                        "title": "Selection to Upper",
-                        "content": "Selection to Upper\n\nSignature: void UpperSelection()\nMethod: UpperSelection\nReturns: void\n\nVim 'U' (VISUAL): uppercase the selected text. Folding never\nchanges line count or line length, so nothing is erased or\nreassembled; the cursor is placed at the start of the selection\nand the mode returns to NORMAL.",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "b39ab65a",
-                        "title": "Selection to Lower",
-                        "content": "Selection to Lower\n\nSignature: void LowerSelection()\nMethod: LowerSelection\nReturns: void\n\nVim 'u' (VISUAL): lowercase the selected text.",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "5fadc899",
-                        "title": "Transform Selection",
-                        "content": "Transform Selection\n\nSignature: void TransformSelection(char (*fold)(char), const char* status_msg)\nMethod: TransformSelection\nReturns: void\nParameters:\n    status_msg const char*",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "bff29aed",
-                        "title": "Variables",
-                        "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nscribbolyth::treeview::TreeNode* active_ = nullptr;\nstd::string active_id_;\nstd::vector<std::string> lines_;\nint row_ = 0;\nint col_ = 0;\nint last_col_ = 0;\nint visual_row_ = -1;\nint visual_col_ = -1;\nint viewport_height_ = 0;",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "efc90588",
-                        "title": "Block Insert Struct",
-                        "content": "Block Insert Struct\n\nstruct BlockInsert\n{\n    bool active = false;\n    bool at_end = false;\n    int col = 0;\n    std::vector<int> rows;\n    std::string pending;\n};",
+                        "content": "Load if Changed\n\nSignature: void LoadIfChanged()\nMethod: LoadIfChanged\nReturns: void\n\nHow Comparison is Done:\n\nCompare by id, not just pointer: nodes live in std::vectors,\nso erasing one (e.g. deleting a node) can leave a different\nnode at the same address as the previously loaded one.",
                         "children": [],
                         "expanded": false
                       }
                     ],
+                    "expanded": false
+                  },
+                  {
+                    "id": "a9941d9f",
+                    "title": "Select First Search Match",
+                    "content": "Select First Search Match\n\nSignature: void JumpToFirstSearchMatch()\nMethod: JumpToFirstSearchMatch\nReturns: void\n\nMove the cursor to the first occurrence of the active search\nquery in the freshly loaded node, so the '/' find and n/N\nnavigation reveal the match in the editor (as in Vim).",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "cea2cac0",
+                    "title": "Move Cursor to Position",
+                    "content": "Move Cursor to Position\n\nSignature: void SetCursor(int row, int col)\nMethod: SetCursor\nReturns: void\nParameters:\n    row int\n    col int\n\nPlace the cursor on (row, col), clamped to the document.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "28d34adf",
+                    "title": "Search Results Navigation",
+                    "content": "Search Results Navigation\n\nSignature: void StepSearchOccurrence(int dir)\nMethod: StepSearchOccurrence\nReturns: void\nParameters:\n    dir int\n\nStep the cursor to the next (dir > 0) or previous (dir < 0)\noccurrence of the active search query inside the current node's\ntext, wrapping around like Vim's n/N. Also works while the\nhighlight is hidden by ':noh' (the query is kept). Does nothing\nwhen there is no search or the node has no occurrences.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "8e5e3f57",
+                    "title": "Get Word Under Cursor",
+                    "content": "Get Word Under Cursor\n\nSignature: std::string WordUnderCursor() const\nMethod: WordUnderCursor\nReturns: std::string\nQualifiers: const\n\nThe word (letters, digits, '_') under the editor cursor, as Vim\ndefines it for '*'. When the cursor sits right after a word,\nthat word is used.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "4889b012",
+                    "title": "Search Word Under Cursor",
+                    "content": "Search Word Under Cursor\n\nSignature: void SearchWordUnderCursor()\nMethod: SearchWordUnderCursor\nReturns: void\n\nVim '*': search for the word under the cursor and jump to its\nnext occurrence (wrapping). The word becomes the active find\nquery, so n/N continue stepping through it and the highlight\nshows every node that contains it.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "76f23bf7",
+                    "title": "Replace All Text",
+                    "content": "Replace All Text\n\nSignature: void ReplaceAllInString(std::string& line, const std::string& old_text, const std::string& new_text, int& count)\nMethod: ReplaceAllInString\nReturns: void\nParameters:\n    line     std::string&\n    old_text const std::string&\n    new_text const std::string&\n    count    int&\n\nReplace every occurrence of `old_text` in `line` with `new_text`,\ncounting the replacements.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "70d3e5b5",
+                    "title": "Replace Text in Range",
+                    "content": "Replace Text in Range\n\nSignature: void ReplaceRange(std::string& line, int lo, int hi, const std::string& old_text, const std::string& new_text, int& count)\nMethod: ReplaceRange\nReturns: void\nParameters:\n    line     std::string&\n    lo       int\n    hi       int\n    old_text const std::string&\n    new_text const std::string&\n    count    int&\n\nReplace within the half-open column range [lo, hi) of `line`.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "fd4ff245",
+                    "title": "Replaced Message",
+                    "content": "Replaced Message\n\nSignature: void FinishReplace(int count)\nMethod: FinishReplace\nReturns: void\nParameters:\n    count int",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "f874bf8c",
+                    "title": "Replace Text",
+                    "content": "Replace Text\n\nSignature: void ReplaceText(const std::string& args)\nMethod: ReplaceText\nReturns: void\nParameters:\n    args const std::string&\n\nVim ':replace old/new' (also bound to 'R'): literal, global\nreplace of `old` with `new` inside the current node's text. In\nNORMAL mode the whole node text is processed (like :%s/../g);\nin VISUAL/VISUAL_LINE/VISUAL_BLOCK only the selected range is\ntouched. Only this node's text is ever changed.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "58c4ae22",
+                    "title": "Save Current File",
+                    "content": "Save Current File\n\nSignature: void Save()\nMethod: Save\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "f9cd7916",
+                    "title": "Rebuild Table",
+                    "content": "Rebuild Table\n\nSignature: void FormatTable()\nMethod: FormatTable\nReturns: void\n\nRebuild the selected rows (or the current line when no VISUAL\nselection is active) into a padded markdown table with a\n\"+---+\" separator, mirroring the web app's formatMarkdownTable.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "6ae5a092",
+                    "title": "Split Lines",
+                    "content": "Split Lines\n\nSignature: static std::vector<std::string> SplitLines(const std::string& text)\nMethod: SplitLines\nReturns: static std::vector<std::string>\nParameters:\n    text const std::string&",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "fd8c4b6e",
+                    "title": "To Upper / To Lower",
+                    "content": "To Upper / To Lower\n\nSignature: static char ToUpperAscii(char c)\nMethod: ToUpperAscii\nReturns: static char\nParameters:\n    c char\n\nSignature: static char ToLowerAscii(char c)\nMethod: ToLowerAscii\nReturns: static char\nParameters:\n    c char\n\n                ASCII-only case folding: the editor is byte-oriented (columns =\n                bytes), so folding a full byte would corrupt UTF-8 text. Other\n                bytes (letters with diacritics, CJK, emoji, ...) are left as-is.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "46c80e8d",
+                    "title": "Clamp",
+                    "content": "Clamp\n\nSignature: void Clamp()\nMethod: Clamp\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "ac5632b8",
+                    "title": "Move Cursor Up",
+                    "content": "Move Cursor Up\n\nSignature: void CursorUp()\nMethod: CursorUp\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "7e4fbe6f",
+                    "title": "Move Cursor Down",
+                    "content": "Move Cursor Down\n\nSignature: void CursorDown()\nMethod: CursorDown\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "07f5a469",
+                    "title": "Move Cursor Left",
+                    "content": "Move Cursor Left\n\nSignature: void CursorLeft()\nMethod: CursorLeft\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "f5aeecdb",
+                    "title": "Move Cursor Right",
+                    "content": "Move Cursor Right\n\nSignature: void CursorRight()\nMethod: CursorRight\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "b1c576e0",
+                    "title": "Page Up",
+                    "content": "Page Up\n\nSignature: void CursorPageUp()\nMethod: CursorPageUp\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "d34427ee",
+                    "title": "Page Down",
+                    "content": "Page Down\n\nSignature: void CursorPageDown()\nMethod: CursorPageDown\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "0128d795",
+                    "title": "Move Forward Word",
+                    "content": "Move Forward Word\n\nSignature: void CursorWordForward()\nMethod: CursorWordForward\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "32494df7",
+                    "title": "Move Back Word",
+                    "content": "Move Back Word\n\nSignature: void CursorWordBack()\nMethod: CursorWordBack\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "f5bf1b9c",
+                    "title": "Move to Word End",
+                    "content": "Move to Word End\n\nSignature: void CursorWordEnd()\nMethod: CursorWordEnd\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "a222a350",
+                    "title": "Select Inner Word",
+                    "content": "Select Inner Word\n\nSignature: void SelectInnerWord()\nMethod: SelectInnerWord\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "25bbfd02",
+                    "title": "Delete Inner Word",
+                    "content": "Delete Inner Word\n\nSignature: void DeleteInnerWord()\nMethod: DeleteInnerWord\nReturns: void\n\nDelete the inner word under the cursor (diw): the word's\ncharacters only, keeping surrounding whitespace, mirroring the\nbounds chosen by SelectInnerWord().",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "6e602de8",
+                    "title": "Delete Word Back",
+                    "content": "Delete Word Back\n\nSignature: void DeleteWordBack()\nMethod: DeleteWordBack\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "df35cf44",
+                    "title": "Delete Word Forward",
+                    "content": "Delete Word Forward\n\nSignature: void DeleteWordForward()\nMethod: DeleteWordForward\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "ab938768",
+                    "title": "Insert Text",
+                    "content": "Insert Text\n\nSignature: void InsertText(const std::string& text)\nMethod: InsertText\nReturns: void\nParameters:\n    text const std::string&",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "2a375952",
+                    "title": "Paste Text",
+                    "content": "Paste Text\n\nSignature: void PasteText(const std::string& text)\nMethod: PasteText\nReturns: void\nParameters:\n    text const std::string&\n\nInsert clipboard-style text (possibly multi-line) at the cursor.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "6435cfa1",
+                    "title": "Insert New Line",
+                    "content": "Insert New Line\n\nSignature: void InsertNewline()\nMethod: InsertNewline\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "9eff12dd",
+                    "title": "Handle Backspace",
+                    "content": "Handle Backspace\n\nSignature: void Backspace()\nMethod: Backspace\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "208870e2",
+                    "title": "Enter Block Insert Mode",
+                    "content": "Enter Block Insert Mode\n\nSignature: void EnterBlockInsert(bool at_end)\nMethod: EnterBlockInsert\nReturns: void\nParameters:\n    at_end bool\n\nEnter INSERT mode with a pending block insert (Vim Ctrl+V then\nI/A). The text the user types is accumulated in block_insert_ and\nshown live on the top row; ApplyBlockInsert() replays it on the\nremaining rows when Esc is pressed.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "80d353fb",
+                    "title": "Apply the Block Insert",
+                    "content": "Apply the Block Insert\n\nSignature: void ApplyBlockInsert()\nMethod: ApplyBlockInsert\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "d1bd61a1",
+                    "title": "Delete Character",
+                    "content": "Delete Character\n\nSignature: void DeleteChar()\nMethod: DeleteChar\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "943aae2d",
+                    "title": "Delete Line",
+                    "content": "Delete Line\n\nSignature: void DeleteLine()\nMethod: DeleteLine\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "3aa6f392",
+                    "title": "Delete to End of Line",
+                    "content": "Delete to End of Line\n\nSignature: void DeleteToEol()\nMethod: DeleteToEol\nReturns: void\n\nVim 'D' = 'd$': delete from the cursor to the end of the line,\nleaving the line itself (and the newline) in place.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "30d4c920",
+                    "title": "Move Line",
+                    "content": "Move Line\n\nSignature: void MoveLine(int dir)\nMethod: MoveLine\nReturns: void\nParameters:\n    dir int\n\nVim-style line move: swap the current line with the one above\n(dir < 0) or below (dir > 0), carrying the cursor with it.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "fad06de1",
+                    "title": "Select Text",
+                    "content": "Select Text\n\nSignature: std::string SelectionText() const\nMethod: SelectionText\nReturns: std::string\nQualifiers: const\n\nThe text currently under a VISUAL/VISUAL_LINE selection, or the\ncurrent line when no selection is active (NORMAL/INSERT).\nLine-based copies include a trailing newline so a cut+paste\nround-trip reproduces the lines.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "c06a299a",
+                    "title": "Delete Selection",
+                    "content": "Delete Selection\n\nSignature: void DeleteSelection()\nMethod: DeleteSelection\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "fc6575a4",
+                    "title": "Selection to Upper",
+                    "content": "Selection to Upper\n\nSignature: void UpperSelection()\nMethod: UpperSelection\nReturns: void\n\nVim 'U' (VISUAL): uppercase the selected text. Folding never\nchanges line count or line length, so nothing is erased or\nreassembled; the cursor is placed at the start of the selection\nand the mode returns to NORMAL.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "a78f1005",
+                    "title": "Selection to Lower",
+                    "content": "Selection to Lower\n\nSignature: void LowerSelection()\nMethod: LowerSelection\nReturns: void\n\nVim 'u' (VISUAL): lowercase the selected text.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "f0ae98ed",
+                    "title": "Transform Selection",
+                    "content": "Transform Selection\n\nSignature: void TransformSelection(char (*fold)(char), const char* status_msg)\nMethod: TransformSelection\nReturns: void\nParameters:\n    status_msg const char*",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "7807cbbb",
+                    "title": "Variables",
+                    "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nscribbolyth::treeview::TreeNode* active_ = nullptr;\nstd::string active_id_;\nstd::vector<std::string> lines_;\nint row_ = 0;\nint col_ = 0;\nint last_col_ = 0;\nint visual_row_ = -1;\nint visual_col_ = -1;\nint viewport_height_ = 0;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "1a1af5d8",
+                    "title": "Block Insert Struct",
+                    "content": "Block Insert Struct\n\nstruct BlockInsert\n{\n    bool active = false;\n    bool at_end = false;\n    int col = 0;\n    std::vector<int> rows;\n    std::string pending;\n};",
+                    "children": [],
                     "expanded": false
                   }
                 ],
                 "expanded": false
               },
               {
-                "id": "deba9fc6",
+                "id": "7fcc9d42",
                 "title": "Make the Editor",
                 "content": "Make the Editor\n\nSignature: ftxui::Component MakeEditor(std::shared_ptr<EditorState> state)\nMethod: MakeEditor\nReturns: ftxui::Component\nParameters:\n    state std::shared_ptr<EditorState>",
                 "children": [],
@@ -3946,7 +3953,7 @@
               {
                 "id": "33648a43",
                 "title": "Variables",
-                "content": "Variables\nConstructs the persistent editor state as well as the editor and treeview elements.\n\n--------------------------------------------------------------------------------\n\nauto state = std::make_shared<EditorState>();\n\nauto editor_comp = scribbolyth::editor::MakeEditor(state);\nauto treeview_comp = scribbolyth::treeview::MakeTreeView(state);\n\nstate->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };\nstate->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };\n\nauto treeview_wrap = treeview_comp;\nauto editor_wrap = editor_comp;\n\nauto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);\n\nauto screen = ScreenInteractive::Fullscreen();\nauto quit = screen.ExitLoopClosure();\n\n--------------------------------------------------------------------------------",
+                "content": "Variables\nConstructs the persistent editor state as well as the editor and treeview elements.\n\n--------------------------------------------------------------------------------\n\nauto version = \"1.0.0\";\n\nauto state = std::make_shared<EditorState>();\n\nauto editor_comp = scribbolyth::editor::MakeEditor(state);\nauto treeview_comp = scribbolyth::treeview::MakeTreeView(state);\n\nstate->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };\nstate->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };\n\nauto treeview_wrap = treeview_comp;\nauto editor_wrap = editor_comp;\n\nauto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);\n\nauto screen = ScreenInteractive::Fullscreen();\nauto quit = screen.ExitLoopClosure();\n\n--------------------------------------------------------------------------------",
                 "children": [],
                 "expanded": false
               },
@@ -3960,7 +3967,7 @@
               {
                 "id": "1e0a460c",
                 "title": "Operations",
-                "content": "Operations\nAll of the key binding operations are declared here.\n\nExamples:\n\nstate->operations[\"quit\"] = [state, quit](const std::string&, int)\n{\n    if (state->changed)\n    {\n        state->status = \"Unsaved changes - use :w to save or :qa! to quit without saving\";\n        return;\n    }\n    quit();\n};\nstate->operations[\"quit_force\"] = [quit](const std::string&, int) { quit(); };\nstate->commands[\"qa\"] = \"quit\";\nstate->commands[\"qa!\"] = \"quit_force\";\n\nbool show_help = false;\nstate->operations[\"show_help\"] = [&show_help](const std::string&, int) { show_help = true; };\n\nbool show_links = false;\nstate->operations[\"links\"] = [&show_links](const std::string&, int) { show_links = true; };\nstate->commands[\"links\"] = \"links\";",
+                "content": "Operations\nAll of the key binding operations are declared here.\n\nExamples:\n\nstate->operations[\"quit\"] = [state, quit](const std::string&, int)\n{\n    if (state->changed)\n    {\n        state->status = \"Unsaved changes - use :w to save or :qa! to quit without saving\";\n        return;\n    }\n    quit();\n};\nstate->operations[\"quit_force\"] = [quit](const std::string&, int) { quit(); };\nstate->commands[\"qa\"] = \"quit\";\nstate->commands[\"qa!\"] = \"quit_force\";\n\nstate->operations[\"show_version\"] = [state, &version](const std::string&, int)\n{\n    state->command_buffer = \":\" + std::string(version);\n    state->command_cursor = static_cast<int>(state->command_buffer.size());\n    state->command_keep_open = true;\n};\nstate->commands[\"version\"] = \"show_version\";\n\nbool show_help = false;\nstate->operations[\"show_help\"] = [&show_help](const std::string&, int) { show_help = true; };\n\nbool show_links = false;\nstate->operations[\"links\"] = [&show_links](const std::string&, int) { show_links = true; };\nstate->commands[\"links\"] = \"links\";",
                 "children": [],
                 "expanded": false
               },

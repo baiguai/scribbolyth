@@ -58,6 +58,8 @@ int main(int, char** argv) {
         ----
     */
     //>>
+    auto version = "1.0.0";
+
     auto state = std::make_shared<EditorState>();
 
     auto editor_comp = scribbolyth::editor::MakeEditor(state);
@@ -129,6 +131,16 @@ int main(int, char** argv) {
         state->command_cursor = static_cast<int>(state->command_buffer.size());
         state->command_keep_open = true;
     };
+
+    //>>
+    state->operations["show_version"] = [state, &version](const std::string&, int)
+    {
+        state->command_buffer = ":" + std::string(version);
+        state->command_cursor = static_cast<int>(state->command_buffer.size());
+        state->command_keep_open = true;
+    };
+    state->commands["version"] = "show_version";
+    //<<
 
     //>>
     bool show_help = false;

@@ -941,6 +941,7 @@ namespace scribbolyth::editor
                     Compare by id, not just pointer: nodes live in std::vectors,
                     so erasing one (e.g. deleting a node) can leave a different
                     node at the same address as the previously loaded one.
+                */
 
                 //!
                 const std::string cur_id = state_->active_node
