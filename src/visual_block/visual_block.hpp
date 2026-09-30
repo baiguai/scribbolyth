@@ -4,16 +4,13 @@
 #include <string>
 #include <vector>
 
-/*!
-    Introduction
-
+/*[./Introduction]
     Visual Block mode (Vim Ctrl+V): a rectangular, column-wise selection.
     The anchor and cursor positions define the block's row span and column
     span; every line between row_lo and row_hi has its columns between
     col_lo and col_hi (inclusive) selected. Lines shorter than the block
     simply expose no columns past their end.
 */
-//!
 namespace scribbolyth::visual_block
 {
 
