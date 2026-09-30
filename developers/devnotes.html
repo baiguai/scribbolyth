@@ -976,6 +976,391 @@
                 "content": "TreeView is the notes sidebar tree: an FTXUI component that owns the\ndocument's node tree, the current selection, and all tree-mode behavior:\n\n  - selection / cursor movement across the visible tree (j/k, gg/G, /find)\n  - structural edits: add, rename, delete and move nodes, expand & collapse\n  - document persistence: open, save, import and export\n  - undo history, scoped to the currently selected node\n  - the record of viewed nodes that powers the history dialog\n\nTreeView installs callbacks into EditorState.operations under formal op\nnames (\"move_up\", \"new_node\", ...). The tree keymap in commands.conf maps\nkeys to those names and op::HandleKey()/op::Dispatch() invoke the matching\ncallback, so this file contains no key-decoding logic of its own.",
                 "children": [],
                 "expanded": false
+              },
+              {
+                "id": "08564998",
+                "title": "Variables",
+                "content": "Variables\n\n--------------------------------------------------------------------------------\n\nint CountNodes(const std::vector<TreeNode>& nodes);\nTreeNode* FindParent(std::vector<TreeNode>& roots, TreeNode* child);\nTreeNode* FindById(std::vector<TreeNode>& nodes, const std::string& id);\nvoid CollectAllDepth(TreeNode& node, int depth, std::vector<std::pair<TreeNode*, int>>& out);\nvoid EnsureIds(std::vector<TreeNode>& nodes);",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "6c797bfc",
+                "title": "Trim White Space",
+                "content": "Trim White Space\n\nSignature: std::string TrimWhitespace(const std::string& s)\nMethod: TrimWhitespace\nReturns: std::string\nParameters:\n    s const std::string&\n\nStrip leading and trailing whitespace from s.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "af8673e4",
+                "title": "Strip Note Links",
+                "content": "Strip Note Links\n\nSignature: std::string StripNoteLinks(const std::string& content)\nMethod: StripNoteLinks\nReturns: std::string\nParameters:\n    content const std::string&\n\nStrip the underscores of inter-note links (_text_ -> text) for the\nplain-text note export, keeping surrounding whitespace/line breaks,\nmirroring the regex used by the web app's exportNoteAsTxt().",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "53a8ce22",
+                "title": "TreeView Component",
+                "content": "TreeView Component\n\n!_method\n\nFTXUI component owning the document tree (roots_), the current\nselection, and every tree-mode operation. Key events arrive through\nthe operation map installed in the constructor; this file never\ndecodes keys itself.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "88457db9",
+                "title": "Make TreeView",
+                "content": "Make TreeView\n\nSignature: ftxui::Component MakeTreeView(std::shared_ptr<EditorState> state)\nMethod: MakeTreeView\nReturns: ftxui::Component\nParameters:\n    state std::shared_ptr<EditorState>\n\nComponent factory: give EditorState a ready-to-render TreeView.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "cfeae9f2",
+                "title": "Collect Visible Nodes",
+                "content": "Collect Visible Nodes\n\nSignature: void CollectVisible(TreeNode& node, std::vector<TreeNode*>& out)\nMethod: CollectVisible\nReturns: void\nParameters:\n    node TreeNode&\n    out  std::vector<TreeNode*>&\n\nAppend `node` and, when it is expanded, all of its visible descendants.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "9c0f15d7",
+                "title": "Collect All Depth Nodes",
+                "content": "Collect All Depth Nodes\n\nSignature: void CollectAllDepth(TreeNode& node, int depth, std::vector<std::pair<TreeNode*, int>>& out)\nMethod: CollectAllDepth\nReturns: void\nParameters:\n    node  TreeNode&\n    depth int\n    out   std::vector<std::pair<TreeNode*, int>>&\n\nDepth-first walk that ignores expansion state; every node is appended with\nits depth (this is the \"whole document\" enumeration).",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "08429cec",
+                "title": "Set All Nodes Expanded",
+                "content": "Set All Nodes Expanded\n\nSignature: void SetAllExpanded(TreeNode& node, bool expanded, bool skip_root)\nMethod: SetAllExpanded\nReturns: void\nParameters:\n    node      TreeNode&\n    expanded  bool\n    skip_root bool\n\nApply `expanded` to every node in the subtree that has children.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "42090682",
+                "title": "Find Parent Node",
+                "content": "Find Parent Node\n\nSignature: TreeNode* FindParent(TreeNode& node, TreeNode* child)\nMethod: FindParent\nReturns: TreeNode*\nParameters:\n    node  TreeNode&\n    child TreeNode*\n\nFind the node that directly owns `child`, or null when it is a root.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "f84e1837",
+                "title": "Find Roots Parent Node",
+                "content": "Find Roots Parent Node\n\nSignature: TreeNode* FindParent(std::vector<TreeNode>& roots, TreeNode* child)\nMethod: FindParent\nReturns: TreeNode*\nParameters:\n    roots std::vector<TreeNode>&\n    child TreeNode*\n\nFindParent() over a whole root list.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "bf9cfabd",
+                "title": "Find By Id",
+                "content": "Find By Id\n\nSignature: TreeNode* FindById(std::vector<TreeNode>& nodes, const std::string& id)\nMethod: FindById\nReturns: TreeNode*\nParameters:\n    nodes std::vector<TreeNode>&\n    id    const std::string&\n\nDepth-first search for the node with `id`, or null.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "174a13ad",
+                "title": "Get Node Count",
+                "content": "Get Node Count\n\nSignature: int CountNodes(const std::vector<TreeNode>& nodes)\nMethod: CountNodes\nReturns: int\nParameters:\n    nodes const std::vector<TreeNode>&\n\nTotal number of nodes in the forest (includes all children).",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "433c5527",
+                "title": "Sibling List",
+                "content": "Sibling List\n\nSignature: std::vector<TreeNode>& TreeView::ContainerOf(TreeNode* node)\nMethod: ContainerOf\nReturns: std::vector<TreeNode>& TreeView\nParameters:\n    node TreeNode*\n\nThe sibling list that owns `node`: its parent's children, or the roots.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "018b335b",
+                "title": "Visible Nodes",
+                "content": "Visible Nodes\n\nSignature: std::vector<TreeNode*> TreeView::VisibleNodes()\nMethod: VisibleNodes\nReturns: std::vector<TreeNode*> TreeView\n\nAll nodes currently on screen in display order: a depth-first walk of\nonly the expanded nodes.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "e1d5e832",
+                "title": "Is Ancestor",
+                "content": "Is Ancestor\n\nSignature: bool TreeView::IsAncestor(TreeNode& ancestor, TreeNode* node)\nMethod: IsAncestor\nReturns: bool TreeView\nParameters:\n    ancestor TreeNode&\n    node     TreeNode*\n\nTrue when `ancestor` is an ancestor of `node` (or is node itself).",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "34595f2c",
+                "title": "Get Visible Depth",
+                "content": "Get Visible Depth\n\nSignature: void TreeView::CollectVisibleDepth(TreeNode& node, int depth, std::vector<TreeNode*>& nodes, std::vector<int>& depths)\nMethod: CollectVisibleDepth\nReturns: void TreeView\nParameters:\n    node   TreeNode&\n    depth  int\n    nodes  std::vector<TreeNode*>&\n    depths std::vector<int>&\n\nSame walk as VisibleNodes(), but also reporting each node's depth.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "591b1212",
+                "title": "Move Selection Up / Down",
+                "content": "Move Selection Up / Down\n\nSignature: void TreeView::MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void TreeView\nParameters:\n    dir int\n\nStep the selection `dir` rows (-1 up, +1 down) through the visible\nnodes, clamped to the ends; selects the first node when none is set.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "e267bba2",
+                "title": "Select Search Node",
+                "content": "Select Search Node\n\nSignature: void TreeView::SearchJump(int dir)\nMethod: SearchJump\nReturns: void TreeView\nParameters:\n    dir int\n\nMove to the next/previous node in the '/' search result list (n/N),\nwrapping at both ends, and reveal the picked node.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "b0bb2f3b",
+                "title": "Move Selected Node Up / Down",
+                "content": "Move Selected Node Up / Down\n\nSignature: void TreeView::MoveNode(int dir)\nMethod: MoveNode\nReturns: void TreeView\nParameters:\n    dir int\n\nSwap the selected node with its sibling at offset `dir` (-1 up, +1\ndown), reordering it within the same parent.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "924865a6",
+                "title": "Move Selected Node's Level",
+                "content": "Move Selected Node's Level\n\nSignature: void TreeView::MoveParent(int dir)\nMethod: MoveParent\nReturns: void TreeView\nParameters:\n    dir int\n\nChange the selected node's level: dir < 0 promotes it one level up (out\nof its parent), dir > 0 demotes it one level down (under its previous\nsibling).",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "9c1afc83",
+                "title": "Refresh Current Node",
+                "content": "Refresh Current Node\n\nSignature: void TreeView::RefreshActiveNode()\nMethod: RefreshActiveNode\nReturns: void TreeView\n\nSync state_->active_node with the selection, reset the undo history when\nthe selection changes, and record the viewed node into the history list.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "23deb7f7",
+                "title": "Save As",
+                "content": "Save As\n\nSignature: void TreeView::SaveTo(const std::string& path)\nMethod: SaveTo\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nSerialize the whole document and write it to `path`, remembering the\npath for future saves and updating the recent-files list and init file.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "6c4ba7dd",
+                "title": "Open File",
+                "content": "Open File\n\nSignature: void TreeView::LoadFrom(const std::string& path)\nMethod: LoadFrom\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nRead and deserialize a document (tree, pane width, bookmarks and history)\nfrom `path`, making it the currently edited file.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "123ec801",
+                "title": "Import Scribboleth File",
+                "content": "Import Scribboleth File\n\nSignature: void TreeView::ImportFrom(const std::string& path)\nMethod: ImportFrom\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nLoad a document from the HTML export produced by the web app; unlike\nLoadFrom() this leaves the document without a file path.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "9342ba5e",
+                "title": "Open File",
+                "content": "Open File\n\nSignature: void TreeView::OpenFile(const std::string& path)\nMethod: OpenFile\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nOpen `path` directly, or launch the file browser when it is a folder.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "a7b38192",
+                "title": "New Document",
+                "content": "New Document\n\nSignature: void TreeView::NewDocument()\nMethod: NewDocument\nReturns: void TreeView\n\nClear the tree, selection, bookmarks, history and undo; reset the pane\nwidth and leave the document without a file path.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "08ceefb4",
+                "title": "Export to Scribboleth Html File",
+                "content": "Export to Scribboleth Html File\n\nSignature: void TreeView::ExportTo(const std::string& path)\nMethod: ExportTo\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nWrite the web-app HTML export: patch an existing target file in place so\nmanual edits survive re-export, otherwise build from the scribboleth.html\ntemplate.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "f5e989b6",
+                "title": "Export Subtree",
+                "content": "Export Subtree\n\nSignature: void TreeView::ExportScribbolyth(const std::string& path)\nMethod: ExportScribbolyth\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nExport the selected node and its whole subtree as a standalone\nScribbolyth document (its own .scribboleth file). Unlike SaveTo this\ndoes not repoint current_file_, touch the recent-files list or rewrite\ninit.conf: the branch is written to `path` and the open document is\nleft exactly as it was. Bookmarks and history are not carried over and\nthe pane width is preserved so the file reopens with the same layout.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "deee0c8a",
+                "title": "Export Node to Text",
+                "content": "Export Node to Text\n\nSignature: void TreeView::ExportNoteTxt(const std::string& path)\nMethod: ExportNoteTxt\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nExport the selected note's text as plain text, with inter-note link\nunderscores stripped (web app's exportNoteAsTxt()).",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "fc958bce",
+                "title": "Export Subtree to Text File",
+                "content": "Export Subtree to Text File\n\nSignature: void TreeView::ExportTreeTxt(const std::string& path)\nMethod: ExportTreeTxt\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nExport the selected branch as plain text, depth-first: each node's text\nis written verbatim followed by four blank lines; nodes whose text\ncontains \"#noexp\" are skipped (web app's exportTreeAsTxt()).",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "69680a9a",
+                "title": "Collect Branch Text",
+                "content": "Collect Branch Text\n\nSignature: std::string TreeView::CollectBranchTxt(const TreeNode& node) const\nMethod: CollectBranchTxt\nReturns: std::string TreeView\nQualifiers: const\nParameters:\n    node const TreeNode&\n\nDepth-first plain-text dump of a branch: each node's text followed by\nfour blank lines, skipping empty and \"#noexp\" nodes.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "90a62423",
+                "title": "Export Start Dir",
+                "content": "Export Start Dir\n\nSignature: std::string TreeView::ExportStartDir() const\nMethod: ExportStartDir\nReturns: std::string TreeView\nQualifiers: const\n\nHitting Enter w/out entering a path shows the dialog, defaulted to the\nfolder of the document currently being edited, or the working directory\nwhen no file is loaded yet.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "f9d5d3cd",
+                "title": "Is Directory Check",
+                "content": "Is Directory Check\n\nSignature: bool TreeView::IsDirectory(const std::string& path)\nMethod: IsDirectory\nReturns: bool TreeView\nParameters:\n    path const std::string&\n\nTrue when `path` names an existing directory (errors count as false).",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "f0fce55c",
+                "title": "Persist Last File",
+                "content": "Persist Last File\n\nSignature: void TreeView::PersistLastFile()\nMethod: PersistLastFile\nReturns: void TreeView\n\nStore the last-edited file path (and recent list) into init.conf so the\ntree is reopened on the next launch.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "8a8e8780",
+                "title": "Push Recent File",
+                "content": "Push Recent File\n\nSignature: void TreeView::PushRecentFile(const std::string& path)\nMethod: PushRecentFile\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nMove `path` to the front of the recent-files list, capping its size.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "9f372cb0",
+                "title": "Snapshot Undo",
+                "content": "Snapshot Undo\n\nSignature: void TreeView::SnapshotUndo()\nMethod: SnapshotUndo\nReturns: void TreeView\n\nPush a full serialized snapshot of the document onto the undo stack\n(skipped when identical to the top, capped in size), clearing redo.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "38866250",
+                "title": "Apply Undo",
+                "content": "Apply Undo\n\nSignature: void TreeView::ApplyUndo(std::size_t index)\nMethod: ApplyUndo\nReturns: void TreeView\nParameters:\n    index std::size_t\n\nRoll back to undo entry `index` (0 = newest): move the current state to\nthe redo stack, drop newer undos, reload the stored tree, and re-find\nthe previously selected node by id.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "fd04b2dd",
+                "title": "Clear Undo",
+                "content": "Clear Undo\n\nSignature: void TreeView::ClearUndo()\nMethod: ClearUndo\nReturns: void TreeView\n\nDrop both the undo and redo stacks.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "4e4cf818",
+                "title": "Browse For File",
+                "content": "Browse For File\n\nSignature: void TreeView::BrowseFor(const std::string& dir, const std::string& command, std::function<void(const std::string&)> on_pick)\nMethod: BrowseFor\nReturns: void TreeView\nParameters:\n    dir     const std::string&\n    command const std::string&\n    on_pick std::function<void(const std::string&)>\n\nOpen the file-browser dialog. `on_pick` runs when a file is chosen; when\n`command` is non-empty, choosing a folder instead reopens the command\nline prefilled with it (the save/export flow).",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "4e5772b0",
+                "title": "Move Selection to Start",
+                "content": "Move Selection to Start\n\nSignature: void TreeView::MoveToStart()\nMethod: MoveToStart\nReturns: void TreeView\n\nSelect the first visible node (gg).",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "a821502d",
+                "title": "Move Selection to End",
+                "content": "Move Selection to End\n\nSignature: void TreeView::MoveToEnd()\nMethod: MoveToEnd\nReturns: void TreeView",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "ce1ea8ec",
+                "title": "Expand Selected Node",
+                "content": "Expand Selected Node\n\nSignature: void TreeView::ExpandSelected()\nMethod: ExpandSelected\nReturns: void TreeView\n\nDrill \"in\": expand the selected folder, or descend into its first child\nwhen it is already expanded.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "ae07c157",
+                "title": "Collapse Selected Node",
+                "content": "Collapse Selected Node \n\nSignature: void TreeView::CollapseSelected()\nMethod: CollapseSelected\nReturns: void TreeView\n\nDrill \"out\": collapse the selected folder, or move up to its parent when\nit is already collapsed.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "30815084",
+                "title": "Open Selected Node",
+                "content": "Open Selected Node \n\nSignature: void TreeView::OpenSelected()\nMethod: OpenSelected\nReturns: void TreeView\n\nToggle the selected folder's expansion (Enter on a folder).",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "b24f4669",
+                "title": "Expand All",
+                "content": "Expand All \n\nSignature: void TreeView::ExpandAll()\nMethod: ExpandAll\nReturns: void TreeView\n\nExpand every folder in the tree (E).",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "22759ce4",
+                "title": "Expand Selected Branch",
+                "content": "Expand Selected Branch \n\nSignature: void TreeView::ExpandSelectedBranch()\nMethod: ExpandSelectedBranch\nReturns: void TreeView\n\nExpand the selected node and its entire subtree of children (e).",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "a75de894",
+                "title": "Collapse All",
+                "content": "Collapse All \n\nSignature: void TreeView::CollapseAll()\nMethod: CollapseAll\nReturns: void TreeView\n\nCollapse every folder in the tree (C); deselect when the selection ends\nup hidden.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "ec1babbb",
+                "title": "New Node",
+                "content": "New Node \n\nSignature: TreeNode new_node(std::string name)\nMethod: new_node\nReturns: TreeNode\nParameters:\n    name std::string\n\nBuild a fresh node with a new id and the given name.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "5c4a605b",
+                "title": "Ensure All Nodes Have IDs",
+                "content": "Ensure All Nodes Have IDs \n\nSignature: void EnsureIds(std::vector<TreeNode>& nodes)\nMethod: EnsureIds\nReturns: void\nParameters:\n    nodes std::vector<TreeNode>&\n\nGive every node that lacks one a fresh id (after import or load).",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "6207214e",
+                "title": "Insert Child Node",
+                "content": "Insert Child Node \n\nSignature: void TreeView::InsertChild(const std::string& name)\nMethod: InsertChild\nReturns: void TreeView\nParameters:\n    name const std::string&\n\nAdd `name` as the first child of the selected node (A), expanding it; with\nno selection the new node becomes a root.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "005f0d8d",
+                "title": "Insert Node",
+                "content": "Insert Node \n\nSignature: void TreeView::InsertNode(const std::string& name)\nMethod: InsertNode\nReturns: void TreeView\nParameters:\n    name const std::string&\n\n\nAdd `name` as the sibling just below the selected node (a); with no\nselection the new node becomes a root.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "d3bdb207",
+                "title": "Delete Node",
+                "content": "Delete Node \n\nSignature: void TreeView::DeleteNode()\nMethod: DeleteNode\nReturns: void TreeView\n\nRemove the selected node (D), then select its next sibling, the parent, or\nnothing, whichever is available.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "044cd9c6",
+                "title": "Ftxui Event Method",
+                "content": "Ftxui Event Method\n\nSignature: bool TreeView::OnEvent(ftxui::Event event)\nMethod: OnEvent\nReturns: bool TreeView\nParameters:\n    event ftxui::Event\n\nForward every key event to the shared operation dispatcher; the tree\nkeymap is what actually decides what a key means.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "2b21b64e",
+                "title": "Render Node",
+                "content": "Render Node \n\nSignature: void RenderNode(const TreeNode& node, int depth, const TreeNode* selected, const std::set<const TreeNode*>* matches, ftxui::Elements& rows)\nMethod: RenderNode\nReturns: void\nParameters:\n    node     const TreeNode&\n    depth    int\n    selected const TreeNode*\n    matches  const std::set<const TreeNode*>*\n    rows     ftxui::Elements&\n\nRender one node as a row (indented by depth, \u25b8/\u25be folder marker) and\nrecurse into its expanded children. Yellow = search match, inverted =\nthis node is selected.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "733bb665",
+                "title": "Render the Treeview",
+                "content": "Render the Treeview \n\nSignature: ftxui::Element TreeView::Render()\nMethod: Render\nReturns: ftxui::Element TreeView\n\nCompose the full tree pane: all root rows in a scrollable, flexible\nvertical box.",
+                "children": [],
+                "expanded": false
               }
             ],
             "expanded": false
@@ -989,6 +1374,21 @@
                 "id": "0ab1dee5",
                 "title": "Tree Node Struct",
                 "content": "Tree Node Struct\n\nstruct TreeNode\n{\n    std::string id;\n    std::string name;\n    bool expanded = false;\n    std::string text;\n    std::vector<TreeNode> children;\n};",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          },
+          {
+            "id": "bab78ac4",
+            "title": "treeview.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "98656495",
+                "title": "Make Treeview Forward Declaration",
+                "content": "Make Treeview Forward Declaration\n\nftxui::Component MakeTreeView(std::shared_ptr<EditorState> state);",
                 "children": [],
                 "expanded": false
               }
@@ -4372,6 +4772,231 @@
                 "id": "2a99ba0c",
                 "title": "Ascii to Punctuation",
                 "content": "Ascii to Punctuation\n\n!_method\n\nReplace typographic (smart) punctuation with plain ASCII equivalents so\nthe result is always renderable in the terminal (\"smart\" quote/dash\ncharacters often do not display). Only the exact UTF-8 sequences of the\nmapped characters are consumed; every other byte, including other\nmulti-byte characters, passes through untouched.",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
+        "id": "a697a309",
+        "title": "undo",
+        "content": "",
+        "children": [
+          {
+            "id": "a32edd0d",
+            "title": "undo.cpp",
+            "content": "",
+            "children": [
+              {
+                "id": "0809980f",
+                "title": "Trunc",
+                "content": "Trunc \n\nSignature: std::string Trunc(std::string s, std::size_t width)\nMethod: Trunc\nReturns: std::string\nParameters:\n    s     std::string\n    width std::size_t",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "1b7dd36e",
+                "title": "Diff Marks",
+                "content": "Diff Marks \n\nSignature: std::vector<int> DiffMark(const std::vector<std::string>& snap, const std::vector<std::string>& cur)\nMethod: DiffMark\nReturns: std::vector<int>\nParameters:\n    snap const std::vector<std::string>&\n    cur  const std::vector<std::string>&\n\n\nDiff markers for the preview pane: 0 = unchanged, 1 = changed,\n2 = first changed line.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "8b50bd27",
+                "title": "Split Lines",
+                "content": "Split Lines \n\nSignature: std::vector<std::string> SplitLines(const std::string& text)\nMethod: SplitLines\nReturns: std::vector<std::string>\nParameters:\n    text const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "516ad794",
+                "title": "Find Node",
+                "content": "Find Node \n\nSignature: treeview::TreeNode* FindNode(std::vector<treeview::TreeNode>& nodes, const std::string& id)\nMethod: FindNode\nReturns: treeview::TreeNode*\nParameters:\n    nodes std::vector<treeview::TreeNode>&\n    id    const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "bfd98d6e",
+                "title": "Node Text Doc",
+                "content": "Node Text Doc \n\nSignature: std::vector<std::string> NodeTextDoc(const std::string& json, const std::string& id)\nMethod: NodeTextDoc\nReturns: std::vector<std::string>\nParameters:\n    json const std::string&\n    id   const std::string&\n\nText lines of the node `id` inside a serialized snapshot. The undo\ndialog shows only the currently active note, so this pulls that one\nnode's text out of the snapshot rather than rendering the whole\ndocument.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "80fc9302",
+                "title": "First Text Line",
+                "content": "First Text Line \n\nSignature: std::string FirstTextLine(const treeview::TreeNode& node)\nMethod: FirstTextLine\nReturns: std::string\nParameters:\n    node const treeview::TreeNode&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "8ac92e81",
+                "title": "Undo Dialog Class",
+                "content": "Undo Dialog Class ",
+                "children": [
+                  {
+                    "id": "e06517e7",
+                    "title": "Public Members",
+                    "content": "Public Members ",
+                    "children": [
+                      {
+                        "id": "9a9e24d7",
+                        "title": "Constructor",
+                        "content": "Constructor \n\nSignature: UndoDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: UndoDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "fa534cc2",
+                        "title": "Variables",
+                        "content": "Variables \n\n--------------------------------------------------------------------------------\n\nbool Focusable() const override { return true; }",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "a0c398f5",
+                        "title": "Ftxui Event Method",
+                        "content": "Ftxui Event Method \n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "f0b577b3",
+                        "title": "Render",
+                        "content": "Render \n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  },
+                  {
+                    "id": "d43491e7",
+                    "title": "Private Members",
+                    "content": "Private Members ",
+                    "children": [
+                      {
+                        "id": "e3fe21b4",
+                        "title": "Close Dialog",
+                        "content": "Close Dialog \n\nSignature: void Close()\nMethod: Close\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "3af52928",
+                        "title": "Apply Undo",
+                        "content": "Apply Undo \n\nSignature: void Apply()\nMethod: Apply\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "0972cc88",
+                        "title": "Move Selection Up / Down",
+                        "content": "Move Selection Up / Down \n\nSignature: void Move(int dir)\nMethod: Move\nReturns: void\nParameters:\n    dir int",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "cc021120",
+                        "title": "Variables",
+                        "content": "Variables \n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nint selection_ = 0;\nstatic constexpr int kPreviewRows = 8;\nstatic constexpr int kVisibleRows = 10;\nstatic constexpr std::size_t kMaxContent = 88;",
+                        "children": [],
+                        "expanded": false
+                      }
+                    ],
+                    "expanded": false
+                  }
+                ],
+                "expanded": false
+              },
+              {
+                "id": "18de43c3",
+                "title": "Make Undo Dialog",
+                "content": "Make Undo Dialog \n\nSignature: ftxui::Component MakeUndoDialog(std::shared_ptr<EditorState> state, bool* show)\nMethod: MakeUndoDialog\nReturns: ftxui::Component\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
+        "id": "21e321fa",
+        "title": "visual_block",
+        "content": "",
+        "children": [
+          {
+            "id": "26aafde8",
+            "title": "visual_block.cpp",
+            "content": "",
+            "children": [
+              {
+                "id": "ad56de36",
+                "title": "Line Span",
+                "content": "Line Span \n\nSignature: bool LineSpan(const std::vector<std::string>& lines, const Block& b, int row, int& lo, int& hi)\nMethod: LineSpan\nReturns: bool\nParameters:\n    lines const std::vector<std::string>&\n    b     const Block&\n    row   int\n    lo    int&\n    hi    int&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "6f546d6e",
+                "title": "Extract",
+                "content": "Extract \n\nSignature: std::string Extract(const std::vector<std::string>& lines, const Block& b)\nMethod: Extract\nReturns: std::string\nParameters:\n    lines const std::vector<std::string>&\n    b     const Block&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "d63c4f3e",
+                "title": "Erase",
+                "content": "Erase \n\nSignature: void Erase(std::vector<std::string>& lines, const Block& b)\nMethod: Erase\nReturns: void\nParameters:\n    lines std::vector<std::string>&\n    b     const Block&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "2d171d3e",
+                "title": "Transform",
+                "content": "Transform\n\nSignature: void Transform(std::vector<std::string>& lines, const Block& b, char (*fold)(char))\nMethod: Transform\nReturns: void\nParameters:\n    lines std::vector<std::string>&\n    b     const Block&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "839265ed",
+                "title": "Insert",
+                "content": "Insert \n\nSignature: void Insert(std::vector<std::string>& lines, const Block& b, const std::string& text, bool at_end)\nMethod: Insert\nReturns: void\nParameters:\n    lines  std::vector<std::string>&\n    b      const Block&\n    text   const std::string&\n    at_end bool",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          },
+          {
+            "id": "dc678ed6",
+            "title": "visual_block.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "d7f588c1",
+                "title": "Introduction",
+                "content": "Introduction\n\nVisual Block mode (Vim Ctrl+V): a rectangular, column-wise selection.\nThe anchor and cursor positions define the block's row span and column\nspan; every line between row_lo and row_hi has its columns between\ncol_lo and col_hi (inclusive) selected. Lines shorter than the block\nsimply expose no columns past their end.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "ed1242b7",
+                "title": "Block Struct",
+                "content": "Block Struct \n\nstruct Block\n{\n    int row_lo = 0;\n    int row_hi = 0;\n    int col_lo = 0;\n    int col_hi = 0;\n};",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "04f46980",
+                "title": "Make Block",
+                "content": "Make Block \n\nSignature: inline Block MakeBlock(int aRow, int aCol, int bRow, int bCol)\nMethod: MakeBlock\nReturns: inline Block\nParameters:\n    aRow int\n    aCol int\n    bRow int\n    bCol int",
                 "children": [],
                 "expanded": false
               }

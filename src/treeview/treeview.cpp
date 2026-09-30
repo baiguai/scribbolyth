@@ -36,15 +36,27 @@
 namespace scribbolyth::treeview
 {
 
+    /*!
+        Variables
+
+        ----
+    */
+    //>>
     int CountNodes(const std::vector<TreeNode>& nodes);
     TreeNode* FindParent(std::vector<TreeNode>& roots, TreeNode* child);
     TreeNode* FindById(std::vector<TreeNode>& nodes, const std::string& id);
     void CollectAllDepth(TreeNode& node, int depth, std::vector<std::pair<TreeNode*, int>>& out);
     void EnsureIds(std::vector<TreeNode>& nodes);
+    //<<
+    //!
 
-    // ============ File scope helpers ============
+    /*!
+        Trim White Space
 
-    // Strip leading and trailing whitespace from s.
+        !_method
+
+        Strip leading and trailing whitespace from s.
+    */
     std::string TrimWhitespace(const std::string& s)
     {
         std::size_t b = 0;
@@ -53,23 +65,35 @@ namespace scribbolyth::treeview
         while (e > b && std::isspace(static_cast<unsigned char>(s[e - 1]))) --e;
         return s.substr(b, e - b);
     }
+    //!
 
-    // Strip the underscores of inter-note links (_text_ -> text) for the
-    // plain-text note export, keeping surrounding whitespace/line breaks,
-    // mirroring the regex used by the web app's exportNoteAsTxt().
+    /*!
+        Strip Note Links
+
+        !_method
+
+        Strip the underscores of inter-note links (_text_ -> text) for the
+        plain-text note export, keeping surrounding whitespace/line breaks,
+        mirroring the regex used by the web app's exportNoteAsTxt().
+    */
     std::string StripNoteLinks(const std::string& content)
     {
         static const std::regex node_link_re(
             R"((^|\s)_([^_]|[^_].*?[^_])_(?=\s|[.,!?;:)]|$))");
         return std::regex_replace(content, node_link_re, "$1$2");
     }
+    //!
 
-    // ============ TreeView component ============
+    /*!
+        TreeView Component
 
-    // FTXUI component owning the document tree (roots_), the current
-    // selection, and every tree-mode operation. Key events arrive through
-    // the operation map installed in the constructor; this file never
-    // decodes keys itself.
+        !_method
+
+        FTXUI component owning the document tree (roots_), the current
+        selection, and every tree-mode operation. Key events arrive through
+        the operation map installed in the constructor; this file never
+        decodes keys itself.
+    */
     class TreeView : public ftxui::ComponentBase
     {
         public:
@@ -500,18 +524,28 @@ namespace scribbolyth::treeview
             // Path of the file backing this tree ("" when unsaved/imported).
             std::string current_file_;
     };
+    //!
 
-    // ============ TreeView factory ============
+    /*!
+        Make TreeView
 
-    // Component factory: give EditorState a ready-to-render TreeView.
+        !_method
+
+        Component factory: give EditorState a ready-to-render TreeView.
+    */
     ftxui::Component MakeTreeView(std::shared_ptr<EditorState> state)
     {
         return ftxui::Make<TreeView>(std::move(state));
     }
+    //!
 
-    // ============ Tree traversal helpers ============
+    /*!
+        Collect Visible Nodes
 
-    // Append `node` and, when it is expanded, all of its visible descendants.
+        !_method
+
+        Append `node` and, when it is expanded, all of its visible descendants.
+    */
     void CollectVisible(TreeNode& node, std::vector<TreeNode*>& out)
     {
         out.push_back(&node);
@@ -523,9 +557,16 @@ namespace scribbolyth::treeview
             }
         }
     }
+    //!
 
-    // Depth-first walk that ignores expansion state; every node is appended with
-    // its depth (this is the "whole document" enumeration).
+    /*!
+        Collect All Depth Nodes
+
+        !_method
+
+        Depth-first walk that ignores expansion state; every node is appended with
+        its depth (this is the "whole document" enumeration).
+    */
     void CollectAllDepth(TreeNode& node, int depth, std::vector<std::pair<TreeNode*, int>>& out)
     {
         out.push_back({&node, depth});
@@ -534,8 +575,15 @@ namespace scribbolyth::treeview
             CollectAllDepth(child, depth + 1, out);
         }
     }
+    //!
 
-    // Apply `expanded` to every node in the subtree that has children.
+    /*!
+        Set All Nodes Expanded
+
+        !_method
+
+        Apply `expanded` to every node in the subtree that has children.
+    */
     void SetAllExpanded(TreeNode& node, bool expanded, bool skip_root)
     {
         if (!node.children.empty() && !skip_root)
@@ -547,8 +595,15 @@ namespace scribbolyth::treeview
             SetAllExpanded(child, expanded, false);
         }
     }
+    //!
 
-    // Find the node that directly owns `child`, or null when it is a root.
+    /*!
+        Find Parent Node
+
+        !_method
+
+        Find the node that directly owns `child`, or null when it is a root.
+    */
     TreeNode* FindParent(TreeNode& node, TreeNode* child)
     {
         for (auto& c : node.children)
@@ -564,8 +619,15 @@ namespace scribbolyth::treeview
         }
         return nullptr;
     }
+    //!
 
-    // FindParent() over a whole root list.
+    /*!
+        Find Roots Parent Node
+
+        !_method
+
+        FindParent() over a whole root list.
+    */
     TreeNode* FindParent(std::vector<TreeNode>& roots, TreeNode* child)
     {
         for (auto& root : roots)
@@ -577,8 +639,15 @@ namespace scribbolyth::treeview
         }
         return nullptr;
     }
+    //!
 
-    // Depth-first search for the node with `id`, or null.
+    /*!
+        Find By Id
+
+        !_method
+
+        Depth-first search for the node with `id`, or null.
+    */
     TreeNode* FindById(std::vector<TreeNode>& nodes, const std::string& id)
     {
         for (auto& node : nodes)
@@ -588,8 +657,15 @@ namespace scribbolyth::treeview
         }
         return nullptr;
     }
+    //!
 
-    // Total number of nodes in the forest (includes all children).
+    /*!
+        Get Node Count
+
+        !_method
+
+        Total number of nodes in the forest (includes all children).
+    */
     int CountNodes(const std::vector<TreeNode>& nodes)
     {
         int total = 0;
@@ -600,16 +676,30 @@ namespace scribbolyth::treeview
         }
         return total;
     }
+    //!
 
-    // The sibling list that owns `node`: its parent's children, or the roots.
+    /*!
+        Sibling List
+
+        !_method
+
+        The sibling list that owns `node`: its parent's children, or the roots.
+    */
     std::vector<TreeNode>& TreeView::ContainerOf(TreeNode* node)
     {
         TreeNode* parent = FindParent(roots_, node);
         return parent ? parent->children : roots_;
     }
+    //!
 
-    // All nodes currently on screen in display order: a depth-first walk of
-    // only the expanded nodes.
+    /*!
+        Visible Nodes
+
+        !_method
+
+        All nodes currently on screen in display order: a depth-first walk of
+        only the expanded nodes.
+    */
     std::vector<TreeNode*> TreeView::VisibleNodes()
     {
         std::vector<TreeNode*> out;
@@ -619,8 +709,15 @@ namespace scribbolyth::treeview
         }
         return out;
     }
+    //!
 
-    // True when `ancestor` is an ancestor of `node` (or is node itself).
+    /*!
+        Is Ancestor
+
+        !_method
+
+        True when `ancestor` is an ancestor of `node` (or is node itself).
+    */
     bool TreeView::IsAncestor(TreeNode& ancestor, TreeNode* node)
     {
         for (TreeNode* cur = node; cur; cur = FindParent(roots_, cur))
@@ -632,8 +729,15 @@ namespace scribbolyth::treeview
         }
         return false;
     }
+    //!
 
-    // Same walk as VisibleNodes(), but also reporting each node's depth.
+    /*!
+        Get Visible Depth
+
+        !_method
+
+        Same walk as VisibleNodes(), but also reporting each node's depth.
+    */
     void TreeView::CollectVisibleDepth(TreeNode& node, int depth,
                                        std::vector<TreeNode*>& nodes,
                                        std::vector<int>& depths)
@@ -648,11 +752,16 @@ namespace scribbolyth::treeview
             }
         }
     }
+    //!
 
-    // ============ Selection movement and search ============
+    /*!
+        Move Selection Up / Down
 
-    // Step the selection `dir` rows (-1 up, +1 down) through the visible
-    // nodes, clamped to the ends; selects the first node when none is set.
+        !_method
+
+        Step the selection `dir` rows (-1 up, +1 down) through the visible
+        nodes, clamped to the ends; selects the first node when none is set.
+    */
     void TreeView::MoveSelection(int dir)
     {
         auto visible = VisibleNodes();
@@ -672,9 +781,16 @@ namespace scribbolyth::treeview
         }
         selected_ = visible.front();
     }
+    //!
 
-    // Move to the next/previous node in the '/' search result list (n/N),
-    // wrapping at both ends, and reveal the picked node.
+    /*!
+        Select Search Node
+
+        !_method
+
+        Move to the next/previous node in the '/' search result list (n/N),
+        wrapping at both ends, and reveal the picked node.
+    */
     void TreeView::SearchJump(int dir)
     {
         const auto& matches = state_->search_matches;
@@ -691,11 +807,16 @@ namespace scribbolyth::treeview
         if (state_->reveal_node) state_->reveal_node(matches[static_cast<std::size_t>(idx)]);
         state_->status = "Match " + std::to_string(idx + 1) + " of " + std::to_string(n);
     }
+    //!
 
-    // ============ Node reordering ============
+    /*!
+        Move Selected Node Up / Down
 
-    // Swap the selected node with its sibling at offset `dir` (-1 up, +1
-    // down), reordering it within the same parent.
+        !_method
+
+        Swap the selected node with its sibling at offset `dir` (-1 up, +1
+        down), reordering it within the same parent.
+    */
     void TreeView::MoveNode(int dir)
     {
         if (selected_ == nullptr) return;
@@ -711,10 +832,17 @@ namespace scribbolyth::treeview
             return;
         }
     }
+    //!
 
-    // Change the selected node's level: dir < 0 promotes it one level up (out
-    // of its parent), dir > 0 demotes it one level down (under its previous
-    // sibling).
+    /*!
+        Move Selected Node's Level
+
+        !_method
+
+        Change the selected node's level: dir < 0 promotes it one level up (out
+        of its parent), dir > 0 demotes it one level down (under its previous
+        sibling).
+    */
     void TreeView::MoveParent(int dir)
     {
         if (selected_ == nullptr) return;
@@ -777,9 +905,16 @@ namespace scribbolyth::treeview
             selected_ = &target->children.front();
         }
     }
+    //!
 
-    // Sync state_->active_node with the selection, reset the undo history when
-    // the selection changes, and record the viewed node into the history list.
+    /*!
+        Refresh Current Node
+
+        !_method
+
+        Sync state_->active_node with the selection, reset the undo history when
+        the selection changes, and record the viewed node into the history list.
+    */
     void TreeView::RefreshActiveNode()
     {
         state_->active_node = selected_;
@@ -801,11 +936,16 @@ namespace scribbolyth::treeview
             scribbolyth::history::Record(*state_, selected_->id);
         }
     }
+    //!
 
-    // ============ Document persistence ============
+    /*!
+        Save As
 
-    // Serialize the whole document and write it to `path`, remembering the
-    // path for future saves and updating the recent-files list and init file.
+        !_method
+
+        Serialize the whole document and write it to `path`, remembering the
+        path for future saves and updating the recent-files list and init file.
+    */
     void TreeView::SaveTo(const std::string& path)
     {
         std::string json = scribbolyth::io::Serialize(roots_, state_->treeview_width,
@@ -822,9 +962,16 @@ namespace scribbolyth::treeview
         PushRecentFile(path);
         PersistLastFile();
     }
+    //!
 
-    // Read and deserialize a document (tree, pane width, bookmarks and history)
-    // from `path`, making it the currently edited file.
+    /*!
+        Open File
+
+        !_method
+
+        Read and deserialize a document (tree, pane width, bookmarks and history)
+        from `path`, making it the currently edited file.
+    */
     void TreeView::LoadFrom(const std::string& path)
     {
         std::string content;
@@ -862,9 +1009,16 @@ namespace scribbolyth::treeview
         PushRecentFile(path);
         PersistLastFile();
     }
+    //!
 
-    // Load a document from the HTML export produced by the web app; unlike
-    // LoadFrom() this leaves the document without a file path.
+    /*!
+        Import Scribboleth File
+
+        !_method
+
+        Load a document from the HTML export produced by the web app; unlike
+        LoadFrom() this leaves the document without a file path.
+    */
     void TreeView::ImportFrom(const std::string& path)
     {
         std::vector<TreeNode> loaded;
@@ -891,8 +1045,15 @@ namespace scribbolyth::treeview
         // PushRecentFile(path);
         PersistLastFile();
     }
+    //!
 
-    // Open `path` directly, or launch the file browser when it is a folder.
+    /*!
+        Open File
+
+        !_method
+
+        Open `path` directly, or launch the file browser when it is a folder.
+    */
     void TreeView::OpenFile(const std::string& path)
     {
         if (path.empty())
@@ -910,9 +1071,16 @@ namespace scribbolyth::treeview
         }
         LoadFrom(path);
     }
+    //!
 
-    // Clear the tree, selection, bookmarks, history and undo; reset the pane
-    // width and leave the document without a file path.
+    /*!
+        New Document
+
+        !_method
+
+        Clear the tree, selection, bookmarks, history and undo; reset the pane
+        width and leave the document without a file path.
+    */
     void TreeView::NewDocument()
     {
         roots_.clear();
@@ -928,10 +1096,17 @@ namespace scribbolyth::treeview
         state_->changed = false;
         state_->status = "New document - no file path";
     }
+    //!
 
-    // Write the web-app HTML export: patch an existing target file in place so
-    // manual edits survive re-export, otherwise build from the scribboleth.html
-    // template.
+    /*!
+        Export to Scribboleth Html File
+
+        !_method
+
+        Write the web-app HTML export: patch an existing target file in place so
+        manual edits survive re-export, otherwise build from the scribboleth.html
+        template.
+    */
     void TreeView::ExportTo(const std::string& path)
     {
         // When overwriting an existing export, patch the data in that file in
@@ -957,13 +1132,20 @@ namespace scribbolyth::treeview
         }
         state_->status = "Exported " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
     }
+    //!
 
-    // Export the selected node and its whole subtree as a standalone
-    // Scribbolyth document (its own .scribboleth file). Unlike SaveTo this
-    // does not repoint current_file_, touch the recent-files list or rewrite
-    // init.conf: the branch is written to `path` and the open document is
-    // left exactly as it was. Bookmarks and history are not carried over and
-    // the pane width is preserved so the file reopens with the same layout.
+    /*!
+        Export Subtree
+
+        !_method
+
+        Export the selected node and its whole subtree as a standalone
+        Scribbolyth document (its own .scribboleth file). Unlike SaveTo this
+        does not repoint current_file_, touch the recent-files list or rewrite
+        init.conf: the branch is written to `path` and the open document is
+        left exactly as it was. Bookmarks and history are not carried over and
+        the pane width is preserved so the file reopens with the same layout.
+    */
     void TreeView::ExportScribbolyth(const std::string& path)
     {
         if (selected_ == nullptr)
@@ -982,9 +1164,16 @@ namespace scribbolyth::treeview
         }
         state_->status = "Exported " + std::to_string(CountNodes(branch)) + " nodes to " + path;
     }
+    //!
 
-    // Export the selected note's text as plain text, with inter-note link
-    // underscores stripped (web app's exportNoteAsTxt()).
+    /*!
+        Export Node to Text
+
+        !_method
+
+        Export the selected note's text as plain text, with inter-note link
+        underscores stripped (web app's exportNoteAsTxt()).
+    */
     void TreeView::ExportNoteTxt(const std::string& path)
     {
         if (selected_ == nullptr)
@@ -1005,10 +1194,17 @@ namespace scribbolyth::treeview
         }
         state_->status = "Exported note to " + path;
     }
+    //!
 
-    // Export the selected branch as plain text, depth-first: each node's text
-    // is written verbatim followed by four blank lines; nodes whose text
-    // contains "#noexp" are skipped (web app's exportTreeAsTxt()).
+    /*!
+        Export Subtree to Text File
+
+        !_method
+
+        Export the selected branch as plain text, depth-first: each node's text
+        is written verbatim followed by four blank lines; nodes whose text
+        contains "#noexp" are skipped (web app's exportTreeAsTxt()).
+    */
     void TreeView::ExportTreeTxt(const std::string& path)
     {
         if (selected_ == nullptr)
@@ -1024,9 +1220,16 @@ namespace scribbolyth::treeview
         }
         state_->status = "Exported branch to " + path;
     }
+    //!
 
-    // Depth-first plain-text dump of a branch: each node's text followed by
-    // four blank lines, skipping empty and "#noexp" nodes.
+    /*!
+        Collect Branch Text
+
+        !_method
+
+        Depth-first plain-text dump of a branch: each node's text followed by
+        four blank lines, skipping empty and "#noexp" nodes.
+    */
     std::string TreeView::CollectBranchTxt(const TreeNode& node) const
     {
         std::string out;
@@ -1042,10 +1245,17 @@ namespace scribbolyth::treeview
         }
         return out;
     }
+    //!
 
-    // Hitting Enter w/out entering a path shows the dialog, defaulted to the
-    // folder of the document currently being edited, or the working directory
-    // when no file is loaded yet.
+    /*!
+        Export Start Dir
+
+        !_method
+
+        Hitting Enter w/out entering a path shows the dialog, defaulted to the
+        folder of the document currently being edited, or the working directory
+        when no file is loaded yet.
+    */
     std::string TreeView::ExportStartDir() const
     {
         if (!current_file_.empty())
@@ -1057,23 +1267,44 @@ namespace scribbolyth::treeview
         std::error_code ec;
         return std::filesystem::current_path(ec).string();
     }
+    //!
 
-    // True when `path` names an existing directory (errors count as false).
+    /*!
+        Is Directory Check
+
+        !_method
+
+        True when `path` names an existing directory (errors count as false).
+    */
     bool TreeView::IsDirectory(const std::string& path)
     {
         std::error_code ec;
         return std::filesystem::is_directory(path, ec);
     }
+    //!
 
-    // Store the last-edited file path (and recent list) into init.conf so the
-    // tree is reopened on the next launch.
+    /*!
+        Persist Last File
+
+        !_method
+
+        Store the last-edited file path (and recent list) into init.conf so the
+        tree is reopened on the next launch.
+    */
     void TreeView::PersistLastFile()
     {
         if (state_->init_path.empty()) return;
         scribbolyth::config::WriteInit(state_->init_path, current_file_, state_->recent_files);
     }
+    //!
 
-    // Move `path` to the front of the recent-files list, capping its size.
+    /*!
+        Push Recent File
+
+        !_method
+
+        Move `path` to the front of the recent-files list, capping its size.
+    */
     void TreeView::PushRecentFile(const std::string& path)
     {
         if (path.empty()) return;
@@ -1085,11 +1316,16 @@ namespace scribbolyth::treeview
             recent.resize(EditorState::kRecentMax);
         }
     }
+    //!
 
-    // ============ Undo history ============
+    /*!
+        Snapshot Undo
 
-    // Push a full serialized snapshot of the document onto the undo stack
-    // (skipped when identical to the top, capped in size), clearing redo.
+        !_method
+
+        Push a full serialized snapshot of the document onto the undo stack
+        (skipped when identical to the top, capped in size), clearing redo.
+    */
     void TreeView::SnapshotUndo()
     {
         std::string json = scribbolyth::io::Serialize(roots_, state_->treeview_width,
@@ -1107,10 +1343,17 @@ namespace scribbolyth::treeview
             stack.erase(stack.begin());
         }
     }
+    //!
 
-    // Roll back to undo entry `index` (0 = newest): move the current state to
-    // the redo stack, drop newer undos, reload the stored tree, and re-find
-    // the previously selected node by id.
+    /*!
+        Apply Undo
+
+        !_method
+
+        Roll back to undo entry `index` (0 = newest): move the current state to
+        the redo stack, drop newer undos, reload the stored tree, and re-find
+        the previously selected node by id.
+    */
     void TreeView::ApplyUndo(std::size_t index)
     {
         auto& stack = state_->undo_stack;
@@ -1167,17 +1410,31 @@ namespace scribbolyth::treeview
         }
         stack.resize(stack_index);
     }
+    //!
 
-    // Drop both the undo and redo stacks.
+    /*!
+        Clear Undo
+
+        !_method
+
+        Drop both the undo and redo stacks.
+    */
     void TreeView::ClearUndo()
     {
         state_->undo_stack.clear();
         state_->redo_stack.clear();
     }
+    //!
 
-    // Open the file-browser dialog. `on_pick` runs when a file is chosen; when
-    // `command` is non-empty, choosing a folder instead reopens the command
-    // line prefilled with it (the save/export flow).
+    /*!
+        Browse For File
+
+        !_method
+
+        Open the file-browser dialog. `on_pick` runs when a file is chosen; when
+        `command` is non-empty, choosing a folder instead reopens the command
+        line prefilled with it (the save/export flow).
+    */
     void TreeView::BrowseFor(const std::string& dir, const std::string& command,
                              std::function<void(const std::string&)> on_pick)
     {
@@ -1187,10 +1444,15 @@ namespace scribbolyth::treeview
         state_->browser_pick = std::move(on_pick);
         *state_->show_file_browser = true;
     }
+    //!
 
-    // ============ Selection movement and expand/collapse ============
+    /*!
+        Move Selection to Start
 
-    // Select the first visible node (gg).
+        !_method
+
+        Select the first visible node (gg).
+    */
     void TreeView::MoveToStart()
     {
         auto visible = VisibleNodes();
@@ -1199,7 +1461,13 @@ namespace scribbolyth::treeview
             selected_ = visible.front();
         }
     }
+    //!
 
+    /*!
+        Move Selection to End
+
+        !_method
+    */
     // Select the last visible node (G).
     void TreeView::MoveToEnd()
     {
@@ -1209,18 +1477,32 @@ namespace scribbolyth::treeview
             selected_ = visible.back();
         }
     }
+    //!
 
-    // Drill "in": expand the selected folder, or descend into its first child
-    // when it is already expanded.
+    /*!
+        Expand Selected Node
+
+        !_method
+
+        Drill "in": expand the selected folder, or descend into its first child
+        when it is already expanded.
+    */
     void TreeView::ExpandSelected()
     {
         if (selected_ == nullptr || selected_->children.empty()) return;
         if (!selected_->expanded) { selected_->expanded = true; return; }
         selected_ = &selected_->children.front();
     }
+    //!
 
-    // Drill "out": collapse the selected folder, or move up to its parent when
-    // it is already collapsed.
+    /*!
+        Collapse Selected Node 
+
+        !_method
+
+        Drill "out": collapse the selected folder, or move up to its parent when
+        it is already collapsed.
+    */
     void TreeView::CollapseSelected()
     {
         if (selected_ == nullptr) return;
@@ -1234,15 +1516,29 @@ namespace scribbolyth::treeview
             selected_ = parent;
         }
     }
+    //!
 
-    // Toggle the selected folder's expansion (Enter on a folder).
+    /*!
+        Open Selected Node 
+
+        !_method
+
+        Toggle the selected folder's expansion (Enter on a folder).
+    */
     void TreeView::OpenSelected()
     {
         if (selected_ == nullptr || selected_->children.empty()) return;
         selected_->expanded = !selected_->expanded;
     }
+    //!
 
-    // Expand every folder in the tree (E).
+    /*!
+        Expand All 
+
+        !_method
+
+        Expand every folder in the tree (E).
+    */
     void TreeView::ExpandAll()
     {
         for (auto& root : roots_)
@@ -1250,16 +1546,30 @@ namespace scribbolyth::treeview
             SetAllExpanded(root, true, false);
         }
     }
+    //!
 
-    // Expand the selected node and its entire subtree of children (e).
+    /*!
+        Expand Selected Branch 
+
+        !_method
+
+        Expand the selected node and its entire subtree of children (e).
+    */
     void TreeView::ExpandSelectedBranch()
     {
         if (selected_ == nullptr) return;
         SetAllExpanded(*selected_, true, false);
     }
+    //!
 
-    // Collapse every folder in the tree (C); deselect when the selection ends
-    // up hidden.
+    /*!
+        Collapse All 
+
+        !_method
+
+        Collapse every folder in the tree (C); deselect when the selection ends
+        up hidden.
+    */
     void TreeView::CollapseAll()
     {
         for (auto& root : roots_)
@@ -1272,10 +1582,15 @@ namespace scribbolyth::treeview
             selected_ = nullptr;
         }
     }
+    //!
 
-    // ============ Node creation and deletion ============
+    /*!
+        New Node 
 
-    // Build a fresh node with a new id and the given name.
+        !_method
+
+        Build a fresh node with a new id and the given name.
+    */
     TreeNode new_node(std::string name)
     {
         TreeNode node;
@@ -1283,8 +1598,15 @@ namespace scribbolyth::treeview
         node.name = std::move(name);
         return node;
     }
+    //!
 
-    // Give every node that lacks one a fresh id (after import or load).
+    /*!
+        Ensure All Nodes Have IDs 
+
+        !_method
+
+        Give every node that lacks one a fresh id (after import or load).
+    */
     void EnsureIds(std::vector<TreeNode>& nodes)
     {
         for (auto& node : nodes)
@@ -1293,9 +1615,16 @@ namespace scribbolyth::treeview
             EnsureIds(node.children);
         }
     }
+    //!
 
-    // Add `name` as the first child of the selected node (A), expanding it; with
-    // no selection the new node becomes a root.
+    /*!
+        Insert Child Node 
+
+        !_method
+
+        Add `name` as the first child of the selected node (A), expanding it; with
+        no selection the new node becomes a root.
+    */
     void TreeView::InsertChild(const std::string& name)
     {
         SnapshotUndo();
@@ -1309,9 +1638,17 @@ namespace scribbolyth::treeview
         auto inserted = selected_->children.insert(selected_->children.begin(), new_node(name));
         selected_ = &*inserted;
     }
+    //!
 
-    // Add `name` as the sibling just below the selected node (a); with no
-    // selection the new node becomes a root.
+    /*!
+        Insert Node 
+
+        !_method
+
+
+        Add `name` as the sibling just below the selected node (a); with no
+        selection the new node becomes a root.
+    */
     void TreeView::InsertNode(const std::string& name)
     {
         SnapshotUndo();
@@ -1332,9 +1669,16 @@ namespace scribbolyth::treeview
             }
         }
     }
+    //!
 
-    // Remove the selected node (D), then select its next sibling, the parent, or
-    // nothing, whichever is available.
+    /*!
+        Delete Node 
+
+        !_method
+
+        Remove the selected node (D), then select its next sibling, the parent, or
+        nothing, whichever is available.
+    */
     void TreeView::DeleteNode()
     {
         if (selected_ == nullptr) return;
@@ -1360,19 +1704,31 @@ namespace scribbolyth::treeview
             return;
         }
     }
+    //!
 
-    // Forward every key event to the shared operation dispatcher; the tree
-    // keymap is what actually decides what a key means.
+    /*!
+        Ftxui Event Method
+
+        !_method
+
+        Forward every key event to the shared operation dispatcher; the tree
+        keymap is what actually decides what a key means.
+    */
     bool TreeView::OnEvent(ftxui::Event event)
     {
         return scribbolyth::op::HandleKey(state_, event);
     }
+    //!
 
-    // ============ Rendering ============
+    /*!
+        Render Node 
 
-    // Render one node as a row (indented by depth, ▸/▾ folder marker) and
-    // recurse into its expanded children. Yellow = search match, inverted =
-    // this node is selected.
+        !_method
+
+        Render one node as a row (indented by depth, ▸/▾ folder marker) and
+        recurse into its expanded children. Yellow = search match, inverted =
+        this node is selected.
+    */
     void RenderNode(const TreeNode& node, int depth, const TreeNode* selected,
                     const std::set<const TreeNode*>* matches, ftxui::Elements& rows)
     {
@@ -1399,9 +1755,16 @@ namespace scribbolyth::treeview
             RenderNode(child, depth + 1, selected, matches, rows);
         }
     }
+    //!
 
-    // Compose the full tree pane: all root rows in a scrollable, flexible
-    // vertical box.
+    /*!
+        Render the Treeview 
+
+        !_method
+
+        Compose the full tree pane: all root rows in a scrollable, flexible
+        vertical box.
+    */
     ftxui::Element TreeView::Render()
     {
         std::set<const TreeNode*> matches;
@@ -1419,5 +1782,6 @@ namespace scribbolyth::treeview
         }
         return ftxui::vbox(std::move(rows)) | ftxui::frame | ftxui::flex;
     }
+    //!
 
 }

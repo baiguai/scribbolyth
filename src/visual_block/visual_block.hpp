@@ -4,13 +4,23 @@
 #include <string>
 #include <vector>
 
-// Visual Block mode (Vim Ctrl+V): a rectangular, column-wise selection.
-// The anchor and cursor positions define the block's row span and column
-// span; every line between row_lo and row_hi has its columns between
-// col_lo and col_hi (inclusive) selected. Lines shorter than the block
-// simply expose no columns past their end.
+/*!
+    Introduction
+
+    Visual Block mode (Vim Ctrl+V): a rectangular, column-wise selection.
+    The anchor and cursor positions define the block's row span and column
+    span; every line between row_lo and row_hi has its columns between
+    col_lo and col_hi (inclusive) selected. Lines shorter than the block
+    simply expose no columns past their end.
+*/
+//!
 namespace scribbolyth::visual_block
 {
+
+    /*!
+        Block Struct 
+    */
+    //>>
     struct Block
     {
         int row_lo = 0;
@@ -18,21 +28,24 @@ namespace scribbolyth::visual_block
         int col_lo = 0;
         int col_hi = 0;
     };
+    //<<
+    //!
 
+    /*!
+        Make Block 
+
+        !_method
+    */
     inline Block MakeBlock(int aRow, int aCol, int bRow, int bCol)
     {
         return Block{std::min(aRow, bRow), std::max(aRow, bRow),
                      std::min(aCol, bCol), std::max(aCol, bCol)};
     }
+    //!
 
-    // Column span actually covered on `row` (the right edge is exclusive, so
-    // the character under the cursor is included). Returns false when the row
-    // is outside the block or has no covered columns.
     bool LineSpan(const std::vector<std::string>& lines, const Block& b, int row,
                   int& lo, int& hi);
 
-    // The block's column text, one line per covered row, joined with '\n'
-    // (for yank/copy). Blank when no row covers any column.
     std::string Extract(const std::vector<std::string>& lines, const Block& b);
 
     // Erase the block's columns from every covered row.

@@ -15,6 +15,11 @@ namespace scribbolyth::undo
 {
     namespace
     {
+        /*!
+            Trunc 
+
+            !_method
+        */
         std::string Trunc(std::string s, std::size_t width)
         {
             if (s.size() > width)
@@ -23,9 +28,17 @@ namespace scribbolyth::undo
             }
             return s;
         }
+        //!
 
-        // Diff markers for the preview pane: 0 = unchanged, 1 = changed,
-        // 2 = first changed line.
+        /*!
+            Diff Marks 
+
+            !_method
+
+
+            Diff markers for the preview pane: 0 = unchanged, 1 = changed,
+            2 = first changed line.
+        */
         std::vector<int> DiffMark(const std::vector<std::string>& snap,
                                   const std::vector<std::string>& cur)
         {
@@ -44,10 +57,16 @@ namespace scribbolyth::undo
             }
             return mark;
         }
+        //!
     }
 
     namespace
     {
+        /*!
+            Split Lines 
+
+            !_method
+        */
         std::vector<std::string> SplitLines(const std::string& text)
         {
             std::vector<std::string> out;
@@ -65,7 +84,13 @@ namespace scribbolyth::undo
             }
             return out;
         }
+        //!
 
+        /*!
+            Find Node 
+
+            !_method
+        */
         treeview::TreeNode* FindNode(std::vector<treeview::TreeNode>& nodes,
                                      const std::string& id)
         {
@@ -76,11 +101,18 @@ namespace scribbolyth::undo
             }
             return nullptr;
         }
+        //!
 
-        // Text lines of the node `id` inside a serialized snapshot. The undo
-        // dialog shows only the currently active note, so this pulls that one
-        // node's text out of the snapshot rather than rendering the whole
-        // document.
+        /*!
+            Node Text Doc 
+
+            !_method
+
+            Text lines of the node `id` inside a serialized snapshot. The undo
+            dialog shows only the currently active note, so this pulls that one
+            node's text out of the snapshot rather than rendering the whole
+            document.
+        */
         std::vector<std::string> NodeTextDoc(const std::string& json,
                                              const std::string& id)
         {
@@ -93,22 +125,55 @@ namespace scribbolyth::undo
             if (node == nullptr) return {};
             return SplitLines(node->text);
         }
+        //!
     }
 
+    /*!
+        First Text Line 
+
+        !_method
+    */
     std::string FirstTextLine(const treeview::TreeNode& node)
     {
         const std::size_t nl = node.text.find('\n');
         return (nl == std::string::npos) ? node.text : node.text.substr(0, nl);
     }
+    //!
 
+    /*!
+        Undo Dialog Class 
+    */
     class UndoDialog : public ftxui::ComponentBase
     {
     public:
+        /*!
+            Public Members 
+        */
+
+        /*!
+            Constructor 
+
+            !_ctor
+        */
         UndoDialog(std::shared_ptr<EditorState> state, bool* show)
             : state_(std::move(state)), show_(show) {}
+        //!
 
+        /*!
+            Variables 
+
+            ----
+        */
+        //>>
         bool Focusable() const override { return true; }
+        //<<
+        //!
 
+        /*!
+            Ftxui Event Method 
+
+            !_method
+        */
         bool OnEvent(ftxui::Event event) override
         {
             if (event == ftxui::Event::Escape)
@@ -145,7 +210,13 @@ namespace scribbolyth::undo
             }
             return true; // consume everything else
         }
+        //!
 
+        /*!
+            Render 
+
+            !_method
+        */
         ftxui::Element Render() override
         {
             const auto& stack = state_->undo_stack;
@@ -260,14 +331,32 @@ namespace scribbolyth::undo
                    ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 26);
         }
+        //!
+
+        //!
 
     private:
+        /*!
+            Private Members 
+        */
+
+        /*!
+            Close Dialog 
+
+            !_method
+        */
         void Close()
         {
             *show_ = false;
             selection_ = 0;
         }
+        //!
 
+        /*!
+            Apply Undo 
+
+            !_method
+        */
         void Apply()
         {
             const auto& stack = state_->undo_stack;
@@ -281,24 +370,48 @@ namespace scribbolyth::undo
             }
             state_->status = "Undone: " + preview;
         }
+        //!
 
+        /*!
+            Move Selection Up / Down 
+
+            !_method
+        */
         void Move(int dir)
         {
             const int total = static_cast<int>(state_->undo_stack.size());
             if (total == 0) return;
             selection_ = std::max(0, std::min(total - 1, selection_ + dir));
         }
+        //!
 
+        /*!
+            Variables 
+
+            ----
+        */
+        //>>
         std::shared_ptr<EditorState> state_;
         bool* show_;
         int selection_ = 0;
         static constexpr int kPreviewRows = 8;
         static constexpr int kVisibleRows = 10;
         static constexpr std::size_t kMaxContent = 88;
-    };
+        //<<
+        //!
 
+        //!
+    };
+    //!
+
+    /*!
+        Make Undo Dialog 
+
+        !_method
+    */
     ftxui::Component MakeUndoDialog(std::shared_ptr<EditorState> state, bool* show)
     {
         return ftxui::Make<UndoDialog>(std::move(state), show);
     }
+    //!
 }
