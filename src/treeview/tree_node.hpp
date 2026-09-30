@@ -6,6 +6,10 @@
 namespace scribbolyth::treeview
 {
 
+    /*!
+        Tree Node Struct
+    */
+    //>>
     struct TreeNode
     {
         std::string id;
@@ -14,5 +18,7 @@ namespace scribbolyth::treeview
         std::string text;
         std::vector<TreeNode> children;
     };
+    //<<
+    //!
 
 }

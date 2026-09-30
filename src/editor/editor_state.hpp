@@ -16,28 +16,70 @@ inline constexpr int kDefaultTreeviewWidth = 30;
 inline constexpr int kMinTreeviewWidth = 10;
 inline constexpr int kMaxTreeviewWidth = 200;
 
-// A single undoable point-in-time snapshot of the document. `json` is the
-// full serialized state (tree + bookmarks + history + width); `preview` is
-// a short human label for the undo dialog's list.
+/*!
+    Undo State Struct
+
+    A single undoable point-in-time snapshot of the document. `json` is the
+    full serialized state (tree + bookmarks + history + width); `preview` is
+    a short human label for the undo dialog's list.
+
+*/
+//>>
 struct UndoState {
     std::string json;
     std::string preview;
 };
+//<<
+//!
 
+/*!
+    Editor State Struct
+*/
 struct EditorState {
+    /*!
+        Mode-Related Variables
+
+        ----
+    */
+    //>>
     Mode mode = Mode::TREE;
     std::string command_buffer;
     int command_cursor = 0;
     int* active_child = nullptr;
     Mode mode_before_command = Mode::TREE;
+    //<<
+    //!
 
-    // When a command sets this on Enter (e.g. :calc leaving its result in the
-    // field), the command line stays open with the buffer the command wrote
-    // instead of closing. The Enter handler consumes and resets it.
+    /*!
+        Keep Command Open
+
+        When a command sets this on Enter (e.g. :calc leaving its result in the
+        field), the command line stays open with the buffer the command wrote
+        instead of closing. The Enter handler consumes and resets it.
+
+        ----
+    */
+    //>>
     bool command_keep_open = false;
+    //<<
+    //!
 
+    /*!
+        Tracking Changes
+
+        ----
+    */
+    //>>
     bool changed = false;
+    //<<
+    //!
 
+    /*!
+        Treeview Related
+
+        ----
+    */
+    //>>
     int treeview_width = kDefaultTreeviewWidth;
 
     scribbolyth::treeview::TreeNode* active_node = nullptr;
@@ -45,25 +87,61 @@ struct EditorState {
     std::string template_path;
     std::string init_path;
     std::vector<scribbolyth::bookmark::Bookmark> bookmarks;
+    //<<
+    //!
 
-    // Theme material captured from a .html import, carried through the session
-    // so a later HTML export reproduces it (colors, grid, custom CSS).
+    /*!
+        Theme Material
+
+        Theme material captured from a .html import, carried through the session
+        so a later HTML export reproduces it (colors, grid, custom CSS).
+
+        ----
+
+    */
+    //>>
     scribbolyth::html::HtmlTheme html_theme;
+    //<<
+    //!
 
-    // Viewed-node history: node ids of every selected node that has text,
-    // most recent last, deduplicated, capped at kHistoryMax. Populated by
-    // the treeview; the history dialog resolves ids to live nodes.
+    /*!
+        Viewed Node History
+
+        Viewed-node history: node ids of every selected node that has text,
+        most recent last, deduplicated, capped at kHistoryMax. Populated by
+        the treeview; the history dialog resolves ids to live nodes.
+
+        ----
+    */
+    //>>
     std::vector<std::string> history;
     static constexpr std::size_t kHistoryMax = 30;
+    //<<
+    //!
 
+    /*!
+        Recent Files
+
+        ----
+    */
+    //>>
     std::vector<std::string> recent_files;
     static constexpr std::size_t kRecentMax = 20;
+    //<<
+    //!
 
-    // Document undo history. A snapshot is pushed before every content
-    // mutation (tree edits and text edits); `undo_stack` is newest last,
-    // `redo_stack` newest first. `snapshot_undo`/`apply_undo`/`clear_undo`
-    // are installed by the treeview. The undo dialog reads the stacks
-    // directly and applies a rollback through `apply_undo`.
+    /*!
+        Node Undo History
+
+        Document undo history. A snapshot is pushed before every content
+        mutation (tree edits and text edits); `undo_stack` is newest last,
+        `redo_stack` newest first. `snapshot_undo`/`apply_undo`/`clear_undo`
+        are installed by the treeview. The undo dialog reads the stacks
+        directly and applies a rollback through `apply_undo`.
+
+        ----
+    */
+    //>>
     std::vector<UndoState> undo_stack;
     std::vector<UndoState> redo_stack;
     static constexpr std::size_t kUndoMax = 50;
@@ -72,45 +150,107 @@ struct EditorState {
     // `index` 0 = newest snapshot.
     std::function<void(std::size_t index)> apply_undo;
     std::function<void()> clear_undo;
+    //<<
+    //!
 
-    // File browser dialog. `show_file_browser` is the Modal visibility flag;
-    // `browser_start_dir` is the directory to open in; `browser_pick` is
-    // invoked with the chosen file's path when the user presses Enter.
-    // `browser_command` is the `:command` name of the invoking op for
-    // save/export-style ops: when non-empty, Enter on a folder closes the
-    // dialog and reopens the command line prefilled with that folder so the
-    // user can type a filename (open/import-style ops leave it empty and
-    // Enter on a folder simply navigates into it).
+    /*!
+        File Browser Related
+
+        File browser dialog. `show_file_browser` is the Modal visibility flag;
+        `browser_start_dir` is the directory to open in; `browser_pick` is
+        invoked with the chosen file's path when the user presses Enter.
+        `browser_command` is the `:command` name of the invoking op for
+        save/export-style ops: when non-empty, Enter on a folder closes the
+        dialog and reopens the command line prefilled with that folder so the
+        user can type a filename (open/import-style ops leave it empty and
+        Enter on a folder simply navigates into it).
+
+        ----
+    */
+    //>>
     bool* show_file_browser = nullptr;
     std::string browser_start_dir;
     std::string browser_command;
     std::function<void(const std::string&)> browser_pick;
+    //<<
+    //!
 
+    /*!
+        Focus
+
+        ----
+    */
+    //>>
     std::function<void()> focus_editor;
     std::function<void()> focus_treeview;
+    //<<
+    //!
 
-    // Flat enumeration of the document: (node pointer, depth) in document
-    // order, ignoring expansion state. Set by the treeview.
+    /*!
+        Getting All Nodes
+
+        Flat enumeration of the document: (node pointer, depth) in document
+        order, ignoring expansion state. Set by the treeview.
+
+        ----
+    */
+    //>>
     std::function<std::vector<std::pair<scribbolyth::treeview::TreeNode*, int>>()> collect_all_nodes;
+    //<<
+    //!
 
-    // Select `node` in the tree, expanding every ancestor so it is visible.
-    // Set by the treeview.
+    /*!
+        Expand to Node
+
+        Select `node` in the tree, expanding every ancestor so it is visible.
+        Set by the treeview.
+
+        ----
+    */
+    //>>
     std::function<void(scribbolyth::treeview::TreeNode*)> reveal_node;
+    //<<
+    //!
 
-    // Position the editor cursor on a 0-based line of the currently active
-    // node. Set by the editor.
+    /*!
+        Reset Cursor Position
+
+        Position the editor cursor on a 0-based line of the currently active
+        node. Set by the editor.
+
+        ----
+    */
+    //>>
     std::function<void(int)> reveal_line;
+    //<<
+    //!
 
-    // Insert `text` into the currently active node at the editor cursor, as a
-    // single undoable edit. Set by the editor; used by dialogs to inject text
-    // (e.g. a node link picked from a search) at the cursor.
+    /*!
+        Text Insertion
+
+        Insert `text` into the currently active node at the editor cursor, as a
+        single undoable edit. Set by the editor; used by dialogs to inject text
+        (e.g. a node link picked from a search) at the cursor.
+
+        ----
+    */
+    //>>
     std::function<void(const std::string&)> insert_text_at_cursor;
+    //<<
+    //!
 
-    // Vim-style find state (the last '/' search). `search_matches` holds the
-    // nodes that matched the last query, in document order; `search_index` is
-    // the currently selected match (n/N move it, wrapping). `search_active`
-    // is cleared by ':noh' to hide the match highlight; the query and match
-    // list are kept so n/N keep working, as in Vim.
+    /*!
+        Find in Node Related
+
+        Vim-style find state (the last '/' search). `search_matches` holds the
+        nodes that matched the last query, in document order; `search_index` is
+        the currently selected match (n/N move it, wrapping). `search_active`
+        is cleared by ':noh' to hide the match highlight; the query and match
+        list are kept so n/N keep working, as in Vim.
+
+        ----
+    */
+    //>>
     std::string search_query;
     std::vector<scribbolyth::treeview::TreeNode*> search_matches;
     int search_index = -1;
@@ -125,10 +265,26 @@ struct EditorState {
     // editor: it moves the cursor through the occurrences of the query inside
     // the active node's text (wrapping within the node), as in Vim.
     std::function<void(int)> search_jump;
+    //<<
+    //!
 
+    /*!
+        Operations and Commands
+
+        ----
+    */
+    //>>
     std::map<std::string, scribbolyth::op::Operation> operations;
     std::map<std::string, std::string> commands;
+    //<<
+    //!
 
+    /*!
+        Key Map Related
+
+        ----
+    */
+    //>>
     Keymap normal_keymap;
     Keymap insert_keymap;
     Keymap visual_keymap;
@@ -146,4 +302,7 @@ struct EditorState {
             default:                    return normal_keymap;
         }
     }
+    //<<
+    //!
 };
+//!

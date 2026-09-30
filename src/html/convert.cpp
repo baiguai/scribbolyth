@@ -11,11 +11,29 @@ namespace scribbolyth::html
 {
     namespace
     {
+        /*!
+            Parser Class
+        */
         class Parser
         {
             public:
-                explicit Parser(const std::string& s) : s_(s) {}
+                /*!
+                    Public Members
+                */
 
+                /*!
+                    Constructor
+
+                    !_ctor
+                */
+                explicit Parser(const std::string& s) : s_(s) {}
+                //!
+
+                /*!
+                    Parse the Array
+
+                    !_method
+                */
                 bool ParseArray(std::vector<TreeNode>& arr)
                 {
                     if (!Consume('[')) return false;
@@ -33,7 +51,13 @@ namespace scribbolyth::html
                         return false;
                     }
                 }
+                //!
 
+                /*!
+                    Parse the Bookmarks
+
+                    !_method
+                */
                 bool ParseBookmarks(std::vector<bookmark::Bookmark>& marks)
                 {
                     if (!Consume('[')) return false;
@@ -51,7 +75,13 @@ namespace scribbolyth::html
                         return false;
                     }
                 }
+                //!
 
+                /*!
+                    Parse a Bookmark
+
+                    !_method
+                */
                 bool ParseBookmark(bookmark::Bookmark& mark)
                 {
                     if (!Consume('{')) return false;
@@ -85,7 +115,13 @@ namespace scribbolyth::html
                         return false;
                     }
                 }
+                //!
 
+                /*!
+                    Parse History
+
+                    !_method
+                */
                 bool ParseHistory(std::vector<std::string>& ids)
                 {
                     if (!Consume('[')) return false;
@@ -127,23 +163,55 @@ namespace scribbolyth::html
                         return false;
                     }
                 }
+                //!
+
+                //!
 
             private:
+                /*!
+                    Private Members
+                */
+
+                /*!
+                    Variables
+
+                    ----
+                */
+                //>>
                 const std::string& s_;
                 std::size_t i_ = 0;
+                //<<
+                //!
 
+                /*!
+                    Skip White Space
+
+                    !_method
+                */
                 void SkipWs()
                 {
                     while (i_ < s_.size() && (s_[i_] == ' ' || s_[i_] == '\t'
                            || s_[i_] == '\n' || s_[i_] == '\r')) ++i_;
                 }
+                //!
 
+                /*!
+                    Utilize the Char
+
+                    !_method
+                */
                 bool Consume(char c)
                 {
                     if (i_ < s_.size() && s_[i_] == c) { ++i_; return true; }
                     return false;
                 }
+                //!
 
+                /*!
+                    Parse the String
+
+                    !_method
+                */
                 bool ParseString(std::string& out)
                 {
                     if (!Consume('"')) return false;
@@ -200,14 +268,26 @@ namespace scribbolyth::html
                     }
                     return false;
                 }
+                //!
 
+                /*!
+                    Parse Boolean
+
+                    !_method
+                */
                 bool ParseBool(bool& out)
                 {
                     if (s_.compare(i_, 4, "true") == 0)  { i_ += 4; out = true;  return true; }
                     if (s_.compare(i_, 5, "false") == 0) { i_ += 5; out = false; return true; }
                     return false;
                 }
+                //!
 
+                /*!
+                    Parse Number
+
+                    !_method
+                */
                 bool ParseNumber(int& out)
                 {
                     bool neg = false;
@@ -219,7 +299,13 @@ namespace scribbolyth::html
                     out = neg ? -value : value;
                     return true;
                 }
+                //!
 
+                /*!
+                    Skip Value
+
+                    !_method
+                */
                 bool SkipValue()
                 {
                     SkipWs();
@@ -268,7 +354,13 @@ namespace scribbolyth::html
                     }
                     return false;
                 }
+                //!
 
+                /*!
+                    Parse Object
+
+                    !_method
+                */
                 bool ParseObject(TreeNode& node)
                 {
                     node = TreeNode{};
@@ -297,12 +389,22 @@ namespace scribbolyth::html
                         return false;
                     }
                 }
-        };
+                //!
 
-        // Locate the '[' that opens the `let <keyword> = [ ... ];` array and the
-        // index of its matching ']' (string- and nesting-aware). The keyword is
-        // matched as a JS variable declaration so mentions of it in comments or
-        // help text never confuse the search.
+                //!
+        };
+        //!
+
+        /*!
+            Find JS Array
+
+            !_method
+
+            Locate the '[' that opens the `let <keyword> = [ ... ];` array and the
+            index of its matching ']' (string- and nesting-aware). The keyword is
+            matched as a JS variable declaration so mentions of it in comments or
+            help text never confuse the search.
+        */
         bool FindJsArray(const std::string& html, const std::string& keyword,
                          std::size_t& open, std::size_t& close)
         {
@@ -347,11 +449,18 @@ namespace scribbolyth::html
             }
             return false;
         }
+        //!
 
-        // The exported content keeps the note's text, but if its first line is
-        // not already the node's name, the name is prepended on its own line so
-        // every note reads as a titled section in the rendered HTML. Notes
-        // with no text are left untouched (no title line is invented for them).
+        /*!
+            Export Content
+
+            !_method
+
+            The exported content keeps the note's text, but if its first line is
+            not already the node's name, the name is prepended on its own line so
+            every note reads as a titled section in the rendered HTML. Notes
+            with no text are left untouched (no title line is invented for them).
+        */
         std::string ExportContent(const TreeNode& node)
         {
             if (node.name.empty() || node.text.empty()) return node.text;
@@ -371,7 +480,13 @@ namespace scribbolyth::html
             if (trim(first_line) == trim(node.name)) return node.text;
             return node.name + "\n\n" + node.text;
         }
+        //!
 
+        /*!
+            Append Node
+
+            !_method
+        */
         void AppendNode(std::string& out, const TreeNode& node, int depth)
         {
             std::string pad(depth * 2, ' ');
@@ -399,7 +514,13 @@ namespace scribbolyth::html
             out += pad2 + "\"expanded\": " + (node.expanded ? "true" : "false") + "\n";
             out += pad + "}";
         }
+        //!
 
+        /*!
+            Replace Array
+
+            !_method
+        */
         void ReplaceArray(std::string& html, std::size_t open, std::size_t close,
                           const std::string& json)
         {
@@ -409,7 +530,13 @@ namespace scribbolyth::html
             if (end < html.size() && html[end] == ';') ++end;
             html.replace(open, end - open, json + ";");
         }
+        //!
 
+        /*!
+            Replace Tree Data
+
+            !_method
+        */
         bool ReplaceTreeData(std::string& html, const std::vector<TreeNode>& roots)
         {
             std::size_t open = 0;
@@ -434,7 +561,11 @@ namespace scribbolyth::html
             ReplaceArray(html, open, close, json);
             return true;
         }
+        //!
 
+        /*!
+            Find Node by Id
+        */
         const TreeNode* FindNodeById(const std::vector<TreeNode>& nodes,
                                      const std::string& id,
                                      std::vector<std::string>& path)
@@ -455,7 +586,13 @@ namespace scribbolyth::html
             }
             return nullptr;
         }
+        //!
 
+        /*!
+            Join Path
+
+            !_method
+        */
         std::string JoinPath(const std::vector<std::string>& path)
         {
             std::string out;
@@ -466,10 +603,17 @@ namespace scribbolyth::html
             }
             return out;
         }
+        //!
 
-        // Serialize bookmarks into the HTML app's format:
-        //   { "id", "caption", "path", "line"? }  with `line` being 1-based.
-        // Bookmarks whose target node no longer exists are skipped.
+        /*!
+            Append Bookmark.
+
+            !_method
+
+            Serialize bookmarks into the HTML app's format:
+              { "id", "caption", "path", "line"? }  with `line` being 1-based.
+            Bookmarks whose target node no longer exists are skipped.
+        */
         void AppendBookmarksJson(std::string& out,
                                  const std::vector<bookmark::Bookmark>& bookmarks,
                                  const std::vector<TreeNode>& roots)
@@ -495,7 +639,13 @@ namespace scribbolyth::html
             }
             out += "\n]";
         }
+        //!
 
+        /*!
+            Replace Bookmarks
+
+            !_method
+        */
         bool ReplaceBookmarks(std::string& html,
                               const std::vector<bookmark::Bookmark>& bookmarks,
                               const std::vector<TreeNode>& roots)
@@ -511,10 +661,17 @@ namespace scribbolyth::html
             ReplaceArray(html, open, close, json);
             return true;
         }
+        //!
 
-        // Serialize the viewed-node history into the HTML app's format:
-        //   { "id", "title" }  one entry per id, most recent last.
-        // Entries whose target node no longer exists are skipped.
+        /*!
+            Append History Json
+
+            !_method
+
+            Serialize the viewed-node history into the HTML app's format:
+              { "id", "title" }  one entry per id, most recent last.
+            Entries whose target node no longer exists are skipped.
+        */
         void AppendHistoryJson(std::string& out,
                                const std::vector<std::string>& history,
                                const std::vector<TreeNode>& roots)
@@ -535,7 +692,13 @@ namespace scribbolyth::html
             }
             out += "\n]";
         }
+        //!
 
+        /*!
+            Replace History
+
+            !_method
+        */
         bool ReplaceHistory(std::string& html,
                             const std::vector<std::string>& history,
                             const std::vector<TreeNode>& roots)
@@ -551,11 +714,18 @@ namespace scribbolyth::html
             ReplaceArray(html, open, close, json);
             return true;
         }
+        //!
 
-        // The web app renders leading indentation as literal tabs; the editor
-        // uses 4-space indentation (Tab inserts four spaces), so expanding each
-        // tab in the imported note text to four spaces keeps that leading
-        // whitespace from being lost.
+        /*!
+            Expand Tabs
+
+            !_method
+
+            The web app renders leading indentation as literal tabs; the editor
+            uses 4-space indentation (Tab inserts four spaces), so expanding each
+            tab in the imported note text to four spaces keeps that leading
+            whitespace from being lost.
+        */
         void ExpandTabs(std::string& s)
         {
             std::string out;
@@ -573,7 +743,13 @@ namespace scribbolyth::html
             }
             s = std::move(out);
         }
+        //!
 
+        /*!
+            ExpandTabsInNode
+
+            !_method
+        */
         void ExpandTabsInNode(TreeNode& node)
         {
             ExpandTabs(node.text);
@@ -582,10 +758,17 @@ namespace scribbolyth::html
                 ExpandTabsInNode(child);
             }
         }
+        //!
 
-        // Convert typographic punctuation in the imported titles and note text
-        // to plain ASCII, mirroring the paste sanitizer, so nothing that the
-        // terminal cannot render ends up in the document.
+        /*!
+            AsciiPunctuationInNode
+
+            !_method
+
+            Convert typographic punctuation in the imported titles and note text
+            to plain ASCII, mirroring the paste sanitizer, so nothing that the
+            terminal cannot render ends up in the document.
+        */
         void AsciiPunctuationInNode(TreeNode& node)
         {
             node.name = scribbolyth::text::ToAsciiPunctuation(node.name);
@@ -595,11 +778,18 @@ namespace scribbolyth::html
                 AsciiPunctuationInNode(child);
             }
         }
+        //!
 
-        // Locate a `let <keyword> = <value>;` script statement and return the
-        // byte range [start, end) covering the whole statement including the
-        // trailing ';'. The value may be a nested '{...}'/'[...]' literal,
-        // scanned string- and nesting-aware, or a scalar ending at ';'.
+        /*!
+            Find JS Statement
+
+            !_method
+
+            Locate a `let <keyword> = <value>;` script statement and return the
+            byte range [start, end) covering the whole statement including the
+            trailing ';'. The value may be a nested '{...}'/'[...]' literal,
+            scanned string- and nesting-aware, or a scalar ending at ';'.
+        */
         bool FindJsStatement(const std::string& html, const std::string& keyword,
                              std::size_t& start, std::size_t& end)
         {
@@ -662,7 +852,13 @@ namespace scribbolyth::html
                 return true;
             }
         }
+        //!
 
+        /*!
+            Replace JS Statement
+
+            !_method
+        */
         bool ReplaceJsStatement(std::string& html, const std::string& keyword,
                                 const std::string& statement)
         {
@@ -672,11 +868,26 @@ namespace scribbolyth::html
             html.replace(start, end - start, statement);
             return true;
         }
+        //!
 
+        /*!
+            Const Variables
+
+            ----
+        */
+        //>>
         const char* kThemeStyleOpen = "<style id=\"theme_styles\">";
         const char* kThemeStyleClose = "</style>";
+        //<<
+        //!
 
-        // The inner text of the `<style id="theme_styles">` block.
+        /*!
+            Find Style Content
+
+            !_method
+
+            The inner text of the `<style id="theme_styles">` block.
+        */
         bool FindStyleContent(const std::string& html, std::size_t& open, std::size_t& close)
         {
             std::size_t a = html.find(kThemeStyleOpen);
@@ -687,7 +898,13 @@ namespace scribbolyth::html
             close = b;
             return true;
         }
+        //!
 
+        /*!
+            Replace Style Content
+
+            !_method
+        */
         bool ReplaceStyleContent(std::string& html, const std::string& content)
         {
             std::size_t open = 0;
@@ -696,8 +913,14 @@ namespace scribbolyth::html
             html.replace(open, close - open, content);
             return true;
         }
+        //!
     }
 
+    /*!
+        Import Html File
+
+        !_method
+    */
     bool ImportHtmlFile(const std::string& path, std::vector<TreeNode>& roots,
                         std::vector<bookmark::Bookmark>* bookmarks,
                         std::vector<std::string>* history,
@@ -781,7 +1004,13 @@ namespace scribbolyth::html
         roots = std::move(result);
         return true;
     }
+    //!
 
+    /*!
+        Export Html File
+
+        !_method
+    */
     bool ExportHtmlFile(const std::string& template_path, const std::string& out_path,
                         const std::vector<TreeNode>& roots,
                         const std::vector<bookmark::Bookmark>& bookmarks,
@@ -810,4 +1039,5 @@ namespace scribbolyth::html
         }
         return scribbolyth::io::WriteFile(out_path, content);
     }
+    //!
 }

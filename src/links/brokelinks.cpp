@@ -21,15 +21,27 @@ namespace scribbolyth::brokenlinks
 {
     namespace
     {
+        /*!
+            Pad Right
+
+            !_method
+        */
         std::string PadRight(const std::string& s, std::size_t width)
         {
             if (s.size() >= width) return s;
             return s + std::string(width - s.size(), ' ');
         }
+        //!
 
-        // 0-based line of the first real occurrence of `target` (a `_Title_`
-        // reference) in `text`. A candidate counts only when its neighbours
-        // are not word characters, mirroring the `_Note_` scanning rules.
+        /*!
+            First Occurrence in Line
+
+            !_method
+
+            0-based line of the first real occurrence of `target` (a `_Title_`
+            reference) in `text`. A candidate counts only when its neighbours
+            are not word characters, mirroring the `_Note_` scanning rules.
+        */
         int FirstOccurrenceLine(const std::string& text, const std::string& target)
         {
             auto is_word = [](char c) {
@@ -56,15 +68,38 @@ namespace scribbolyth::brokenlinks
             return 0;
         }
     }
+    //!
 
+    /*!
+        Dead Link Dialog Class
+    */
     class DeadLinksDialog : public ftxui::ComponentBase
     {
     public:
+        /*!
+            Public Members
+        */
+
+        /*!
+            Constructor
+
+            !_ctor
+        */
         DeadLinksDialog(std::shared_ptr<EditorState> state, bool* show)
             : state_(std::move(state)), show_(show) {}
+        //!
 
+        /*!
+            Focusable Variable
+        */
+        //>>
         bool Focusable() const override { return true; }
+        //<<
+        //!
 
+        /*!
+            Ftxui Event Call
+        */
         bool OnEvent(ftxui::Event event) override
         {
             if (event.is_mouse())
@@ -95,7 +130,11 @@ namespace scribbolyth::brokenlinks
             }
             return true;
         }
+        //!
 
+        /*!
+            Ftxui Render Call
+        */
         ftxui::Element Render() override
         {
             Recompute();
@@ -142,18 +181,44 @@ namespace scribbolyth::brokenlinks
                    ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
         }
+        //!
+
+        //!
 
     private:
+        /*!
+            Private Members
+        */
+
+        /*!
+            Entry Struct
+        */
+        //>>
         struct Entry
         {
             std::string target;
             treeview::TreeNode* node = nullptr;
             int line = 0;
         };
+        //<<
+        //!
 
+        /*!
+            Variables
+
+            ----
+        */
+        //>>
         static constexpr int kVisibleRows = 18;
         static constexpr int kDoubleClickMs = 500;
+        //<<
+        //!
 
+        /*!
+            On Mouse
+
+            !_method
+        */
         bool OnMouse(ftxui::Mouse mouse)
         {
             const auto now = std::chrono::steady_clock::now();
@@ -190,7 +255,13 @@ namespace scribbolyth::brokenlinks
             }
             return true;
         }
+        //!
 
+        /*!
+            Close
+
+            !_method
+        */
         void Close()
         {
             *show_ = false;
@@ -198,7 +269,13 @@ namespace scribbolyth::brokenlinks
             scroll_ = 0;
             last_click_index_ = -1;
         }
+        //!
 
+        /*!
+            Activate
+
+            !_method
+        */
         void Activate()
         {
             if (entries_.empty()) return;
@@ -214,14 +291,26 @@ namespace scribbolyth::brokenlinks
             }
             Close();
         }
+        //!
 
+        /*!
+            Select Next/Previous Item
+
+            !_method
+        */
         void MoveSelection(int dir)
         {
             if (entries_.empty()) return;
             const int total = static_cast<int>(entries_.size());
             selection_ = std::max(0, std::min(total - 1, selection_ + dir));
         }
+        //!
 
+        /*!
+            Compute the Top
+
+            !_method
+        */
         int ComputeTop(int sel, int total) const
         {
             const int max_top = std::max(0, total - kVisibleRows);
@@ -230,7 +319,13 @@ namespace scribbolyth::brokenlinks
             if (sel >= top + kVisibleRows) top = sel - kVisibleRows + 1;
             return std::max(0, std::min(top, max_top));
         }
+        //!
 
+        /*!
+            Recompute
+
+            !_method
+        */
         void Recompute()
         {
             entries_.clear();
@@ -287,7 +382,14 @@ namespace scribbolyth::brokenlinks
 
             selection_ = std::max(0, std::min(selection_, static_cast<int>(entries_.size()) - 1));
         }
+        //!
 
+        /*!
+            Variables
+
+            ----
+        */
+        //>>
         std::shared_ptr<EditorState> state_;
         bool* show_;
         ftxui::Box box_;
@@ -298,10 +400,21 @@ namespace scribbolyth::brokenlinks
         int content_width_ = 20;
         int last_click_index_ = -1;
         std::chrono::steady_clock::time_point last_click_time_;
-    };
+        //<<
+        //!
 
+        //!
+    };
+    //!
+
+    /*!
+        Make Dead Link Dialog
+
+        !_method
+    */
     ftxui::Component MakeDeadLinksDialog(std::shared_ptr<EditorState> state, bool* show)
     {
         return ftxui::Make<DeadLinksDialog>(std::move(state), show);
     }
+    //!
 }
