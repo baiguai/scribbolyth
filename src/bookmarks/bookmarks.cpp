@@ -23,7 +23,7 @@ namespace scribbolyth::bookmarks
             !_method
 
             This indents the bookmarks to match their depth in the treeview.
-            TODO: We should be able to make this a globally accessible method.
+            #todo : We should be able to make this a globally accessible method.
         */
         std::string PadRight(const std::string& s, std::size_t width)
         {
