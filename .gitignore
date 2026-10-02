@@ -78,7 +78,7 @@ __pycache__/
 docsgen/.venv/
 
 # Docs generation reference copy (contains saved personal notes; kept local only)
-docsgen/example.html
+docsgen/help.html
 
 # opencode session data
 sessions/

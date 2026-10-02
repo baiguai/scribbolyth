@@ -32,6 +32,9 @@ Comment grammar (all harvested from files under src/):
     /*| <body> */          Appends its body text to the current
                            documentation node's content (same attachment
                            rules as the //>> ... //<< snippet).
+    //| <text>             Single-line append: the rest of the line is
+                           appended to the current documentation node's
+                           content, exactly like a one-line /*| ... */.
     !_method               Marker inside a doc comment.  Replaced with the
                            signature, method name, return type and
                            parameters of the function definition that
@@ -53,6 +56,7 @@ The output HTML is a full rebuild: config/scribboleth.html is copied fresh,
 its <title> rewritten, and the harvested tree injected into `let treeData`.
 """
 
+import argparse
 import hashlib
 import json
 import os
@@ -66,6 +70,12 @@ SRC_ROOT = os.path.join(ROOT, "src")
 TITLE = "Scribbolyth Developer Notes"
 
 EXTENSIONS = (".cpp", ".hpp", ".h", ".cc", ".cxx", ".c")
+
+# Create/emit the source-code subtree nodes in alphabetical order (by title,
+# case-insensitive) instead of source order.  Custom nodes (//[...] and
+# /*[...] */) are never moved - they keep the order they were encountered
+# in.  Toggle with --no-sort on the command line.
+ALPHABETICAL = True
 
 
 # ----------------------------------------------------------------------
@@ -427,6 +437,11 @@ def classify(items):
                                     "path": text[1:end].strip(),
                                     "line": line})
                 continue
+            if text.startswith("|"):
+                if text[1:].strip():
+                    actions.append({"kind": "append", "body": text[1:],
+                                    "line": line})
+                continue
             continue
 
         # block comment
@@ -603,11 +618,15 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None):
             parts = coderoot_parts + file_parts + split_path(p[2:])
         else:
             parts = split_path(p)
+        node = tree.ensure(parts)
+        # Mark the custom node itself so the alphabetical source sort
+        # leaves it at its encountered position.  Ancestor folders are
+        # regular source/file folders and must stay sortable.
+        node["custom"] = True
         if a["kind"] == "manual":
-            node = tree.ensure(parts)
             node["content"] = doc_text(a["body"])
         elif a["kind"] == "folder":
-            tree.ensure(parts)
+            pass
 
     # Phase 1: custom nodes defined before 'int main' (in the anchor file)
     # lead the tree.  Custom nodes from other files are treated as leading
@@ -677,6 +696,24 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None):
                 if a.get("line", 1) < anchor_line:
                     continue
                 apply_custom(a, tuple(rel.split("/")))
+
+    if ALPHABETICAL:
+        source_root = tree.by_path.get(coderoot_parts)
+        if source_root is not None:
+            sort_source_tree(source_root)
+
+    # A node's display name is its first content line (mirroring the app's
+    # title sync).  When a node's saved title differs from that line - e.g.
+    # a custom node whose body doesn't restate its path name - prepend the
+    # name so the document reads correctly.
+    def _sync_title(ns):
+        for n in ns:
+            content = n.get("content", "")
+            if content and first_line(content) != n["title"]:
+                n["content"] = n["title"] + "\n\n" + content
+            _sync_title(n.get("children", []))
+    _sync_title(tree.children)
+
     return tree.children
 
 
@@ -691,7 +728,41 @@ def count_nodes(nodes):
     return total
 
 
+def _sort_levels(children):
+    """Sort one sibling list: source nodes alphabetically (by title,
+    case-insensitive) while custom nodes stay pinned at their encountered
+    slots, then recurse into each child."""
+    slots = [i for i, n in enumerate(children) if n.get("custom")]
+    sources = [n for n in children if not n.get("custom")]
+    sources.sort(key=lambda n: n["title"].lower())
+    it = iter(sources)
+    out = []
+    for i in range(len(children)):
+        out.append(children[i] if i in slots else next(it))
+    children[:] = out
+    for n in children:
+        _sort_levels(n.get("children", []))
+
+
+def sort_source_tree(node):
+    """Alphabetically sort the descendants of the source-code root node
+    only; custom nodes everywhere keep their encountered order."""
+    _sort_levels(node.get("children", []))
+
+
 def main():
+    global ALPHABETICAL
+
+    parser = argparse.ArgumentParser(
+        description="Harvest doc comments from src/ into devnotes.html")
+    parser.add_argument("--sort", dest="alphabetical", action="store_true",
+                        default=None, help="order nodes alphabetically (default)")
+    parser.add_argument("--no-sort", dest="alphabetical", action="store_false",
+                        help="keep nodes in source order")
+    args = parser.parse_args()
+    if args.alphabetical is not None:
+        ALPHABETICAL = args.alphabetical
+
     if not os.path.isfile(TEMPLATE):
         print("! Error: template not found: %s" % TEMPLATE, file=sys.stderr)
         return 1
@@ -721,6 +792,12 @@ def main():
 
     anchor_rel, anchor_line = find_anchor(src_files)
     nodes = build_tree(file_actions, coderoot, anchor_rel, anchor_line)
+    # drop the internal custom marker used only by the source sort
+    def _strip(ns):
+        for n in ns:
+            n.pop("custom", None)
+            _strip(n.get("children", []))
+    _strip(nodes)
     payload = json.dumps(nodes, indent=2)
 
     with open(TEMPLATE, "r", encoding="utf-8") as f:

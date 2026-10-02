@@ -229,7 +229,7 @@ namespace scribbolyth::recent
             if (filter_active_)
             {
                 rows.push_back(ftxui::text(
-                        PadRight("  " + filter_ + "_  ", row_width)) | ftxui::inverted);
+                        PadRight("  " + filter_ + "_  ", row_width)) | ftxui::dim);
             }
             if (total == 0)
             {

@@ -35,4 +35,4 @@ if [ -f "$REQ" ]; then
     "$PY" -m pip install --quiet -r "$REQ"
 fi
 
-exec "$PY" "$SCRIPT_DIR/harvest.py"
+exec "$PY" "$SCRIPT_DIR/harvest.py" "$@"

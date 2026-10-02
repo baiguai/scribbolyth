@@ -23,6 +23,7 @@ namespace scribbolyth::bookmarks
             !_method
 
             This indents the bookmarks to match their depth in the treeview.
+            #todo : We should be able to make this a globally accessible method.
         */
         std::string PadRight(const std::string& s, std::size_t width)
         {
@@ -34,6 +35,8 @@ namespace scribbolyth::bookmarks
         /*!
             Entry Struct
             Used to create the treeview nodes.
+            The line value denotes whether it is a line specific bookmark.
+            If the value is -1 it is NOT.
         */
         //>>
         struct Entry
@@ -152,11 +155,16 @@ namespace scribbolyth::bookmarks
 
         /*!
             Render
+
+            !_method
+
             Renders the bookmarks dialog.
-            This is an override
+
+            ----
         */
         ftxui::Element Render() override
         {
+            //| * First do a _Recompute Bookmarks_.
             Recompute();
 
             const int total = static_cast<int>(entries_.size());
@@ -169,6 +177,7 @@ namespace scribbolyth::bookmarks
             top = std::max(0, std::min(top, max_top));
             const int count = std::min(kVisibleRows, std::max(0, total - top));
 
+            //| * Gather the Bookmarks.
             ftxui::Elements rows;
             const int row_width = content_width_ + 2;
             if (total == 0)
@@ -184,17 +193,20 @@ namespace scribbolyth::bookmarks
                     rows.push_back(row);
                 }
             }
+            //| * PadRight.
             while (static_cast<int>(rows.size()) < kVisibleRows)
             {
                 rows.push_back(ftxui::text(PadRight("", row_width)));
             }
 
+            //| * Build the footer.
             const std::string footer =
                 "  " + std::to_string(total == 0 ? 0 : sel + 1) + "/" + std::to_string(total) +
                 "    j/k move  Enter jump  D unbookmark  Esc cancel  ";
 
             /*|
-                
+                ----
+
                 Create the dialog's window:
 
             */
@@ -221,7 +233,7 @@ namespace scribbolyth::bookmarks
 
         /*!
             Close
-            Closes the bookmarks dialog.
+            Closes the bookmarks dialog by updating the related variables.
         */
         void Close()
         {
@@ -233,7 +245,9 @@ namespace scribbolyth::bookmarks
 
         /*!
             Jump
+
             Navigates to the selected bookmark's node.
+            If it is a line specific bookmark, it navigates to that particular line.
         */
         void Jump()
         {
@@ -312,7 +326,10 @@ namespace scribbolyth::bookmarks
         //!
 
         /*!
-            Recompute
+            Recompute Bookmarks
+
+            !_method
+
             Rebuilds the entries_ from the state_->bookmarks.
             Gathers all the nodes for looking them up by id.
             Sets the selection_.
