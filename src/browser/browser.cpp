@@ -23,6 +23,8 @@ namespace scribbolyth::browser
             Right Padding
 
             !_method
+
+            #todo : We should be able to make this a globally accessible method.
         */
         std::string PadRight(const std::string& s, std::size_t width)
         {

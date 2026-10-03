@@ -16,7 +16,15 @@ namespace scribbolyth::bookmark
         int line = -1;
     };
     //<<
+    //!
 
+    /*!
+        Variables
+
+        ----
+    */
+    //>>
     std::string NewId();
+    //<<
     //!
 }
