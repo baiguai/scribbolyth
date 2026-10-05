@@ -19,6 +19,14 @@ Comment grammar (all harvested from files under src/):
                            from the body). Its title is the first content
                            line.  Doc and sub blocks found inside the open
                            region nest under it.
+    /*> <body> */          like /*! in every way (same region, same title
+                           rule, nesting and attachment rules), except the
+                           node is *pinned*: it keeps its source-order slot
+                           instead of being alphabetized.  /*>*/ closes a
+                           region, like /*!*/ does.
+    //> <text>             single-line pinned doc block: the rest of the line
+                           is the body, and the region it opens still needs a
+                           close marker.
     /*+ <body> */          sub-note. A child of the innermost open doc
                            region in the same file. Ignored when no doc
                            region is open.
@@ -407,7 +415,9 @@ def classify(items):
         folder {path}                  from //[path]
         manual {path, body}            from /*[path] body*/
         doc    {body}                  from /*! body*/  (opens a region)
-        docclose                       from /*!*/        (closes the region)
+        docseq {body}                  from /*> body*/ or //> text (same as
+                                            doc, but pinned in source order)
+        docclose                       from /*!*/, /*>*/ or //! (closes the region)
         sub    {body}                  from /*+ body*/
         code   {body}                  from //>> ... //<< (raw source)
         append {body}                  from /*| body*/
@@ -437,6 +447,11 @@ def classify(items):
                                     "path": text[1:end].strip(),
                                     "line": line})
                 continue
+            if text.startswith(">"):
+                if text[1:].strip():
+                    actions.append({"kind": "docseq", "body": text[1:],
+                                    "line": line})
+                continue
             if text.startswith("|"):
                 if text[1:].strip():
                     actions.append({"kind": "append", "body": text[1:],
@@ -449,6 +464,15 @@ def classify(items):
             text = strip_marker(body[1:], "/*!")
             if text.strip():
                 actions.append({"kind": "doc", "body": text, "line": line})
+            else:
+                actions.append({"kind": "docclose", "line": line})
+            continue
+        if body.startswith(">"):
+            # Like /*! but pinned: the node keeps its source-order slot
+            # instead of being alphabetized.
+            text = strip_marker(body[1:], "/*>")
+            if text.strip():
+                actions.append({"kind": "docseq", "body": text, "line": line})
             else:
                 actions.append({"kind": "docclose", "line": line})
             continue
@@ -622,7 +646,7 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None):
         # Mark the custom node itself so the alphabetical source sort
         # leaves it at its encountered position.  Ancestor folders are
         # regular source/file folders and must stay sortable.
-        node["custom"] = True
+        node["pinned"] = True
         if a["kind"] == "manual":
             node["content"] = doc_text(a["body"])
         elif a["kind"] == "folder":
@@ -660,7 +684,7 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None):
                 if current is not None:
                     current["content"] = (current["content"] + "\n\n" if current["content"] else "") + body
                 continue
-            if a["kind"] not in ("doc", "docclose", "sub"):
+            if a["kind"] not in ("doc", "docseq", "docclose", "sub"):
                 continue
             ev += 1
             if a["kind"] == "docclose":
@@ -680,9 +704,11 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None):
                     "content": content,
                     "children": [],
                     "expanded": False}
+            if a["kind"] == "docseq":
+                node["pinned"] = True
             parent["children"].append(node)
             last = node
-            if a["kind"] == "doc":
+            if a["kind"] in ("doc", "docseq"):
                 stack.append(node)
 
     # Phase 3: custom nodes defined after 'int main' trail the tree
@@ -730,10 +756,10 @@ def count_nodes(nodes):
 
 def _sort_levels(children):
     """Sort one sibling list: source nodes alphabetically (by title,
-    case-insensitive) while custom nodes stay pinned at their encountered
-    slots, then recurse into each child."""
-    slots = [i for i, n in enumerate(children) if n.get("custom")]
-    sources = [n for n in children if not n.get("custom")]
+    case-insensitive) while pinned nodes (custom nodes and /*> doc blocks)
+    stay at their encountered slots, then recurse into each child."""
+    slots = [i for i, n in enumerate(children) if n.get("pinned")]
+    sources = [n for n in children if not n.get("pinned")]
     sources.sort(key=lambda n: n["title"].lower())
     it = iter(sources)
     out = []
@@ -746,7 +772,7 @@ def _sort_levels(children):
 
 def sort_source_tree(node):
     """Alphabetically sort the descendants of the source-code root node
-    only; custom nodes everywhere keep their encountered order."""
+    only; pinned nodes everywhere keep their encountered order."""
     _sort_levels(node.get("children", []))
 
 
@@ -792,10 +818,10 @@ def main():
 
     anchor_rel, anchor_line = find_anchor(src_files)
     nodes = build_tree(file_actions, coderoot, anchor_rel, anchor_line)
-    # drop the internal custom marker used only by the source sort
+    # drop the internal pin marker used only by the source sort
     def _strip(ns):
         for n in ns:
-            n.pop("custom", None)
+            n.pop("pinned", None)
             _strip(n.get("children", []))
     _strip(nodes)
     payload = json.dumps(nodes, indent=2)

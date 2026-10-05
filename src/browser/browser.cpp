@@ -133,12 +133,12 @@ namespace scribbolyth::browser
         {
             if (filter_active_) return OnFilterEvent(event);
 
-            /*!
+            /*>
                 Key Events
             */
             if (event == ftxui::Event::Escape)
             {
-                /*!
+                /*>
                     Escape
                 */
                 //>>
@@ -154,7 +154,7 @@ namespace scribbolyth::browser
             }
             if (event.is_character() && event.character() == "/")
             {
-                /*!
+                /*>
                     /
                 */
                 //>>
@@ -166,7 +166,7 @@ namespace scribbolyth::browser
             if (event.is_character() && event.character() == ":"
                 && !state_->browser_command.empty())
             {
-                /*!
+                /*>
                     :
 
                     The dialog just picks a directory; `:` hands the currently
@@ -185,7 +185,7 @@ namespace scribbolyth::browser
             }
             if (event == ftxui::Event::Return)
             {
-                /*!
+                /*>
                     Return
 
                     Select the file.
@@ -198,7 +198,7 @@ namespace scribbolyth::browser
             }
             if (event.is_character() && event.character() == "l")
             {
-                /*!
+                /*>
                     l
 
                     Enter the selected directory.
@@ -212,7 +212,7 @@ namespace scribbolyth::browser
             if (event == ftxui::Event::ArrowDown
                 || (event.is_character() && event.character() == "j"))
             {
-                /*!
+                /*>
                     j / Arrow Down
 
                     Move the selection down.
@@ -227,7 +227,7 @@ namespace scribbolyth::browser
             if (event == ftxui::Event::ArrowUp
                 || (event.is_character() && event.character() == "k"))
             {
-                /*!
+                /*>
                     k / Arrow Up
 
                     Move the selection up.
@@ -242,7 +242,7 @@ namespace scribbolyth::browser
             if (event == ftxui::Event::Backspace
                 || (event.is_character() && event.character() == "h"))
             {
-                /*!
+                /*>
                     h
 
                     Move up one directory.
@@ -256,7 +256,7 @@ namespace scribbolyth::browser
             }
             if (event.is_character() && event.character() == "g")
             {
-                /*!
+                /*>
                     g
 
                     If the first 'g', await for a second 'g'.
@@ -271,7 +271,7 @@ namespace scribbolyth::browser
             }
             if (event.is_character() && event.character() == "G")
             {
-                /*!
+                /*>
                     G
 
                     Move to the bottom.
@@ -296,7 +296,7 @@ namespace scribbolyth::browser
         */
         ftxui::Element Render() override
         {
-            /*!
+            /*>
                 Recompute
 
                 Before rendering ensure that everything is in sync with the state_.
@@ -306,7 +306,7 @@ namespace scribbolyth::browser
             //<<
             //!
 
-            /*!
+            /*>
                 Const Variables
 
                 ----
@@ -322,6 +322,13 @@ namespace scribbolyth::browser
             //<<
             //!
 
+            /*>
+                Fetch the items.
+
+                If there are none, output (empty directory).
+                This is driven by the total const value.
+            */
+            //!
             ftxui::Elements rows;
             if (filter_active_)
             {
