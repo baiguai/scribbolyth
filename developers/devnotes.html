@@ -1171,7 +1171,7 @@
               {
                 "id": "20d051b4",
                 "title": "Case Insensitive Less Check",
-                "content": "Case Insensitive Less Check\n\nSignature: bool NoCaseLess(const std::string& a, const std::string& b)\nMethod: NoCaseLess\nReturns: bool\nParameters:\n    a const std::string&\n    b const std::string&",
+                "content": "Case Insensitive Less Check\n\nSignature: bool NoCaseLess(const std::string& a, const std::string& b)\nMethod: NoCaseLess\nReturns: bool\nParameters:\n    a const std::string&\n    b const std::string&\n\n#todo : We should be able to make this a globally accessible method.",
                 "children": [],
                 "expanded": false
               },
@@ -1181,103 +1181,103 @@
                 "content": "FileBrowserDialog Class\n(ftxui::ComponentBase)",
                 "children": [
                   {
-                    "id": "36a0cf51",
+                    "id": "efdf24e8",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "a7d75041",
+                        "id": "25b90d2c",
                         "title": "Apply the Filter",
                         "content": "Apply the Filter\n\nSignature: void ApplyFilter()\nMethod: ApplyFilter\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "75253f27",
+                        "id": "9fde7621",
                         "title": "Clear the Filter",
                         "content": "Clear the Filter\n\nSignature: void ClearFilter()\nMethod: ClearFilter\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "a81fbfe7",
+                        "id": "57f0c07b",
                         "title": "Close the Dialog",
                         "content": "Close the Dialog\n\nSignature: void Close()\nMethod: Close\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "f4e3e181",
+                        "id": "8b48af2b",
                         "title": "Compute the Top",
                         "content": "Compute the Top\n\nSignature: int ComputeTop(int sel, int total) const\nMethod: ComputeTop\nReturns: int\nQualifiers: const\nParameters:\n    sel   int\n    total int",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "f2256427",
+                        "id": "ad700c71",
                         "title": "Constants",
                         "content": "Constants\n\n--------------------------------------------------------------------------------\n\nstatic constexpr int kVisibleRows = 16;",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "aa09f907",
+                        "id": "b93ba126",
                         "title": "Entry Struct",
                         "content": "Entry Struct\n\nstruct Entry\n{\n    bool is_dir = false;\n    std::string display;\n    std::string path;\n};",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "5bf4a573",
+                        "id": "6eefde9b",
                         "title": "Handle Filter Event",
                         "content": "Handle Filter Event\n\nSignature: bool OnFilterEvent(ftxui::Event event)\nMethod: OnFilterEvent\nReturns: bool\nParameters:\n    event ftxui::Event",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "67d292f6",
+                        "id": "63953a64",
                         "title": "Jump to Top / Bottom",
                         "content": "Jump to Top / Bottom\n\nSignature: void JumpToTop()\nMethod: JumpToTop\nReturns: void\n\nSignature: void JumpToBottom()\nMethod: JumpToBottom\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "eeb48cff",
+                        "id": "33982852",
                         "title": "Move Up a Directory",
                         "content": "Move Up a Directory\n\nSignature: void GoUp()\nMethod: GoUp\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "8ff6e388",
+                        "id": "36dceee0",
                         "title": "Navigate Items",
                         "content": "Navigate Items\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "0191a615",
+                        "id": "435017c9",
                         "title": "Pick a File",
                         "content": "Pick a File\n\nSignature: void Activate()\nMethod: Activate\nReturns: void\n\nSignature: void EnterAt(bool pick_file)\nMethod: EnterAt\nReturns: void\nParameters:\n    pick_file bool",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "eea6bf61",
+                        "id": "44655cb1",
                         "title": "Recompute",
                         "content": "Recompute\n\n* Refresh this dialog via the state_\n\nSignature: void Recompute()\nMethod: Recompute\nReturns: void\n\nSignature: void Relist()\nMethod: Relist\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "99679b1c",
+                        "id": "7f275e89",
                         "title": "Set the Directory",
                         "content": "Set the Directory\n\nSignature: void SetDir(const std::string& path)\nMethod: SetDir\nReturns: void\nParameters:\n    path const std::string&",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "a40e9de6",
+                        "id": "e8d1ddd7",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nftxui::Box box_;\nstd::string dir_;\nstd::string start_dir_;\nbool needs_refresh_ = true;\nstd::vector<Entry> entries_;\nstd::vector<std::size_t> visible_;\nstd::string filter_;\nstd::string last_filter_;\nbool filter_active_ = false;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 24;\nbool pending_g_ = false;",
                         "children": [],
@@ -1302,14 +1302,115 @@
                         "id": "bf824ad1",
                         "title": "Ftxui Event",
                         "content": "Ftxui Event\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
-                        "children": [],
+                        "children": [
+                          {
+                            "id": "b7edcdf5",
+                            "title": "Key Events",
+                            "content": "Key Events",
+                            "children": [
+                              {
+                                "id": "3d07040f",
+                                "title": "Escape",
+                                "content": "Escape\n\nif (!filter_.empty())\n{\n    ClearFilter();\n    return true;\n}\nClose();\nreturn true;",
+                                "children": [],
+                                "expanded": false
+                              },
+                              {
+                                "id": "2380739b",
+                                "title": "/",
+                                "content": "/\n\nfilter_active_ = true;\nreturn true;",
+                                "children": [],
+                                "expanded": false
+                              },
+                              {
+                                "id": "f2256427",
+                                "title": ":",
+                                "content": ":\n\nThe dialog just picks a directory; `:` hands the currently\nshown directory back to the save/export command line so the\nuser can type a filename.\n\nconst std::string command = std::move(state_->browser_command);\nstate_->browser_command.clear();\nconst std::string target = (fs::path(dir_) / \"\").string();\nClose();\nscribbolyth::op::OpenCommandLineWithArgs(state_, command, target);\nreturn true;",
+                                "children": [],
+                                "expanded": false
+                              },
+                              {
+                                "id": "aa09f907",
+                                "title": "Return",
+                                "content": "Return\n\nSelect the file.\n\nActivate();\nreturn true;",
+                                "children": [],
+                                "expanded": false
+                              },
+                              {
+                                "id": "a81fbfe7",
+                                "title": "l",
+                                "content": "l\n\nEnter the selected directory.\n\nEnterAt(/*pick_file=*/false);\nreturn true;",
+                                "children": [],
+                                "expanded": false
+                              },
+                              {
+                                "id": "99679b1c",
+                                "title": "j / Arrow Down",
+                                "content": "j / Arrow Down\n\nMove the selection down.\n\nMoveSelection(+1);\npending_g_ = false;\nreturn true;",
+                                "children": [],
+                                "expanded": false
+                              },
+                              {
+                                "id": "8ff6e388",
+                                "title": "k / Arrow Up",
+                                "content": "k / Arrow Up\n\nMove the selection up.\n\nMoveSelection(-1);\npending_g_ = false;\nreturn true;",
+                                "children": [],
+                                "expanded": false
+                              },
+                              {
+                                "id": "67d292f6",
+                                "title": "h",
+                                "content": "h\n\nMove up one directory.\n\nGoUp();\npending_g_ = false;\nreturn true;",
+                                "children": [],
+                                "expanded": false
+                              },
+                              {
+                                "id": "eeb48cff",
+                                "title": "g",
+                                "content": "g\n\nIf the first 'g', await for a second 'g'.\nIf the second 'g', move to the top.\n\nif (pending_g_) JumpToTop();\nelse pending_g_ = true;\nreturn true;",
+                                "children": [],
+                                "expanded": false
+                              },
+                              {
+                                "id": "0191a615",
+                                "title": "G",
+                                "content": "G\n\nMove to the bottom.\n\nJumpToBottom();\nreturn true;",
+                                "children": [],
+                                "expanded": false
+                              }
+                            ],
+                            "expanded": false
+                          }
+                        ],
                         "expanded": false
                       },
                       {
-                        "id": "3d07040f",
+                        "id": "f4e3e181",
                         "title": "Render the Element",
                         "content": "Render the Element\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
-                        "children": [],
+                        "children": [
+                          {
+                            "id": "d116215c",
+                            "title": "Recompute",
+                            "content": "Recompute\n\nBefore rendering ensure that everything is in sync with the state_.\n\nRecompute();",
+                            "children": [],
+                            "expanded": false
+                          },
+                          {
+                            "id": "840ceee8",
+                            "title": "Const Variables",
+                            "content": "Const Variables\n\n--------------------------------------------------------------------------------\n\nconst int total = static_cast<int>(visible_.size());\nconst int sel = std::min(selection_, std::max(0, total - 1));\nconst int top = ComputeTop(sel, total);\nconst int count = std::min(kVisibleRows, std::max(0, total - top));\nconst int dlg_width { 90 };\n\nconst std::size_t row_width = static_cast<std::size_t>(content_width_ + 2);",
+                            "children": [],
+                            "expanded": false
+                          },
+                          {
+                            "id": "b67dc721",
+                            "title": "Fetch the items.",
+                            "content": "Fetch the items.\n\nIf there are none, output (empty directory).\nThis is driven by the total const value.",
+                            "children": [],
+                            "expanded": false
+                          }
+                        ],
                         "expanded": false
                       },
                       {
@@ -1328,7 +1429,7 @@
               {
                 "id": "9cd32dc3",
                 "title": "Path Check",
-                "content": "Path Check\n\nSignature: std::string Normalize(const std::string& path)\nMethod: Normalize\nReturns: std::string\nParameters:\n    path const std::string&",
+                "content": "Path Check\n\nSignature: std::string Normalize(const std::string& path)\nMethod: Normalize\nReturns: std::string\nParameters:\n    path const std::string&\n\nGets the absolute path from the path input variable.",
                 "children": [],
                 "expanded": false
               },
@@ -1342,14 +1443,14 @@
               {
                 "id": "4a92b96e",
                 "title": "Tailing",
-                "content": "Tailing\n\nSignature: std::string Tail(const std::string& s, std::size_t width)\nMethod: Tail\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t",
+                "content": "Tailing\n\nSignature: std::string Tail(const std::string& s, std::size_t width)\nMethod: Tail\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t\n\n#todo : We should be able to make this a globally accessible method.",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "74225a0b",
                 "title": "To Lower Case",
-                "content": "To Lower Case\n\nSignature: std::string Lower(const std::string& s)\nMethod: Lower\nReturns: std::string\nParameters:\n    s const std::string&",
+                "content": "To Lower Case\n\nSignature: std::string Lower(const std::string& s)\nMethod: Lower\nReturns: std::string\nParameters:\n    s const std::string&\n\n#todo : We should be able to make this a globally accessible method.",
                 "children": [],
                 "expanded": false
               }
