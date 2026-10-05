@@ -37,6 +37,8 @@ namespace scribbolyth::browser
             Tailing
 
             !_method
+
+            #todo : We should be able to make this a globally accessible method.
         */
         std::string Tail(const std::string& s, std::size_t width)
         {
@@ -49,6 +51,8 @@ namespace scribbolyth::browser
             To Lower Case
 
             !_method
+
+            #todo : We should be able to make this a globally accessible method.
         */
         std::string Lower(const std::string& s)
         {
@@ -65,6 +69,8 @@ namespace scribbolyth::browser
             Case Insensitive Less Check
 
             !_method
+
+            #todo : We should be able to make this a globally accessible method.
         */
         bool NoCaseLess(const std::string& a, const std::string& b)
         {
@@ -76,6 +82,8 @@ namespace scribbolyth::browser
             Path Check
 
             !_method
+
+            Gets the absolute path from the path input variable.
         */
         std::string Normalize(const std::string& path)
         {
@@ -125,8 +133,15 @@ namespace scribbolyth::browser
         {
             if (filter_active_) return OnFilterEvent(event);
 
+            /*!
+                Key Events
+            */
             if (event == ftxui::Event::Escape)
             {
+                /*!
+                    Escape
+                */
+                //>>
                 if (!filter_.empty())
                 {
                     ClearFilter();
@@ -134,69 +149,143 @@ namespace scribbolyth::browser
                 }
                 Close();
                 return true;
+                //<<
+                //!
             }
             if (event.is_character() && event.character() == "/")
             {
+                /*!
+                    /
+                */
+                //>>
                 filter_active_ = true;
                 return true;
+                //<<
+                //!
             }
             if (event.is_character() && event.character() == ":"
                 && !state_->browser_command.empty())
             {
-                // The dialog just picks a directory; `:` hands the currently
-                // shown directory back to the save/export command line so the
-                // user can type a filename.
+                /*!
+                    :
+
+                    The dialog just picks a directory; `:` hands the currently
+                    shown directory back to the save/export command line so the
+                    user can type a filename.
+                */
+                //>>
                 const std::string command = std::move(state_->browser_command);
                 state_->browser_command.clear();
                 const std::string target = (fs::path(dir_) / "").string();
                 Close();
                 scribbolyth::op::OpenCommandLineWithArgs(state_, command, target);
                 return true;
+                //<<
+                //!
             }
             if (event == ftxui::Event::Return)
             {
+                /*!
+                    Return
+
+                    Select the file.
+                */
+                //>>
                 Activate();
                 return true;
+                //<<
+                //!
             }
             if (event.is_character() && event.character() == "l")
             {
+                /*!
+                    l
+
+                    Enter the selected directory.
+                */
+                //>>
                 EnterAt(/*pick_file=*/false);
                 return true;
+                //<<
+                //!
             }
             if (event == ftxui::Event::ArrowDown
                 || (event.is_character() && event.character() == "j"))
             {
+                /*!
+                    j / Arrow Down
+
+                    Move the selection down.
+                */
+                //>>
                 MoveSelection(+1);
                 pending_g_ = false;
                 return true;
+                //<<
+                //!
             }
             if (event == ftxui::Event::ArrowUp
                 || (event.is_character() && event.character() == "k"))
             {
+                /*!
+                    k / Arrow Up
+
+                    Move the selection up.
+                */
+                //>>
                 MoveSelection(-1);
                 pending_g_ = false;
                 return true;
+                //<<
+                //!
             }
             if (event == ftxui::Event::Backspace
                 || (event.is_character() && event.character() == "h"))
             {
+                /*!
+                    h
+
+                    Move up one directory.
+                */
+                //>>
                 GoUp();
                 pending_g_ = false;
                 return true;
+                //<<
+                //!
             }
             if (event.is_character() && event.character() == "g")
             {
+                /*!
+                    g
+
+                    If the first 'g', await for a second 'g'.
+                    If the second 'g', move to the top.
+                */
+                //>>
                 if (pending_g_) JumpToTop();
                 else pending_g_ = true;
                 return true;
+                //<<
+                //!
             }
             if (event.is_character() && event.character() == "G")
             {
+                /*!
+                    G
+
+                    Move to the bottom.
+                */
+                //>>
                 JumpToBottom();
                 return true;
+                //<<
+                //!
             }
             pending_g_ = false;
             return true;
+
+            //!
         }
         //!
 
@@ -207,8 +296,22 @@ namespace scribbolyth::browser
         */
         ftxui::Element Render() override
         {
-            Recompute();
+            /*!
+                Recompute
 
+                Before rendering ensure that everything is in sync with the state_.
+            */
+            //>>
+            Recompute();
+            //<<
+            //!
+
+            /*!
+                Const Variables
+
+                ----
+            */
+            //>>
             const int total = static_cast<int>(visible_.size());
             const int sel = std::min(selection_, std::max(0, total - 1));
             const int top = ComputeTop(sel, total);
@@ -216,6 +319,8 @@ namespace scribbolyth::browser
             const int dlg_width { 90 };
 
             const std::size_t row_width = static_cast<std::size_t>(content_width_ + 2);
+            //<<
+            //!
 
             ftxui::Elements rows;
             if (filter_active_)
