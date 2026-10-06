@@ -405,7 +405,7 @@ namespace scribbolyth::bookmarks
     };
     //!
 
-    /*!
+    /*>
         Create the Dialog
 
         !_method

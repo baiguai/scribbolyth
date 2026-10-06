@@ -407,7 +407,7 @@ namespace scribbolyth::brokenlinks
     };
     //!
 
-    /*!
+    /*>
         Make Dead Link Dialog
 
         !_method

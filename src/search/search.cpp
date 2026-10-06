@@ -831,7 +831,7 @@ namespace scribbolyth::search
     };
     //!
 
-    /*!
+    /*>
         Ftxui Make Dialog
 
         !_method

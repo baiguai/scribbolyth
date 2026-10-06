@@ -645,7 +645,7 @@ namespace scribbolyth::links
     };
     //!
 
-    /*!
+    /*>
         Make Links Dialog
 
         !_method

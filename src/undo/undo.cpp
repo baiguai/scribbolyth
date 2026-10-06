@@ -404,7 +404,7 @@ namespace scribbolyth::undo
     };
     //!
 
-    /*!
+    /*>
         Make Undo Dialog 
 
         !_method
