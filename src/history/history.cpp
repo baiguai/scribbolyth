@@ -353,7 +353,7 @@ namespace scribbolyth::history
     };
     //!
 
-    /*!
+    /*>
         Make History Dialog
 
         !_method

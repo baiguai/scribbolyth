@@ -2403,7 +2403,7 @@ namespace scribbolyth::editor
     };
     //!
 
-    /*!
+    /*>
         Make the Editor
 
         !_method

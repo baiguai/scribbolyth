@@ -317,7 +317,7 @@ namespace scribbolyth::regex
     };
     //!
 
-    /*!
+    /*>
         Ftxui Make Dialog
 
         !_method
