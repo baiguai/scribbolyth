@@ -25,7 +25,7 @@ void Keymap::Bind(std::vector<ftxui::Event> sequence, Binding binding)
 }
 //!
 
-/*!
+/*>
     Keymap Handle Call
 */
 Keymap::Result Keymap::Handle(ftxui::Event event)

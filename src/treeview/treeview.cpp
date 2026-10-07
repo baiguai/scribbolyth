@@ -1706,7 +1706,7 @@ namespace scribbolyth::treeview
     }
     //!
 
-    /*!
+    /*>
         Ftxui Event Method
 
         !_method
@@ -1720,7 +1720,7 @@ namespace scribbolyth::treeview
     }
     //!
 
-    /*!
+    /*>
         Render Node 
 
         !_method
@@ -1757,7 +1757,7 @@ namespace scribbolyth::treeview
     }
     //!
 
-    /*!
+    /*>
         Render the Treeview 
 
         !_method

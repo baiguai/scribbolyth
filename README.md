@@ -2,6 +2,35 @@
 Scribbolyth is a Vim-like notes editor that organizes plain text notes via a treeview structure.
 So it has the familiar Vim modes plus a TREE mode for managing the treeview.
 
+## Features
+* Available for multiple platforms.
+* Fully keyboard driven.
+* Keybindings are configuration driven.
+* Runs in the terminal.
+* Treeview management in TREE mode.
+* Treeview panel resizing.
+* Bookmarks, or line specific bookmarks.
+* Search, including REGEX search, and title-only search.
+* Search and send results to a new node.
+* Search within the current note.
+* Find and replace within the current note.
+* Visual mode, including visual block mode for vertical selections.
+* Vim-like keybindings.
+* Quick keybindings lookup via '?'.
+* Recent files dialog - operates similar to 'tab switching'.
+* ASCII 'tables' - that can be reformatted as contents change.
+* Links to websites or other nodes within the currently open file.
+* Imports/exports to/from the stand alone variant - Scribboleth.
+* Commands input with configurable commands.
+
+### For Developers
+* Code documentation generated from comments within the code.
+* Code documentation within a stand alone Scribboleth .html file.
+* Memory leak check script.
+* Build and run scripts.
+* Configuration driven MakeFiles generation.
+
+
 # Downloading
 
 

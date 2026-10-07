@@ -530,7 +530,8 @@ namespace scribbolyth::browser
         {
             EnterAt(/*pick_file=*/true);
         }
-        /*|
+        /*!
+            Enter At
             
             !_method
         */
@@ -541,11 +542,15 @@ namespace scribbolyth::browser
             const Entry& entry = entries_[visible_[static_cast<std::size_t>(sel)]];
             if (entry.is_dir)
             {
-                // `l` always navigates into the folder. For save/export-style
-                // ops (`browser_command` set) the dialog is a folder picker:
-                // Enter hands the chosen folder back to the command line so a
-                // filename can be typed. `:` picks the currently shown folder
-                // the same way.
+                /*|
+
+                `l` always navigates into the folder. For save/export-style
+                ops (`browser_command` set) the dialog is a folder picker:
+                Enter hands the chosen folder back to the command line so a
+                filename can be typed. `:` picks the currently shown folder
+                the same way.
+
+                */
                 if (!pick_file || state_->browser_command.empty())
                 {
                     SetDir(entry.path);
@@ -573,6 +578,8 @@ namespace scribbolyth::browser
             Clear the Filter
 
             !_method
+
+            Simply clear out the filter variables.
         */
         void ClearFilter()
         {
@@ -586,14 +593,19 @@ namespace scribbolyth::browser
             Compute the Top
 
             !_method
+
+            Computation logic:
+
         */
         int ComputeTop(int sel, int total) const
         {
+            //>>
             const int max_top = std::max(0, total - kVisibleRows);
             int top = std::min(scroll_, max_top);
             if (sel < top) top = sel;
             if (sel >= top + kVisibleRows) top = sel - kVisibleRows + 1;
             return std::max(0, std::min(top, max_top));
+            //<<
         }
         //!
 
@@ -604,29 +616,57 @@ namespace scribbolyth::browser
         */
         bool OnFilterEvent(ftxui::Event event)
         {
+            /*>
+                Escape Key
+            */
             if (event == ftxui::Event::Escape)
             {
+                //>>
                 ClearFilter();
                 return true;
+                //<<
             }
+            //!
+
+            /*>
+                Return Key
+            */
             if (event == ftxui::Event::Return)
             {
+                //>>
                 filter_active_ = false;
                 selection_ = 0;
                 return true;
+                //<<
             }
+            //!
+
+            /*>
+                Backspace Key
+            */
             if (event == ftxui::Event::Backspace)
             {
+                //>>
                 if (!filter_.empty()) filter_.pop_back();
                 selection_ = 0;
                 return true;
+                //<<
             }
+            //!
+
+            /*>
+                General Key Processing
+            */
             if (event.is_character())
             {
+                //>>
                 filter_ += event.character();
                 selection_ = 0;
                 return true;
+                //<<
             }
+            //!
+
             return true;
         }
         //!
@@ -634,9 +674,9 @@ namespace scribbolyth::browser
         /*!
             Recompute
 
-            * Refresh this dialog via the state_
-
             !_method
+
+            * Refresh this dialog via the state_
         */
         void Recompute()
         {
@@ -660,6 +700,7 @@ namespace scribbolyth::browser
 
             !_method
 
+            * List the currently selected directory's contents.
         */
         void Relist()
         {
@@ -716,6 +757,8 @@ namespace scribbolyth::browser
             Apply the Filter
 
             !_method
+
+            * Applies the currently set filter.
         */
         void ApplyFilter()
         {
@@ -763,8 +806,14 @@ namespace scribbolyth::browser
     };
     //!
 
+    /*>
+        Make the File Browser Dialog
+
+        !_method
+    */
     ftxui::Component MakeFileBrowserDialog(std::shared_ptr<EditorState> state, bool* show)
     {
         return ftxui::Make<FileBrowserDialog>(std::move(state), show);
     }
+    //!
 }

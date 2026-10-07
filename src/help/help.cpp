@@ -326,7 +326,7 @@ namespace scribbolyth::help
     };
     //!
 
-    /*!
+    /*>
         Make Help Dialog
 
         !_method
