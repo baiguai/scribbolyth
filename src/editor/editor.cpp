@@ -93,6 +93,21 @@ namespace scribbolyth::editor
         }
         //!
 
+        /*!
+            Table Line Check
+
+            !_method
+
+            A line belongs to a table when it contains a cell separator "|"
+            or is a divider row, so a whole table can be detected without a
+            selection by walking up and down the contiguous table lines.
+        */
+        bool IsTableLine(const std::string& s)
+        {
+            return s.find('|') != std::string::npos || IsDividerLine(s);
+        }
+        //!
+
 
         /*!
             Split Line Into Cells
@@ -1380,6 +1395,20 @@ namespace scribbolyth::editor
                 int a = (visual_row_ >= 0) ? std::min(visual_row_, row_) : row_;
                 int b = (visual_row_ >= 0) ? std::max(visual_row_, row_) : row_;
                 if (a > b) std::swap(a, b);
+
+                // With no selection, walk up to the top of the enclosing table
+                // and down to its bottom so the whole table is rebuilt.
+                if (visual_row_ < 0)
+                {
+                    if (!IsTableLine(lines_[row_]))
+                    {
+                        state_->status = "No table detected";
+                        return;
+                    }
+                    while (a > 0 && IsTableLine(lines_[a - 1])) --a;
+                    while (b + 1 < static_cast<int>(lines_.size())
+                           && IsTableLine(lines_[b + 1])) ++b;
+                }
 
                 // Line-based analog of the web app's sel.trim(): drop blank
                 // lines hugging the selection edges.
