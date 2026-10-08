@@ -58,7 +58,7 @@ int main(int, char** argv) {
         ----
     */
     //>>
-    auto version = "1.0.1";
+    auto version = "1.0.2";
 
     auto state = std::make_shared<EditorState>();
 
@@ -101,6 +101,7 @@ int main(int, char** argv) {
     /*!
         Operations
         All of the key binding operations are declared here.
+        You can look in the commands.conf and search for the OP in this code.
 
         Examples:
     */
@@ -196,6 +197,26 @@ int main(int, char** argv) {
     };
     state->operations["recents"] = [&open_recent](const std::string&, int) { open_recent(false); };
     state->operations["recents_force"] = [&open_recent](const std::string&, int) { open_recent(true); };
+
+    state->operations["open_prev"] = [state](const std::string&, int)
+    {
+        const std::size_t removed = scribbolyth::recent::PruneRecentFiles(state->recent_files);
+        if (removed > 0 && !state->init_path.empty())
+        {
+            scribbolyth::config::WriteRecentFiles(state->init_path, state->recent_files);
+        }
+        if (state->recent_files.size() < 2)
+        {
+            state->status = "No previous file in recents";
+            return;
+        }
+        auto it = state->operations.find("open");
+        if (it != state->operations.end())
+        {
+            const std::string target = state->recent_files[1];
+            it->second(target, 1);
+        }
+    };
 
     bool show_undo = false;
     state->operations["undo"] = [&show_undo](const std::string&, int) { show_undo = true; };
