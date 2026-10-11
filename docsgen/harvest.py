@@ -56,6 +56,13 @@ Within any comment body, a line containing just dashes (e.g. ----) is
 expanded to an 80-character horizontal rule.  Raw code captured by
 //>> ... //<< is never rewritten.
 
+The delimiters and markers shown above are the C++ defaults: the comment
+syntax, the grammar markers and the method/constructor regexes all come from
+per-language JSON profiles in langs/ (see langs/cpp.json).  A profile is
+selected for each source file by its extension, so a C++ .hpp and a Python
+.py can be harvested side by side.  Add a langs/<lang>.json to teach the
+harvester another language.
+
 Every file that contains a /*! */ doc block produces a *folder* node named
 after the file (e.g. editor/editor.cpp -> editor > editor.cpp), hanging off
 the coderoot node.
@@ -72,12 +79,21 @@ import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TEMPLATE = os.path.join(ROOT, "config", "scribboleth.html")
-OUTPUT = os.path.join(ROOT, "developers", "devnotes.html")
-SRC_ROOT = os.path.join(ROOT, "src")
-TITLE = "Scribbolyth Developer Notes"
+HERE = os.path.dirname(os.path.abspath(__file__))
+LANG_DIR = os.path.join(HERE, "langs")
+MAIN_CONFIG = os.path.join(HERE, "config", "main.json")
 
-EXTENSIONS = (".cpp", ".hpp", ".h", ".cc", ".cxx", ".c")
+# Default project layout, overridable via config/main.json.  Relative paths
+# in that file are resolved against HERE (the docsgen/ directory).
+DEFAULT_SOURCE = "../src"
+DEFAULT_OUTPUT = "../developers"
+DEFAULT_TEMPLATE = "../config/scribboleth.html"
+OUTPUT_FILENAME = "devnotes.html"
+
+TEMPLATE = os.path.normpath(os.path.join(HERE, DEFAULT_TEMPLATE))
+OUTPUT = os.path.join(HERE, DEFAULT_OUTPUT, OUTPUT_FILENAME)
+SRC_ROOT = os.path.normpath(os.path.join(HERE, DEFAULT_SOURCE))
+TITLE = "Scribbolyth Developer Notes"
 
 # Create/emit the source-code subtree nodes in alphabetical order (by title,
 # case-insensitive) instead of source order.  Custom nodes (//[...] and
@@ -87,37 +103,204 @@ ALPHABETICAL = True
 
 
 # ----------------------------------------------------------------------
+# Language configuration
+# ----------------------------------------------------------------------
+
+class Language:
+    """Comment/grammar profile for one language, loaded from langs/*.json.
+
+    Everything that differs between languages lives here: which comment
+    delimiters to scan, which marker characters open the doc/sub/folder/etc
+    regions, and how to recognise and describe a following method or
+    constructor.  harvest.py owns only the generic engine; adding a language
+    means adding a langs/<name>.json file (and, when the C-like signature
+    parser does not fit, a parser branch keyed by "callable.parser").
+    """
+
+    def __init__(self, data, source):
+        self.source = source
+        self.name = data.get("name", os.path.basename(source))
+        self.extensions = tuple(e.lower() for e in data.get("extensions", []))
+        self.line_comment = data.get("line_comment")
+        block = data.get("block_comment") or {}
+        self.block_open = block.get("open")
+        self.block_close = block.get("close")
+        if not (self.block_open and self.block_close):
+            self.block_open = self.block_close = None
+        self.string_delimiters = set(data.get("string_delimiters", []))
+        self.config_prefix = data.get("config_prefix", "!_")
+        self.line_markers = data.get("line_markers", {})
+        self.block_markers = data.get("block_markers", {})
+
+        call = data.get("callable", {})
+        self.callable_parser = call.get("parser", "c_like")
+        self.method_token = call.get("method_token", "!_method")
+        self.ctor_token = call.get("ctor_token", "!_ctor")
+        self.method_mark_re = re.compile(
+            call.get("method_regex",
+                     r"^[ \t]*%s[ \t]*$" % re.escape(self.method_token)), re.M)
+        self.ctor_mark_re = re.compile(
+            call.get("ctor_regex",
+                     r"^[ \t]*%s[ \t]*$" % re.escape(self.ctor_token)), re.M)
+        self.param_open = call.get("param_open", "(")
+        self.param_close = call.get("param_close", ")")
+        self.terminators = set(call.get("terminators", ["{", ";"]))
+        self.definition_terminators = set(call.get("definition_terminators", ["{"]))
+        self.operator_re = re.compile(call.get("operator_regex", r"\boperator\b"))
+        self.name_re = re.compile(call.get("name_regex",
+                                           r"[A-Za-z_~][A-Za-z0-9_]*\s*$"))
+        self.param_name_re = re.compile(
+            call.get("param_name_regex", r"[A-Za-z_][A-Za-z0-9_]*\s*$"))
+        self.split_open = set(call.get("split_open", "<(["))
+        self.split_close = set(call.get("split_close", ">)]"))
+
+        anchor = data.get("anchor", {})
+        self.anchor_re = (re.compile(anchor["regex"])
+                          if anchor.get("enabled") and anchor.get("regex") else None)
+
+        self.config_re = re.compile(
+            "^" + re.escape(self.config_prefix) + r"\s*([A-Za-z0-9_]+)\s*=\s*(.*)$")
+
+
+def load_languages(lang_dir):
+    """Read every langs/*.json into a Language (sorted by file name)."""
+    langs = []
+    if not os.path.isdir(lang_dir):
+        return langs
+    for fn in sorted(os.listdir(lang_dir)):
+        if not fn.lower().endswith(".json"):
+            continue
+        path = os.path.join(lang_dir, fn)
+        with open(path, "r", encoding="utf-8") as f:
+            langs.append(Language(json.load(f), path))
+    return langs
+
+
+def extension_map(langs):
+    """Map each configured extension (lower-case, with dot) to its Language."""
+    ext_map = {}
+    for lang in langs:
+        for ext in lang.extensions:
+            if ext in ext_map and ext_map[ext] is not lang:
+                print("! Warning: extension %s claimed by both %s and %s; "
+                      "keeping %s" % (ext, ext_map[ext].name, lang.name,
+                                      ext_map[ext].name), file=sys.stderr)
+                continue
+            ext_map[ext] = lang
+    return ext_map
+
+
+def load_settings(path):
+    """Read config/main.json (project source/output/template paths)."""
+    if not os.path.isfile(path):
+        return {}
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def resolve_path(base, path):
+    """Make `path` absolute; relative paths are resolved against `base`."""
+    return path if os.path.isabs(path) else os.path.normpath(os.path.join(base, path))
+
+
+# ----------------------------------------------------------------------
 # Comment scanning
 # ----------------------------------------------------------------------
 
-METHOD_MARK_RE = re.compile(r"^[ \t]*!_method[ \t]*$", re.M)
-CTOR_MARK_RE = re.compile(r"^[ \t]*!_ctor[ \t]*$", re.M)
+def matching_paren(sig, open_, open_ch="(", close_ch=")"):
+    depth = 0
+    for i in range(open_, len(sig)):
+        c = sig[i]
+        if c == open_ch:
+            depth += 1
+        elif c == close_ch:
+            depth -= 1
+            if depth == 0:
+                return i
+    return -1
 
 
-def extract_signature(src, pos):
+def param_parens(sig, lang):
+    """The parameter list is the one whose closing ')' is the signature's
+    last top-level ')'.  Backtrack from it to its matching '('.  Returns
+    (open_pos, close_pos) or (-1, -1)."""
+    close_ = sig.rfind(lang.param_close)
+    if close_ == -1:
+        return -1, -1
+    depth = 0
+    for i in range(close_, -1, -1):
+        c = sig[i]
+        if c == lang.param_close:
+            depth += 1
+        elif c == lang.param_open:
+            depth -= 1
+            if depth == 0:
+                return i, close_
+    return -1, -1
+
+
+def extract_signature_python(src, pos, lang):
+    """Scan src[pos:] for the first 'def'/'class' line, skipping blank and
+    comment lines, and return (signature, True) up to the trailing ':'.
+    Used when callable.parser == 'python'."""
+    n = len(src)
+    i = pos
+    while i < n:
+        line_end = src.find("\n", i)
+        if line_end == -1:
+            line_end = n
+        stripped = src[i:line_end].strip()
+        if not stripped or stripped.startswith("#"):
+            i = line_end + 1
+            continue
+        if not re.match(r"(async\s+def|def|class)\b", stripped):
+            return None
+        buf = []
+        depth = 0
+        j = i
+        while j < n:
+            c = src[j]
+            if c in "([{":
+                depth += 1
+            elif c in ")]}":
+                depth = max(0, depth - 1)
+            elif c == ":" and depth == 0:
+                break
+            if c != "\n":
+                buf.append(c)
+            j += 1
+        return " ".join("".join(buf).split()), True
+    return None
+
+
+def extract_signature(src, pos, lang):
     """Scan src[pos:] for a function/method declaration right after a doc
     comment.  Whitespace and comments are skipped; scanning stops at the
-    first '{' or ';' at parenthesis-depth 0.  Returns
+    first definition/statement terminator (see lang.terminators) at
+    parenthesis-depth 0.  Returns
         (signature_text, is_definition)
     with signature_text whitespace-collapsed, or None when no signature
     is found before the end of the file."""
+    if lang.callable_parser == "python":
+        return extract_signature_python(src, pos, lang)
     n = len(src)
     i = pos
     depth = 0
     buf = []
+    open_ch, close_ch = lang.param_open, lang.param_close
     while i < n:
-        if src.startswith("//", i):
+        if lang.line_comment and src.startswith(lang.line_comment, i):
             j = src.find("\n", i)
             i = n if j == -1 else j
             buf.append(" ")
             continue
-        if src.startswith("/*", i):
-            j = src.find("*/", i + 2)
-            i = n if j == -1 else j + 2
+        if lang.block_open and src.startswith(lang.block_open, i):
+            j = src.find(lang.block_close, i + len(lang.block_open))
+            i = n if j == -1 else j + len(lang.block_close)
             buf.append(" ")
             continue
         c = src[i]
-        if c in "\"'":
+        if c in lang.string_delimiters:
             q = c
             i += 1
             while i < n:
@@ -130,25 +313,26 @@ def extract_signature(src, pos):
                 i += 1
             buf.append(" ")
             continue
-        if c == "(":
+        if c == open_ch:
             depth += 1
-        elif c == ")":
+        elif c == close_ch:
             depth = max(0, depth - 1)
-        elif c in "{;":
-            if depth == 0:
-                return " ".join("".join(buf).split()), c == "{"
+        elif c in lang.terminators and depth == 0:
+            return (" ".join("".join(buf).split()),
+                    c in lang.definition_terminators)
         buf.append(c)
         i += 1
     return None
 
 
-def split_top_level(text):
-    """Split text on commas that are not nested inside (), [], or <>."""
+def split_top_level(text, lang):
+    """Split text on commas that are not nested inside the language's
+    bracket pairs ((), [], <> for C++)."""
     parts, depth, cur = [], 0, []
     for ch in text:
-        if ch in "<([":
+        if ch in lang.split_open:
             depth += 1
-        elif ch in ">)]":
+        elif ch in lang.split_close:
             depth = max(0, depth - 1)
         if ch == "," and depth == 0:
             parts.append("".join(cur).strip())
@@ -160,46 +344,52 @@ def split_top_level(text):
     return parts
 
 
-def matching_paren(sig, open_):
-    depth = 0
-    for i in range(open_, len(sig)):
-        c = sig[i]
-        if c == "(":
-            depth += 1
-        elif c == ")":
-            depth -= 1
-            if depth == 0:
-                return i
-    return -1
+def describe_signature_python(sig, lang):
+    """Break a collapsed Python def/class signature into
+    (name, returns, params, tail)."""
+    m = re.match(r"(?:async\s+)?(def|class)\s+([A-Za-z_][A-Za-z0-9_]*)", sig)
+    if m is None:
+        return None
+    keyword, name = m.group(1), m.group(2)
+    rest = sig[m.end():].strip()
+    if keyword == "class":
+        return name, "class", [], rest
+    params = []
+    tail = rest
+    open_ = rest.find("(")
+    if open_ != -1:
+        close_ = matching_paren(rest, open_, "(", ")")
+        if close_ != -1:
+            param_text = rest[open_ + 1:close_].strip()
+            tail = rest[close_ + 1:].strip()
+            for p in split_top_level(param_text, lang):
+                p = p.strip()
+                if not p:
+                    continue
+                if "=" in p:
+                    p = p.split("=", 1)[0].strip()
+                if ":" in p:
+                    nm, ty = p.split(":", 1)
+                    params.append((ty.strip(), nm.strip()))
+                else:
+                    params.append(("", p))
+    returns = ""
+    if "->" in tail:
+        returns = tail.split("->", 1)[1].strip()
+    return name, returns, params, tail
 
 
-def param_parens(sig):
-    """The parameter list is the one whose closing ')' is the signature's
-    last top-level ')'.  Backtrack from it to its matching '('.  Returns
-    (open_pos, close_pos) or (-1, -1)."""
-    close_ = sig.rfind(")")
-    if close_ == -1:
-        return -1, -1
-    depth = 0
-    for i in range(close_, -1, -1):
-        c = sig[i]
-        if c == ")":
-            depth += 1
-        elif c == "(":
-            depth -= 1
-            if depth == 0:
-                return i, close_
-    return -1, -1
-
-
-def describe_signature(sig, ctor=False):
+def describe_signature(sig, lang, ctor=False):
     """Break a collapsed signature into (name, returns, params, tail) or
     return None when it does not look like a function/method."""
+    if lang.callable_parser == "python":
+        return describe_signature_python(sig, lang)
     if ctor:
-        open_ = sig.find("(")
-        close_ = matching_paren(sig, open_) if open_ != -1 else -1
+        open_ = sig.find(lang.param_open)
+        close_ = (matching_paren(sig, open_, lang.param_open, lang.param_close)
+                  if open_ != -1 else -1)
     else:
-        open_, close_ = param_parens(sig)
+        open_, close_ = param_parens(sig, lang)
     if open_ == -1 or close_ == -1:
         return None
     decl = sig[:open_].strip()
@@ -207,12 +397,12 @@ def describe_signature(sig, ctor=False):
     quals = sig[close_ + 1:].strip()
     returns = decl
     name = None
-    op = re.search(r"\boperator\b", decl)
+    op = lang.operator_re.search(decl)
     if op:
         name = decl[op.start():].strip()
         returns = decl[:op.start()].strip()
     else:
-        m = re.search(r"[A-Za-z_~][A-Za-z0-9_]*\s*$", decl)
+        m = lang.name_re.search(decl)
         if m:
             name = m.group(0).strip()
             returns = decl[:m.start()].strip()
@@ -220,13 +410,13 @@ def describe_signature(sig, ctor=False):
                 returns = returns[:-2].strip()
     params = []
     if param_text:
-        for p in split_top_level(param_text):
+        for p in split_top_level(param_text, lang):
             p = p.strip()
             if not p:
                 continue
             if "=" in p:
                 p = p.split("=", 1)[0].strip()
-            pm = re.search(r"[A-Za-z_][A-Za-z0-9_]*\s*$", p)
+            pm = lang.param_name_re.search(p)
             if pm:
                 nm = pm.group(0).strip()
                 ty = p[:pm.start()].strip()
@@ -234,7 +424,7 @@ def describe_signature(sig, ctor=False):
     return name, returns, params, quals
 
 
-def member_inits(tail):
+def member_inits(tail, lang):
     """Split a constructor tail `: a(x), b({...})` into init-list members.
     Returns (members, qualifiers).  A qualifier prefix (e.g. `noexcept : ...`)
     is peeled off before the ':'."""
@@ -243,7 +433,8 @@ def member_inits(tail):
     if colon == -1:
         return [], t
     quals = t[:colon].strip()
-    members = [p.strip() for p in split_top_level(t[colon + 1:]) if p.strip()]
+    members = [p.strip() for p in split_top_level(t[colon + 1:], lang)
+               if p.strip()]
     return members, quals
 
 
@@ -277,25 +468,27 @@ def _content_base(body):
     return 0
 
 
-def callable_description(src, code_pos, body):
-    """Replace a `!_method` / `!_ctor` marker line in a comment body with a
-    description of the function/constructor definition immediately following
-    the comment.  Leaves the marker untouched when no definition follows."""
-    kinds = [("ctor", CTOR_MARK_RE) if rx is CTOR_MARK_RE else ("method", rx)
-             for rx in (CTOR_MARK_RE, METHOD_MARK_RE) if rx.search(body)]
+def callable_description(src, code_pos, body, lang):
+    """Replace a method/constructor marker line (see lang.method_mark_re /
+    ctor_mark_re) in a comment body with a description of the
+    function/constructor definition immediately following the comment.
+    Leaves the marker untouched when no definition follows."""
+    kinds = [("ctor", lang.ctor_mark_re) if rx is lang.ctor_mark_re
+             else ("method", rx)
+             for rx in (lang.ctor_mark_re, lang.method_mark_re) if rx.search(body)]
     if not kinds:
         return body
-    found = extract_signature(src, code_pos)
+    found = extract_signature(src, code_pos, lang)
     if not found or not found[1]:
         return body
     kind, rx = kinds[0]
-    described = describe_signature(found[0], ctor=kind == "ctor")
+    described = describe_signature(found[0], lang, ctor=kind == "ctor")
     if described is None:
         return body
     name, returns, params, tail = described
     lines = ["Signature: " + found[0]]
     if kind == "ctor":
-        members, quals = member_inits(tail)
+        members, quals = member_inits(tail, lang)
         specs = [returns] if returns in ("explicit", "inline") else []
         if specs:
             quals = " ".join(specs + ([quals] if quals else []))
@@ -326,14 +519,14 @@ def callable_description(src, code_pos, body):
         lambda m: "\n".join(ind + ln if ln else "" for ln in lines), body)
 
 
-def scan_file(path):
+def scan_file(path, lang):
     """Return source comments/segments as (kind, body, line) in source order.
 
-    kind is "line" for // comments, "block" for /* ... */ comments, or
-    "code" for the raw source captured between a `//>>` and `//<<` line
-    (each on its own line).  Body excludes the // or /* */ delimiters.
-    Strings and char literals are skipped so // inside them is not
-    mistaken for a comment.
+    kind is "line" for a single line comment, "block" for a delimited block
+    comment, or "code" for raw source captured between the configured raw
+    markers (e.g. `//>>` ... `//<<`).  Body excludes the comment delimiters.
+    String literals are skipped so comment text inside them is not mistaken
+    for a comment.  Delimiters and markers come from `lang`.
     """
     with open(path, "r", encoding="utf-8", errors="replace") as f:
         src = f.read()
@@ -341,11 +534,15 @@ def scan_file(path):
     items = []
     i, n = 0, len(src)
     line = 1
+    lc = lang.line_comment
+    bo, bc = lang.block_open, lang.block_close
+    lm = lang.line_markers
+    raw_open = lm.get("raw_open")
+    raw_close = (lc + lm["raw_close"]) if (lc and lm.get("raw_close")) else None
     while i < n:
         c = src[i]
-        if c in "\"'":
+        if c in lang.string_delimiters:
             quote = c
-            line_start = line
             i += 1
             while i < n:
                 if src[i] == "\\":
@@ -359,13 +556,14 @@ def scan_file(path):
                     line += 1
                 i += 1
             continue
-        if src.startswith("//", i):
+        if lc and src.startswith(lc, i):
             end = src.find("\n", i)
             if end == -1:
                 end = n
-            if src[i + 2:end].strip() == ">>":
-                # Capture raw source until a `//<<` line (both markers sit
-                # on their own lines); the captured text lands in the
+            body = src[i + len(lc):end]
+            if raw_open and body.strip() == raw_open:
+                # Capture raw source until a raw-close line (both markers
+                # sit on their own lines); the captured text lands in the
                 # current documentation node as a code snippet.
                 j = end + 1
                 seg = []
@@ -373,7 +571,7 @@ def scan_file(path):
                     lf = src.find("\n", j)
                     if lf == -1:
                         lf = n
-                    if src[j:lf].strip().startswith("//<<"):
+                    if raw_close and src[j:lf].strip().startswith(raw_close):
                         items.append(("code", "\n".join(seg), line))
                         line += 1
                         i = n if lf == n else lf + 1
@@ -385,21 +583,22 @@ def scan_file(path):
                     items.append(("code", "\n".join(seg), line))
                     i = n
                 continue
-            items.append(("line", src[i + 2:end], line))
+            items.append(("line", body, line))
             i = end
             continue
-        if src.startswith("/*", i):
+        if bo and src.startswith(bo, i):
             start_line = line
-            end = src.find("*/", i + 2)
+            end = src.find(bc, i + len(bo))
             if end == -1:
-                items.append(("block", src[i + 2:], start_line))
+                items.append(("block", src[i + len(bo):], start_line))
                 line += src.count("\n", i, n)
                 i = n
             else:
-                body = callable_description(src, end + 2, src[i + 2:end])
+                body = callable_description(
+                    src, end + len(bc), src[i + len(bo):end], lang)
                 items.append(("block", body, start_line))
-                line += src.count("\n", i, end + 2)
-                i = end + 2
+                line += src.count("\n", i, end + len(bc))
+                i = end + len(bc)
             continue
         if c == "\n":
             line += 1
@@ -407,94 +606,102 @@ def scan_file(path):
     return items
 
 
-def classify(items):
+def _emit_marked(actions, action, marker, text, line,
+                 close_marker=None, empty_closes=False):
+    """If `text` starts with `marker`, record the matching action and return
+    True.  `close_marker + marker` (e.g. `/*!`) is stripped as an explicit
+    "stop harvesting here" token.  A doc/docseq marker with an empty body
+    becomes a docclose when `empty_closes` (block comments), otherwise the
+    empty marker line is simply ignored (line comments)."""
+    if not marker or not text.startswith(marker):
+        return False
+    rest = text[len(marker):]
+    if close_marker:
+        rest = strip_marker(rest, close_marker + marker)
+    if not rest.strip():
+        if empty_closes and action in ("doc", "docseq"):
+            actions.append({"kind": "docclose", "line": line})
+        return True
+    actions.append({"kind": action, "body": rest, "line": line})
+    return True
+
+
+def classify(items, lang):
     """Turn raw comments into structured actions.
 
     Actions are dicts with a "kind" and the source "line":
-        config {key, value}            from //!_key=value
-        folder {path}                  from //[path]
-        manual {path, body}            from /*[path] body*/
-        doc    {body}                  from /*! body*/  (opens a region)
-        docseq {body}                  from /*> body*/ or //> text (same as
-                                            doc, but pinned in source order)
-        docclose                       from /*!*/, /*>*/ or //! (closes the region)
-        sub    {body}                  from /*+ body*/
-        code   {body}                  from //>> ... //<< (raw source)
-        append {body}                  from /*| body*/
+        config {key, value}   from the configured config marker
+        folder {path}         from a line folder marker
+        manual {path, body}   from a block manual marker
+        doc    {body}         doc block (opens a region)
+        docseq {body}         pinned doc block (same as doc, but pinned
+                                        in source order)
+        docclose              closes the innermost open region
+        sub    {body}         sub-note of the innermost open region
+        code   {body}         raw source snippet
+        append {body}         appended to the current documentation node
     Doc/sub/code/append nesting is resolved by the builder using a region
     stack.
     """
     actions = []
-    doc_open = None
+    lm = lang.line_markers
+    bm = lang.block_markers
     for kind, body, line in items:
         if kind == "code":
             actions.append({"kind": "code", "body": body, "line": line})
             continue
         if kind == "line":
             text = body.strip()
-            if text == "!":
-                actions.append({"kind": "docclose", "line": line})
-                continue
-            m = re.match(r"!_\s*([A-Za-z0-9_]+)\s*=\s*(.*)$", text)
+            m = lang.config_re.match(text)
             if m:
                 actions.append({"kind": "config", "key": m.group(1),
                                 "value": m.group(2).strip(), "line": line})
                 continue
-            if text.startswith("["):
-                end = text.find("]")
+            close = lm.get("close")
+            if close and text == close:
+                actions.append({"kind": "docclose", "line": line})
+                continue
+            folder = lm.get("folder")
+            if folder and text.startswith(folder):
+                rest = text[len(folder):]
+                end = rest.find("]")
                 if end != -1:
                     actions.append({"kind": "folder",
-                                    "path": text[1:end].strip(),
+                                    "path": rest[:end].strip(),
                                     "line": line})
                 continue
-            if text.startswith(">"):
-                if text[1:].strip():
-                    actions.append({"kind": "docseq", "body": text[1:],
-                                    "line": line})
+            if _emit_marked(actions, "doc", lm.get("doc"), text, line):
                 continue
-            if text.startswith("|"):
-                if text[1:].strip():
-                    actions.append({"kind": "append", "body": text[1:],
-                                    "line": line})
+            if _emit_marked(actions, "docseq", lm.get("pinned"), text, line):
+                continue
+            if _emit_marked(actions, "sub", lm.get("sub"), text, line):
+                continue
+            if _emit_marked(actions, "append", lm.get("append"), text, line):
                 continue
             continue
 
         # block comment
-        if body.startswith("!"):
-            text = strip_marker(body[1:], "/*!")
-            if text.strip():
-                actions.append({"kind": "doc", "body": text, "line": line})
-            else:
-                actions.append({"kind": "docclose", "line": line})
+        if _emit_marked(actions, "doc", bm.get("doc"), body, line,
+                        lang.block_open, empty_closes=True):
             continue
-        if body.startswith(">"):
-            # Like /*! but pinned: the node keeps its source-order slot
-            # instead of being alphabetized.
-            text = strip_marker(body[1:], "/*>")
-            if text.strip():
-                actions.append({"kind": "docseq", "body": text, "line": line})
-            else:
-                actions.append({"kind": "docclose", "line": line})
+        if _emit_marked(actions, "docseq", bm.get("pinned"), body, line,
+                        lang.block_open, empty_closes=True):
             continue
-        if body.startswith("+"):
-            text = strip_marker(body[1:], "/*+")
-            if text.strip():
-                actions.append({"kind": "sub", "body": text, "line": line})
+        if _emit_marked(actions, "sub", bm.get("sub"), body, line,
+                        lang.block_open):
             continue
-        if body.startswith("|"):
-            text = body[1:]
-            if text.strip():
-                actions.append({"kind": "append", "body": text, "line": line})
+        if _emit_marked(actions, "append", bm.get("append"), body, line):
             continue
-        manual = body.lstrip()
-        if manual.startswith("["):
-            end = manual.find("]")
-            if end != -1:
-                actions.append({"kind": "manual",
-                                "path": manual[1:end].strip(),
-                                "body": manual[end + 1:],
-                                "line": line})
-                continue
+        manual = bm.get("manual")
+        if manual:
+            text = body.lstrip()
+            if text.startswith(manual):
+                end = text.find("]")
+                if end != -1:
+                    actions.append({"kind": "manual",
+                                    "path": text[len(manual):end].strip(),
+                                    "body": text[end + 1:],
+                                    "line": line})
     return actions
 
 
@@ -612,16 +819,17 @@ def split_path(path):
     return tuple(s.strip() for s in path.split("/") if s.strip())
 
 
-ANCHOR_RE = re.compile(r"\bint\s+main\s*\(")
-
-
 def find_anchor(src_files):
-    """Return (rel_path, line) of the file containing 'int main', or
-    (None, None) if no source file has an entry point."""
-    for path in src_files:
+    """Return (rel_path, line) of the entry-point file, or (None, None).
+
+    src_files is a list of (path, lang) pairs; only languages whose config
+    enables an anchor (lang.anchor_re) participate."""
+    for path, lang in src_files:
+        if lang.anchor_re is None:
+            continue
         with open(path, "r", encoding="utf-8", errors="replace") as f:
             src = f.read()
-        m = ANCHOR_RE.search(src)
+        m = lang.anchor_re.search(src)
         if m:
             rel = os.path.relpath(path, SRC_ROOT).replace(os.sep, "/")
             return rel, src.count("\n", 0, m.start()) + 1
@@ -777,7 +985,7 @@ def sort_source_tree(node):
 
 
 def main():
-    global ALPHABETICAL
+    global ALPHABETICAL, TEMPLATE, OUTPUT, SRC_ROOT
 
     parser = argparse.ArgumentParser(
         description="Harvest doc comments from src/ into devnotes.html")
@@ -789,25 +997,40 @@ def main():
     if args.alphabetical is not None:
         ALPHABETICAL = args.alphabetical
 
+    settings = load_settings(MAIN_CONFIG)
+    SRC_ROOT = resolve_path(HERE, settings.get("source", DEFAULT_SOURCE))
+    OUTPUT = os.path.join(
+        resolve_path(HERE, settings.get("output", DEFAULT_OUTPUT)),
+        settings.get("output_file", OUTPUT_FILENAME))
+    TEMPLATE = resolve_path(HERE, settings.get("template", DEFAULT_TEMPLATE))
+
     if not os.path.isfile(TEMPLATE):
         print("! Error: template not found: %s" % TEMPLATE, file=sys.stderr)
         return 1
 
+    languages = load_languages(LANG_DIR)
+    if not languages:
+        print("! Error: no language configs found in %s" % LANG_DIR,
+              file=sys.stderr)
+        return 1
+    ext_map = extension_map(languages)
+
     file_actions = []
     coderoot = None
 
-    # walk src/ recursively
+    # walk src/ recursively, keeping the files a language config claims
     src_files = []
     for dirpath, dirnames, filenames in os.walk(SRC_ROOT):
         dirnames[:] = sorted(d for d in dirnames if not d.startswith("."))
         for fn in sorted(filenames):
-            if fn.lower().endswith(EXTENSIONS):
-                src_files.append(os.path.join(dirpath, fn))
-    src_files.sort()
+            lang = ext_map.get(os.path.splitext(fn)[1].lower())
+            if lang is not None:
+                src_files.append((os.path.join(dirpath, fn), lang))
+    src_files.sort(key=lambda p: p[0])
 
-    for path in src_files:
+    for path, lang in src_files:
         rel = os.path.relpath(path, SRC_ROOT).replace(os.sep, "/")
-        actions = classify(scan_file(path))
+        actions = classify(scan_file(path, lang), lang)
         file_actions.append((rel, actions))
         for a in actions:
             if a["kind"] == "config" and a["key"] == "coderoot":
@@ -841,6 +1064,7 @@ def main():
 
     print("Generated: %s" % OUTPUT)
     print("  title:      %s" % TITLE)
+    print("  source:     %s" % SRC_ROOT)
     print("  coderoot:   %s" % coderoot)
     print("  files:      %d" % len(src_files))
     print("  doc nodes:  %d" % count_nodes(nodes))

@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Smoke test: build/update a markdown table from VISUAL mode.
+"""Smoke test: build/update a markdown table from VISUAL and NORMAL mode.
 
 Select pipe rows in the editor (v + j...), press ';' and the app rebuilds
 them into a padded table with a '+---+' separator row, mirroring the web
-app's Ctrl+; (formatMarkdownTable).
+app's Ctrl+; (formatMarkdownTable). With no selection, ';' now auto-detects
+the whole table at the cursor and rebuilds it top to bottom.
 """
 import harness
 
 s = harness.launch()
 try:
-    s.require('Select a node to edit', 'app must start blank')
+    s.require('Keycode help', 'app must start blank')
 
     s.send(b'a')
     s.require('create_node', 'a should open the :create_node prompt')
@@ -41,7 +42,7 @@ try:
         s.dump()
         raise SystemExit(1)
 
-    # ';' rebuilds the padded table
+    # ';' rebuilds the padded table from the VISUAL selection
     s.send(b';')
     s.require('| name  | age |', 'header row should be padded')
     s.require('+-------+-----+', 'separator row should be rebuilt')
@@ -50,12 +51,32 @@ try:
     s.require('NORMAL', 'formatting should return to NORMAL mode')
     s.require('Table updated', 'status should report the update')
 
-    # a selection without pipes is a no-op
+    # NORMAL auto-detect is a no-op on prose (no pipes nearby)
     s.send(b'G')
-    s.send(b'v')
+    s.send(b'a')
+    s.send(b'\r')
+    s.send(b'plain prose here')
+    s.send(b'\x1b')
     s.send(b';')
-    s.require('No table detected', 'a selection without pipes should be a no-op')
+    s.require('No table detected', 'prose without pipes should be a no-op')
+    s.require('NORMAL', 'the no-op should leave NORMAL mode')
     s.require('| bob   | 5   |', 'the table should be left untouched')
+
+    # NORMAL auto-detect rebuilds a whole ragged table from any one row
+    s.send(b'a')
+    s.send(b'\r')
+    s.send(b'| x   | y |')
+    s.send(b'\r')
+    s.send(b'|-----|---|')
+    s.send(b'\r')
+    s.send(b'| longer | 2 |')
+    s.send(b'\x1b')
+    s.require('| longer | 2 |', 'raw table rows should be visible')
+    s.send(b';')
+    s.require('| x      | y |', 'header row should be padded via auto-detect')
+    s.require('+--------+---+', 'separator row should be rebuilt via auto-detect')
+    s.require('| longer | 2 |', 'data row should be padded via auto-detect')
+    s.require('Table updated', 'status should report the auto-detected update')
 
 finally:
     s.quit()

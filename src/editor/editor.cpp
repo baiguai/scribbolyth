@@ -10,6 +10,7 @@
 #include "../bookmark/bookmark.hpp"
 #include "../clipboard/clipboard.hpp"
 #include "../history/history.hpp"
+#include "../links/links.hpp"
 #include "../search/search.hpp"
 #include "../text/text.hpp"
 #include "../visual_block/visual_block.hpp"
@@ -90,6 +91,21 @@ namespace scribbolyth::editor
             }
             while (i < t.size() && t[i] == '-') ++i;
             return i == t.size();
+        }
+        //!
+
+        /*!
+            Table Line Check
+
+            !_method
+
+            A line belongs to a table when it contains a cell separator "|"
+            or is a divider row, so a whole table can be detected without a
+            selection by walking up and down the contiguous table lines.
+        */
+        bool IsTableLine(const std::string& s)
+        {
+            return s.find('|') != std::string::npos || IsDividerLine(s);
         }
         //!
 
@@ -598,6 +614,10 @@ namespace scribbolyth::editor
                 state_->operations["search_word"] = [this](const std::string&, int)
                 {
                     SearchWordUnderCursor();
+                };
+                state_->operations["follow_link"] = [this](const std::string&, int)
+                {
+                    FollowLinkUnderCursor();
                 };
                 state_->operations["replace"] = [this](const std::string& args, int)
                 {
@@ -1127,6 +1147,35 @@ namespace scribbolyth::editor
             //!
 
             /*!
+                Follow Link Under Cursor
+
+                !_method
+
+                If the cursor sits on a link, open it (URL) or reveal its target
+                node (`_Note_`). Otherwise report it in the status area.
+            */
+            void FollowLinkUnderCursor()
+            {
+                if (active_ == nullptr) return;
+                LoadIfChanged();
+                if (lines_.empty())
+                {
+                    state_->status = "No link under cursor";
+                    return;
+                }
+                const int row = std::min(row_, static_cast<int>(lines_.size()) - 1);
+                scribbolyth::links::Link link;
+                if (!scribbolyth::links::FindLinkInLine(
+                        lines_[static_cast<std::size_t>(row)], col_, link))
+                {
+                    state_->status = "No link under cursor";
+                    return;
+                }
+                scribbolyth::links::FollowLink(link, state_);
+            }
+            //!
+
+            /*!
                 Search Word Under Cursor
 
                 !_method
@@ -1380,6 +1429,20 @@ namespace scribbolyth::editor
                 int a = (visual_row_ >= 0) ? std::min(visual_row_, row_) : row_;
                 int b = (visual_row_ >= 0) ? std::max(visual_row_, row_) : row_;
                 if (a > b) std::swap(a, b);
+
+                // With no selection, walk up to the top of the enclosing table
+                // and down to its bottom so the whole table is rebuilt.
+                if (visual_row_ < 0)
+                {
+                    if (!IsTableLine(lines_[row_]))
+                    {
+                        state_->status = "No table detected";
+                        return;
+                    }
+                    while (a > 0 && IsTableLine(lines_[a - 1])) --a;
+                    while (b + 1 < static_cast<int>(lines_.size())
+                           && IsTableLine(lines_[b + 1])) ++b;
+                }
 
                 // Line-based analog of the web app's sel.trim(): drop blank
                 // lines hugging the selection edges.

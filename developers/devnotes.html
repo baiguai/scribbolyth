@@ -941,6 +941,13 @@
             /** @type {NodeT[]} */
             let treeData = [
   {
+    "id": "3ff8280c",
+    "title": "Label",
+    "content": "",
+    "children": [],
+    "expanded": false
+  },
+  {
     "id": "69277a1d",
     "title": "Introduction",
     "content": "Introduction\nDeveloper documentation for Scribbolyth.",
@@ -1807,28 +1814,28 @@
                 "expanded": false
               },
               {
-                "id": "96cd3a8f",
+                "id": "323ca9bf",
                 "title": "Parse Replacement Arguments",
                 "content": "Parse Replacement Arguments\n\nSignature: bool ParseReplaceArgs(const std::string& args, std::string& old_text, std::string& new_text)\nMethod: ParseReplaceArgs\nReturns: bool\nParameters:\n    args     const std::string&\n    old_text std::string&\n    new_text std::string&\n\nSplit \"old/new\" at the first unescaped '/'. A backslash-slash\n(\"\\/\") is a literal slash and is unescaped in both parts. Returns\nfalse when no separator is present.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "8c5d1e9a",
+                "id": "e0ffc710",
                 "title": "Read Clipboard",
                 "content": "Read Clipboard\n\nSignature: std::string ReadClipboard()\nMethod: ReadClipboard\nReturns: std::string\n\nRead the system clipboard (Win32 API on Windows, wl-paste/xclip/xsel\non POSIX). Returns \"\" when nothing is available or the clipboard is\nempty.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "323ca9bf",
+                "id": "073e6359",
                 "title": "Scroll Past Helper",
                 "content": "Scroll Past Helper\n\n!_method\n\n\nA transparent leaf node that records the height of the box it is\nassigned each frame. Rendered as an overlay share of the editor view,\nit reports the editor's viewport height so the trailing scroll-past-\nbottom padding can be sized to about half the viewport (Vim-like).",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "65d7a389",
+                "id": "8c5d1e9a",
                 "title": "Split Line Into Cells",
                 "content": "Split Line Into Cells\n\nSignature: std::vector<std::string> SplitCells(const std::string& line)\nMethod: SplitCells\nReturns: std::vector<std::string>\nParameters:\n    line const std::string&\n\nThis is used when creating / updating tables.",
                 "children": [],
@@ -1842,213 +1849,227 @@
                 "expanded": false
               },
               {
-                "id": "073e6359",
+                "id": "65d7a389",
+                "title": "Table Line Check",
+                "content": "Table Line Check\n\nSignature: bool IsTableLine(const std::string& s)\nMethod: IsTableLine\nReturns: bool\nParameters:\n    s const std::string&\n\nA line belongs to a table when it contains a cell separator \"|\"\nor is a divider row, so a whole table can be detected without a\nselection by walking up and down the contiguous table lines.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "e0380d55",
                 "title": "The Editor Class",
                 "content": "The Editor Class",
                 "children": [
                   {
-                    "id": "80d353fb",
+                    "id": "943aae2d",
                     "title": "Apply the Block Insert",
                     "content": "Apply the Block Insert\n\nSignature: void ApplyBlockInsert()\nMethod: ApplyBlockInsert\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "1a1af5d8",
+                    "id": "7fcc9d42",
                     "title": "Block Insert Struct",
                     "content": "Block Insert Struct\n\nstruct BlockInsert\n{\n    bool active = false;\n    bool at_end = false;\n    int col = 0;\n    std::vector<int> rows;\n    std::string pending;\n};",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "46c80e8d",
+                    "id": "7e4fbe6f",
                     "title": "Clamp",
                     "content": "Clamp\n\nSignature: void Clamp()\nMethod: Clamp\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "d1bd61a1",
+                    "id": "3aa6f392",
                     "title": "Delete Character",
                     "content": "Delete Character\n\nSignature: void DeleteChar()\nMethod: DeleteChar\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "25bbfd02",
+                    "id": "df35cf44",
                     "title": "Delete Inner Word",
                     "content": "Delete Inner Word\n\nSignature: void DeleteInnerWord()\nMethod: DeleteInnerWord\nReturns: void\n\nDelete the inner word under the cursor (diw): the word's\ncharacters only, keeping surrounding whitespace, mirroring the\nbounds chosen by SelectInnerWord().",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "943aae2d",
+                    "id": "30d4c920",
                     "title": "Delete Line",
                     "content": "Delete Line\n\nSignature: void DeleteLine()\nMethod: DeleteLine\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "c06a299a",
+                    "id": "a78f1005",
                     "title": "Delete Selection",
                     "content": "Delete Selection\n\nSignature: void DeleteSelection()\nMethod: DeleteSelection\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "3aa6f392",
+                    "id": "fad06de1",
                     "title": "Delete to End of Line",
                     "content": "Delete to End of Line\n\nSignature: void DeleteToEol()\nMethod: DeleteToEol\nReturns: void\n\nVim 'D' = 'd$': delete from the cursor to the end of the line,\nleaving the line itself (and the newline) in place.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "6e602de8",
+                    "id": "ab938768",
                     "title": "Delete Word Back",
                     "content": "Delete Word Back\n\nSignature: void DeleteWordBack()\nMethod: DeleteWordBack\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "df35cf44",
+                    "id": "2a375952",
                     "title": "Delete Word Forward",
                     "content": "Delete Word Forward\n\nSignature: void DeleteWordForward()\nMethod: DeleteWordForward\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "208870e2",
+                    "id": "d1bd61a1",
                     "title": "Enter Block Insert Mode",
                     "content": "Enter Block Insert Mode\n\nSignature: void EnterBlockInsert(bool at_end)\nMethod: EnterBlockInsert\nReturns: void\nParameters:\n    at_end bool\n\nEnter INSERT mode with a pending block insert (Vim Ctrl+V then\nI/A). The text the user types is accumulated in block_insert_ and\nshown live on the top row; ApplyBlockInsert() replays it on the\nremaining rows when Esc is pressed.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "8e5e3f57",
+                    "id": "76f23bf7",
+                    "title": "Follow Link Under Cursor",
+                    "content": "Follow Link Under Cursor\n\nSignature: void FollowLinkUnderCursor()\nMethod: FollowLinkUnderCursor\nReturns: void\n\nIf the cursor sits on a link, open it (URL) or reveal its target\nnode (`_Note_`). Otherwise report it in the status area.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "4889b012",
                     "title": "Get Word Under Cursor",
                     "content": "Get Word Under Cursor\n\nSignature: std::string WordUnderCursor() const\nMethod: WordUnderCursor\nReturns: std::string\nQualifiers: const\n\nThe word (letters, digits, '_') under the editor cursor, as Vim\ndefines it for '*'. When the cursor sits right after a word,\nthat word is used.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "9eff12dd",
+                    "id": "80d353fb",
                     "title": "Handle Backspace",
                     "content": "Handle Backspace\n\nSignature: void Backspace()\nMethod: Backspace\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "6435cfa1",
+                    "id": "208870e2",
                     "title": "Insert New Line",
                     "content": "Insert New Line\n\nSignature: void InsertNewline()\nMethod: InsertNewline\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "ab938768",
+                    "id": "6435cfa1",
                     "title": "Insert Text",
                     "content": "Insert Text\n\nSignature: void InsertText(const std::string& text)\nMethod: InsertText\nReturns: void\nParameters:\n    text const std::string&",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "32494df7",
+                    "id": "a222a350",
                     "title": "Move Back Word",
                     "content": "Move Back Word\n\nSignature: void CursorWordBack()\nMethod: CursorWordBack\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "7e4fbe6f",
+                    "id": "f5aeecdb",
                     "title": "Move Cursor Down",
                     "content": "Move Cursor Down\n\nSignature: void CursorDown()\nMethod: CursorDown\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "07f5a469",
+                    "id": "b1c576e0",
                     "title": "Move Cursor Left",
                     "content": "Move Cursor Left\n\nSignature: void CursorLeft()\nMethod: CursorLeft\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "f5aeecdb",
+                    "id": "d34427ee",
                     "title": "Move Cursor Right",
                     "content": "Move Cursor Right\n\nSignature: void CursorRight()\nMethod: CursorRight\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "cea2cac0",
+                    "id": "28d34adf",
                     "title": "Move Cursor to Position",
                     "content": "Move Cursor to Position\n\nSignature: void SetCursor(int row, int col)\nMethod: SetCursor\nReturns: void\nParameters:\n    row int\n    col int\n\nPlace the cursor on (row, col), clamped to the document.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "ac5632b8",
+                    "id": "07f5a469",
                     "title": "Move Cursor Up",
                     "content": "Move Cursor Up\n\nSignature: void CursorUp()\nMethod: CursorUp\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "0128d795",
+                    "id": "f5bf1b9c",
                     "title": "Move Forward Word",
                     "content": "Move Forward Word\n\nSignature: void CursorWordForward()\nMethod: CursorWordForward\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "30d4c920",
+                    "id": "c06a299a",
                     "title": "Move Line",
                     "content": "Move Line\n\nSignature: void MoveLine(int dir)\nMethod: MoveLine\nReturns: void\nParameters:\n    dir int\n\nVim-style line move: swap the current line with the one above\n(dir < 0) or below (dir > 0), carrying the cursor with it.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "f5bf1b9c",
+                    "id": "25bbfd02",
                     "title": "Move to Word End",
                     "content": "Move to Word End\n\nSignature: void CursorWordEnd()\nMethod: CursorWordEnd\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "d34427ee",
+                    "id": "32494df7",
                     "title": "Page Down",
                     "content": "Page Down\n\nSignature: void CursorPageDown()\nMethod: CursorPageDown\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "b1c576e0",
+                    "id": "0128d795",
                     "title": "Page Up",
                     "content": "Page Up\n\nSignature: void CursorPageUp()\nMethod: CursorPageUp\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "2a375952",
+                    "id": "9eff12dd",
                     "title": "Paste Text",
                     "content": "Paste Text\n\nSignature: void PasteText(const std::string& text)\nMethod: PasteText\nReturns: void\nParameters:\n    text const std::string&\n\nInsert clipboard-style text (possibly multi-line) at the cursor.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "e8523714",
+                    "id": "606c38b0",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "1d65cfc1",
+                        "id": "cefb667a",
                         "title": "Editable Flag",
                         "content": "Editable Flag\n\nSignature: bool Editable()\nMethod: Editable\nReturns: bool",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "cefb667a",
+                        "id": "514e462d",
                         "title": "Load if Changed",
                         "content": "Load if Changed\n\nSignature: void LoadIfChanged()\nMethod: LoadIfChanged\nReturns: void\n\nHow Comparison is Done:\n\nCompare by id, not just pointer: nodes live in std::vectors,\nso erasing one (e.g. deleting a node) can leave a different\nnode at the same address as the previously loaded one.",
                         "children": [],
@@ -2058,33 +2079,33 @@
                     "expanded": false
                   },
                   {
-                    "id": "1ac8444a",
+                    "id": "b4332f69",
                     "title": "Public Members",
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "e0380d55",
+                        "id": "371eef95",
                         "title": "Constructor",
                         "content": "Constructor\n\nSignature: Editor(std::shared_ptr<EditorState> state) : state_(std::move(state))\nConstructor: Editor\nParameters:\n    state std::shared_ptr<EditorState>\nInitializers:\n    state_ std::move(state)",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "b5b7722d",
+                        "id": "adcb0629",
                         "title": "Focusable Const",
                         "content": "Focusable Const\n\nbool Focusable() const override\n{\n    return true;\n}",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "adcb0629",
+                        "id": "8ffdfd76",
                         "title": "Ftxui Event",
                         "content": "Ftxui Event\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "371eef95",
+                        "id": "b5b7722d",
                         "title": "Render the Editor",
                         "content": "Render the Editor\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
                         "children": [],
@@ -2094,119 +2115,119 @@
                     "expanded": false
                   },
                   {
-                    "id": "f9cd7916",
+                    "id": "fd8c4b6e",
                     "title": "Rebuild Table",
                     "content": "Rebuild Table\n\nSignature: void FormatTable()\nMethod: FormatTable\nReturns: void\n\nRebuild the selected rows (or the current line when no VISUAL\nselection is active) into a padded markdown table with a\n\"+---+\" separator, mirroring the web app's formatMarkdownTable.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "76f23bf7",
+                    "id": "fd4ff245",
                     "title": "Replace All Text",
                     "content": "Replace All Text\n\nSignature: void ReplaceAllInString(std::string& line, const std::string& old_text, const std::string& new_text, int& count)\nMethod: ReplaceAllInString\nReturns: void\nParameters:\n    line     std::string&\n    old_text const std::string&\n    new_text const std::string&\n    count    int&\n\nReplace every occurrence of `old_text` in `line` with `new_text`,\ncounting the replacements.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "f874bf8c",
+                    "id": "f9cd7916",
                     "title": "Replace Text",
                     "content": "Replace Text\n\nSignature: void ReplaceText(const std::string& args)\nMethod: ReplaceText\nReturns: void\nParameters:\n    args const std::string&\n\nVim ':replace old/new' (also bound to 'R'): literal, global\nreplace of `old` with `new` inside the current node's text. In\nNORMAL mode the whole node text is processed (like :%s/../g);\nin VISUAL/VISUAL_LINE/VISUAL_BLOCK only the selected range is\ntouched. Only this node's text is ever changed.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "70d3e5b5",
+                    "id": "f874bf8c",
                     "title": "Replace Text in Range",
                     "content": "Replace Text in Range\n\nSignature: void ReplaceRange(std::string& line, int lo, int hi, const std::string& old_text, const std::string& new_text, int& count)\nMethod: ReplaceRange\nReturns: void\nParameters:\n    line     std::string&\n    lo       int\n    hi       int\n    old_text const std::string&\n    new_text const std::string&\n    count    int&\n\nReplace within the half-open column range [lo, hi) of `line`.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "fd4ff245",
+                    "id": "58c4ae22",
                     "title": "Replaced Message",
                     "content": "Replaced Message\n\nSignature: void FinishReplace(int count)\nMethod: FinishReplace\nReturns: void\nParameters:\n    count int",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "58c4ae22",
+                    "id": "6ae5a092",
                     "title": "Save Current File",
                     "content": "Save Current File\n\nSignature: void Save()\nMethod: Save\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "28d34adf",
+                    "id": "8e5e3f57",
                     "title": "Search Results Navigation",
                     "content": "Search Results Navigation\n\nSignature: void StepSearchOccurrence(int dir)\nMethod: StepSearchOccurrence\nReturns: void\nParameters:\n    dir int\n\nStep the cursor to the next (dir > 0) or previous (dir < 0)\noccurrence of the active search query inside the current node's\ntext, wrapping around like Vim's n/N. Also works while the\nhighlight is hidden by ':noh' (the query is kept). Does nothing\nwhen there is no search or the node has no occurrences.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "4889b012",
+                    "id": "70d3e5b5",
                     "title": "Search Word Under Cursor",
                     "content": "Search Word Under Cursor\n\nSignature: void SearchWordUnderCursor()\nMethod: SearchWordUnderCursor\nReturns: void\n\nVim '*': search for the word under the cursor and jump to its\nnext occurrence (wrapping). The word becomes the active find\nquery, so n/N continue stepping through it and the highlight\nshows every node that contains it.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "a9941d9f",
+                    "id": "cea2cac0",
                     "title": "Select First Search Match",
                     "content": "Select First Search Match\n\nSignature: void JumpToFirstSearchMatch()\nMethod: JumpToFirstSearchMatch\nReturns: void\n\nMove the cursor to the first occurrence of the active search\nquery in the freshly loaded node, so the '/' find and n/N\nnavigation reveal the match in the editor (as in Vim).",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "a222a350",
+                    "id": "6e602de8",
                     "title": "Select Inner Word",
                     "content": "Select Inner Word\n\nSignature: void SelectInnerWord()\nMethod: SelectInnerWord\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "fad06de1",
+                    "id": "fc6575a4",
                     "title": "Select Text",
                     "content": "Select Text\n\nSignature: std::string SelectionText() const\nMethod: SelectionText\nReturns: std::string\nQualifiers: const\n\nThe text currently under a VISUAL/VISUAL_LINE selection, or the\ncurrent line when no selection is active (NORMAL/INSERT).\nLine-based copies include a trailing newline so a cut+paste\nround-trip reproduces the lines.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "a78f1005",
+                    "id": "7807cbbb",
                     "title": "Selection to Lower",
                     "content": "Selection to Lower\n\nSignature: void LowerSelection()\nMethod: LowerSelection\nReturns: void\n\nVim 'u' (VISUAL): lowercase the selected text.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "fc6575a4",
+                    "id": "f0ae98ed",
                     "title": "Selection to Upper",
                     "content": "Selection to Upper\n\nSignature: void UpperSelection()\nMethod: UpperSelection\nReturns: void\n\nVim 'U' (VISUAL): uppercase the selected text. Folding never\nchanges line count or line length, so nothing is erased or\nreassembled; the cursor is placed at the start of the selection\nand the mode returns to NORMAL.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "6ae5a092",
+                    "id": "46c80e8d",
                     "title": "Split Lines",
                     "content": "Split Lines\n\nSignature: static std::vector<std::string> SplitLines(const std::string& text)\nMethod: SplitLines\nReturns: static std::vector<std::string>\nParameters:\n    text const std::string&",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "fd8c4b6e",
+                    "id": "ac5632b8",
                     "title": "To Upper / To Lower",
                     "content": "To Upper / To Lower\n\nSignature: static char ToUpperAscii(char c)\nMethod: ToUpperAscii\nReturns: static char\nParameters:\n    c char\n\nSignature: static char ToLowerAscii(char c)\nMethod: ToLowerAscii\nReturns: static char\nParameters:\n    c char\n\n                ASCII-only case folding: the editor is byte-oriented (columns =\n                bytes), so folding a full byte would corrupt UTF-8 text. Other\n                bytes (letters with diacritics, CJK, emoji, ...) are left as-is.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "f0ae98ed",
+                    "id": "1a1af5d8",
                     "title": "Transform Selection",
                     "content": "Transform Selection\n\nSignature: void TransformSelection(char (*fold)(char), const char* status_msg)\nMethod: TransformSelection\nReturns: void\nParameters:\n    status_msg const char*",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "7807cbbb",
+                    "id": "7f2f4a1b",
                     "title": "Variables",
                     "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nscribbolyth::treeview::TreeNode* active_ = nullptr;\nstd::string active_id_;\nstd::vector<std::string> lines_;\nint row_ = 0;\nint col_ = 0;\nint last_col_ = 0;\nint visual_row_ = -1;\nint visual_col_ = -1;\nint viewport_height_ = 0;",
                     "children": [],
@@ -2216,14 +2237,14 @@
                 "expanded": false
               },
               {
-                "id": "e0ffc710",
+                "id": "96cd3a8f",
                 "title": "Write to the Clipboard",
                 "content": "Write to the Clipboard\n\nSignature: bool WriteClipboard(const std::string& text)\nMethod: WriteClipboard\nReturns: bool\nParameters:\n    text const std::string&\n\nWrite to the system clipboard (Win32 API on Windows,\nwl-copy/xclip/xsel on POSIX). Returns false when no tool is\navailable.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "7fcc9d42",
+                "id": "8c9c6b99",
                 "title": "Make the Editor",
                 "content": "Make the Editor\n\nSignature: ftxui::Component MakeEditor(std::shared_ptr<EditorState> state)\nMethod: MakeEditor\nReturns: ftxui::Component\nParameters:\nstate std::shared_ptr<EditorState>",
                 "children": [],
@@ -3435,6 +3456,20 @@
                 "expanded": false
               },
               {
+                "id": "52f69581",
+                "title": "Find Link In Line",
+                "content": "Find Link In Line\n\nSignature: bool FindLinkInLine(const std::string& line, int col, Link& out)\nMethod: FindLinkInLine\nReturns: bool\nParameters:\n    line const std::string&\n    col  int\n    out  Link&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "5d216d7f",
+                "title": "Follow Link",
+                "content": "Follow Link\n\nSignature: void FollowLink(Link link, const std::shared_ptr<EditorState>& state)\nMethod: FollowLink\nReturns: void\nParameters:\n    link  Link\n    state const std::shared_ptr<EditorState>&",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "96a24701",
                 "title": "Is Note Target",
                 "content": "Is Note Target\n\nSignature: bool IsNoteTarget(const std::string& target)\nMethod: IsNoteTarget\nReturns: bool\nParameters:\n    target const std::string&",
@@ -3449,87 +3484,87 @@
                 "expanded": false
               },
               {
-                "id": "52f69581",
+                "id": "f16ae7a3",
                 "title": "Links Dialog Class",
                 "content": "Links Dialog Class",
                 "children": [
                   {
-                    "id": "92430517",
+                    "id": "7f63dc44",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "81ba27ed",
+                        "id": "c2a65f3e",
                         "title": "Activate",
                         "content": "Activate\n\nSignature: void Activate()\nMethod: Activate\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "2e1dc3e8",
+                        "id": "a8e874a5",
                         "title": "Close",
                         "content": "Close\n\nSignature: void Close()\nMethod: Close\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "f7c1bda6",
+                        "id": "a11e8a65",
                         "title": "Compute Top",
                         "content": "Compute Top\n\nSignature: int ComputeTop(int sel, int total) const\nMethod: ComputeTop\nReturns: int\nQualifiers: const\nParameters:\n    sel   int\n    total int",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "18aa5235",
+                        "id": "5132d756",
                         "title": "Copy Selected",
                         "content": "Copy Selected\n\nSignature: void CopySelected()\nMethod: CopySelected\nReturns: void\n\nMirror of the HTML app's `y` key: copy a URL verbatim, or a note\nlink as its `_Title_` reference. Missing notes copy nothing.",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "a8e874a5",
+                        "id": "49af98ad",
                         "title": "Move Selection Up/Down",
                         "content": "Move Selection Up/Down\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "49af98ad",
+                        "id": "f7c1bda6",
                         "title": "Move To End",
                         "content": "Move To End\n\nSignature: void MoveToEnd()\nMethod: MoveToEnd\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "c2a65f3e",
+                        "id": "18aa5235",
                         "title": "Move To Start",
                         "content": "Move To Start\n\nSignature: void MoveToStart()\nMethod: MoveToStart\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "c6e8deec",
+                        "id": "81ba27ed",
                         "title": "On Mouse",
                         "content": "On Mouse\n\nSignature: bool OnMouse(ftxui::Mouse mouse)\nMethod: OnMouse\nReturns: bool\nParameters:\n    mouse ftxui::Mouse",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "5132d756",
+                        "id": "209f30f6",
                         "title": "Recompute",
                         "content": "Recompute\n\nSignature: void Recompute()\nMethod: Recompute\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "c87db8b7",
+                        "id": "2e1dc3e8",
                         "title": "Static Variables",
                         "content": "Static Variables\n\n--------------------------------------------------------------------------------\n\nstatic constexpr int kVisibleRows = 18;\nstatic constexpr int kDoubleClickMs = 500;",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "a11e8a65",
+                        "id": "5a9c204f",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nftxui::Box box_;\nstd::vector<Link> entries_;\nstd::vector<std::string> rendered_;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 20;\nint last_click_index_ = -1;\nstd::chrono::steady_clock::time_point last_click_time_;",
                         "children": [],
@@ -3539,33 +3574,33 @@
                     "expanded": false
                   },
                   {
-                    "id": "b302c5f3",
+                    "id": "ad062dbe",
                     "title": "Public Members",
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "5d216d7f",
+                        "id": "334fa214",
                         "title": "Constructor",
                         "content": "Constructor\n\nSignature: LinksDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: LinksDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "334fa214",
+                        "id": "fd7b2b5b",
                         "title": "Ftxui Event Call",
                         "content": "Ftxui Event Call\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "cd2a63d7",
+                        "id": "c87db8b7",
                         "title": "Ftxui Render Call",
                         "content": "Ftxui Render Call\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "f16ae7a3",
+                        "id": "cd2a63d7",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nbool Focusable() const override { return true; }\n\nbool pending_g_ = false;",
                         "children": [],
@@ -3613,7 +3648,7 @@
                 "expanded": false
               },
               {
-                "id": "5a9c204f",
+                "id": "fd5db5ef",
                 "title": "Make Links Dialog",
                 "content": "Make Links Dialog\n\nSignature: ftxui::Component MakeLinksDialog(std::shared_ptr<EditorState> state, bool* show)\nMethod: MakeLinksDialog\nReturns: ftxui::Component\nParameters:\nstate std::shared_ptr<EditorState>\nshow  bool*",
                 "children": [],
@@ -3631,6 +3666,20 @@
                 "id": "83db20ea",
                 "title": "Collect Links",
                 "content": "Collect Links\n\n!_method\n\nCollect every link in `content`, deduplicated by target, in order.\nMirrors the HTML app's openLinksDialog() scanning rules.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "e58a4090",
+                "title": "Find Link In Line",
+                "content": "Find Link In Line\n\n!_method\n\nFind the link whose span covers column `col` (0-based) on a single line.\nMarkdown links are matched before standalone URLs so a cursor sitting on\nthe URL half of `[Label](https://...)` still reports the labeled link.\nReturns true and fills `out` when a link is found.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "b96f5816",
+                "title": "Follow Link",
+                "content": "Follow Link\n\n!_method\n\nOpen a URL link externally, or reveal the node targeted by a `_Note_`\nlink. Status feedback is written to `state->status`, mirroring the links\ndialog's Activate().",
                 "children": [],
                 "expanded": false
               },
@@ -3688,7 +3737,7 @@
               {
                 "id": "1e0a460c",
                 "title": "Operations",
-                "content": "Operations\nAll of the key binding operations are declared here.\n\nExamples:\n\nstate->operations[\"quit\"] = [state, quit](const std::string&, int)\n{\n    if (state->changed)\n    {\n        state->status = \"Unsaved changes - use :w to save or :qa! to quit without saving\";\n        return;\n    }\n    quit();\n};\nstate->operations[\"quit_force\"] = [quit](const std::string&, int) { quit(); };\nstate->commands[\"qa\"] = \"quit\";\nstate->commands[\"qa!\"] = \"quit_force\";\n\nstate->operations[\"show_version\"] = [state, &version](const std::string&, int)\n{\n    state->command_buffer = \":\" + std::string(version);\n    state->command_cursor = static_cast<int>(state->command_buffer.size());\n    state->command_keep_open = true;\n};\nstate->commands[\"version\"] = \"show_version\";\n\nbool show_help = false;\nstate->operations[\"show_help\"] = [&show_help](const std::string&, int) { show_help = true; };\n\nbool show_links = false;\nstate->operations[\"links\"] = [&show_links](const std::string&, int) { show_links = true; };\nstate->commands[\"links\"] = \"links\";",
+                "content": "Operations\nAll of the key binding operations are declared here.\nYou can look in the commands.conf and search for the OP in this code.\n\nExamples:\n\nstate->operations[\"quit\"] = [state, quit](const std::string&, int)\n{\n    if (state->changed)\n    {\n        state->status = \"Unsaved changes - use :w to save or :qa! to quit without saving\";\n        return;\n    }\n    quit();\n};\nstate->operations[\"quit_force\"] = [quit](const std::string&, int) { quit(); };\nstate->commands[\"qa\"] = \"quit\";\nstate->commands[\"qa!\"] = \"quit_force\";\n\nstate->operations[\"show_version\"] = [state, &version](const std::string&, int)\n{\n    state->command_buffer = \":\" + std::string(version);\n    state->command_cursor = static_cast<int>(state->command_buffer.size());\n    state->command_keep_open = true;\n};\nstate->commands[\"version\"] = \"show_version\";\n\nbool show_help = false;\nstate->operations[\"show_help\"] = [&show_help](const std::string&, int) { show_help = true; };\n\nbool show_links = false;\nstate->operations[\"links\"] = [&show_links](const std::string&, int) { show_links = true; };\nstate->commands[\"links\"] = \"links\";",
                 "children": [],
                 "expanded": false
               },
@@ -3702,7 +3751,7 @@
               {
                 "id": "33648a43",
                 "title": "Variables",
-                "content": "Variables\nConstructs the persistent editor state as well as the editor and treeview elements.\n\n--------------------------------------------------------------------------------\n\nauto version = \"1.0.1\";\n\nauto state = std::make_shared<EditorState>();\n\nauto editor_comp = scribbolyth::editor::MakeEditor(state);\nauto treeview_comp = scribbolyth::treeview::MakeTreeView(state);\n\nstate->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };\nstate->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };\n\nauto treeview_wrap = treeview_comp;\nauto editor_wrap = editor_comp;\n\nauto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);\n\nauto screen = ScreenInteractive::Fullscreen();\nauto quit = screen.ExitLoopClosure();\n\n--------------------------------------------------------------------------------",
+                "content": "Variables\nConstructs the persistent editor state as well as the editor and treeview elements.\n\n--------------------------------------------------------------------------------\n\nauto version = \"1.0.2\";\n\nauto state = std::make_shared<EditorState>();\n\nauto editor_comp = scribbolyth::editor::MakeEditor(state);\nauto treeview_comp = scribbolyth::treeview::MakeTreeView(state);\n\nstate->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };\nstate->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };\n\nauto treeview_wrap = treeview_comp;\nauto editor_wrap = editor_comp;\n\nauto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);\n\nauto screen = ScreenInteractive::Fullscreen();\nauto quit = screen.ExitLoopClosure();\n\n--------------------------------------------------------------------------------",
                 "children": [],
                 "expanded": false
               },
@@ -4838,7 +4887,7 @@
               {
                 "id": "8a8e8780",
                 "title": "Push Recent File",
-                "content": "Push Recent File\n\nSignature: void TreeView::PushRecentFile(const std::string& path)\nMethod: PushRecentFile\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nMove `path` to the front of the recent-files list, capping its size.",
+                "content": "Push Recent File\n\nSignature: void TreeView::PushRecentFile(const std::string path)\nMethod: PushRecentFile\nReturns: void TreeView\nParameters:\n    path const std::string\n\nMove `path` to the front of the recent-files list, capping its size.",
                 "children": [],
                 "expanded": false
               },
@@ -4893,8 +4942,8 @@
               },
               {
                 "id": "53a8ce22",
-                "title": "TreeView Component",
-                "content": "TreeView Component\n\n!_method\n\nFTXUI component owning the document tree (roots_), the current\nselection, and every tree-mode operation. Key events arrive through\nthe operation map installed in the constructor; this file never\ndecodes keys itself.",
+                "title": "TreeView Component Class",
+                "content": "TreeView Component Class\n\nFTXUI component owning the document tree (roots_), the current\nselection, and every tree-mode operation. Key events arrive through\nthe operation map installed in the constructor; this file never\ndecodes keys itself.",
                 "children": [],
                 "expanded": false
               },
@@ -5226,7 +5275,7 @@
             let importedFileName = null;
 
             let fileName = "help";
-            let curVersion = "1.0.12"
+            let curVersion = "1.0.13"
             let showInitHelp = false;
             let headerTemplate = "__| ^*^ |__";
             let selectedId = null;
@@ -5582,6 +5631,7 @@
                     { key: "v", mode: "NORMAL", description: "Enter VISUAL mode" },
                     { key: "V", mode: "NORMAL", description: "Enter VISUAL LINE mode" },
                     { key: "Control+v", mode: "NORMAL", description: "Enter VISUAL BLOCK mode" },
+                    { key: "Control+l", mode: "NORMAL", description: "Open the link under the cursor" },
                     { key: "\\", mode: "NORMAL", description: "Search, then create a child node with links to all results" },
                     { key: "v,i,w", mode: "NORMAL", description: "Select the word at cursor" },
                     { key: "d,i,w", mode: "NORMAL", description: "Delete the word at cursor" },
@@ -5892,35 +5942,8 @@
 
                 editorArea.addEventListener('dblclick', (e) => {
                     if (readOnly) return;
-                    const cursorPos = editorArea.selectionStart;
-                    if (cursorPos < 0) return;
-                    const content = editorArea.value;
-                    const link = findLinkAtCursor(content, cursorPos);
-                    if (!link) return;
+                    if (!openLinkAtCursor()) return;
                     e.preventDefault();
-                    if (link.type === 'url') {
-                        window.open(link.target, '_blank');
-                    } else if (link.type === 'note') {
-                        const title = link.title.toLowerCase();
-                        let foundNode = null;
-                        (function walk(nodes) {
-                            for (const n of nodes) {
-                                if (n.title && n.title.toLowerCase() === title) {
-                                    foundNode = n;
-                                    return;
-                                }
-                                if (n.children && n.children.length) walk(n.children);
-                                if (foundNode) return;
-                            }
-                        })(treeData);
-                        if (foundNode) {
-                            expandToNode(foundNode.id);
-                            selectedId = foundNode.id;
-                            editing = false;
-                            closeLinksDialog();
-                            render();
-                        }
-                    }
                 });
 
                 function syncFile() {
@@ -6865,7 +6888,14 @@
                             moveChar(newPosBack, true);
                             performed = true;
                             break;
-                        case 'l': // Move right
+                        case 'l': // Move right, or open the link at the cursor (Ctrl+l)
+                            if ((e.ctrlKey || e.metaKey) && !mode_visual && !mode_visual_block) {
+                                if (!openLinkAtCursor()) {
+                                    showMessage("No link at cursor");
+                                }
+                                performed = true;
+                                break;
+                            }
                             let newPosFwd = Math.min(editorArea.value.length, editorArea.selectionStart + mode_repeat);
                             moveChar(newPosFwd, false);
                             performed = true;
@@ -8168,18 +8198,65 @@
                 const end = ta.selectionEnd;
                 const value = ta.value;
 
-                // Get selection or current line if none
-                const sel = start !== end
-                    ? value.slice(start, end)
-                    : (() => {
-                        const ls = value.lastIndexOf("\n", start - 1) + 1;
-                        const le = value.indexOf("\n", start);
-                        return value.slice(ls, le === -1 ? value.length : le);
-                    })();
+                let selStart = start;
+                let selEnd = end;
+                let sel;
 
-                if (!/\|/.test(sel)) return; // no table detected
+                if (start !== end) {
+                    sel = value.slice(start, end);
+                } else {
+                    // Get current line
+                    const ls = value.lastIndexOf("\n", start - 1) + 1;
+                    const le = value.indexOf("\n", start);
+                    const currentLine = value.slice(ls, le === -1 ? value.length : le);
+                    const dividerPatternCur = /^\s*(?:[\|+]\s*-+\s*(?:[\|+]\s*-+\s*)*[\|+]|-+)\s*$/;
+                    if (!/\|/.test(currentLine) && !dividerPatternCur.test(currentLine)) return; // no table detected
 
-                const rawLines = sel.trim().split(/\r?\n/);
+                    // Walk up to find start of table
+                    let lineStart = ls;
+                    let pos = ls - 1;
+                    const dividerPatternWalk = /^\s*(?:[\|+]\s*-+\s*(?:[\|+]\s*-+\s*)*[\|+]|-+)\s*$/;
+                    while (pos >= 0) {
+                        const prevLineStart = value.lastIndexOf("\n", pos - 1) + 1;
+                        const prevLineEnd = value.indexOf("\n", pos);
+                        const prevLine = value.slice(prevLineStart, prevLineEnd === -1 ? pos + 1 : prevLineEnd);
+                        // Stop if line is empty (or just whitespace)
+                        if (/^\s*$/.test(prevLine)) break;
+                        // Table line contains | or is a divider
+                        if (/\|/.test(prevLine) || dividerPatternWalk.test(prevLine)) {
+                            lineStart = prevLineStart;
+                            pos = prevLineStart - 1;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    // Walk down to find end of table
+                    let lineEnd = le === -1 ? value.length : le;
+                    let posDown = le === -1 ? value.length : le;
+                    while (posDown < value.length) {
+                        const nextLineStart = posDown + (value[posDown] === "\n" ? 1 : 0);
+                        if (nextLineStart > value.length) break;
+                        const nextLineEnd = value.indexOf("\n", nextLineStart);
+                        const nextLine = value.slice(nextLineStart, nextLineEnd === -1 ? value.length : nextLineEnd);
+                        if (/^\s*$/.test(nextLine)) break;
+                        if (/\|/.test(nextLine) || dividerPatternWalk.test(nextLine)) {
+                            lineEnd = nextLineEnd === -1 ? value.length : nextLineEnd;
+                            posDown = nextLineEnd === -1 ? value.length : nextLineEnd;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    selStart = lineStart;
+                    selEnd = lineEnd;
+                    sel = value.slice(selStart, selEnd);
+                }
+
+                const dividerPatternCheck = /^\s*(?:[\|+]\s*-+\s*(?:[\|+]\s*-+\s*)*[\|+]|-+)\s*$/;
+                if (!/\|/.test(sel) && !dividerPatternCheck.test(sel)) return; // no table detected
+
+                const rawLines = sel.replace(/\r\n/g, "\n").split("\n");
 
                 // Matches:
                 //   | ---- | ---- |   (old markdown style)
@@ -8239,9 +8316,13 @@
                     finalRows.length = 0;
                     finalRows.push(...padded);
                 }
-                finalRows.push("");
 
-                ta.setRangeText(finalRows.join("\n"), start, end, "select");
+
+                // Preserve trailing newline if original selection ended at line boundary
+                const formatted = finalRows.join("\n");
+                const endsAtNewline = selEnd < value.length && value[selEnd] === "\n";
+                const result = endsAtNewline && !formatted.endsWith("\n") ? formatted + "\n" : formatted;
+                ta.setRangeText(result, selStart, selEnd, "select");
             }
 
             function renumberOrderedList() {
@@ -8384,6 +8465,43 @@
             }
 
         //---- Links -----------------------------------------------------------
+            function openLinkAtCursor() {
+                const cursorPos = editorArea.selectionStart;
+                if (cursorPos < 0) return false;
+                const link = findLinkAtCursor(editorArea.value, cursorPos);
+                if (!link) return false;
+
+                if (link.type === 'url') {
+                    window.open(link.target, '_blank');
+                    return true;
+                }
+
+                if (link.type === 'note') {
+                    const title = link.title.toLowerCase();
+                    let foundNode = null;
+                    (function walk(nodes) {
+                        for (const n of nodes) {
+                            if (n.title && n.title.toLowerCase() === title) {
+                                foundNode = n;
+                                return;
+                            }
+                            if (n.children && n.children.length) walk(n.children);
+                            if (foundNode) return;
+                        }
+                    })(treeData);
+                    if (foundNode) {
+                        expandToNode(foundNode.id);
+                        selectedId = foundNode.id;
+                        editing = false;
+                        closeLinksDialog();
+                        render();
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
             function findLinkAtCursor(content, cursorPos) {
                 const markdownRegex = /\[([^\]]+)\](?:[ \t]*\r?\n[ \t]*|[ \t]*)(https?:\/\/\S+|file:\/\/\S+|_[^_]+_)/gi;
                 let match;
@@ -10585,7 +10703,7 @@
                         return;
                     }
 
-                    if (e.ctrlKey && e.key === ";") {
+                    if ((e.ctrlKey || e.metaKey) && e.key === ";") {
                         e.preventDefault();
                         formatMarkdownTable();
                     }

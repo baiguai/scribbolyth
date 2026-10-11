@@ -29,6 +29,7 @@ So it has the familiar Vim modes plus a TREE mode for managing the treeview.
 * Memory leak check script.
 * Build and run scripts.
 * Configuration driven MakeFiles generation.
+* A set of Python-based tests are included in this repo along with a runtests shell script.
 
 
 # Downloading

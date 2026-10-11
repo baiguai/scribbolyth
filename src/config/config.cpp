@@ -76,6 +76,7 @@ namespace scribbolyth::config
             if (token == "CtrlDash")    { out = Event::Special("\x1f"); return true; }
             if (token == "CtrlQuote")   { out = Event::Special("\x07"); return true; }
             if (token == "CtrlRBracket"){ out = Event::Special("\x1d"); return true; }
+            if (token == "CtrlL")       { out = Event::Special("\x0c"); return true; }
             if (token == "Ctrl;")       { out = Event::Character(';'); return true; }
             if (token == "CtrlArrowUp")    { out = Event::ArrowUpCtrl;    return true; }
             if (token == "CtrlArrowDown")  { out = Event::ArrowDownCtrl;  return true; }

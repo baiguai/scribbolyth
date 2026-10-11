@@ -213,6 +213,120 @@ namespace scribbolyth::links
     }
 
     /*!
+        Find Link In Line
+
+        !_method
+    */
+    bool FindLinkInLine(const std::string& line, int col, Link& out)
+    {
+        if (line.empty() || col < 0) return false;
+        const int size = static_cast<int>(line.size());
+        const auto covers = [col, size](int start, int end)
+        {
+            return col >= start && col < std::min(end, size);
+        };
+
+        // Markdown-style first so a cursor on the URL half of
+        // [Label](target) still reports the labeled link.
+        for (std::sregex_iterator it(line.begin(), line.end(), kMarkdownRegex), finish;
+             it != finish; ++it)
+        {
+            const std::smatch& match = *it;
+            const int start = static_cast<int>(match.position(0));
+            const int end = start + static_cast<int>(match.length(0));
+            if (covers(start, end))
+            {
+                out = Link{Trim(match[1].str()), Trim(match[2].str()),
+                           nullptr, true, true};
+                return true;
+            }
+        }
+
+        // Standalone URLs.
+        for (std::sregex_iterator it(line.begin(), line.end(), kUrlRegex), finish;
+             it != finish; ++it)
+        {
+            const std::smatch& match = *it;
+            const int start = static_cast<int>(match.position(0));
+            const int end = start + static_cast<int>(match.length(0));
+            if (covers(start, end))
+            {
+                const std::string target = match[0].str();
+                out = Link{target, target, nullptr, false, true};
+                return true;
+            }
+        }
+
+        // _Note_ references. Group 1 is the title without underscores, so the
+        // wrapped span extends one character either side.
+        for (std::sregex_iterator it(line.begin(), line.end(), kNoteRegex), finish;
+             it != finish; ++it)
+        {
+            const std::smatch& match = *it;
+            const int inner = static_cast<int>(match.position(1));
+            const int start = inner - 1;
+            const int end = inner + static_cast<int>(match.length(1)) + 1;
+            if (covers(start, end))
+            {
+                const std::string title = Trim(match[1].str());
+                out = Link{title, "_" + title + "_", nullptr, false, true};
+                return true;
+            }
+        }
+
+        return false;
+    }
+    //!
+
+    /*!
+        Follow Link
+
+        !_method
+    */
+    void FollowLink(Link link, const std::shared_ptr<EditorState>& state)
+    {
+        if (!state) return;
+
+        if (IsUrlTarget(link.target))
+        {
+            OpenExternal(link.target);
+            state->status = "Opened: " + link.target;
+            return;
+        }
+
+        if (IsNoteTarget(link.target))
+        {
+            const std::string title = NoteTitle(link.target);
+            treeview::TreeNode* node = nullptr;
+            if (state->collect_all_nodes)
+            {
+                const std::string key = Lower(Trim(title));
+                for (const auto& item : state->collect_all_nodes())
+                {
+                    if (Lower(Trim(item.first->name)) == key)
+                    {
+                        node = item.first;
+                        break;
+                    }
+                }
+            }
+            if (node && state->reveal_node)
+            {
+                state->reveal_node(node);
+                state->status = "Followed: " + title;
+            }
+            else
+            {
+                state->status = "Node not found: " + title;
+            }
+            return;
+        }
+
+        state->status = "Unrecognized link format";
+    }
+    //!
+
+    /*!
         Links Dialog Class
     */
     class LinksDialog : public ftxui::ComponentBase

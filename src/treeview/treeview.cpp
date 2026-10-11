@@ -85,9 +85,7 @@ namespace scribbolyth::treeview
     //!
 
     /*!
-        TreeView Component
-
-        !_method
+        TreeView Component Class
 
         FTXUI component owning the document tree (roots_), the current
         selection, and every tree-mode operation. Key events arrive through
@@ -500,7 +498,7 @@ namespace scribbolyth::treeview
             std::string CollectBranchTxt(const TreeNode& node) const;
             std::string ExportStartDir() const;
             void PersistLastFile();
-            void PushRecentFile(const std::string& path);
+            void PushRecentFile(const std::string path);
             void SnapshotUndo();
             void ApplyUndo(std::size_t index);
             void ClearUndo();
@@ -1305,7 +1303,7 @@ namespace scribbolyth::treeview
 
         Move `path` to the front of the recent-files list, capping its size.
     */
-    void TreeView::PushRecentFile(const std::string& path)
+    void TreeView::PushRecentFile(const std::string path)
     {
         if (path.empty()) return;
         auto& recent = state_->recent_files;
