@@ -969,7 +969,7 @@
             let importedFileName = null;
 
             let fileName = "help";
-            let curVersion = "1.0.12"
+            let curVersion = "1.0.13"
             let showInitHelp = false;
             let headerTemplate = "__| ^*^ |__";
             let selectedId = null;
@@ -1325,6 +1325,7 @@
                     { key: "v", mode: "NORMAL", description: "Enter VISUAL mode" },
                     { key: "V", mode: "NORMAL", description: "Enter VISUAL LINE mode" },
                     { key: "Control+v", mode: "NORMAL", description: "Enter VISUAL BLOCK mode" },
+                    { key: "Control+l", mode: "NORMAL", description: "Open the link under the cursor" },
                     { key: "\\", mode: "NORMAL", description: "Search, then create a child node with links to all results" },
                     { key: "v,i,w", mode: "NORMAL", description: "Select the word at cursor" },
                     { key: "d,i,w", mode: "NORMAL", description: "Delete the word at cursor" },
@@ -1635,35 +1636,8 @@
 
                 editorArea.addEventListener('dblclick', (e) => {
                     if (readOnly) return;
-                    const cursorPos = editorArea.selectionStart;
-                    if (cursorPos < 0) return;
-                    const content = editorArea.value;
-                    const link = findLinkAtCursor(content, cursorPos);
-                    if (!link) return;
+                    if (!openLinkAtCursor()) return;
                     e.preventDefault();
-                    if (link.type === 'url') {
-                        window.open(link.target, '_blank');
-                    } else if (link.type === 'note') {
-                        const title = link.title.toLowerCase();
-                        let foundNode = null;
-                        (function walk(nodes) {
-                            for (const n of nodes) {
-                                if (n.title && n.title.toLowerCase() === title) {
-                                    foundNode = n;
-                                    return;
-                                }
-                                if (n.children && n.children.length) walk(n.children);
-                                if (foundNode) return;
-                            }
-                        })(treeData);
-                        if (foundNode) {
-                            expandToNode(foundNode.id);
-                            selectedId = foundNode.id;
-                            editing = false;
-                            closeLinksDialog();
-                            render();
-                        }
-                    }
                 });
 
                 function syncFile() {
@@ -2608,7 +2582,14 @@
                             moveChar(newPosBack, true);
                             performed = true;
                             break;
-                        case 'l': // Move right
+                        case 'l': // Move right, or open the link at the cursor (Ctrl+l)
+                            if ((e.ctrlKey || e.metaKey) && !mode_visual && !mode_visual_block) {
+                                if (!openLinkAtCursor()) {
+                                    showMessage("No link at cursor");
+                                }
+                                performed = true;
+                                break;
+                            }
                             let newPosFwd = Math.min(editorArea.value.length, editorArea.selectionStart + mode_repeat);
                             moveChar(newPosFwd, false);
                             performed = true;
@@ -3911,18 +3892,65 @@
                 const end = ta.selectionEnd;
                 const value = ta.value;
 
-                // Get selection or current line if none
-                const sel = start !== end
-                    ? value.slice(start, end)
-                    : (() => {
-                        const ls = value.lastIndexOf("\n", start - 1) + 1;
-                        const le = value.indexOf("\n", start);
-                        return value.slice(ls, le === -1 ? value.length : le);
-                    })();
+                let selStart = start;
+                let selEnd = end;
+                let sel;
 
-                if (!/\|/.test(sel)) return; // no table detected
+                if (start !== end) {
+                    sel = value.slice(start, end);
+                } else {
+                    // Get current line
+                    const ls = value.lastIndexOf("\n", start - 1) + 1;
+                    const le = value.indexOf("\n", start);
+                    const currentLine = value.slice(ls, le === -1 ? value.length : le);
+                    const dividerPatternCur = /^\s*(?:[\|+]\s*-+\s*(?:[\|+]\s*-+\s*)*[\|+]|-+)\s*$/;
+                    if (!/\|/.test(currentLine) && !dividerPatternCur.test(currentLine)) return; // no table detected
 
-                const rawLines = sel.trim().split(/\r?\n/);
+                    // Walk up to find start of table
+                    let lineStart = ls;
+                    let pos = ls - 1;
+                    const dividerPatternWalk = /^\s*(?:[\|+]\s*-+\s*(?:[\|+]\s*-+\s*)*[\|+]|-+)\s*$/;
+                    while (pos >= 0) {
+                        const prevLineStart = value.lastIndexOf("\n", pos - 1) + 1;
+                        const prevLineEnd = value.indexOf("\n", pos);
+                        const prevLine = value.slice(prevLineStart, prevLineEnd === -1 ? pos + 1 : prevLineEnd);
+                        // Stop if line is empty (or just whitespace)
+                        if (/^\s*$/.test(prevLine)) break;
+                        // Table line contains | or is a divider
+                        if (/\|/.test(prevLine) || dividerPatternWalk.test(prevLine)) {
+                            lineStart = prevLineStart;
+                            pos = prevLineStart - 1;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    // Walk down to find end of table
+                    let lineEnd = le === -1 ? value.length : le;
+                    let posDown = le === -1 ? value.length : le;
+                    while (posDown < value.length) {
+                        const nextLineStart = posDown + (value[posDown] === "\n" ? 1 : 0);
+                        if (nextLineStart > value.length) break;
+                        const nextLineEnd = value.indexOf("\n", nextLineStart);
+                        const nextLine = value.slice(nextLineStart, nextLineEnd === -1 ? value.length : nextLineEnd);
+                        if (/^\s*$/.test(nextLine)) break;
+                        if (/\|/.test(nextLine) || dividerPatternWalk.test(nextLine)) {
+                            lineEnd = nextLineEnd === -1 ? value.length : nextLineEnd;
+                            posDown = nextLineEnd === -1 ? value.length : nextLineEnd;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    selStart = lineStart;
+                    selEnd = lineEnd;
+                    sel = value.slice(selStart, selEnd);
+                }
+
+                const dividerPatternCheck = /^\s*(?:[\|+]\s*-+\s*(?:[\|+]\s*-+\s*)*[\|+]|-+)\s*$/;
+                if (!/\|/.test(sel) && !dividerPatternCheck.test(sel)) return; // no table detected
+
+                const rawLines = sel.replace(/\r\n/g, "\n").split("\n");
 
                 // Matches:
                 //   | ---- | ---- |   (old markdown style)
@@ -3982,9 +4010,13 @@
                     finalRows.length = 0;
                     finalRows.push(...padded);
                 }
-                finalRows.push("");
 
-                ta.setRangeText(finalRows.join("\n"), start, end, "select");
+
+                // Preserve trailing newline if original selection ended at line boundary
+                const formatted = finalRows.join("\n");
+                const endsAtNewline = selEnd < value.length && value[selEnd] === "\n";
+                const result = endsAtNewline && !formatted.endsWith("\n") ? formatted + "\n" : formatted;
+                ta.setRangeText(result, selStart, selEnd, "select");
             }
 
             function renumberOrderedList() {
@@ -4127,6 +4159,43 @@
             }
 
         //---- Links -----------------------------------------------------------
+            function openLinkAtCursor() {
+                const cursorPos = editorArea.selectionStart;
+                if (cursorPos < 0) return false;
+                const link = findLinkAtCursor(editorArea.value, cursorPos);
+                if (!link) return false;
+
+                if (link.type === 'url') {
+                    window.open(link.target, '_blank');
+                    return true;
+                }
+
+                if (link.type === 'note') {
+                    const title = link.title.toLowerCase();
+                    let foundNode = null;
+                    (function walk(nodes) {
+                        for (const n of nodes) {
+                            if (n.title && n.title.toLowerCase() === title) {
+                                foundNode = n;
+                                return;
+                            }
+                            if (n.children && n.children.length) walk(n.children);
+                            if (foundNode) return;
+                        }
+                    })(treeData);
+                    if (foundNode) {
+                        expandToNode(foundNode.id);
+                        selectedId = foundNode.id;
+                        editing = false;
+                        closeLinksDialog();
+                        render();
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
             function findLinkAtCursor(content, cursorPos) {
                 const markdownRegex = /\[([^\]]+)\](?:[ \t]*\r?\n[ \t]*|[ \t]*)(https?:\/\/\S+|file:\/\/\S+|_[^_]+_)/gi;
                 let match;
@@ -6328,7 +6397,7 @@
                         return;
                     }
 
-                    if (e.ctrlKey && e.key === ";") {
+                    if ((e.ctrlKey || e.metaKey) && e.key === ";") {
                         e.preventDefault();
                         formatMarkdownTable();
                     }

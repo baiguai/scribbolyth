@@ -10,6 +10,7 @@
 #include "../bookmark/bookmark.hpp"
 #include "../clipboard/clipboard.hpp"
 #include "../history/history.hpp"
+#include "../links/links.hpp"
 #include "../search/search.hpp"
 #include "../text/text.hpp"
 #include "../visual_block/visual_block.hpp"
@@ -614,6 +615,10 @@ namespace scribbolyth::editor
                 {
                     SearchWordUnderCursor();
                 };
+                state_->operations["follow_link"] = [this](const std::string&, int)
+                {
+                    FollowLinkUnderCursor();
+                };
                 state_->operations["replace"] = [this](const std::string& args, int)
                 {
                     ReplaceText(args);
@@ -1138,6 +1143,35 @@ namespace scribbolyth::editor
                 }
                 return line.substr(static_cast<std::size_t>(start),
                                    static_cast<std::size_t>(end - start));
+            }
+            //!
+
+            /*!
+                Follow Link Under Cursor
+
+                !_method
+
+                If the cursor sits on a link, open it (URL) or reveal its target
+                node (`_Note_`). Otherwise report it in the status area.
+            */
+            void FollowLinkUnderCursor()
+            {
+                if (active_ == nullptr) return;
+                LoadIfChanged();
+                if (lines_.empty())
+                {
+                    state_->status = "No link under cursor";
+                    return;
+                }
+                const int row = std::min(row_, static_cast<int>(lines_.size()) - 1);
+                scribbolyth::links::Link link;
+                if (!scribbolyth::links::FindLinkInLine(
+                        lines_[static_cast<std::size_t>(row)], col_, link))
+                {
+                    state_->status = "No link under cursor";
+                    return;
+                }
+                scribbolyth::links::FollowLink(link, state_);
             }
             //!
 
