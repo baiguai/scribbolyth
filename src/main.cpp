@@ -377,6 +377,16 @@ int main(int, char** argv) {
             // separator(),
             // text(" scribbolyth ") | dim,
         };
+        // Descendant count of the selected node, or of the whole document when
+        // nothing is selected (right after a load/import). Hidden on an empty
+        // document so a blank start shows only the mode.
+        if (state->active_node != nullptr || state->active_descendants > 0)
+        {
+            const int n = state->active_descendants;
+            parts.push_back(separator());
+            parts.push_back(text(" " + std::to_string(n)
+                                 + (n == 1 ? " descendant " : " descendants ")) | dim);
+        }
         if (!state->status.empty())
         {
             parts.push_back(separator());

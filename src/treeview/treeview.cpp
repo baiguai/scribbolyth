@@ -916,6 +916,11 @@ namespace scribbolyth::treeview
     void TreeView::RefreshActiveNode()
     {
         state_->active_node = selected_;
+        // Recursive descendant count for the status bar; CountNodes() walks
+        // the whole subtree regardless of expansion. With nothing selected it
+        // reports the whole document, so the count survives load/import.
+        state_->active_descendants = selected_ ? CountNodes(selected_->children)
+                                               : CountNodes(roots_);
         const std::string cur_id = selected_ ? selected_->id : "";
         // Undo history is scoped to the currently selected node: switching to
         // a different node (or deselecting) resets it, leaving one baseline
@@ -1003,7 +1008,7 @@ namespace scribbolyth::treeview
         ClearUndo();
         RefreshActiveNode();
         state_->changed = false;
-        state_->status = "Loaded " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
+        state_->status.clear();
         PushRecentFile(path);
         PersistLastFile();
     }
@@ -1039,7 +1044,7 @@ namespace scribbolyth::treeview
         ClearUndo();
         RefreshActiveNode();
         state_->changed = false;
-        state_->status = "Imported " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
+        state_->status.clear();
         // PushRecentFile(path);
         PersistLastFile();
     }
