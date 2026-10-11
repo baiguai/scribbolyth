@@ -1,0 +1,8 @@
+{
+  "_comment": "Project settings for harvest.py. Paths are relative to the docsgen/ directory (where harvest.py lives) unless absolute. 'output' is a directory; the generated file is named by 'output_file'.",
+
+  "source": "../src/",
+  "output": "../developers/",
+  "output_file": "devnotes.html",
+  "template": "../config/scribboleth.html"
+}

@@ -1,0 +1,37 @@
+{
+  "_comment": "EXPERIMENTAL STUB. This config teaches the harvester Python's comment syntax and selects the (minimal) 'python' signature parser. Because Python has no block comments, the region grammar ([doc]/[pinned]/[sub]) is expressed with line markers and is not yet exercised by a real Python source tree. Use it as the template for adding full Python support.",
+
+  "name": "Python",
+  "extensions": [".py", ".pyi"],
+
+  "line_comment": "#",
+  "block_comment": null,
+  "string_delimiters": ["\"", "'"],
+
+  "config_prefix": "@_",
+
+  "line_markers": {
+    "doc": "!",
+    "pinned": ">",
+    "sub": "+",
+    "append": "|",
+    "close": "~",
+    "folder": "[",
+    "raw_open": ">>",
+    "raw_close": "<<"
+  },
+
+  "block_markers": {},
+
+  "callable": {
+    "parser": "python",
+    "method_token": "@_method",
+    "ctor_token": "@_ctor",
+    "method_regex": "^[ \\t]*@_method[ \\t]*$",
+    "ctor_regex": "^[ \\t]*@_ctor[ \\t]*$"
+  },
+
+  "anchor": {
+    "enabled": false
+  }
+}
