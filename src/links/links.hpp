@@ -64,5 +64,30 @@ namespace scribbolyth::links
     void CollectLinks(const std::string& content, std::vector<Link>& out);
     //!
 
+    /*!
+        Find Link In Line
+
+        !_method
+
+        Find the link whose span covers column `col` (0-based) on a single line.
+        Markdown links are matched before standalone URLs so a cursor sitting on
+        the URL half of `[Label](https://...)` still reports the labeled link.
+        Returns true and fills `out` when a link is found.
+    */
+    bool FindLinkInLine(const std::string& line, int col, Link& out);
+    //!
+
+    /*!
+        Follow Link
+
+        !_method
+
+        Open a URL link externally, or reveal the node targeted by a `_Note_`
+        link. Status feedback is written to `state->status`, mirroring the links
+        dialog's Activate().
+    */
+    void FollowLink(Link link, const std::shared_ptr<EditorState>& state);
+    //!
+
     ftxui::Component MakeLinksDialog(std::shared_ptr<EditorState> state, bool* show);
 }

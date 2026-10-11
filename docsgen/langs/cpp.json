@@ -1,0 +1,51 @@
+{
+  "_comment": "Language driver for C and C++. Selected for any source file whose extension appears in \"extensions\". All fields are optional; omitted values fall back to the defaults in the Language class in harvest.py.",
+
+  "name": "C/C++",
+  "extensions": [".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx", ".ipp", ".inl"],
+
+  "line_comment": "//",
+  "block_comment": { "open": "/*", "close": "*/" },
+  "string_delimiters": ["\"", "'"],
+
+  "config_prefix": "!_",
+
+  "line_markers": {
+    "close": "!",
+    "folder": "[",
+    "pinned": ">",
+    "append": "|",
+    "raw_open": ">>",
+    "raw_close": "<<"
+  },
+
+  "block_markers": {
+    "doc": "!",
+    "pinned": ">",
+    "sub": "+",
+    "append": "|",
+    "manual": "["
+  },
+
+  "callable": {
+    "parser": "c_like",
+    "method_token": "!_method",
+    "ctor_token": "!_ctor",
+    "method_regex": "^[ \\t]*!_method[ \\t]*$",
+    "ctor_regex": "^[ \\t]*!_ctor[ \\t]*$",
+    "param_open": "(",
+    "param_close": ")",
+    "terminators": ["{", ";"],
+    "definition_terminators": ["{"],
+    "operator_regex": "\\boperator\\b",
+    "name_regex": "[A-Za-z_~][A-Za-z0-9_]*\\s*$",
+    "param_name_regex": "[A-Za-z_][A-Za-z0-9_]*\\s*$",
+    "split_open": "<([",
+    "split_close": ">)]"
+  },
+
+  "anchor": {
+    "enabled": true,
+    "regex": "\\bint\\s+main\\s*\\("
+  }
+}
