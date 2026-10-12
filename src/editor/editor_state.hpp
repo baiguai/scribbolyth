@@ -78,11 +78,16 @@ struct EditorState {
         Treeview Related
 
         ----
+
+        `active_node` is the selected node (null = none). `active_descendants`
+        is the recursive count of every node beneath it, refreshed by the
+        treeview whenever the selection changes; the status bar shows it.
     */
     //>>
     int treeview_width = kDefaultTreeviewWidth;
 
     scribbolyth::treeview::TreeNode* active_node = nullptr;
+    int active_descendants = 0;
     std::string status;
     std::string template_path;
     std::string init_path;

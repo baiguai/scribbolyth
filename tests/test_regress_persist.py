@@ -16,7 +16,7 @@ os.makedirs(DATA_DIR)
 s = harness.launch(workdir=DATA_DIR)
 try:
     # blank start, and :w with no stored path warns instead of saving
-    s.require('Select a node to edit', 'app must start blank')
+    s.require('Keycode help, use:', 'app must start blank')
     s.send(b':w'); s.send(b'\r')
     s.require('use :saveas', ':w with no path should suggest :S')
 

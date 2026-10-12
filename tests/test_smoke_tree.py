@@ -10,7 +10,7 @@ import harness
 
 s = harness.launch()          # START: spawn the app
 try:
-    s.require('Select a node to edit', 'app must start blank')
+    s.require('Keycode help, use:', 'app must start blank')
 
     # create a node via the :create_node prompt
     s.send(b'a')

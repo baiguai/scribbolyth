@@ -20,7 +20,7 @@ init_conf = os.path.join(DATA_DIR, 'init.conf')
 # --- save a document, then relaunch: it should come back automatically ---
 s = harness.launch(workdir=DATA_DIR)
 try:
-    s.require('Select a node to edit', 'first launch must start blank')
+    s.require('Keycode help, use:', 'first launch must start blank')
     s.send(b'a')
     s.require('create_node')
     s.send(b'Persist Me'); s.send(b'\r')
@@ -62,13 +62,13 @@ try:
     s.require('Persist Me', 'launch should still auto-restore')
     s.send(b':n')
     s.send(b'\r')
-    s.require('Select a node to edit', ':new should blank the document')
+    s.require('Keycode help, use:', ':new should blank the document')
 finally:
     s.quit()
 
 s = harness.launch(workdir=DATA_DIR)
 try:
-    s.require('Select a node to edit', 'launch after :new must start blank')
+    s.require('Keycode help, use:', 'launch after :new must start blank')
     s.forbid('Persist Me', 'auto-restore should be cleared by :new')
 finally:
     s.quit()

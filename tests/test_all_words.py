@@ -128,7 +128,7 @@ try:
         f.write(harness.SIGNATURE)
         json.dump(doc, f)
     d.send((':open %s\r' % doc_path).encode())
-    d.require('Loaded', 'doc should load')
+    d.require('descendant', 'doc should load')
 
     d.send(b'/')
     d.require('/ Search', 'search dialog should open')
