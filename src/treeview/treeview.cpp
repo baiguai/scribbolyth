@@ -1001,6 +1001,10 @@ namespace scribbolyth::treeview
         state_->treeview_width = loaded_width;
         state_->bookmarks = std::move(loaded_marks);
         state_->history = std::move(loaded_history);
+        // A .scribboleth document carries no theme material, so drop any theme
+        // captured from an earlier HTML import: it belongs to that other
+        // document and must not bleed into this one's exports.
+        state_->html_theme = scribbolyth::html::HtmlTheme{};
         EnsureIds(loaded);
         roots_ = std::move(loaded);
         current_file_ = path;
@@ -1115,7 +1119,10 @@ namespace scribbolyth::treeview
         // When overwriting an existing export, patch the data in that file in
         // place rather than regenerating from the config template, so any other
         // edits made to the exported file are preserved. Only the tree,
-        // bookmarks and history data sections change.
+        // bookmarks and history data sections change. The in-memory theme is
+        // deliberately not passed when overwriting: an existing export keeps
+        // its own theme (colors, grid, custom CSS) untouched. The theme only
+        // applies when building a fresh file from the template.
         std::error_code ec;
         const bool overwrite = std::filesystem::exists(path, ec);
         const std::string base = overwrite ? path : state_->template_path;
@@ -1125,10 +1132,11 @@ namespace scribbolyth::treeview
             state_->status = "Error: scribboleth.html template not found";
             return;
         }
+        const scribbolyth::html::HtmlTheme* theme = overwrite ? nullptr : &state_->html_theme;
         if (!scribbolyth::html::ExportHtmlFile(base, path,
                                                roots_, state_->bookmarks,
                                                state_->history,
-                                               &state_->html_theme))
+                                               theme))
         {
             state_->status = "Error: could not export " + path;
             return;
