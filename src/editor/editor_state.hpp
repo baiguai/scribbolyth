@@ -136,6 +136,35 @@ struct EditorState {
     //!
 
     /*!
+        Last-Used Directories
+
+        The directory most recently used by each family of path commands.
+        They are prefilled into the command prompt (so `:open ` starts at the
+        folder you last used) and used as the default when a path is omitted.
+        Persisted to init.conf as `open_dir` / `export_dir`, so the memory
+        survives a restart.
+
+        The two families are deliberately independent:
+
+            open   - open / save / save-as            (this is a document)
+            export - import / export (html, txt, ...) (this is a side file)
+
+        ----
+    */
+    //>>
+    std::string last_open_dir;
+    std::string last_export_dir;
+
+    // The directory automatically inserted into the command prompt by the
+    // most recent `prompt` binding (e.g. pressing `o` gives `:open /dir/`).
+    // Typing '\' in the prompt strips exactly this text back out, so the
+    // user can start from a blank path without backspacing. Empty when the
+    // current prompt was not prefilled.
+    std::string command_path_prefix;
+    //<<
+    //!
+
+    /*!
         Node Undo History
 
         Document undo history. A snapshot is pushed before every content

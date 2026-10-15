@@ -76,6 +76,7 @@ try:
     # skipping the #noexp child, and separating nodes with four blank lines.
     branch = os.path.join(docs, 'branch.txt')
     s.send(b'T'); s.step(0.4)
+    s.send(b'\\'); s.step(0.3)        # clear the prefilled last-used export dir
     s.send(branch.encode()); s.step(0.3); s.send(b'\r'); s.step(0.7)
     s.forbid(' File Browser ', 'a file path must export directly')
     s.require('Exported branch to', 'branch export status')
