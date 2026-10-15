@@ -173,6 +173,7 @@ try:
     s.send(b'a'); s.require('create_node')
     s.send(b'two'); s.send(b'\r')
     s.send(b'S'); s.require('saveas')
+    s.send(b'\\')                     # '\' clears the prefilled last-used dir
     s.send(b'b.json'); s.send(b'\r')
     s.require('Saved', 'move: save b.json')
     s.send(b':enew'); s.send(b'\r')       # clear last_file so relaunch stays blank
