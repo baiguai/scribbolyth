@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
-"""Feature test for last-used-directory memory.
+"""Feature test for path-prompt default directories.
 
-Saving / opening / importing / exporting records the parent directory (with a
-trailing separator) of the file that was used. The next path prompt is
-prefilled with it, so the user extends it instead of retyping a full path:
+Each path prompt is prefilled with a directory chosen per command:
 
-    :saveas /home/bob/temp/
-    :open   /home/bob/temp/
+    open / open!  -> the folder the last document was opened from
+    import (U)    -> the folder the last HTML file was imported from
+    saveas / X / x / t / T -> the folder the current document lives in
 
-The open/save family and the import/export family keep independent directories,
-both persisted to init.conf, and pressing '\\' in the prompt clears just the
-auto-inserted directory prefix (leaving anything typed after it).
+`last_open_dir` and `last_import_dir` persist in init.conf (`open_dir` /
+`import_dir`); the save/export default is derived from the open document, so
+after a save-as to a new folder the exports follow the document while `:o `
+still returns to where you last opened from.
 
-Permanent regression for the last-dir memory added to editor_state.hpp,
+Typing the command name then Tab pre-fills the same directory, and '\\'
+strips the auto-inserted directory back out.
+
+Permanent regression for the path defaults added to editor_state.hpp,
 config/, op/ and treeview/.
 """
 import os
@@ -22,22 +25,26 @@ import harness
 
 DATA_DIR = '/tmp/scribbolyth_tests/last_dir_data'
 shutil.rmtree(DATA_DIR, ignore_errors=True)
-os.makedirs(DATA_DIR)
 
-open_dir = os.path.join(DATA_DIR, 'open_docs')
-exp_dir = os.path.join(DATA_DIR, 'exp_docs')
-os.makedirs(open_dir)
-os.makedirs(exp_dir)
+open_src = os.path.join(DATA_DIR, 'open_src')
+save_dst = os.path.join(DATA_DIR, 'save_dst')
+import_src = os.path.join(DATA_DIR, 'import_src')
+for d in (open_src, save_dst, import_src):
+    os.makedirs(d)
 
+feed_html = os.path.join(import_src, 'feed.html')
 init_conf = os.path.join(DATA_DIR, 'init.conf')
 
 
 def setting(name):
     """Value of `name = ...` from init.conf, or None when absent."""
-    with open(init_conf, encoding='utf-8') as f:
-        for line in f:
-            if line.strip().startswith(name + ' ='):
-                return line.split('=', 1)[1].strip()
+    try:
+        with open(init_conf, encoding='utf-8') as f:
+            for line in f:
+                if line.strip().startswith(name + ' ='):
+                    return line.split('=', 1)[1].strip()
+    except FileNotFoundError:
+        pass
     return None
 
 
@@ -48,110 +55,85 @@ def cmdline(s):
 
 s = harness.launch(cols=110, workdir=DATA_DIR)
 try:
-    # --- open/save family ------------------------------------------------
-    # Save a document inside open_docs/; the family remembers that folder.
-    s.send(b'a'); s.send(b'Doc'); s.send(b'\r'); s.step(0.4)
-    s.send(b'S'); s.require('saveas')
-    s.send(os.path.join(open_dir, 'doc.json').encode()); s.send(b'\r')
-    s.require('Saved', 'save should succeed')
-
-    if setting('open_dir') != open_dir + '/':
-        print('FAIL: open_dir should be %r, got %r'
-              % (open_dir + '/', setting('open_dir')))
-        s.dump()
-        raise SystemExit(1)
-
-    # Pressing S again prefills :saveas with the remembered directory.
-    s.send(b'S'); s.step(0.5)
-    if not cmdline(s).endswith(':saveas ' + open_dir + '/'):
-        print('FAIL: S should prefill the last-used open dir, got %r' % cmdline(s))
-        s.dump()
-        raise SystemExit(1)
-
-    # '\' strips the auto-inserted directory; the command name survives.
-    s.send(b'\\'); s.step(0.3)
-    if cmdline(s).endswith(open_dir + '/'):
-        print('FAIL: \\ should clear the prefilled dir, got %r' % cmdline(s))
-        s.dump()
-        raise SystemExit(1)
-    s.require('saveas', 'the command name should remain after clearing')
-    s.send(b'\x1b'); s.step(0.3)
-
-    # The open prompt shares the same remembered directory.
-    s.send(b'o'); s.step(0.5)
-    if not cmdline(s).endswith(':o ' + open_dir + '/'):
-        print('FAIL: o should prefill the last-used open dir, got %r' % cmdline(s))
-        s.dump()
-        raise SystemExit(1)
-    s.send(b'\x1b'); s.step(0.3)
-
-    # --- import/export family (independent) ------------------------------
-    # A note to export.
-    s.send(b'a'); s.send(b'Exp'); s.send(b'\r'); s.step(0.4)
-    s.send(b'I'); s.send(b'export body'); s.send(b'\x1b'); s.send(b'\x1b')
+    # A document to work with.
+    s.send(b'a'); s.require('create_node')
+    s.send(b'Alpha'); s.send(b'\r'); s.step(0.4)
+    s.send(b'I'); s.send(b'hello world'); s.send(b'\x1b'); s.send(b'\x1b')
     s.step(0.3)
 
-    # First export has no remembered export dir yet, so no prefill.
-    s.send(b't'); s.step(0.5)
-    s.send(os.path.join(exp_dir, 'note.txt').encode()); s.send(b'\r')
-    s.require('Exported note to', 'note export should succeed')
+    # Save-as into open_src/: from now on the save/export prompts follow the
+    # document. No document has been *opened* yet, so :o has no default.
+    s.send(b'S'); s.require('saveas')
+    s.send(os.path.join(open_src, 'doc.json').encode()); s.send(b'\r')
+    s.require('Saved', 'save should succeed')
 
-    if setting('export_dir') != exp_dir + '/':
-        print('FAIL: export_dir should be %r, got %r'
-              % (exp_dir + '/', setting('export_dir')))
-        s.dump()
-        raise SystemExit(1)
-
-    # The export prompt now prefills its own directory, independent of open_dir.
-    s.send(b't'); s.step(0.5)
-    if not cmdline(s).endswith(':export_note_txt ' + exp_dir + '/'):
-        print('FAIL: t should prefill the last-used export dir, got %r' % cmdline(s))
-        s.dump()
-        raise SystemExit(1)
-    s.send(b'\\'); s.step(0.3)
-    if cmdline(s).endswith(exp_dir + '/'):
-        print('FAIL: \\ should clear the prefilled export dir, got %r' % cmdline(s))
+    s.send(b'S'); s.step(0.5)
+    if not cmdline(s).endswith(':saveas ' + open_src + '/'):
+        print('FAIL: saveas should default to the document dir, got %r' % cmdline(s))
         s.dump()
         raise SystemExit(1)
     s.send(b'\x1b'); s.step(0.3)
-finally:
-    s.quit()
 
-# --- both directories survive a relaunch --------------------------------
-s = harness.launch(cols=110, workdir=DATA_DIR)
-try:
     s.send(b'o'); s.step(0.5)
-    if not cmdline(s).endswith(':o ' + open_dir + '/'):
-        print('FAIL: open dir should persist across relaunch, got %r' % cmdline(s))
+    if open_src in cmdline(s):
+        print('FAIL: o should have no default until a file is opened, got %r' % cmdline(s))
         s.dump()
         raise SystemExit(1)
     s.send(b'\x1b'); s.step(0.3)
 
-    s.send(b't'); s.step(0.5)
-    if not cmdline(s).endswith(':export_note_txt ' + exp_dir + '/'):
-        print('FAIL: export dir should persist across relaunch, got %r' % cmdline(s))
+    # Open the saved file back from open_src: this records the open directory.
+    s.send(b':o ' + os.path.join(open_src, 'doc.json').encode()); s.send(b'\r')
+    s.require('Alpha', 'reopen should succeed')
+    s.step(0.4)
+
+    # Export an HTML fixture for the import test (exports remember nothing).
+    s.send(b':X ' + feed_html.encode()); s.send(b'\r')
+    s.require('Exported', 'html export should succeed')
+
+    # Save-as to a *different* folder: the document moves, the open dir does not.
+    s.send(b'S'); s.step(0.5)
+    s.send(b'\\'); s.send(os.path.join(save_dst, 'doc.json').encode()); s.send(b'\r')
+    s.require('Saved', 'second save should succeed')
+
+    # :o still returns to where we last opened from ...
+    s.send(b'o'); s.step(0.5)
+    if not cmdline(s).endswith(':o ' + open_src + '/'):
+        print('FAIL: o should default to the last open dir, got %r' % cmdline(s))
         s.dump()
         raise SystemExit(1)
     s.send(b'\x1b'); s.step(0.3)
-finally:
-    s.quit()
 
-# --- typing a command name then Tab also pre-fills the directory --------
-# (the '\' escape works here too)
-cases = [
-    (b'o', ':o ', open_dir + '/'),
-    (b'open', ':open ', open_dir + '/'),
-    (b'saveas', ':saveas ', open_dir + '/'),
-    (b'U', ':U ', exp_dir + '/'),
-    (b'X', ':X ', exp_dir + '/'),
-]
-s = harness.launch(cols=110, workdir=DATA_DIR)
-try:
-    for typed, prefix, directory in cases:
+    # ... while save-as and exports follow the moved document.
+    for key, cmd, where in ((b'S', 'saveas', save_dst),
+                            (b't', 'export_note_txt', save_dst)):
+        s.send(key); s.step(0.5)
+        if not cmdline(s).endswith(':' + cmd + ' ' + where + '/'):
+            print('FAIL: %s should default to the document dir (%s), got %r'
+                  % (cmd, where, cmdline(s)))
+            s.dump()
+            raise SystemExit(1)
+        s.send(b'\x1b'); s.step(0.3)
+
+    # Import from import_src: records the import directory.
+    s.send(b':U ' + feed_html.encode()); s.send(b'\r')
+    s.require('Alpha', 'import should succeed')
+    if setting('import_dir') != import_src + '/':
+        print('FAIL: import_dir should be %r, got %r'
+              % (import_src + '/', setting('import_dir')))
+        s.dump()
+        raise SystemExit(1)
+
+    if setting('open_dir') != open_src + '/':
+        print('FAIL: open_dir should be %r, got %r'
+              % (open_src + '/', setting('open_dir')))
+        s.dump()
+        raise SystemExit(1)
+
+    # Typing a command name then Tab pre-fills the same default.
+    for typed, want in ((b'o', ':o ' + open_src + '/'),
+                        (b'U', ':U ' + import_src + '/')):
         s.send(b':'); s.step(0.3)
-        s.send(typed); s.step(0.2)
-        s.send(b'\t'); s.step(0.4)
-        want = prefix + directory
+        s.send(typed); s.send(b'\t'); s.step(0.4)
         if not cmdline(s).endswith(want):
             print('FAIL: :%s + Tab should yield %r, got %r'
                   % (typed.decode(), want, cmdline(s)))
@@ -159,12 +141,31 @@ try:
             raise SystemExit(1)
         # '\' strips the inserted directory again.
         s.send(b'\\'); s.step(0.3)
-        if cmdline(s).endswith(directory):
-            print('FAIL: \\ should clear the Tab-inserted dir for :%s'
-                  % typed.decode())
+        if want.split(' ', 1)[1] in cmdline(s):
+            print('FAIL: \\ should clear the Tab-inserted dir for :%s' % typed.decode())
             s.dump()
             raise SystemExit(1)
         s.send(b'\x1b'); s.step(0.3)
+finally:
+    s.quit()
+
+# Both remembered directories survive a relaunch.
+s = harness.launch(cols=110, workdir=DATA_DIR)
+try:
+    s.send(b'o'); s.step(0.5)
+    if not cmdline(s).endswith(':o ' + open_src + '/'):
+        print('FAIL: open dir should persist across relaunch, got %r' % cmdline(s))
+        s.dump()
+        raise SystemExit(1)
+    s.send(b'\x1b'); s.step(0.3)
+
+    s.send(b':'); s.step(0.3)
+    s.send(b'U'); s.send(b'\t'); s.step(0.4)
+    if not cmdline(s).endswith(':U ' + import_src + '/'):
+        print('FAIL: import dir should persist across relaunch, got %r' % cmdline(s))
+        s.dump()
+        raise SystemExit(1)
+    s.send(b'\x1b'); s.step(0.3)
 finally:
     s.quit()
 
