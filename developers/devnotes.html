@@ -1737,7 +1737,7 @@
               {
                 "id": "a766b9c4",
                 "title": "Read the Init Config",
-                "content": "Read the Init Config\n\nSignature: bool ReadInit(const std::string& path, std::string& last_file, std::vector<std::string>& recent_files, std::string& open_dir, std::string& export_dir)\nMethod: ReadInit\nReturns: bool\nParameters:\n    path         const std::string&\n    last_file    std::string&\n    recent_files std::vector<std::string>&\n    open_dir     std::string&\n    export_dir   std::string&",
+                "content": "Read the Init Config\n\nSignature: bool ReadInit(const std::string& path, std::string& last_file, std::vector<std::string>& recent_files, std::string& open_dir, std::string& import_dir)\nMethod: ReadInit\nReturns: bool\nParameters:\n    path         const std::string&\n    last_file    std::string&\n    recent_files std::vector<std::string>&\n    open_dir     std::string&\n    import_dir   std::string&",
                 "children": [],
                 "expanded": false
               },
@@ -1765,7 +1765,7 @@
               {
                 "id": "2394ceac",
                 "title": "Update the Init Config",
-                "content": "Update the Init Config\n\nSignature: bool WriteInit(const std::string& path, const std::string& last_file, const std::vector<std::string>& recent_files, const std::string& open_dir, const std::string& export_dir)\nMethod: WriteInit\nReturns: bool\nParameters:\n    path         const std::string&\n    last_file    const std::string&\n    recent_files const std::vector<std::string>&\n    open_dir     const std::string&\n    export_dir   const std::string&",
+                "content": "Update the Init Config\n\nSignature: bool WriteInit(const std::string& path, const std::string& last_file, const std::vector<std::string>& recent_files, const std::string& open_dir, const std::string& import_dir)\nMethod: WriteInit\nReturns: bool\nParameters:\n    path         const std::string&\n    last_file    const std::string&\n    recent_files const std::vector<std::string>&\n    open_dir     const std::string&\n    import_dir   const std::string&",
                 "children": [],
                 "expanded": false
               },
@@ -2313,13 +2313,6 @@
                     "expanded": false
                   },
                   {
-                    "id": "044c3ae9",
-                    "title": "Last-Used Directories",
-                    "content": "Last-Used Directories\n\nThe directory most recently used by each family of path commands.\nThey are prefilled into the command prompt (so `:open ` starts at the\nfolder you last used) and used as the default when a path is omitted.\nPersisted to init.conf as `open_dir` / `export_dir`, so the memory\nsurvives a restart.\n\nThe two families are deliberately independent:\n\n    open   - open / save / save-as            (this is a document)\n    export - import / export (html, txt, ...) (this is a side file)\n\n--------------------------------------------------------------------------------\n\nstd::string last_open_dir;\nstd::string last_export_dir;\n\n// The directory automatically inserted into the command prompt by the\n// most recent `prompt` binding (e.g. pressing `o` gives `:open /dir/`).\n// Typing '\\' in the prompt strips exactly this text back out, so the\n// user can start from a blank path without backspacing. Empty when the\n// current prompt was not prefilled.\nstd::string command_path_prefix;",
-                    "children": [],
-                    "expanded": false
-                  },
-                  {
                     "id": "3cdf6e72",
                     "title": "Mode-Related Variables",
                     "content": "Mode-Related Variables\n\n--------------------------------------------------------------------------------\n\nMode mode = Mode::TREE;\nstd::string command_buffer;\nint command_cursor = 0;\nint* active_child = nullptr;\nMode mode_before_command = Mode::TREE;",
@@ -2337,6 +2330,13 @@
                     "id": "3fbceae2",
                     "title": "Operations and Commands",
                     "content": "Operations and Commands\n\n--------------------------------------------------------------------------------\n\nstd::map<std::string, scribbolyth::op::Operation> operations;\nstd::map<std::string, std::string> commands;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "044c3ae9",
+                    "title": "Path Prompt Directories",
+                    "content": "Path Prompt Directories\n\nThe directories used to prefill the file prompts, chosen per command:\n\n    open     - `last_open_dir`   last folder a document was opened from\n    import   - `last_import_dir` last folder an HTML file was imported from\n    save/exp - `current_dir`     folder the current document lives in\n\nSo `:open ` returns you to where you last opened from, `:U ` to where\nyou last imported from, while save-as and every export start next to\nthe document being edited. `last_open_dir` and `last_import_dir` are\npersisted to init.conf (`open_dir` / `import_dir`) and survive a\nrestart; `current_dir` is derived and tracked as the file is saved or\nloaded.\n\n--------------------------------------------------------------------------------\n\nstd::string last_open_dir;\nstd::string last_import_dir;\nstd::string current_dir;\n\n// The directory automatically inserted into the command prompt by the\n// most recent `prompt` binding (e.g. pressing `o` gives `:o /dir/`).\n// Typing '\\' in the prompt strips exactly this text back out, so the\n// user can start from a blank path without backspacing. Empty when the\n// current prompt was not prefilled.\nstd::string command_path_prefix;",
                     "children": [],
                     "expanded": false
                   },
@@ -3816,63 +3816,63 @@
             "content": "",
             "children": [
               {
-                "id": "fe287978",
+                "id": "f7031a40",
                 "title": "Collect Path Matches",
                 "content": "Collect Path Matches\n\nSignature: void CollectPathMatches(const std::string& arg, std::vector<std::string>& matches)\nMethod: CollectPathMatches\nReturns: void\nParameters:\n    arg     const std::string&\n    matches std::vector<std::string>&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "b6b4e1f3",
+                "id": "fe287978",
                 "title": "Common Prefix",
                 "content": "Common Prefix\n\nSignature: std::string CommonPrefix(const std::vector<std::string>& items)\nMethod: CommonPrefix\nReturns: std::string\nParameters:\n    items const std::vector<std::string>&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "eb16506d",
+                "id": "04696b9e",
                 "title": "Complete Command",
                 "content": "Complete Command\n\nSignature: void CompleteCommand(std::shared_ptr<EditorState> state)\nMethod: CompleteCommand\nReturns: void\nParameters:\n    state std::shared_ptr<EditorState>",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "b65e1b77",
+                "id": "8658f8f7",
+                "title": "Default Directory For Operation",
+                "content": "Default Directory For Operation\n\nSignature: std::string DefaultDirForOp(const std::shared_ptr<EditorState>& state, const std::string& op)\nMethod: DefaultDirForOp\nReturns: std::string\nParameters:\n    state const std::shared_ptr<EditorState>&\n    op    const std::string&\n\nThe directory to prefill for a path command, chosen per operation:\n\n    open / open!         - `last_open_dir`   (where we last opened)\n    import_html          - `last_import_dir` (where we last imported)\n    saveas / export...   - `current_dir`     (where the file lives)\n\nReturns \"\" for a non-path op or when no directory is known yet.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "d9cb17d0",
                 "title": "Directory Prefix",
                 "content": "Directory Prefix\n\nSignature: std::string DirPrefix(const std::string& dir)\nMethod: DirPrefix\nReturns: std::string\nParameters:\n    dir const std::string&\n\nTurn a stored directory into the text inserted after the command\nname in a prompt: the directory plus one trailing separator, or \"\"\nwhen no directory is known (or it already ends in a separator).\nA trailing separator makes the file browser treat the argument as\na folder to open.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "208540a7",
+                "id": "1ae6b52f",
                 "title": "Dispatch",
                 "content": "Dispatch\n\nSignature: bool Dispatch(std::shared_ptr<EditorState> state, const Keymap::Result& result)\nMethod: Dispatch\nReturns: bool\nParameters:\n    state  std::shared_ptr<EditorState>\n    result const Keymap::Result&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "4af54b1c",
+                "id": "9d51f8f2",
                 "title": "Execute Command",
                 "content": "Execute Command\n\nSignature: bool ExecuteCommand(std::shared_ptr<EditorState> state, const std::string& input)\nMethod: ExecuteCommand\nReturns: bool\nParameters:\n    state std::shared_ptr<EditorState>\n    input const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "85a13679",
+                "id": "4af54b1c",
                 "title": "Execute Search",
                 "content": "Execute Search\n\nSignature: bool ExecuteSearch(std::shared_ptr<EditorState> state, const std::string& input)\nMethod: ExecuteSearch\nReturns: bool\nParameters:\n    state std::shared_ptr<EditorState>\n    input const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "8658f8f7",
-                "title": "Export-Path Operation Check",
-                "content": "Export-Path Operation Check\n\nSignature: bool IsExportPathOp(const std::string& op)\nMethod: IsExportPathOp\nReturns: bool\nParameters:\n    op const std::string&\n\nTrue for the op names in the import/export family: these share\nthe separate `last_export_dir` last-used directory.",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "34bbd7e3",
+                "id": "208540a7",
                 "title": "Handle Key",
                 "content": "Handle Key\n\nSignature: bool HandleKey(std::shared_ptr<EditorState> state, ftxui::Event event)\nMethod: HandleKey\nReturns: bool\nParameters:\n    state std::shared_ptr<EditorState>\n    event ftxui::Event",
                 "children": [],
@@ -3886,49 +3886,42 @@
                 "expanded": false
               },
               {
-                "id": "04696b9e",
+                "id": "b6b4e1f3",
                 "title": "Join",
                 "content": "Join\n\nSignature: std::string Join(const std::vector<std::string>& items)\nMethod: Join\nReturns: std::string\nParameters:\n    items const std::vector<std::string>&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "f7031a40",
+                "id": "b65e1b77",
                 "title": "Last Directory For Command",
-                "content": "Last Directory For Command\n\nSignature: std::string LastDirForCommand(const std::shared_ptr<EditorState>& state, const std::string& name)\nMethod: LastDirForCommand\nReturns: std::string\nParameters:\n    state const std::shared_ptr<EditorState>&\n    name  const std::string&\n\nThe last-used directory (with trailing separator) for the family\nthat the command `name` belongs to, or \"\" when the command is not\na path command or no directory has been remembered yet. Used to\nprefill the command line when Tab completes a path command name.",
+                "content": "Last Directory For Command\n\nSignature: std::string LastDirForCommand(const std::shared_ptr<EditorState>& state, const std::string& name)\nMethod: LastDirForCommand\nReturns: std::string\nParameters:\n    state const std::shared_ptr<EditorState>&\n    name  const std::string&\n\nThe default directory (with trailing separator) for the path\ncommand `name`, or \"\" when the command is not a path command or no\ndirectory is known yet. Used to prefill the command line when Tab\ncompletes a path command name.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "10ca5ce3",
+                "id": "eb16506d",
                 "title": "Open Command Line",
                 "content": "Open Command Line\n\nSignature: void OpenCommandLine(std::shared_ptr<EditorState> state, const std::string& command, const std::string& initial_prefix)\nMethod: OpenCommandLine\nReturns: void\nParameters:\n    state          std::shared_ptr<EditorState>\n    command        const std::string&\n    initial_prefix const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "9d51f8f2",
+                "id": "549fb366",
                 "title": "Open Command Line With Args",
                 "content": "Open Command Line With Args\n\nSignature: void OpenCommandLineWithArgs(std::shared_ptr<EditorState> state, const std::string& command, const std::string& args)\nMethod: OpenCommandLineWithArgs\nReturns: void\nParameters:\n    state   std::shared_ptr<EditorState>\n    command const std::string&\n    args    const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "549fb366",
+                "id": "10ca5ce3",
                 "title": "Open Search Command",
                 "content": "Open Search Command\n\nSignature: void OpenSearchCommand(std::shared_ptr<EditorState> state)\nMethod: OpenSearchCommand\nReturns: void\nParameters:\n    state std::shared_ptr<EditorState>",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "d9cb17d0",
-                "title": "Open-Path Operation Check",
-                "content": "Open-Path Operation Check\n\nSignature: bool IsOpenPathOp(const std::string& op)\nMethod: IsOpenPathOp\nReturns: bool\nParameters:\n    op const std::string&\n\nTrue for the op names in the open/save family: these share the\n`last_open_dir` last-used directory.",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "1ae6b52f",
+                "id": "85a13679",
                 "title": "Resolve",
                 "content": "Resolve\n\nSignature: Keymap::Result Resolve(std::shared_ptr<EditorState> state, ftxui::Event event)\nMethod: Resolve\nReturns: Keymap::Result\nParameters:\n    state std::shared_ptr<EditorState>\n    event ftxui::Event",
                 "children": [],

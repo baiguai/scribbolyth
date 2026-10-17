@@ -28,37 +28,6 @@ namespace scribbolyth::op
         //!
 
         /*!
-            Open-Path Operation Check
-
-            !_method
-
-            True for the op names in the open/save family: these share the
-            `last_open_dir` last-used directory.
-        */
-        bool IsOpenPathOp(const std::string& op)
-        {
-            return op == "open" || op == "open_force"
-                || op == "save" || op == "saveas";
-        }
-        //!
-
-        /*!
-            Export-Path Operation Check
-
-            !_method
-
-            True for the op names in the import/export family: these share
-            the separate `last_export_dir` last-used directory.
-        */
-        bool IsExportPathOp(const std::string& op)
-        {
-            return op == "import_html" || op == "export_html"
-                || op == "export_scribbolyth"
-                || op == "export_note_txt" || op == "export_tree_txt";
-        }
-        //!
-
-        /*!
             Directory Prefix
 
             !_method
@@ -79,23 +48,49 @@ namespace scribbolyth::op
         //!
 
         /*!
+            Default Directory For Operation
+
+            !_method
+
+            The directory to prefill for a path command, chosen per operation:
+
+                open / open!         - `last_open_dir`   (where we last opened)
+                import_html          - `last_import_dir` (where we last imported)
+                saveas / export...   - `current_dir`     (where the file lives)
+
+            Returns "" for a non-path op or when no directory is known yet.
+        */
+        std::string DefaultDirForOp(const std::shared_ptr<EditorState>& state,
+                                    const std::string& op)
+        {
+            if (op == "open" || op == "open_force")
+                return DirPrefix(state->last_open_dir);
+            if (op == "import_html")
+                return DirPrefix(state->last_import_dir);
+            if (op == "saveas" || op == "export_html"
+                || op == "export_scribbolyth"
+                || op == "export_note_txt" || op == "export_tree_txt")
+                return DirPrefix(state->current_dir);
+            return "";
+        }
+        //!
+
+        /*!
             Last Directory For Command
 
             !_method
 
-            The last-used directory (with trailing separator) for the family
-            that the command `name` belongs to, or "" when the command is not
-            a path command or no directory has been remembered yet. Used to
-            prefill the command line when Tab completes a path command name.
+            The default directory (with trailing separator) for the path
+            command `name`, or "" when the command is not a path command or no
+            directory is known yet. Used to prefill the command line when Tab
+            completes a path command name.
         */
         std::string LastDirForCommand(const std::shared_ptr<EditorState>& state,
                                       const std::string& name)
         {
             auto it = state->commands.find(name);
             if (it == state->commands.end()) return "";
-            if (IsOpenPathOp(it->second)) return DirPrefix(state->last_open_dir);
-            if (IsExportPathOp(it->second)) return DirPrefix(state->last_export_dir);
-            return "";
+            return DefaultDirForOp(state, it->second);
         }
         //!
 
@@ -449,13 +444,10 @@ namespace scribbolyth::op
 
         if (result.args == "prompt" && !result.command.empty() && result.command != "-")
         {
-            // Default a path prompt to the last-used directory for its family
-            // (open/save vs import/export), so the user can extend it with a
-            // filename instead of retyping the whole path.
-            std::string prefix;
-            if (IsOpenPathOp(result.op)) prefix = DirPrefix(state->last_open_dir);
-            else if (IsExportPathOp(result.op)) prefix = DirPrefix(state->last_export_dir);
-            OpenCommandLine(state, result.command, prefix);
+            // Default a path prompt to the directory for its operation
+            // (open / import / save-as+export), so the user can extend it with
+            // a filename instead of retyping the whole path.
+            OpenCommandLine(state, result.command, DefaultDirForOp(state, result.op));
             return true;
         }
 

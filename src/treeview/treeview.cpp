@@ -978,8 +978,8 @@ namespace scribbolyth::treeview
         current_file_ = path;
         state_->changed = false;
         state_->status = "Saved " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
-        // Remember where this document lives for the next open/save prompt.
-        state_->last_open_dir = ParentDir(path);
+        // Save-as and exports start next to the document being edited.
+        state_->current_dir = ParentDir(path);
         PushRecentFile(path);
         PersistLastFile();
     }
@@ -1031,8 +1031,10 @@ namespace scribbolyth::treeview
         RefreshActiveNode();
         state_->changed = false;
         state_->status.clear();
-        // Remember where this document lives for the next open/save prompt.
+        // Opening records both the folder we opened from (for the next open)
+        // and where the current document lives (for save-as / exports).
         state_->last_open_dir = ParentDir(path);
+        state_->current_dir = state_->last_open_dir;
         PushRecentFile(path);
         PersistLastFile();
     }
@@ -1064,13 +1066,14 @@ namespace scribbolyth::treeview
         state_->html_theme = std::move(theme);
         roots_ = std::move(loaded);
         current_file_.clear();
+        state_->current_dir.clear();
         selected_ = nullptr;
         ClearUndo();
         RefreshActiveNode();
         state_->changed = false;
         state_->status.clear();
-        // Remember where this side file lives for the next import/export.
-        state_->last_export_dir = ParentDir(path);
+        // Remember where we imported from for the next import.
+        state_->last_import_dir = ParentDir(path);
         // PushRecentFile(path);
         PersistLastFile();
     }
@@ -1111,6 +1114,7 @@ namespace scribbolyth::treeview
     {
         roots_.clear();
         current_file_.clear();
+        state_->current_dir.clear();
         selected_ = nullptr;
         state_->treeview_width = kDefaultTreeviewWidth;
         state_->bookmarks.clear();
@@ -1161,9 +1165,6 @@ namespace scribbolyth::treeview
             return;
         }
         state_->status = "Exported " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
-        // Remember where this side file lives for the next import/export.
-        state_->last_export_dir = ParentDir(path);
-        PersistLastFile();
     }
     //!
 
@@ -1196,9 +1197,6 @@ namespace scribbolyth::treeview
             return;
         }
         state_->status = "Exported " + std::to_string(CountNodes(branch)) + " nodes to " + path;
-        // Remember where this side file lives for the next import/export.
-        state_->last_export_dir = ParentDir(path);
-        PersistLastFile();
     }
     //!
 
@@ -1229,9 +1227,6 @@ namespace scribbolyth::treeview
             return;
         }
         state_->status = "Exported note to " + path;
-        // Remember where this side file lives for the next import/export.
-        state_->last_export_dir = ParentDir(path);
-        PersistLastFile();
     }
     //!
 
@@ -1258,9 +1253,6 @@ namespace scribbolyth::treeview
             return;
         }
         state_->status = "Exported branch to " + path;
-        // Remember where this side file lives for the next import/export.
-        state_->last_export_dir = ParentDir(path);
-        PersistLastFile();
     }
     //!
 
@@ -1315,7 +1307,7 @@ namespace scribbolyth::treeview
     {
         if (state_->init_path.empty()) return;
         scribbolyth::config::WriteInit(state_->init_path, current_file_, state_->recent_files,
-                                       state_->last_open_dir, state_->last_export_dir);
+                                       state_->last_open_dir, state_->last_import_dir);
     }
     //!
 
