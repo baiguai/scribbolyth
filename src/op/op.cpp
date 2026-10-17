@@ -28,6 +28,73 @@ namespace scribbolyth::op
         //!
 
         /*!
+            Directory Prefix
+
+            !_method
+
+            Turn a stored directory into the text inserted after the command
+            name in a prompt: the directory plus one trailing separator, or ""
+            when no directory is known (or it already ends in a separator).
+            A trailing separator makes the file browser treat the argument as
+            a folder to open.
+        */
+        std::string DirPrefix(const std::string& dir)
+        {
+            if (dir.empty()) return "";
+            const char sep = static_cast<char>(std::filesystem::path::preferred_separator);
+            if (dir.back() == sep || dir.back() == '/' || dir.back() == '\\') return dir;
+            return dir + sep;
+        }
+        //!
+
+        /*!
+            Default Directory For Operation
+
+            !_method
+
+            The directory to prefill for a path command, chosen per operation:
+
+                open / open!         - `last_open_dir`   (where we last opened)
+                import_html          - `last_import_dir` (where we last imported)
+                saveas / export...   - `current_dir`     (where the file lives)
+
+            Returns "" for a non-path op or when no directory is known yet.
+        */
+        std::string DefaultDirForOp(const std::shared_ptr<EditorState>& state,
+                                    const std::string& op)
+        {
+            if (op == "open" || op == "open_force")
+                return DirPrefix(state->last_open_dir);
+            if (op == "import_html")
+                return DirPrefix(state->last_import_dir);
+            if (op == "saveas" || op == "export_html"
+                || op == "export_scribbolyth"
+                || op == "export_note_txt" || op == "export_tree_txt")
+                return DirPrefix(state->current_dir);
+            return "";
+        }
+        //!
+
+        /*!
+            Last Directory For Command
+
+            !_method
+
+            The default directory (with trailing separator) for the path
+            command `name`, or "" when the command is not a path command or no
+            directory is known yet. Used to prefill the command line when Tab
+            completes a path command name.
+        */
+        std::string LastDirForCommand(const std::shared_ptr<EditorState>& state,
+                                      const std::string& name)
+        {
+            auto it = state->commands.find(name);
+            if (it == state->commands.end()) return "";
+            return DefaultDirForOp(state, it->second);
+        }
+        //!
+
+        /*!
             Collect Path Matches
 
             !_method
@@ -143,17 +210,42 @@ namespace scribbolyth::op
             if (matches.empty()) return;
             std::sort(matches.begin(), matches.end());
 
-            std::string completed;
+            // Decide whether the typed text now resolves to one command name.
+            std::string resolved;
             if (std::find(matches.begin(), matches.end(), cmd) != matches.end())
             {
-                completed = cmd + " ";
+                resolved = cmd;
             }
             else
             {
-                std::string common = CommonPrefix(matches);
-                completed = (common == cmd) ? cmd : (common + " ");
+                const std::string common = CommonPrefix(matches);
+                if (common != cmd
+                    && std::find(matches.begin(), matches.end(), common) != matches.end())
+                {
+                    resolved = common;
+                }
             }
-            state->command_buffer = ":" + completed;
+
+            state->command_path_prefix.clear();
+            if (!resolved.empty())
+            {
+                // Command name is settled: leave a space for the argument and,
+                // for a path command, pre-fill the last-used directory so Tab
+                // lands on the folder used last (`:open `/`:U ` etc.).
+                std::string completed = resolved + " ";
+                const std::string dir = LastDirForCommand(state, resolved);
+                if (!dir.empty())
+                {
+                    completed += dir;
+                    state->command_path_prefix = dir;
+                }
+                state->command_buffer = ":" + completed;
+            }
+            else
+            {
+                // Still ambiguous: extend only to the shared prefix.
+                state->command_buffer = ":" + CommonPrefix(matches);
+            }
             state->command_cursor = static_cast<int>(state->command_buffer.size());
             if (matches.size() > 1) state->status = "Matches: " + Join(matches);
             return;
@@ -163,6 +255,21 @@ namespace scribbolyth::op
         if (!IsPathCommand(name)) return;
 
         std::string arg = cmd.substr(space + 1);
+        if (arg.empty())
+        {
+            // Tab on an empty path argument drops in the last-used directory;
+            // the browser / further Tab-completion then work from there.
+            const std::string dir = LastDirForCommand(state, name);
+            if (!dir.empty())
+            {
+                state->command_buffer = ":" + name + " " + dir;
+                state->command_path_prefix = dir;
+                state->command_cursor = static_cast<int>(state->command_buffer.size());
+                return;
+            }
+            // Nothing remembered yet: fall through and list the working dir.
+        }
+
         std::vector<std::string> matches;
         CollectPathMatches(arg, matches);
         if (matches.empty())
@@ -193,11 +300,21 @@ namespace scribbolyth::op
 
         !_method
     */
-    void OpenCommandLine(std::shared_ptr<EditorState> state, const std::string& command)
+    void OpenCommandLine(std::shared_ptr<EditorState> state, const std::string& command,
+                         const std::string& initial_prefix)
     {
         state->mode_before_command = state->mode;
         state->mode = Mode::COMMAND;
         state->command_buffer = command.empty() ? ":" : (":" + command + " ");
+        // Pre-fill the last-used directory for a path prompt (e.g. `:open
+        // /dir/`).  Remember exactly what we inserted so the '\' handler in
+        // main.cpp can remove it again.
+        state->command_path_prefix.clear();
+        if (!command.empty() && !initial_prefix.empty())
+        {
+            state->command_buffer += initial_prefix;
+            state->command_path_prefix = initial_prefix;
+        }
         state->command_cursor = static_cast<int>(state->command_buffer.size());
         if (state->active_child) *state->active_child = 1;
     }
@@ -327,7 +444,10 @@ namespace scribbolyth::op
 
         if (result.args == "prompt" && !result.command.empty() && result.command != "-")
         {
-            OpenCommandLine(state, result.command);
+            // Default a path prompt to the directory for its operation
+            // (open / import / save-as+export), so the user can extend it with
+            // a filename instead of retyping the whole path.
+            OpenCommandLine(state, result.command, DefaultDirForOp(state, result.op));
             return true;
         }
 

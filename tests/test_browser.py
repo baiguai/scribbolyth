@@ -48,7 +48,7 @@ try:
     s.require('5/5', 'G should jump to the last entry')
     s.send(b'\r')
     s.forbid(' File Browser ', 'Enter should close the dialog')
-    s.require('Loaded 1 nodes from', 'Enter should run :open on the picked file')
+    s.require('1 descendant', 'Enter should run :open on the picked file')
     s.forbid('Saved body',
              'a fresh load starts with no active node (editor placeholder)')
 
@@ -153,7 +153,7 @@ try:
     s.require('3/3', 'G should jump to the last filtered entry')
     s.send(b'\r')
     s.forbid(' File Browser ', 'Enter should pick the filtered tree.json')
-    s.require('Loaded 1 nodes from', 'the pick should be loaded')
+    s.require('1 descendant', 'the pick should be loaded')
 
     # Esc with a filter applied (field hidden) clears it; the dialog stays.
     s.send(b':open docs')

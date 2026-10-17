@@ -408,5 +408,5 @@ if __name__ == '__main__':
     print('harness.py is a library; write a test like:')
     print('  import harness')
     print('  s = harness.launch()')
-    print('  s.require("Select a node to edit")')
+    print('  s.require("Keycode help, use:")')
     print('  s.quit()')

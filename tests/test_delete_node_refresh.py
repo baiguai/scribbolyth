@@ -38,7 +38,7 @@ try:
     s.send(b'\x1b')           # back to TREE
     s.send(b'D')              # delete Beta
     s.step(0.4)
-    s.require('Select a node to edit', 'editor clears when nothing is selected')
+    s.require('Keycode help, use:', 'editor clears when nothing is selected')
     print('ok: editor clears when no node remains')
 finally:
     s.quit()

@@ -27,7 +27,7 @@ try:
         json.dump(doc, f)
 
     s.send((':open %s\r' % doc_path).encode())
-    s.require('Loaded', 'doc should load')
+    s.require('descendant', 'doc should load')
 
     # '#' alone lists every tag once, case-insensitively de-duplicated and sorted
     s.send(b'/')

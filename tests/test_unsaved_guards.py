@@ -55,7 +55,7 @@ try:
     # --- :o! must force the open ---
     s.send(b':o! doc2.json\r')
     s.step(0.4)
-    assert 'Loaded' in status(), 'force open should load the file'
+    assert 'descendant' in status(), 'force open should load the file'
     assert 'Beta' in joined(), ':o! should switch to doc2'
     print('ok: :o! forces the open')
 
@@ -75,7 +75,7 @@ try:
     s.step(0.2)
     s.send(b'\r')
     s.step(0.4)
-    assert 'Loaded' in status(), 'forced recent open should load the file'
+    assert 'descendant' in status(), 'forced recent open should load the file'
     assert 'Beta' in joined(), 'forced recent open should keep doc2'
     print('ok: O! forces the recent open')
 
@@ -86,7 +86,7 @@ try:
     assert '!force-on' in joined(), ':O! should open the dialog pre-armed'
     s.send(b'\r')
     s.step(0.4)
-    assert 'Loaded' in status(), ':O! Enter should load the file'
+    assert 'descendant' in status(), ':O! Enter should load the file'
     assert 'Beta' in joined(), ':O! should force-open doc2'
     print('ok: :O! forces the recent open')
 
@@ -101,7 +101,7 @@ try:
     s.send(b':enew!\r')
     s.step(0.4)
     assert 'New document' in status(), ':enew! should create a new document'
-    s.require('Select a node to edit', ':enew! must blank the document')
+    s.require('Keycode help, use:', ':enew! must blank the document')
     assert 'Beta' not in joined(), ':enew! must drop the old tree'
     print('ok: :enew! forces a new document')
 finally:

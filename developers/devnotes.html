@@ -1737,7 +1737,7 @@
               {
                 "id": "a766b9c4",
                 "title": "Read the Init Config",
-                "content": "Read the Init Config\n\nSignature: bool ReadInit(const std::string& path, std::string& last_file, std::vector<std::string>& recent_files)\nMethod: ReadInit\nReturns: bool\nParameters:\n    path         const std::string&\n    last_file    std::string&\n    recent_files std::vector<std::string>&",
+                "content": "Read the Init Config\n\nSignature: bool ReadInit(const std::string& path, std::string& last_file, std::vector<std::string>& recent_files, std::string& open_dir, std::string& import_dir)\nMethod: ReadInit\nReturns: bool\nParameters:\n    path         const std::string&\n    last_file    std::string&\n    recent_files std::vector<std::string>&\n    open_dir     std::string&\n    import_dir   std::string&",
                 "children": [],
                 "expanded": false
               },
@@ -1765,7 +1765,7 @@
               {
                 "id": "2394ceac",
                 "title": "Update the Init Config",
-                "content": "Update the Init Config\n\nSignature: bool WriteInit(const std::string& path, const std::string& last_file, const std::vector<std::string>& recent_files)\nMethod: WriteInit\nReturns: bool\nParameters:\n    path         const std::string&\n    last_file    const std::string&\n    recent_files const std::vector<std::string>&",
+                "content": "Update the Init Config\n\nSignature: bool WriteInit(const std::string& path, const std::string& last_file, const std::vector<std::string>& recent_files, const std::string& open_dir, const std::string& import_dir)\nMethod: WriteInit\nReturns: bool\nParameters:\n    path         const std::string&\n    last_file    const std::string&\n    recent_files const std::vector<std::string>&\n    open_dir     const std::string&\n    import_dir   const std::string&",
                 "children": [],
                 "expanded": false
               },
@@ -2264,35 +2264,35 @@
                 "content": "Editor State Struct",
                 "children": [
                   {
-                    "id": "4be4f201",
+                    "id": "73783b1f",
                     "title": "Expand to Node",
                     "content": "Expand to Node\n\nSelect `node` in the tree, expanding every ancestor so it is visible.\nSet by the treeview.\n\n--------------------------------------------------------------------------------\n\nstd::function<void(scribbolyth::treeview::TreeNode*)> reveal_node;",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "6c0d499e",
+                    "id": "b9534292",
                     "title": "File Browser Related",
                     "content": "File Browser Related\n\nFile browser dialog. `show_file_browser` is the Modal visibility flag;\n`browser_start_dir` is the directory to open in; `browser_pick` is\ninvoked with the chosen file's path when the user presses Enter.\n`browser_command` is the `:command` name of the invoking op for\nsave/export-style ops: when non-empty, Enter on a folder closes the\ndialog and reopens the command line prefilled with that folder so the\nuser can type a filename (open/import-style ops leave it empty and\nEnter on a folder simply navigates into it).\n\n--------------------------------------------------------------------------------\n\nbool* show_file_browser = nullptr;\nstd::string browser_start_dir;\nstd::string browser_command;\nstd::function<void(const std::string&)> browser_pick;",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "341b2976",
+                    "id": "8afacbc9",
                     "title": "Find in Node Related",
                     "content": "Find in Node Related\n\nVim-style find state (the last '/' search). `search_matches` holds the\nnodes that matched the last query, in document order; `search_index` is\nthe currently selected match (n/N move it, wrapping). `search_active`\nis cleared by ':noh' to hide the match highlight; the query and match\nlist are kept so n/N keep working, as in Vim.\n\n--------------------------------------------------------------------------------\n\nstd::string search_query;\nstd::vector<scribbolyth::treeview::TreeNode*> search_matches;\nint search_index = -1;\nbool search_active = false;\n\n// Set when a '/' find executes; the editor consumes it to move its cursor\n// to the first occurrence in the (possibly unchanged) active node so the\n// match is revealed in the text, as in Vim.\nbool search_reveal_pending = false;\n\n// Step to the next (dir > 0) or previous (dir < 0) find result. Set by the\n// editor: it moves the cursor through the occurrences of the query inside\n// the active node's text (wrapping within the node), as in Vim.\nstd::function<void(int)> search_jump;",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "b9534292",
+                    "id": "6e90fb60",
                     "title": "Focus",
                     "content": "Focus\n\n--------------------------------------------------------------------------------\n\nstd::function<void()> focus_editor;\nstd::function<void()> focus_treeview;",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "6e90fb60",
+                    "id": "4be4f201",
                     "title": "Getting All Nodes",
                     "content": "Getting All Nodes\n\nFlat enumeration of the document: (node pointer, depth) in document\norder, ignoring expansion state. Set by the treeview.\n\n--------------------------------------------------------------------------------\n\nstd::function<std::vector<std::pair<scribbolyth::treeview::TreeNode*, int>>()> collect_all_nodes;",
                     "children": [],
@@ -2306,7 +2306,7 @@
                     "expanded": false
                   },
                   {
-                    "id": "3fbceae2",
+                    "id": "cf6905d7",
                     "title": "Key Map Related",
                     "content": "Key Map Related\n\n--------------------------------------------------------------------------------\n\nKeymap normal_keymap;\nKeymap insert_keymap;\nKeymap visual_keymap;\nKeymap visual_block_keymap;\nKeymap tree_keymap;\n\nKeymap& ActiveKeymap() {\n    switch (mode) {\n        case Mode::TREE:            return tree_keymap;\n        case Mode::INSERT:          return insert_keymap;\n        case Mode::VISUAL:\n        case Mode::VISUAL_LINE:     return visual_keymap;\n        case Mode::VISUAL_BLOCK:    return visual_block_keymap;\n        case Mode::COMMAND:         return normal_keymap;\n        default:                    return normal_keymap;\n    }\n}",
                     "children": [],
@@ -2320,16 +2320,23 @@
                     "expanded": false
                   },
                   {
-                    "id": "044c3ae9",
+                    "id": "6c0d499e",
                     "title": "Node Undo History",
                     "content": "Node Undo History\n\nDocument undo history. A snapshot is pushed before every content\nmutation (tree edits and text edits); `undo_stack` is newest last,\n`redo_stack` newest first. `snapshot_undo`/`apply_undo`/`clear_undo`\nare installed by the treeview. The undo dialog reads the stacks\ndirectly and applies a rollback through `apply_undo`.\n\n--------------------------------------------------------------------------------\n\nstd::vector<UndoState> undo_stack;\nstd::vector<UndoState> redo_stack;\nstatic constexpr std::size_t kUndoMax = 50;\n\nstd::function<void()> snapshot_undo;\n// `index` 0 = newest snapshot.\nstd::function<void(std::size_t index)> apply_undo;\nstd::function<void()> clear_undo;",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "8afacbc9",
+                    "id": "3fbceae2",
                     "title": "Operations and Commands",
                     "content": "Operations and Commands\n\n--------------------------------------------------------------------------------\n\nstd::map<std::string, scribbolyth::op::Operation> operations;\nstd::map<std::string, std::string> commands;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "044c3ae9",
+                    "title": "Path Prompt Directories",
+                    "content": "Path Prompt Directories\n\nThe directories used to prefill the file prompts, chosen per command:\n\n    open     - `last_open_dir`   last folder a document was opened from\n    import   - `last_import_dir` last folder an HTML file was imported from\n    save/exp - `current_dir`     folder the current document lives in\n\nSo `:open ` returns you to where you last opened from, `:U ` to where\nyou last imported from, while save-as and every export start next to\nthe document being edited. `last_open_dir` and `last_import_dir` are\npersisted to init.conf (`open_dir` / `import_dir`) and survive a\nrestart; `current_dir` is derived and tracked as the file is saved or\nloaded.\n\n--------------------------------------------------------------------------------\n\nstd::string last_open_dir;\nstd::string last_import_dir;\nstd::string current_dir;\n\n// The directory automatically inserted into the command prompt by the\n// most recent `prompt` binding (e.g. pressing `o` gives `:o /dir/`).\n// Typing '\\' in the prompt strips exactly this text back out, so the\n// user can start from a blank path without backspacing. Empty when the\n// current prompt was not prefilled.\nstd::string command_path_prefix;",
                     "children": [],
                     "expanded": false
                   },
@@ -2341,14 +2348,14 @@
                     "expanded": false
                   },
                   {
-                    "id": "73783b1f",
+                    "id": "13dc4c67",
                     "title": "Reset Cursor Position",
                     "content": "Reset Cursor Position\n\nPosition the editor cursor on a 0-based line of the currently active\nnode. Set by the editor.\n\n--------------------------------------------------------------------------------\n\nstd::function<void(int)> reveal_line;",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "13dc4c67",
+                    "id": "341b2976",
                     "title": "Text Insertion",
                     "content": "Text Insertion\n\nInsert `text` into the currently active node at the editor cursor, as a\nsingle undoable edit. Set by the editor; used by dialogs to inject text\n(e.g. a node link picked from a search) at the cursor.\n\n--------------------------------------------------------------------------------\n\nstd::function<void(const std::string&)> insert_text_at_cursor;",
                     "children": [],
@@ -2371,7 +2378,7 @@
                   {
                     "id": "24e14259",
                     "title": "Treeview Related",
-                    "content": "Treeview Related\n\n--------------------------------------------------------------------------------\n\nint treeview_width = kDefaultTreeviewWidth;\n\nscribbolyth::treeview::TreeNode* active_node = nullptr;\nstd::string status;\nstd::string template_path;\nstd::string init_path;\nstd::vector<scribbolyth::bookmark::Bookmark> bookmarks;",
+                    "content": "Treeview Related\n\n--------------------------------------------------------------------------------\n\n`active_node` is the selected node (null = none). `active_descendants`\nis the recursive count of every node beneath it, refreshed by the\ntreeview whenever the selection changes; the status bar shows it.\n\nint treeview_width = kDefaultTreeviewWidth;\n\nscribbolyth::treeview::TreeNode* active_node = nullptr;\nint active_descendants = 0;\nstd::string status;\nstd::string template_path;\nstd::string init_path;\nstd::vector<scribbolyth::bookmark::Bookmark> bookmarks;",
                     "children": [],
                     "expanded": false
                   },
@@ -3751,7 +3758,7 @@
               {
                 "id": "33648a43",
                 "title": "Variables",
-                "content": "Variables\nConstructs the persistent editor state as well as the editor and treeview elements.\n\n--------------------------------------------------------------------------------\n\nauto version = \"1.0.2\";\n\nauto state = std::make_shared<EditorState>();\n\nauto editor_comp = scribbolyth::editor::MakeEditor(state);\nauto treeview_comp = scribbolyth::treeview::MakeTreeView(state);\n\nstate->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };\nstate->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };\n\nauto treeview_wrap = treeview_comp;\nauto editor_wrap = editor_comp;\n\nauto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);\n\nauto screen = ScreenInteractive::Fullscreen();\nauto quit = screen.ExitLoopClosure();\n\n--------------------------------------------------------------------------------",
+                "content": "Variables\nConstructs the persistent editor state as well as the editor and treeview elements.\n\n--------------------------------------------------------------------------------\n\nauto version = \"1.0.3\";\n\nauto state = std::make_shared<EditorState>();\n\nauto editor_comp = scribbolyth::editor::MakeEditor(state);\nauto treeview_comp = scribbolyth::treeview::MakeTreeView(state);\n\nstate->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };\nstate->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };\n\nauto treeview_wrap = treeview_comp;\nauto editor_wrap = editor_comp;\n\nauto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);\n\nauto screen = ScreenInteractive::Fullscreen();\nauto quit = screen.ExitLoopClosure();\n\n--------------------------------------------------------------------------------",
                 "children": [],
                 "expanded": false
               },
@@ -3809,49 +3816,63 @@
             "content": "",
             "children": [
               {
-                "id": "d9cb17d0",
+                "id": "f7031a40",
                 "title": "Collect Path Matches",
                 "content": "Collect Path Matches\n\nSignature: void CollectPathMatches(const std::string& arg, std::vector<std::string>& matches)\nMethod: CollectPathMatches\nReturns: void\nParameters:\n    arg     const std::string&\n    matches std::vector<std::string>&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "8658f8f7",
+                "id": "fe287978",
                 "title": "Common Prefix",
                 "content": "Common Prefix\n\nSignature: std::string CommonPrefix(const std::vector<std::string>& items)\nMethod: CommonPrefix\nReturns: std::string\nParameters:\n    items const std::vector<std::string>&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "f7031a40",
+                "id": "04696b9e",
                 "title": "Complete Command",
                 "content": "Complete Command\n\nSignature: void CompleteCommand(std::shared_ptr<EditorState> state)\nMethod: CompleteCommand\nReturns: void\nParameters:\n    state std::shared_ptr<EditorState>",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "9d51f8f2",
+                "id": "8658f8f7",
+                "title": "Default Directory For Operation",
+                "content": "Default Directory For Operation\n\nSignature: std::string DefaultDirForOp(const std::shared_ptr<EditorState>& state, const std::string& op)\nMethod: DefaultDirForOp\nReturns: std::string\nParameters:\n    state const std::shared_ptr<EditorState>&\n    op    const std::string&\n\nThe directory to prefill for a path command, chosen per operation:\n\n    open / open!         - `last_open_dir`   (where we last opened)\n    import_html          - `last_import_dir` (where we last imported)\n    saveas / export...   - `current_dir`     (where the file lives)\n\nReturns \"\" for a non-path op or when no directory is known yet.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "d9cb17d0",
+                "title": "Directory Prefix",
+                "content": "Directory Prefix\n\nSignature: std::string DirPrefix(const std::string& dir)\nMethod: DirPrefix\nReturns: std::string\nParameters:\n    dir const std::string&\n\nTurn a stored directory into the text inserted after the command\nname in a prompt: the directory plus one trailing separator, or \"\"\nwhen no directory is known (or it already ends in a separator).\nA trailing separator makes the file browser treat the argument as\na folder to open.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "1ae6b52f",
                 "title": "Dispatch",
                 "content": "Dispatch\n\nSignature: bool Dispatch(std::shared_ptr<EditorState> state, const Keymap::Result& result)\nMethod: Dispatch\nReturns: bool\nParameters:\n    state  std::shared_ptr<EditorState>\n    result const Keymap::Result&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "eb16506d",
+                "id": "9d51f8f2",
                 "title": "Execute Command",
                 "content": "Execute Command\n\nSignature: bool ExecuteCommand(std::shared_ptr<EditorState> state, const std::string& input)\nMethod: ExecuteCommand\nReturns: bool\nParameters:\n    state std::shared_ptr<EditorState>\n    input const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "10ca5ce3",
+                "id": "4af54b1c",
                 "title": "Execute Search",
                 "content": "Execute Search\n\nSignature: bool ExecuteSearch(std::shared_ptr<EditorState> state, const std::string& input)\nMethod: ExecuteSearch\nReturns: bool\nParameters:\n    state std::shared_ptr<EditorState>\n    input const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "4af54b1c",
+                "id": "208540a7",
                 "title": "Handle Key",
                 "content": "Handle Key\n\nSignature: bool HandleKey(std::shared_ptr<EditorState> state, ftxui::Event event)\nMethod: HandleKey\nReturns: bool\nParameters:\n    state std::shared_ptr<EditorState>\n    event ftxui::Event",
                 "children": [],
@@ -3865,35 +3886,42 @@
                 "expanded": false
               },
               {
-                "id": "b65e1b77",
+                "id": "b6b4e1f3",
                 "title": "Join",
                 "content": "Join\n\nSignature: std::string Join(const std::vector<std::string>& items)\nMethod: Join\nReturns: std::string\nParameters:\n    items const std::vector<std::string>&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "fe287978",
-                "title": "Open Command Line",
-                "content": "Open Command Line\n\nSignature: void OpenCommandLine(std::shared_ptr<EditorState> state, const std::string& command)\nMethod: OpenCommandLine\nReturns: void\nParameters:\n    state   std::shared_ptr<EditorState>\n    command const std::string&",
+                "id": "b65e1b77",
+                "title": "Last Directory For Command",
+                "content": "Last Directory For Command\n\nSignature: std::string LastDirForCommand(const std::shared_ptr<EditorState>& state, const std::string& name)\nMethod: LastDirForCommand\nReturns: std::string\nParameters:\n    state const std::shared_ptr<EditorState>&\n    name  const std::string&\n\nThe default directory (with trailing separator) for the path\ncommand `name`, or \"\" when the command is not a path command or no\ndirectory is known yet. Used to prefill the command line when Tab\ncompletes a path command name.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "04696b9e",
+                "id": "eb16506d",
+                "title": "Open Command Line",
+                "content": "Open Command Line\n\nSignature: void OpenCommandLine(std::shared_ptr<EditorState> state, const std::string& command, const std::string& initial_prefix)\nMethod: OpenCommandLine\nReturns: void\nParameters:\n    state          std::shared_ptr<EditorState>\n    command        const std::string&\n    initial_prefix const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "549fb366",
                 "title": "Open Command Line With Args",
                 "content": "Open Command Line With Args\n\nSignature: void OpenCommandLineWithArgs(std::shared_ptr<EditorState> state, const std::string& command, const std::string& args)\nMethod: OpenCommandLineWithArgs\nReturns: void\nParameters:\n    state   std::shared_ptr<EditorState>\n    command const std::string&\n    args    const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "b6b4e1f3",
+                "id": "10ca5ce3",
                 "title": "Open Search Command",
                 "content": "Open Search Command\n\nSignature: void OpenSearchCommand(std::shared_ptr<EditorState> state)\nMethod: OpenSearchCommand\nReturns: void\nParameters:\n    state std::shared_ptr<EditorState>",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "549fb366",
+                "id": "85a13679",
                 "title": "Resolve",
                 "content": "Resolve\n\nSignature: Keymap::Result Resolve(std::shared_ptr<EditorState> state, ftxui::Event event)\nMethod: Resolve\nReturns: Keymap::Result\nParameters:\n    state std::shared_ptr<EditorState>\n    event ftxui::Event",
                 "children": [],
@@ -4640,21 +4668,21 @@
                 "expanded": false
               },
               {
-                "id": "9c0f15d7",
+                "id": "08429cec",
                 "title": "Collect All Depth Nodes",
                 "content": "Collect All Depth Nodes\n\nSignature: void CollectAllDepth(TreeNode& node, int depth, std::vector<std::pair<TreeNode*, int>>& out)\nMethod: CollectAllDepth\nReturns: void\nParameters:\n    node  TreeNode&\n    depth int\n    out   std::vector<std::pair<TreeNode*, int>>&\n\nDepth-first walk that ignores expansion state; every node is appended with\nits depth (this is the \"whole document\" enumeration).",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "69680a9a",
+                "id": "90a62423",
                 "title": "Collect Branch Text",
                 "content": "Collect Branch Text\n\nSignature: std::string TreeView::CollectBranchTxt(const TreeNode& node) const\nMethod: CollectBranchTxt\nReturns: std::string TreeView\nQualifiers: const\nParameters:\n    node const TreeNode&\n\nDepth-first plain-text dump of a branch: each node's text followed by\nfour blank lines, skipping empty and \"#noexp\" nodes.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "cfeae9f2",
+                "id": "9c0f15d7",
                 "title": "Collect Visible Nodes",
                 "content": "Collect Visible Nodes\n\nSignature: void CollectVisible(TreeNode& node, std::vector<TreeNode*>& out)\nMethod: CollectVisible\nReturns: void\nParameters:\n    node TreeNode&\n    out  std::vector<TreeNode*>&\n\nAppend `node` and, when it is expanded, all of its visible descendants.",
                 "children": [],
@@ -4696,77 +4724,70 @@
                 "expanded": false
               },
               {
-                "id": "deee0c8a",
+                "id": "fc958bce",
                 "title": "Export Node to Text",
                 "content": "Export Node to Text\n\nSignature: void TreeView::ExportNoteTxt(const std::string& path)\nMethod: ExportNoteTxt\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nExport the selected note's text as plain text, with inter-note link\nunderscores stripped (web app's exportNoteAsTxt()).",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "90a62423",
-                "title": "Export Start Dir",
-                "content": "Export Start Dir\n\nSignature: std::string TreeView::ExportStartDir() const\nMethod: ExportStartDir\nReturns: std::string TreeView\nQualifiers: const\n\nHitting Enter w/out entering a path shows the dialog, defaulted to the\nfolder of the document currently being edited, or the working directory\nwhen no file is loaded yet.",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "f5e989b6",
+                "id": "deee0c8a",
                 "title": "Export Subtree",
                 "content": "Export Subtree\n\nSignature: void TreeView::ExportScribbolyth(const std::string& path)\nMethod: ExportScribbolyth\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nExport the selected node and its whole subtree as a standalone\nScribbolyth document (its own .scribboleth file). Unlike SaveTo this\ndoes not repoint current_file_, touch the recent-files list or rewrite\ninit.conf: the branch is written to `path` and the open document is\nleft exactly as it was. Bookmarks and history are not carried over and\nthe pane width is preserved so the file reopens with the same layout.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "fc958bce",
+                "id": "69680a9a",
                 "title": "Export Subtree to Text File",
                 "content": "Export Subtree to Text File\n\nSignature: void TreeView::ExportTreeTxt(const std::string& path)\nMethod: ExportTreeTxt\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nExport the selected branch as plain text, depth-first: each node's text\nis written verbatim followed by four blank lines; nodes whose text\ncontains \"#noexp\" are skipped (web app's exportTreeAsTxt()).",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "08ceefb4",
+                "id": "f5e989b6",
                 "title": "Export to Scribboleth Html File",
                 "content": "Export to Scribboleth Html File\n\nSignature: void TreeView::ExportTo(const std::string& path)\nMethod: ExportTo\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nWrite the web-app HTML export: patch an existing target file in place so\nmanual edits survive re-export, otherwise build from the scribboleth.html\ntemplate.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "bf9cfabd",
+                "id": "174a13ad",
                 "title": "Find By Id",
                 "content": "Find By Id\n\nSignature: TreeNode* FindById(std::vector<TreeNode>& nodes, const std::string& id)\nMethod: FindById\nReturns: TreeNode*\nParameters:\n    nodes std::vector<TreeNode>&\n    id    const std::string&\n\nDepth-first search for the node with `id`, or null.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "42090682",
+                "id": "f84e1837",
                 "title": "Find Parent Node",
                 "content": "Find Parent Node\n\nSignature: TreeNode* FindParent(TreeNode& node, TreeNode* child)\nMethod: FindParent\nReturns: TreeNode*\nParameters:\n    node  TreeNode&\n    child TreeNode*\n\nFind the node that directly owns `child`, or null when it is a root.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "f84e1837",
+                "id": "bf9cfabd",
                 "title": "Find Roots Parent Node",
                 "content": "Find Roots Parent Node\n\nSignature: TreeNode* FindParent(std::vector<TreeNode>& roots, TreeNode* child)\nMethod: FindParent\nReturns: TreeNode*\nParameters:\n    roots std::vector<TreeNode>&\n    child TreeNode*\n\nFindParent() over a whole root list.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "174a13ad",
+                "id": "433c5527",
                 "title": "Get Node Count",
                 "content": "Get Node Count\n\nSignature: int CountNodes(const std::vector<TreeNode>& nodes)\nMethod: CountNodes\nReturns: int\nParameters:\n    nodes const std::vector<TreeNode>&\n\nTotal number of nodes in the forest (includes all children).",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "34595f2c",
+                "id": "591b1212",
                 "title": "Get Visible Depth",
                 "content": "Get Visible Depth\n\nSignature: void TreeView::CollectVisibleDepth(TreeNode& node, int depth, std::vector<TreeNode*>& nodes, std::vector<int>& depths)\nMethod: CollectVisibleDepth\nReturns: void TreeView\nParameters:\n    node   TreeNode&\n    depth  int\n    nodes  std::vector<TreeNode*>&\n    depths std::vector<int>&\n\nSame walk as VisibleNodes(), but also reporting each node's depth.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "123ec801",
+                "id": "9342ba5e",
                 "title": "Import Scribboleth File",
                 "content": "Import Scribboleth File\n\nSignature: void TreeView::ImportFrom(const std::string& path)\nMethod: ImportFrom\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nLoad a document from the HTML export produced by the web app; unlike\nLoadFrom() this leaves the document without a file path.",
                 "children": [],
@@ -4787,7 +4808,7 @@
                 "expanded": false
               },
               {
-                "id": "e1d5e832",
+                "id": "34595f2c",
                 "title": "Is Ancestor",
                 "content": "Is Ancestor\n\nSignature: bool TreeView::IsAncestor(TreeNode& ancestor, TreeNode* node)\nMethod: IsAncestor\nReturns: bool TreeView\nParameters:\n    ancestor TreeNode&\n    node     TreeNode*\n\nTrue when `ancestor` is an ancestor of `node` (or is node itself).",
                 "children": [],
@@ -4801,21 +4822,21 @@
                 "expanded": false
               },
               {
-                "id": "88457db9",
+                "id": "cfeae9f2",
                 "title": "Make TreeView",
                 "content": "Make TreeView\n\nSignature: ftxui::Component MakeTreeView(std::shared_ptr<EditorState> state)\nMethod: MakeTreeView\nReturns: ftxui::Component\nParameters:\n    state std::shared_ptr<EditorState>\n\nComponent factory: give EditorState a ready-to-render TreeView.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "b0bb2f3b",
+                "id": "924865a6",
                 "title": "Move Selected Node Up / Down",
                 "content": "Move Selected Node Up / Down\n\nSignature: void TreeView::MoveNode(int dir)\nMethod: MoveNode\nReturns: void TreeView\nParameters:\n    dir int\n\nSwap the selected node with its sibling at offset `dir` (-1 up, +1\ndown), reordering it within the same parent.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "924865a6",
+                "id": "9c1afc83",
                 "title": "Move Selected Node's Level",
                 "content": "Move Selected Node's Level\n\nSignature: void TreeView::MoveParent(int dir)\nMethod: MoveParent\nReturns: void TreeView\nParameters:\n    dir int\n\nChange the selected node's level: dir < 0 promotes it one level up (out\nof its parent), dir > 0 demotes it one level down (under its previous\nsibling).",
                 "children": [],
@@ -4836,14 +4857,14 @@
                 "expanded": false
               },
               {
-                "id": "591b1212",
+                "id": "e267bba2",
                 "title": "Move Selection Up / Down",
                 "content": "Move Selection Up / Down\n\nSignature: void TreeView::MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void TreeView\nParameters:\n    dir int\n\nStep the selection `dir` rows (-1 up, +1 down) through the visible\nnodes, clamped to the ends; selects the first node when none is set.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "a7b38192",
+                "id": "08ceefb4",
                 "title": "New Document",
                 "content": "New Document\n\nSignature: void TreeView::NewDocument()\nMethod: NewDocument\nReturns: void TreeView\n\nClear the tree, selection, bookmarks, history and undo; reset the pane\nwidth and leave the document without a file path.",
                 "children": [],
@@ -4857,14 +4878,14 @@
                 "expanded": false
               },
               {
-                "id": "6c4ba7dd",
+                "id": "123ec801",
                 "title": "Open File",
                 "content": "Open File\n\nSignature: void TreeView::LoadFrom(const std::string& path)\nMethod: LoadFrom\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nRead and deserialize a document (tree, pane width, bookmarks and history)\nfrom `path`, making it the currently edited file.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "9342ba5e",
+                "id": "a7b38192",
                 "title": "Open File",
                 "content": "Open File\n\nSignature: void TreeView::OpenFile(const std::string& path)\nMethod: OpenFile\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nOpen `path` directly, or launch the file browser when it is a folder.",
                 "children": [],
@@ -4874,6 +4895,13 @@
                 "id": "30815084",
                 "title": "Open Selected Node",
                 "content": "Open Selected Node \n\nSignature: void TreeView::OpenSelected()\nMethod: OpenSelected\nReturns: void TreeView\n\nToggle the selected folder's expansion (Enter on a folder).",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "53a8ce22",
+                "title": "Parent Directory",
+                "content": "Parent Directory\n\nSignature: std::string ParentDir(const std::string& path)\nMethod: ParentDir\nReturns: std::string\nParameters:\n    path const std::string&\n\nThe directory of `path`, absolute and with a trailing separator.\nFor `/home/bob/temp/test.scr` this returns `/home/bob/temp/`, so it\ncan be prefilled straight into a prompt and extended with a filename.\nA bare filename (e.g. a save typed as `notes.json`) records the\nworking directory it landed in. Used to remember the last-used\ndirectory for the open/save and import/export prompt families.",
                 "children": [],
                 "expanded": false
               },
@@ -4892,35 +4920,35 @@
                 "expanded": false
               },
               {
-                "id": "9c1afc83",
+                "id": "23deb7f7",
                 "title": "Refresh Current Node",
                 "content": "Refresh Current Node\n\nSignature: void TreeView::RefreshActiveNode()\nMethod: RefreshActiveNode\nReturns: void TreeView\n\nSync state_->active_node with the selection, reset the undo history when\nthe selection changes, and record the viewed node into the history list.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "23deb7f7",
+                "id": "6c4ba7dd",
                 "title": "Save As",
                 "content": "Save As\n\nSignature: void TreeView::SaveTo(const std::string& path)\nMethod: SaveTo\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nSerialize the whole document and write it to `path`, remembering the\npath for future saves and updating the recent-files list and init file.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "e267bba2",
+                "id": "b0bb2f3b",
                 "title": "Select Search Node",
                 "content": "Select Search Node\n\nSignature: void TreeView::SearchJump(int dir)\nMethod: SearchJump\nReturns: void TreeView\nParameters:\n    dir int\n\nMove to the next/previous node in the '/' search result list (n/N),\nwrapping at both ends, and reveal the picked node.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "08429cec",
+                "id": "42090682",
                 "title": "Set All Nodes Expanded",
                 "content": "Set All Nodes Expanded\n\nSignature: void SetAllExpanded(TreeNode& node, bool expanded, bool skip_root)\nMethod: SetAllExpanded\nReturns: void\nParameters:\n    node      TreeNode&\n    expanded  bool\n    skip_root bool\n\nApply `expanded` to every node in the subtree that has children.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "433c5527",
+                "id": "018b335b",
                 "title": "Sibling List",
                 "content": "Sibling List\n\nSignature: std::vector<TreeNode>& TreeView::ContainerOf(TreeNode* node)\nMethod: ContainerOf\nReturns: std::vector<TreeNode>& TreeView\nParameters:\n    node TreeNode*\n\nThe sibling list that owns `node`: its parent's children, or the roots.",
                 "children": [],
@@ -4941,7 +4969,7 @@
                 "expanded": false
               },
               {
-                "id": "53a8ce22",
+                "id": "88457db9",
                 "title": "TreeView Component Class",
                 "content": "TreeView Component Class\n\nFTXUI component owning the document tree (roots_), the current\nselection, and every tree-mode operation. Key events arrive through\nthe operation map installed in the constructor; this file never\ndecodes keys itself.",
                 "children": [],
@@ -4962,7 +4990,7 @@
                 "expanded": false
               },
               {
-                "id": "018b335b",
+                "id": "e1d5e832",
                 "title": "Visible Nodes",
                 "content": "Visible Nodes\n\nSignature: std::vector<TreeNode*> TreeView::VisibleNodes()\nMethod: VisibleNodes\nReturns: std::vector<TreeNode*> TreeView\n\nAll nodes currently on screen in display order: a depth-first walk of\nonly the expanded nodes.",
                 "children": [],

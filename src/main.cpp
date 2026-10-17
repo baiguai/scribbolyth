@@ -58,7 +58,7 @@ int main(int, char** argv) {
         ----
     */
     //>>
-    auto version = "1.0.2";
+    auto version = "1.0.3";
 
     auto state = std::make_shared<EditorState>();
 
@@ -277,7 +277,8 @@ int main(int, char** argv) {
         Recent file handling is done here - including cleaning out dead links.
     */
     std::string last_file;
-    if (scribbolyth::config::ReadInit(init_path.string(), last_file, state->recent_files) && !last_file.empty())
+    if (scribbolyth::config::ReadInit(init_path.string(), last_file, state->recent_files,
+                                      state->last_open_dir, state->last_import_dir) && !last_file.empty())
     {
         auto it = state->operations.find("open");
         std::error_code ec;
@@ -291,7 +292,8 @@ int main(int, char** argv) {
     {
         std::cerr << "Removed " << removed << " stale recent entr"
                   << (removed == 1 ? "y" : "ies") << " from init.conf\n";
-        scribbolyth::config::WriteInit(init_path.string(), last_file, state->recent_files);
+        scribbolyth::config::WriteInit(init_path.string(), last_file, state->recent_files,
+                                       state->last_open_dir, state->last_import_dir);
     }
     /*!*/
 
@@ -317,6 +319,25 @@ int main(int, char** argv) {
     });
 
     auto command_handler = CatchEvent(command_wrapper, [state](Event event) {
+        // A path prompt (e.g. :open) may arrive prefilled with the last-used
+        // directory, shown as `:open /last/dir/`.  Typing '\' strips just
+        // that auto-inserted prefix so the user can type a path from scratch;
+        // we remember the prefix in command_path_prefix and drop only that
+        // exact text.  Once stripped the prefix is cleared, so any following
+        // '\' is a normal character (important for Windows paths).
+        if (event.is_character() && event.character() == "\\"
+            && !state->command_path_prefix.empty())
+        {
+            const std::string& prefix = state->command_path_prefix;
+            const std::size_t pos = state->command_buffer.find(prefix);
+            if (pos != std::string::npos)
+            {
+                state->command_buffer.erase(pos, prefix.size());
+                state->command_cursor = static_cast<int>(state->command_buffer.size());
+            }
+            state->command_path_prefix.clear();
+            return true;
+        }
         if (event == Event::Tab)
         {
             scribbolyth::op::CompleteCommand(state);
@@ -340,6 +361,7 @@ int main(int, char** argv) {
             }
             state->command_buffer.clear();
             state->command_cursor = 0;
+            state->command_path_prefix.clear();
             if (state->active_child)
                 *state->active_child = 0;
             state->mode = state->mode_before_command;
@@ -377,6 +399,16 @@ int main(int, char** argv) {
             // separator(),
             // text(" scribbolyth ") | dim,
         };
+        // Descendant count of the selected node, or of the whole document when
+        // nothing is selected (right after a load/import). Hidden on an empty
+        // document so a blank start shows only the mode.
+        if (state->active_node != nullptr || state->active_descendants > 0)
+        {
+            const int n = state->active_descendants;
+            parts.push_back(separator());
+            parts.push_back(text(" " + std::to_string(n)
+                                 + (n == 1 ? " descendant " : " descendants ")) | dim);
+        }
         if (!state->status.empty())
         {
             parts.push_back(separator());

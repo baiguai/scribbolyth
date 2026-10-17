@@ -165,13 +165,17 @@ namespace scribbolyth::config
 
         !_method
     */
-    bool ReadInit(const std::string& path, std::string& last_file, std::vector<std::string>& recent_files)
+    bool ReadInit(const std::string& path, std::string& last_file,
+                  std::vector<std::string>& recent_files,
+                  std::string& open_dir, std::string& import_dir)
     {
         std::ifstream file(path);
         if (!file.is_open()) return false;
 
         last_file.clear();
         recent_files.clear();
+        open_dir.clear();
+        import_dir.clear();
         std::string line;
         while (std::getline(file, line))
         {
@@ -206,6 +210,16 @@ namespace scribbolyth::config
                     recent_files.push_back(value);
                 }
             }
+            else if (key == "open_dir")
+            {
+                // Last directory a document was opened from.
+                open_dir = value;
+            }
+            else if (key == "import_dir")
+            {
+                // Last directory an HTML file was imported from.
+                import_dir = value;
+            }
         }
         return true;
     }
@@ -216,7 +230,9 @@ namespace scribbolyth::config
 
         !_method
     */
-    bool WriteInit(const std::string& path, const std::string& last_file, const std::vector<std::string>& recent_files)
+    bool WriteInit(const std::string& path, const std::string& last_file,
+                   const std::vector<std::string>& recent_files,
+                   const std::string& open_dir, const std::string& import_dir)
     {
         std::ofstream file(path, std::ios::binary);
         if (!file.is_open()) return false;
@@ -224,6 +240,10 @@ namespace scribbolyth::config
         file << "# scribbolyth init configuration - written by the app\n";
         file << "# On startup the app reopens `last_file` when it still exists.\n";
         file << "last_file = " << last_file << "\n";
+        // Last directories opened from and imported from; they prefill the
+        // corresponding command prompts and browser.
+        file << "open_dir = " << open_dir << "\n";
+        file << "import_dir = " << import_dir << "\n";
         for (const auto& recent : recent_files)
         {
             file << "recent_file = " << recent << "\n";
@@ -239,10 +259,14 @@ namespace scribbolyth::config
     */
     bool WriteRecentFiles(const std::string& path, const std::vector<std::string>& recent_files)
     {
+        // Read the settings this call does not own (last_file and the two
+        // remembered directories) so rewriting the recents does not drop them.
         std::string last_file;
+        std::string open_dir;
+        std::string import_dir;
         std::vector<std::string> ignored;
-        ReadInit(path, last_file, ignored);
-        return WriteInit(path, last_file, recent_files);
+        ReadInit(path, last_file, ignored, open_dir, import_dir);
+        return WriteInit(path, last_file, recent_files, open_dir, import_dir);
     }
     //!
 }

@@ -85,6 +85,31 @@ namespace scribbolyth::treeview
     //!
 
     /*!
+        Parent Directory
+
+        !_method
+
+        The directory of `path`, absolute and with a trailing separator.
+        For `/home/bob/temp/test.scr` this returns `/home/bob/temp/`, so it
+        can be prefilled straight into a prompt and extended with a filename.
+        A bare filename (e.g. a save typed as `notes.json`) records the
+        working directory it landed in. Used to remember the last-used
+        directory for the open/save and import/export prompt families.
+    */
+    std::string ParentDir(const std::string& path)
+    {
+        std::error_code ec;
+        namespace fs = std::filesystem;
+        fs::path abs = fs::absolute(fs::path(path), ec);
+        if (ec) abs = fs::path(path);
+        // `parent_path() / ""` yields the folder and a trailing separator
+        // ("/home/bob/temp/"), except at the filesystem root where it stays
+        // "/", which is already terminated.
+        return (abs.parent_path() / "").string();
+    }
+    //!
+
+    /*!
         TreeView Component Class
 
         FTXUI component owning the document tree (roots_), the current
@@ -286,14 +311,12 @@ namespace scribbolyth::treeview
                 };
                 state_->operations["saveas"] = [this](const std::string& path, int)
                 {
-                    if (path.empty())
+                    // An empty path (no stored directory yet, or the prompt
+                    // was cleared with '\') opens the browser at the root.
+                    if (path.empty() || IsDirectory(path))
                     {
-                        state_->status = "Save as requires a path";
-                        return;
-                    }
-                    if (IsDirectory(path))
-                    {
-                        BrowseFor(path, "saveas", [this](const std::string& chosen)
+                        BrowseFor(path.empty() ? "/" : path, "saveas",
+                                  [this](const std::string& chosen)
                                   {
                                       SaveTo(chosen);
                                   });
@@ -331,14 +354,11 @@ namespace scribbolyth::treeview
                 };
                 state_->operations["import_html"] = [this](const std::string& path, int)
                 {
-                    if (path.empty())
+                    // Empty path -> browser at root (see saveas above).
+                    if (path.empty() || IsDirectory(path))
                     {
-                        state_->status = "Import requires a path";
-                        return;
-                    }
-                    if (IsDirectory(path))
-                    {
-                        BrowseFor(path, "", [this](const std::string& chosen)
+                        BrowseFor(path.empty() ? "/" : path, "",
+                                  [this](const std::string& chosen)
                                   {
                                       ImportFrom(chosen);
                                   });
@@ -348,14 +368,11 @@ namespace scribbolyth::treeview
                 };
                 state_->operations["export_html"] = [this](const std::string& path, int)
                 {
-                    if (path.empty())
+                    // Empty path -> browser at root (see saveas above).
+                    if (path.empty() || IsDirectory(path))
                     {
-                        state_->status = "Export requires a path";
-                        return;
-                    }
-                    if (IsDirectory(path))
-                    {
-                        BrowseFor(path, "X", [this](const std::string& chosen)
+                        BrowseFor(path.empty() ? "/" : path, "X",
+                                  [this](const std::string& chosen)
                                   {
                                       ExportTo(chosen);
                                   });
@@ -372,7 +389,7 @@ namespace scribbolyth::treeview
                     {
                         if (path.empty() || IsDirectory(path))
                         {
-                            BrowseFor(path.empty() ? ExportStartDir() : path,
+                            BrowseFor(path.empty() ? "/" : path,
                                       "saveas", [this](const std::string& chosen)
                                       {
                                           SaveTo(chosen);
@@ -384,7 +401,7 @@ namespace scribbolyth::treeview
                     }
                     if (path.empty() || IsDirectory(path))
                     {
-                        BrowseFor(path.empty() ? ExportStartDir() : path,
+                        BrowseFor(path.empty() ? "/" : path,
                                   "x", [this](const std::string& chosen)
                                   {
                                       ExportScribbolyth(chosen);
@@ -397,7 +414,7 @@ namespace scribbolyth::treeview
                 {
                     if (path.empty() || IsDirectory(path))
                     {
-                        BrowseFor(path.empty() ? ExportStartDir() : path,
+                        BrowseFor(path.empty() ? "/" : path,
                                   "export_note_txt", [this](const std::string& chosen)
                                   {
                                       ExportNoteTxt(chosen);
@@ -410,7 +427,7 @@ namespace scribbolyth::treeview
                 {
                     if (path.empty() || IsDirectory(path))
                     {
-                        BrowseFor(path.empty() ? ExportStartDir() : path,
+                        BrowseFor(path.empty() ? "/" : path,
                                   "export_tree_txt", [this](const std::string& chosen)
                                   {
                                       ExportTreeTxt(chosen);
@@ -496,7 +513,6 @@ namespace scribbolyth::treeview
             void ExportTreeTxt(const std::string& path);
             void ExportScribbolyth(const std::string& path);
             std::string CollectBranchTxt(const TreeNode& node) const;
-            std::string ExportStartDir() const;
             void PersistLastFile();
             void PushRecentFile(const std::string path);
             void SnapshotUndo();
@@ -916,6 +932,11 @@ namespace scribbolyth::treeview
     void TreeView::RefreshActiveNode()
     {
         state_->active_node = selected_;
+        // Recursive descendant count for the status bar; CountNodes() walks
+        // the whole subtree regardless of expansion. With nothing selected it
+        // reports the whole document, so the count survives load/import.
+        state_->active_descendants = selected_ ? CountNodes(selected_->children)
+                                               : CountNodes(roots_);
         const std::string cur_id = selected_ ? selected_->id : "";
         // Undo history is scoped to the currently selected node: switching to
         // a different node (or deselecting) resets it, leaving one baseline
@@ -957,6 +978,8 @@ namespace scribbolyth::treeview
         current_file_ = path;
         state_->changed = false;
         state_->status = "Saved " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
+        // Save-as and exports start next to the document being edited.
+        state_->current_dir = ParentDir(path);
         PushRecentFile(path);
         PersistLastFile();
     }
@@ -996,6 +1019,10 @@ namespace scribbolyth::treeview
         state_->treeview_width = loaded_width;
         state_->bookmarks = std::move(loaded_marks);
         state_->history = std::move(loaded_history);
+        // A .scribboleth document carries no theme material, so drop any theme
+        // captured from an earlier HTML import: it belongs to that other
+        // document and must not bleed into this one's exports.
+        state_->html_theme = scribbolyth::html::HtmlTheme{};
         EnsureIds(loaded);
         roots_ = std::move(loaded);
         current_file_ = path;
@@ -1003,7 +1030,11 @@ namespace scribbolyth::treeview
         ClearUndo();
         RefreshActiveNode();
         state_->changed = false;
-        state_->status = "Loaded " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
+        state_->status.clear();
+        // Opening records both the folder we opened from (for the next open)
+        // and where the current document lives (for save-as / exports).
+        state_->last_open_dir = ParentDir(path);
+        state_->current_dir = state_->last_open_dir;
         PushRecentFile(path);
         PersistLastFile();
     }
@@ -1035,11 +1066,14 @@ namespace scribbolyth::treeview
         state_->html_theme = std::move(theme);
         roots_ = std::move(loaded);
         current_file_.clear();
+        state_->current_dir.clear();
         selected_ = nullptr;
         ClearUndo();
         RefreshActiveNode();
         state_->changed = false;
-        state_->status = "Imported " + std::to_string(CountNodes(roots_)) + " nodes from " + path;
+        state_->status.clear();
+        // Remember where we imported from for the next import.
+        state_->last_import_dir = ParentDir(path);
         // PushRecentFile(path);
         PersistLastFile();
     }
@@ -1054,14 +1088,11 @@ namespace scribbolyth::treeview
     */
     void TreeView::OpenFile(const std::string& path)
     {
-        if (path.empty())
+        // An empty path (no stored directory yet, or the prompt was cleared
+        // with '\') opens the browser at the root.
+        if (path.empty() || IsDirectory(path))
         {
-            state_->status = "Open requires a path";
-            return;
-        }
-        if (IsDirectory(path))
-        {
-            BrowseFor(path, "", [this](const std::string& chosen)
+            BrowseFor(path.empty() ? "/" : path, "", [this](const std::string& chosen)
                       {
                           LoadFrom(chosen);
                       });
@@ -1083,6 +1114,7 @@ namespace scribbolyth::treeview
     {
         roots_.clear();
         current_file_.clear();
+        state_->current_dir.clear();
         selected_ = nullptr;
         state_->treeview_width = kDefaultTreeviewWidth;
         state_->bookmarks.clear();
@@ -1110,7 +1142,10 @@ namespace scribbolyth::treeview
         // When overwriting an existing export, patch the data in that file in
         // place rather than regenerating from the config template, so any other
         // edits made to the exported file are preserved. Only the tree,
-        // bookmarks and history data sections change.
+        // bookmarks and history data sections change. The in-memory theme is
+        // deliberately not passed when overwriting: an existing export keeps
+        // its own theme (colors, grid, custom CSS) untouched. The theme only
+        // applies when building a fresh file from the template.
         std::error_code ec;
         const bool overwrite = std::filesystem::exists(path, ec);
         const std::string base = overwrite ? path : state_->template_path;
@@ -1120,10 +1155,11 @@ namespace scribbolyth::treeview
             state_->status = "Error: scribboleth.html template not found";
             return;
         }
+        const scribbolyth::html::HtmlTheme* theme = overwrite ? nullptr : &state_->html_theme;
         if (!scribbolyth::html::ExportHtmlFile(base, path,
                                                roots_, state_->bookmarks,
                                                state_->history,
-                                               &state_->html_theme))
+                                               theme))
         {
             state_->status = "Error: could not export " + path;
             return;
@@ -1246,28 +1282,6 @@ namespace scribbolyth::treeview
     //!
 
     /*!
-        Export Start Dir
-
-        !_method
-
-        Hitting Enter w/out entering a path shows the dialog, defaulted to the
-        folder of the document currently being edited, or the working directory
-        when no file is loaded yet.
-    */
-    std::string TreeView::ExportStartDir() const
-    {
-        if (!current_file_.empty())
-        {
-            const std::string parent =
-                std::filesystem::path(current_file_).parent_path().string();
-            if (!parent.empty()) return parent;
-        }
-        std::error_code ec;
-        return std::filesystem::current_path(ec).string();
-    }
-    //!
-
-    /*!
         Is Directory Check
 
         !_method
@@ -1292,7 +1306,8 @@ namespace scribbolyth::treeview
     void TreeView::PersistLastFile()
     {
         if (state_->init_path.empty()) return;
-        scribbolyth::config::WriteInit(state_->init_path, current_file_, state_->recent_files);
+        scribbolyth::config::WriteInit(state_->init_path, current_file_, state_->recent_files,
+                                       state_->last_open_dir, state_->last_import_dir);
     }
     //!
 

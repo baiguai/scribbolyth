@@ -23,7 +23,7 @@ FULL = os.path.join(DATA_DIR, 'whole.json')
 
 s = harness.launch(workdir=DATA_DIR)
 try:
-    s.require('Select a node to edit', 'app must start blank')
+    s.require('Keycode help, use:', 'app must start blank')
 
     # Doc(Alpha(Omega(Delta)) Beta): Alpha is a root carrying a subtree; Doc
     # and Beta are roots that must NOT appear in Alpha's branch export.
@@ -70,7 +70,7 @@ try:
 
     # The branch export round-trips: open it and only the branch is present.
     s.send((':o ' + SUB).encode()); s.send(b'\r')
-    s.require('Loaded 3 nodes from', 'branch file should load')
+    s.require('3 descendants', 'branch file should load with its node count')
     s.send(b'E')                                    # expand all
     s.require('Alpha', 'Alpha should be the only root')
     s.require('Omega', 'Omega should be present after expand')

@@ -19,7 +19,7 @@ os.makedirs(DATA_DIR)
 
 s = harness.launch(workdir=DATA_DIR)
 try:
-    s.require('Select a node to edit', 'app must start blank')
+    s.require('Keycode help, use:', 'app must start blank')
 
     s.send(b'a')
     s.require('create_node')
@@ -80,7 +80,7 @@ try:
     s.require('New document', 'new document should reset the workspace')
     s.send(b':U ' + HTML.encode())
     s.send(b'\r')
-    s.require('Imported', 'status bar should report the import')
+    s.require('3 descendants', 'status bar should report the imported node count')
     s.send(b'<')
     s.require(' < History ', 'history dialog should open')
     s.require('1/2', 'imported HTML should carry its history (2 entries)')

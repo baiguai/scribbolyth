@@ -34,7 +34,7 @@ DLG = range(3, 27)
 s = harness.launch(cols=92, rows=30)
 try:
     s.send((':open %s\r' % make_doc(s)).encode())
-    s.require('Loaded', 'doc should load')
+    s.require('descendant', 'doc should load')
 
     # ---- TREE: '\' opens the collect dialog; Enter creates the node ----
     s.send(b'\\')
@@ -85,7 +85,7 @@ finally:
 d = harness.launch(cols=92, rows=30)
 try:
     d.send((':open %s\r' % make_doc(d)).encode())
-    d.require('Loaded', 'doc should load')
+    d.require('descendant', 'doc should load')
 
     d.send(b'\\')
     d.require('\\ Results', 'collect dialog opens')

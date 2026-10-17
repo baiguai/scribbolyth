@@ -10,7 +10,7 @@ import harness
 
 s = harness.launch(cols=80, rows=24)
 try:
-    s.require('Select a node to edit', 'app must start blank')
+    s.require('Keycode help, use:', 'app must start blank')
 
     def calc(expr, expect):
         s.send((':calc ' + expr).encode())

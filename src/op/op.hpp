@@ -11,7 +11,12 @@ struct EditorState;
 namespace scribbolyth::op
 {
     using Operation = std::function<void(const std::string& args, int count)>;
-    void OpenCommandLine(std::shared_ptr<EditorState> state, const std::string& command);
+    // Open the ':' command line. `initial_prefix` (optional) is appended to
+    // the `:command ` buffer as a pre-filled directory for path commands; it
+    // is also recorded in state->command_path_prefix so a '\' in the prompt
+    // can strip it back out.
+    void OpenCommandLine(std::shared_ptr<EditorState> state, const std::string& command,
+                         const std::string& initial_prefix = "");
     // Like OpenCommandLine, but with a '/' prompt (Vim-style find); the buffer
     // is prefilled with "/" and Enter runs a search instead of a command.
     void OpenSearchCommand(std::shared_ptr<EditorState> state);

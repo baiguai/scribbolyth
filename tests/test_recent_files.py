@@ -38,7 +38,7 @@ def last_line():
 # --- save two documents: init.conf should list them, newest first ---------
 s = harness.launch(workdir=DATA_DIR)
 try:
-    s.require('Select a node to edit', 'first launch must start blank')
+    s.require('Keycode help, use:', 'first launch must start blank')
 
     # doc A
     s.send(b'a')
@@ -54,7 +54,7 @@ try:
     # fresh doc, then doc B (saved last -> auto-restore target)
     s.send(b':n')
     s.send(b'\r')
-    s.require('Select a node to edit', ':n should blank the document')
+    s.require('Keycode help, use:', ':n should blank the document')
     s.send(b'a')
     s.require('create_node')
     s.send(b'B'); s.send(b'\r')
@@ -75,8 +75,7 @@ if len(lines) != 2 or 'beta.json' not in lines[0] or 'alpha.json' not in lines[1
 # --- relaunch: auto-restore AND the recents dialog both come back ---------
 s = harness.launch(workdir=DATA_DIR)
 try:
-    s.require('Loaded 1 nodes from beta.json',
-              'relaunch should auto-restore beta.json')
+    s.require('1 descendant', 'relaunch should auto-restore beta.json')
     s.send(b'j')                                  # select the node
     s.require('beta body', 'auto-restored doc should show its text')
     s.send(b'O')                                  # TREE mode, capital o
@@ -107,8 +106,7 @@ try:
     s.require('Recent Files')
     s.send(b'\r')                                 # Enter on beta.json
     s.forbid('Recent Files', 'Enter should close the dialog')
-    s.require('Loaded 1 nodes from beta.json',
-              'Enter should open the selected file')
+    s.require('1 descendant', 'Enter should open the selected file')
 finally:
     s.quit()
 
@@ -117,7 +115,7 @@ s = harness.launch(workdir=DATA_DIR)
 try:
     s.send(b':enew')
     s.send(b'\r')
-    s.require('Select a node to edit', ':enew should blank the document')
+    s.require('Keycode help, use:', ':enew should blank the document')
 finally:
     s.quit()
 if not last_line().endswith('='):
@@ -130,7 +128,7 @@ if len(lines) != 2:
 
 s = harness.launch(workdir=DATA_DIR)
 try:
-    s.require('Select a node to edit', 'after :enew no auto-restore')
+    s.require('Keycode help, use:', 'after :enew no auto-restore')
     s.send(b'O')
     s.require('Recent Files')
     s.require('1/2', 'recents should survive :enew + relaunch')
@@ -166,7 +164,7 @@ MOVE_INIT = os.path.join(MOVE_DIR, 'init.conf')
 
 s = harness.launch(workdir=MOVE_DIR)
 try:
-    s.require('Select a node to edit', 'move: blank start')
+    s.require('Keycode help, use:', 'move: blank start')
     s.send(b'a'); s.require('create_node')
     s.send(b'one'); s.send(b'\r')
     s.send(b'S'); s.require('saveas')
@@ -175,10 +173,11 @@ try:
     s.send(b'a'); s.require('create_node')
     s.send(b'two'); s.send(b'\r')
     s.send(b'S'); s.require('saveas')
+    s.send(b'\\')                     # '\' clears the prefilled last-used dir
     s.send(b'b.json'); s.send(b'\r')
     s.require('Saved', 'move: save b.json')
     s.send(b':enew'); s.send(b'\r')       # clear last_file so relaunch stays blank
-    s.require('Select a node to edit', 'move: :enew blanks the doc')
+    s.require('Keycode help, use:', 'move: :enew blanks the doc')
 finally:
     s.quit()
 
@@ -236,7 +235,7 @@ PRUNE_INIT = os.path.join(PRUNE_DIR, 'init.conf')
 
 s = harness.launch(workdir=PRUNE_DIR)
 try:
-    s.require('Select a node to edit', 'prune: blank start')
+    s.require('Keycode help, use:', 'prune: blank start')
     s.send(b'a'); s.require('create_node')
     s.send(b'one'); s.send(b'\r')
     s.send(b'S'); s.require('saveas')
