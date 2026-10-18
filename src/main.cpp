@@ -6,6 +6,10 @@
 #include <ftxui/component/component.hpp>
 #include <ftxui/dom/elements.hpp>
 
+#include <atomic>
+#include <chrono>
+#include <thread>
+
 #ifndef _WIN32
 #include <termios.h>
 #include <unistd.h>
@@ -278,7 +282,8 @@ int main(int, char** argv) {
     */
     std::string last_file;
     if (scribbolyth::config::ReadInit(init_path.string(), last_file, state->recent_files,
-                                      state->last_open_dir, state->last_import_dir) && !last_file.empty())
+                                      state->last_open_dir, state->last_import_dir,
+                                      state->status_timeout) && !last_file.empty())
     {
         auto it = state->operations.find("open");
         std::error_code ec;
@@ -293,7 +298,8 @@ int main(int, char** argv) {
         std::cerr << "Removed " << removed << " stale recent entr"
                   << (removed == 1 ? "y" : "ies") << " from init.conf\n";
         scribbolyth::config::WriteInit(init_path.string(), last_file, state->recent_files,
-                                       state->last_open_dir, state->last_import_dir);
+                                       state->last_open_dir, state->last_import_dir,
+                                       state->status_timeout);
     }
     /*!*/
 
@@ -379,6 +385,10 @@ int main(int, char** argv) {
     });
     /*!*/
 
+
+    auto status_cache = std::make_shared<std::pair<std::string, std::chrono::steady_clock::time_point>>();
+    auto status_on_screen = std::make_shared<std::atomic<bool>>(false);
+
     /*!
         Ftxui
         Handles the active child in the state.
@@ -387,7 +397,7 @@ int main(int, char** argv) {
         Handles the showing of modal dialogs and the Screen loop.
 
     */
-    auto status_bar = Renderer([state]
+    auto status_bar = Renderer([state, status_cache, status_on_screen]
     {
         std::string mode_str = ModeName(state->mode);
         if (state->changed)
@@ -409,6 +419,18 @@ int main(int, char** argv) {
             parts.push_back(text(" " + std::to_string(n)
                                  + (n == 1 ? " descendant " : " descendants ")) | dim);
         }
+        const auto now = std::chrono::steady_clock::now();
+        if (state->status != status_cache->first)
+        {
+            *status_cache = {state->status, now};
+        }
+        else if (!state->status.empty() && state->status_timeout > 0 &&
+                 now - status_cache->second >= std::chrono::seconds(state->status_timeout))
+        {
+            state->status.clear();
+            status_cache->first.clear();
+        }
+        status_on_screen->store(!state->status.empty());
         if (!state->status.empty())
         {
             parts.push_back(separator());
@@ -466,7 +488,26 @@ int main(int, char** argv) {
     }
     //<<
 
+    // FTXUI only redraws on input events, so without this ticker a timed-out
+    // status message would linger until the next keypress. Posts a wakeup
+    // only while a status message is on screen, so there is no idle cost.
+    std::atomic<bool> running{true};
+    std::thread status_watcher([&]
+    {
+        while (running)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            if (status_on_screen->load())
+            {
+                screen.PostEvent(Event::Custom);
+            }
+        }
+    });
+
     screen.Loop(root);
+
+    running = false;
+    status_watcher.join();
 
     // Break the shared_ptr cycles the UI graph creates (the editor/treeview
     // components hold `state_`, while `state` holds them via focus_*/the op

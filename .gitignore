@@ -1,6 +1,12 @@
 # Prerequisites
 *.d
 
+backups/
+node_modules/
+package-lock.json
+package.json
+svr_help.js
+
 # Compiled Object files
 *.slo
 *.lo
