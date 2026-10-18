@@ -1307,7 +1307,8 @@ namespace scribbolyth::treeview
     {
         if (state_->init_path.empty()) return;
         scribbolyth::config::WriteInit(state_->init_path, current_file_, state_->recent_files,
-                                       state_->last_open_dir, state_->last_import_dir);
+                                       state_->last_open_dir, state_->last_import_dir,
+                                       state_->status_timeout);
     }
     //!
 

@@ -89,6 +89,9 @@ struct EditorState {
     scribbolyth::treeview::TreeNode* active_node = nullptr;
     int active_descendants = 0;
     std::string status;
+    // Seconds before a status-bar message auto-hides; persisted to init.conf
+    // as `status_timeout`. Zero or less disables the auto-hide.
+    int status_timeout = 8;
     std::string template_path;
     std::string init_path;
     std::vector<scribbolyth::bookmark::Bookmark> bookmarks;
