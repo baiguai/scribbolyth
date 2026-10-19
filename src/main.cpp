@@ -34,19 +34,52 @@
 
 using namespace ftxui;
 
-/*[/Introduction]
-Introduction
-Developer documentation for Scribbolyth.
-*/
+//// Custom Help Topics ////////////////////////////////////////////////////////
+    /*[/Introduction]
+    Introduction
+    Developer documentation for Scribbolyth.
+    */
 
-/*[/Introduction/Key Codes]
-Key Codes
+    /*[/Introduction/Key Codes]
+    Key Codes
 
-Key codes are defined within the ./config/commands.conf file.
-*/
+    Key codes are defined within the ./config/commands.conf file.
+    */
 
+    /*[/How To Guides/Add a Key Binding]
+        To add a key binding:
+
+        * Add the key binding definition to the commands.conf file.
+        * You can see how other bindings have been implemented by searching the
+          source code for the Op value. That is the starting point in the code.
+        * Also note the MODE for the existing binding. If it is TREE, start
+          searching in the treeview.cpp file. If it is NORMAL, VISUAL, etc you
+          could start looking in the editor.cpp file. There are some exceptions
+          where methods are in other supporting code files, so you can check
+          those. A good recursive file contents search tool is helpful!
+
+    */
+////////////////////////////////////////////////////////////////////////////////
 
 //!_coderoot=/Source Code
+
+/*[./Introduction to Main.cpp]
+    Main.cpp, of course, contains the main(...) entry point method.
+    However it also defines the state variable as well as building the primary
+    TUI interface.
+    It handles configuration path specifications as well as global level
+    key binding operators.
+
+    It handles TUI focus - between Editor and Treeview.
+
+    And it also handles the Command input field.
+
+    This is also where you will set the application version value.
+
+
+    It also calls the Ftxui screen loop.
+*/
+
 
 /*!
     Main
@@ -62,7 +95,7 @@ int main(int, char** argv) {
         ----
     */
     //>>
-    auto version = "1.0.3";
+    auto version = "1.0.4";
 
     auto state = std::make_shared<EditorState>();
 
@@ -390,7 +423,8 @@ int main(int, char** argv) {
     auto status_on_screen = std::make_shared<std::atomic<bool>>(false);
 
     /*!
-        Ftxui
+        Ftxui Status Bar Renderer
+
         Handles the active child in the state.
         Creates the containers to build the TUI.
         Creates the various dialogs and adds them to a modals list:
@@ -409,9 +443,13 @@ int main(int, char** argv) {
             // separator(),
             // text(" scribbolyth ") | dim,
         };
-        // Descendant count of the selected node, or of the whole document when
-        // nothing is selected (right after a load/import). Hidden on an empty
-        // document so a blank start shows only the mode.
+        /*|
+
+        * Descendant count of the selected node, or of the whole document when
+        nothing is selected (right after a load/import). Hidden on an empty
+        document so a blank start shows only the mode.
+
+        */
         if (state->active_node != nullptr || state->active_descendants > 0)
         {
             const int n = state->active_descendants;
@@ -419,6 +457,12 @@ int main(int, char** argv) {
             parts.push_back(text(" " + std::to_string(n)
                                  + (n == 1 ? " descendant " : " descendants ")) | dim);
         }
+
+        /*|
+
+        * Handles the disappearing status bar messages.
+
+        */
         const auto now = std::chrono::steady_clock::now();
         if (state->status != status_cache->first)
         {

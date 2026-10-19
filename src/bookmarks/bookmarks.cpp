@@ -15,6 +15,11 @@
 
 namespace scribbolyth::bookmarks
 {
+    /*[./Introduction to Bookmarks.cpp]
+        This file handles the rendering of the Bookmarks dialog as well as
+        its logic and its key handling.
+    */
+
     namespace
     {
         /*!
@@ -83,7 +88,7 @@ namespace scribbolyth::bookmarks
         //!
 
         /*!
-            Event Call
+            Ftxui Bookmarks Dialog Event Call
 
             !_method
 
@@ -154,7 +159,7 @@ namespace scribbolyth::bookmarks
         //!
 
         /*!
-            Render
+            Render the Bookmarks Dialog
 
             !_method
 

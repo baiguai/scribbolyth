@@ -148,7 +148,7 @@ namespace scribbolyth::history
         //!
 
         /*!
-            Render
+            Render the History Dialog
 
             !_method
         */

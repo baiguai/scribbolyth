@@ -125,7 +125,7 @@ namespace scribbolyth::browser
         //!
 
         /*!
-            Ftxui Event
+            Ftxui Browser Dialog Event
 
             !_method
         */
