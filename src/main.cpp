@@ -430,6 +430,9 @@ int main(int, char** argv) {
         Creates the various dialogs and adds them to a modals list:
         Handles the showing of modal dialogs and the Screen loop.
 
+        Shows the current mode, the open file path (when the document is
+        backed by a file) and the descendant count of the selected node.
+
     */
     auto status_bar = Renderer([state, status_cache, status_on_screen]
     {
@@ -443,6 +446,17 @@ int main(int, char** argv) {
             // separator(),
             // text(" scribbolyth ") | dim,
         };
+        /*|
+
+        * Path of the open file, kept on the state by the treeview. Hidden
+        when the document is new or was imported from HTML (empty path).
+
+        */
+        if (!state->current_file.empty())
+        {
+            parts.push_back(separator());
+            parts.push_back(text(" " + state->current_file + " ") | dim);
+        }
         /*|
 
         * Descendant count of the selected node, or of the whole document when
