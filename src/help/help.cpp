@@ -198,7 +198,7 @@ namespace scribbolyth::help
         //!
 
         /*!
-            Render
+            Render the Help Dialog
 
             !_method
         */

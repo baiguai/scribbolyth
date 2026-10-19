@@ -662,8 +662,8 @@ def classify(items, lang):
                 actions.append({"kind": "docclose", "line": line})
                 continue
             folder = lm.get("folder")
-            if folder and text.startswith(folder):
-                rest = text[len(folder):]
+            if folder and body.startswith(folder):
+                rest = body[len(folder):]
                 end = rest.find("]")
                 if end != -1:
                     actions.append({"kind": "folder",
@@ -693,15 +693,13 @@ def classify(items, lang):
         if _emit_marked(actions, "append", bm.get("append"), body, line):
             continue
         manual = bm.get("manual")
-        if manual:
-            text = body.lstrip()
-            if text.startswith(manual):
-                end = text.find("]")
-                if end != -1:
-                    actions.append({"kind": "manual",
-                                    "path": text[len(manual):end].strip(),
-                                    "body": text[end + 1:],
-                                    "line": line})
+        if manual and body.startswith(manual):
+            end = body.find("]")
+            if end != -1:
+                actions.append({"kind": "manual",
+                                "path": body[len(manual):end].strip(),
+                                "body": body[end + 1:],
+                                "line": line})
     return actions
 
 
@@ -836,7 +834,8 @@ def find_anchor(src_files):
     return None, None
 
 
-def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None):
+def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None,
+               coderoot_rel=None, coderoot_line=None):
     tree = Tree()
     coderoot_parts = split_path(coderoot)
     made_source_node = False
@@ -860,14 +859,33 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None):
         elif a["kind"] == "folder":
             pass
 
+    # Phase 0: custom nodes in the coderoot file written before the
+    # coderoot config comment lead everything, so they sit in front of the
+    # source-code root no matter which file's relative custom node would
+    # otherwise create that root first.
+    if coderoot_rel is not None and coderoot_line is not None:
+        for rel, actions in file_actions:
+            if rel != coderoot_rel:
+                continue
+            file_parts = tuple(rel.split("/"))
+            for a in actions:
+                if a["kind"] not in ("manual", "folder"):
+                    continue
+                if a.get("line", 1) >= coderoot_line:
+                    continue
+                apply_custom(a, file_parts)
+
     # Phase 1: custom nodes defined before 'int main' (in the anchor file)
     # lead the tree.  Custom nodes from other files are treated as leading
     # too, so the coderoot section stays anchored to main.cpp's flow.
     for rel, actions in file_actions:
         file_parts = tuple(rel.split("/"))
         led_anchor = rel == anchor_rel and anchor_line is not None
+        led_coderoot = (rel == coderoot_rel and coderoot_line is not None)
         for a in actions:
             if a["kind"] not in ("manual", "folder"):
+                continue
+            if led_coderoot and a.get("line", 1) < coderoot_line:
                 continue
             if led_anchor and a.get("line", 1) >= anchor_line:
                 continue
@@ -1017,6 +1035,8 @@ def main():
 
     file_actions = []
     coderoot = None
+    coderoot_rel = None
+    coderoot_line = None
 
     # walk src/ recursively, keeping the files a language config claims
     src_files = []
@@ -1035,12 +1055,15 @@ def main():
         for a in actions:
             if a["kind"] == "config" and a["key"] == "coderoot":
                 coderoot = a["value"]
+                coderoot_rel = rel
+                coderoot_line = a.get("line")
 
     if coderoot is None:
         coderoot = "/src"
 
     anchor_rel, anchor_line = find_anchor(src_files)
-    nodes = build_tree(file_actions, coderoot, anchor_rel, anchor_line)
+    nodes = build_tree(file_actions, coderoot, anchor_rel, anchor_line,
+                       coderoot_rel, coderoot_line)
     # drop the internal pin marker used only by the source sort
     def _strip(ns):
         for n in ns:
