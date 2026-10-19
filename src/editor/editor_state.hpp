@@ -16,6 +16,11 @@ inline constexpr int kDefaultTreeviewWidth = 30;
 inline constexpr int kMinTreeviewWidth = 10;
 inline constexpr int kMaxTreeviewWidth = 200;
 
+/*[./Introduction to Editor_State.hpp]
+    This file handles the state. So if you are working on code that touches
+    the state, you can look here for what is available etc.
+*/
+
 /*!
     Undo State Struct
 

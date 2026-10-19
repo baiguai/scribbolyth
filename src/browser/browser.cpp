@@ -17,6 +17,10 @@ namespace fs = std::filesystem;
 
 namespace scribbolyth::browser
 {
+    /*[./Introduction to Browser.cpp]
+        This file handles the file browsing dialog, as well as its key bindings.
+    */
+
     namespace
     {
         /*!

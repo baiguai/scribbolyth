@@ -6,6 +6,13 @@
 
 namespace scribbolyth::editor {
 
+/*!
+    MakeEditor Forward Declaration
+
+*/
+//>>
 ftxui::Component MakeEditor(std::shared_ptr<EditorState> state);
+//<<
+//!
 
 }

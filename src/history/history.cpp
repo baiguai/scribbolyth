@@ -14,6 +14,10 @@
 
 namespace scribbolyth::history
 {
+    /*[./Introduction to History.cpp]
+        The History.cpp file manages the history dialog and its key bindings.
+    */
+
     /*!
         Record History String
 

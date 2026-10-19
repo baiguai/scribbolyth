@@ -17,6 +17,11 @@
 
 namespace scribbolyth::editor
 {
+    /*[./Introduction to Editor.cpp]
+        The Editor code file handles nearly ALL of the editor functionality.
+        If the user is in NORMAL/VISUAL/VISUAL LINE/VISUAL BLOCK mode, this
+        file is probably handling what they are doing.
+    */
 
     namespace
     {

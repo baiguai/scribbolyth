@@ -7,6 +7,11 @@
 
 namespace scribbolyth::calc
 {
+    /*[./Introduction to Calc.cpp]
+        This file handles the Command inputs and logic associated with the
+        calculator feature in Scribbolyth.
+    */
+
     namespace
     {
         /*!

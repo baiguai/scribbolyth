@@ -11,6 +11,10 @@
 
 namespace scribbolyth::config
 {
+    /*[./Introduction to Config.cpp]
+        This file handles the loading and storing of configuration data.
+    */
+
     namespace
     {
         using ftxui::Event;

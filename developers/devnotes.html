@@ -1198,6 +1198,13 @@
             "content": "",
             "children": [
               {
+                "id": "a7113d25",
+                "title": "Introduction to Browser.cpp",
+                "content": "Introduction to Browser.cpp\n\nThis file handles the file browsing dialog, as well as its key bindings.",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "20d051b4",
                 "title": "Case Insensitive Less Check",
                 "content": "Case Insensitive Less Check\n\nSignature: bool NoCaseLess(const std::string& a, const std::string& b)\nMethod: NoCaseLess\nReturns: bool\nParameters:\n    a const std::string&\n    b const std::string&\n\n#todo : We should be able to make this a globally accessible method.",
@@ -1529,6 +1536,21 @@
               }
             ],
             "expanded": false
+          },
+          {
+            "id": "01461ed3",
+            "title": "browser.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "59ddc0be",
+                "title": "Forward Declaration of the File Browser Dialog",
+                "content": "Forward Declaration of the File Browser Dialog\n\nftxui::Component MakeFileBrowserDialog(std::shared_ptr<EditorState> state, bool* show);\n\n--------------------------------------------------------------------------------\n\nToDo: Organize the following info-dump:\n\nBuild the file-browser dialog. While *show is true it consumes every\nevent, so no app key bindings fire. The treeview sets\n`state->browser_start_dir` and `state->browser_pick` before showing it\nvia a path command that received a directory argument (open/saveas/\nimport_html/export_html). Keys: j/k (or ArrowDown/ArrowUp) move the\nselection, h (or Backspace) goes up one level, l or Enter enters a\ndirectory, Enter picks the selected file (l does nothing on a file),\ngg jumps to the first row, G to the last, / opens a case-insensitive\nfilter field that narrows the list as you type, Escape cancels.\nWhile the filter field is open, Enter keeps the filtered list and hides\nthe field; Escape clears the filter and closes the field. Escape with a\nfilter applied (field hidden) clears the filter; only Escape with no\nfilter cancels the dialog. Picking a file invokes\n`state->browser_pick` with its full path and closes the dialog.\nFor save/export-style commands the treeview also sets\n`state->browser_command` to the invoking command name (\"saveas\"/\"X\");\nthen Enter on a directory closes the dialog and reopens the command\nline prefilled with `:command <folder>/` so a filename can be typed\n(l still navigates into the directory). For open/import-style commands\nthe field stays empty and Enter on a directory navigates as usual.\n\n\n\n\n#todo",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
           }
         ],
         "expanded": false
@@ -1543,6 +1565,13 @@
             "title": "calc.cpp",
             "content": "",
             "children": [
+              {
+                "id": "7efa558e",
+                "title": "Introduction to Calc.cpp",
+                "content": "Introduction to Calc.cpp\n\nThis file handles the Command inputs and logic associated with the\ncalculator feature in Scribbolyth.",
+                "children": [],
+                "expanded": false
+              },
               {
                 "id": "4054175d",
                 "title": "Evaluator Class",
@@ -1690,6 +1719,13 @@
             "content": "",
             "children": [
               {
+                "id": "690a6eb0",
+                "title": "Introduction to Clipboard.hpp",
+                "content": "Introduction to Clipboard.hpp\n\nThis file handles the management of the clipboard, cross-platform.",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "8d0c63e8",
                 "title": "Reading the Clipboard",
                 "content": "Reading the Clipboard",
@@ -1750,6 +1786,13 @@
             "content": "",
             "children": [
               {
+                "id": "07c5ee85",
+                "title": "Introduction to Config.cpp",
+                "content": "Introduction to Config.cpp\n\nThis file handles the loading and storing of configuration data.",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "b885e0f9",
                 "title": "Load Config and Set Keymap Objects",
                 "content": "Load Config and Set Keymap Objects\n\nSignature: bool LoadConfig(const std::string& path, std::shared_ptr<EditorState> state)\nMethod: LoadConfig\nReturns: bool\nParameters:\n    path  const std::string&\n    state std::shared_ptr<EditorState>",
@@ -1800,6 +1843,42 @@
               }
             ],
             "expanded": false
+          },
+          {
+            "id": "a230afe1",
+            "title": "config.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "eb723d4a",
+                "title": "LoadConfig Forward Declaration",
+                "content": "LoadConfig Forward Declaration\n\nbool LoadConfig(const std::string& path, std::shared_ptr<EditorState> state);",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "4b7ae032",
+                "title": "ReadInit Forward Declaration",
+                "content": "ReadInit Forward Declaration\n\nbool ReadInit(const std::string& path, std::string& last_file,\n              std::vector<std::string>& recent_files,\n              std::string& open_dir, std::string& import_dir,\n              int& status_timeout);",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "f24f8bcf",
+                "title": "WriteInit Forward Declaration",
+                "content": "WriteInit Forward Declaration\n\nbool WriteInit(const std::string& path, const std::string& last_file,\n               const std::vector<std::string>& recent_files,\n               const std::string& open_dir, const std::string& import_dir,\n               int status_timeout);",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "fe752ae3",
+                "title": "WriteRecentFiles Forward Declaration",
+                "content": "WriteRecentFiles Forward Declaration\n\nbool WriteRecentFiles(const std::string& path, const std::vector<std::string>& recent_files);",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
           }
         ],
         "expanded": false
@@ -1814,6 +1893,13 @@
             "title": "editor.cpp",
             "content": "",
             "children": [
+              {
+                "id": "5aab9b1b",
+                "title": "Introduction to Editor.cpp",
+                "content": "Introduction to Editor.cpp\n\nThe Editor code file handles nearly ALL of the editor functionality.\nIf the user is in NORMAL/VISUAL/VISUAL LINE/VISUAL BLOCK mode, this\nfile is probably handling what they are doing.",
+                "children": [],
+                "expanded": false
+              },
               {
                 "id": "847c939d",
                 "title": "Full Trim",
@@ -2276,10 +2362,32 @@
             "expanded": false
           },
           {
+            "id": "446aa531",
+            "title": "editor.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "a0ed5c40",
+                "title": "MakeEditor Forward Declaration",
+                "content": "MakeEditor Forward Declaration\n\nftxui::Component MakeEditor(std::shared_ptr<EditorState> state);",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          },
+          {
             "id": "0af68024",
             "title": "editor_state.hpp",
             "content": "",
             "children": [
+              {
+                "id": "c5c1a51a",
+                "title": "Introduction to Editor_State.hpp",
+                "content": "Introduction to Editor_State.hpp\n\nThis file handles the state. So if you are working on code that touches\nthe state, you can look here for what is available etc.",
+                "children": [],
+                "expanded": false
+              },
               {
                 "id": "0277705b",
                 "title": "Editor State Struct",
@@ -2438,6 +2546,13 @@
             "content": "",
             "children": [
               {
+                "id": "f76c267b",
+                "title": "Introduction to Help.cpp",
+                "content": "Introduction to Help.cpp\n\nThis file handles the help dialog, and its key bindings.",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "f09a7cfb",
                 "title": "Help Dialog Class",
                 "content": "Help Dialog Class",
@@ -2584,6 +2699,13 @@
             "content": "",
             "children": [
               {
+                "id": "2c30c75e",
+                "title": "Introduction to History.cpp",
+                "content": "Introduction to History.cpp\n\nThe History.cpp file manages the history dialog and its key bindings.",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "94400346",
                 "title": "Entry Struct",
                 "content": "Entry Struct\n\nstruct Entry\n{\n    treeview::TreeNode* node = nullptr;\n    int depth = 0;\n};",
@@ -2714,6 +2836,28 @@
               }
             ],
             "expanded": false
+          },
+          {
+            "id": "9ba1abc0",
+            "title": "history.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "025664da",
+                "title": "Forward Declaration of the MakeHistoryDialog Method.",
+                "content": "Forward Declaration of the MakeHistoryDialog Method.\n\nftxui::Component MakeHistoryDialog(std::shared_ptr<EditorState> state, bool* show);\n\nToDo: Organize this info-dump:\n\nBuild the history dialog. While *show is true it consumes every\nevent, so no app key bindings fire. j/k (and ArrowUp/ArrowDown) move\nthe selection, Enter jumps to the selected node (revealing it in the\ntree, staying in the current mode), Escape cancels. The list shows the\nmost recently viewed node first. Nodes that no longer exist are listed\nas \"(deleted node)\" and can be skipped with Enter.\n\n\n\n#todo",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "a34288db",
+                "title": "Forward Declaration of the Record Method.",
+                "content": "Forward Declaration of the Record Method.\n\nvoid Record(EditorState& state, const std::string& id);\n\nTodo: Organize this info-dump:\n\nRecord `id` as viewed (most recent last, deduplicated, capped at\nEditorState::kHistoryMax). Called by the treeview when a node with\ntext is selected and by the editor whenever it saves non-empty text.\n\n\n\n\n#todo",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
           }
         ],
         "expanded": false
@@ -2728,6 +2872,13 @@
             "title": "convert.cpp",
             "content": "",
             "children": [
+              {
+                "id": "8786f49e",
+                "title": "Introduction to Convert.cpp",
+                "content": "Introduction to Convert.cpp\n\nThe Convert.cpp file handles importing and exporting Scribboleth .html\nfiles.",
+                "children": [],
+                "expanded": false
+              },
               {
                 "id": "78dff0bd",
                 "title": "Append Bookmark.",
@@ -2999,9 +3150,23 @@
             "content": "",
             "children": [
               {
+                "id": "4959e17e",
+                "title": "Forward Declaration for ExportHtmlFile",
+                "content": "Forward Declaration for ExportHtmlFile\n\nbool ExportHtmlFile(const std::string& template_path, const std::string& out_path,\n                    const std::vector<TreeNode>& roots,\n                    const std::vector<bookmark::Bookmark>& bookmarks,\n                    const std::vector<std::string>& history,\n                    const HtmlTheme* theme = nullptr);",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "f2d73c20",
+                "title": "Forward Declaration for ImportHtmlFile",
+                "content": "Forward Declaration for ImportHtmlFile\n\nbool ImportHtmlFile(const std::string& path, std::vector<TreeNode>& roots,\n                    std::vector<bookmark::Bookmark>* bookmarks = nullptr,\n                    std::vector<std::string>* history = nullptr,\n                    HtmlTheme* theme = nullptr);",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "1ce3732b",
                 "title": "Html Theme Struct",
-                "content": "Html Theme Struct\n\nstruct HtmlTheme\n{\n    bool present = false;\n    std::string current_theme;\n    std::string themes;\n    std::string style_content;\n};\n\nThe theme material of an imported HTML file, captured verbatim from the\nweb app's own script declarations so a later export can reproduce it.\n`current_theme` and `themes` hold the full `let currentTheme = ...;` /\n`let themes = [...];` statements; `style_content` is the inner text of\nthe `<style id=\"theme_styles\">` block. Empty strings mean the piece was\nabsent from the source; `present` is true when any piece was found.",
+                "content": "Html Theme Struct\n\nstruct HtmlTheme\n{\n    bool present = false;\n    std::string current_theme;\n    std::string themes;\n    std::string style_content;\n};\n\nToDo: Organize this info-dump\n\nThe theme material of an imported HTML file, captured verbatim from the\nweb app's own script declarations so a later export can reproduce it.\n`current_theme` and `themes` hold the full `let currentTheme = ...;` /\n`let themes = [...];` statements; `style_content` is the inner text of\nthe `<style id=\"theme_styles\">` block. Empty strings mean the piece was\nabsent from the source; `present` is true when any piece was found.\n\n\n\n#todo",
                 "children": [],
                 "expanded": false
               }
