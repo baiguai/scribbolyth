@@ -12,6 +12,10 @@
 
 namespace scribbolyth::help
 {
+    /*[./Introduction to Help.cpp]
+        This file handles the help dialog, and its key bindings.
+    */
+
     namespace
     {
         /*!
