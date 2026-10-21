@@ -18,6 +18,16 @@ namespace scribbolyth::bookmarks
     /*[./Introduction to Bookmarks.cpp]
         This file handles the rendering of the Bookmarks dialog as well as
         its logic and its key handling.
+
+        Helper Methods
+        * PadRight - These will likely be consolidated into a single method in the future.
+        * The Entry struct is defined here.
+
+        Public Members
+        * The pending_g_ variable is used with navigating to the top.
+        * The Ftxui OnEvent handles the key bindings
+
+        * Navigation and removing bookmarks are private members of the class.
     */
 
     namespace

@@ -10,6 +10,16 @@ namespace scribbolyth::calc
     /*[./Introduction to Calc.cpp]
         This file handles the Command inputs and logic associated with the
         calculator feature in Scribbolyth.
+
+        Helpers
+        * Evaluate boolean.
+
+        Public Members
+        * Run handles the evaluation.
+
+        Private Members
+        * The calculation work is done by these methods.
+        * Formatting is also done here.
     */
 
     namespace

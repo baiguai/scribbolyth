@@ -1040,7 +1040,7 @@
               {
                 "id": "88d76adc",
                 "title": "Introduction to Bookmarks.cpp",
-                "content": "Introduction to Bookmarks.cpp\n\nThis file handles the rendering of the Bookmarks dialog as well as\nits logic and its key handling.",
+                "content": "Introduction to Bookmarks.cpp\n\nThis file handles the rendering of the Bookmarks dialog as well as\nits logic and its key handling.\n\nHelper Methods\n* PadRight - These will likely be consolidated into a single method in the future.\n* The Entry struct is defined here.\n\nPublic Members\n* The pending_g_ variable is used with navigating to the top.\n* The Ftxui OnEvent handles the key bindings\n\n* Navigation and removing bookmarks are private members of the class.",
                 "children": [],
                 "expanded": false
               },
@@ -1177,7 +1177,7 @@
               {
                 "id": "5ad8b1c7",
                 "title": "Forward declares the EditorState Struct and MakeBookmarksDialog.",
-                "content": "Forward declares the EditorState Struct and MakeBookmarksDialog.",
+                "content": "Forward declares the EditorState Struct and MakeBookmarksDialog.\n\n--------------------------------------------------------------------------------\n\nstruct EditorState;\n\nnamespace scribbolyth::bookmarks\n{\n    ftxui::Component MakeBookmarksDialog(std::shared_ptr<EditorState> state, bool* show);\n}",
                 "children": [],
                 "expanded": false
               }
@@ -1200,7 +1200,7 @@
               {
                 "id": "a7113d25",
                 "title": "Introduction to Browser.cpp",
-                "content": "Introduction to Browser.cpp\n\nThis file handles the file browsing dialog, as well as its key bindings.",
+                "content": "Introduction to Browser.cpp\n\nThis file handles the file browsing dialog, as well as its key bindings.\n\nHelper Methods\n* PadRight - soon to be consolidated to a single method.\n* Tail - this also will likely be consolidated.\n\nPublic Members\n* The Ftxui OnEvent handles the key inputs.\n\nPrivate Members\n* The navigation and filtering is handled by these.\n* The initial directory is determined via: state_->browser_start_dir\n* Another state helper is: state_->browser_pick",
                 "children": [],
                 "expanded": false
               },
@@ -1545,7 +1545,7 @@
               {
                 "id": "59ddc0be",
                 "title": "Forward Declaration of the File Browser Dialog",
-                "content": "Forward Declaration of the File Browser Dialog\n\nftxui::Component MakeFileBrowserDialog(std::shared_ptr<EditorState> state, bool* show);\n\n--------------------------------------------------------------------------------\n\nToDo: Organize the following info-dump:\n\nBuild the file-browser dialog. While *show is true it consumes every\nevent, so no app key bindings fire. The treeview sets\n`state->browser_start_dir` and `state->browser_pick` before showing it\nvia a path command that received a directory argument (open/saveas/\nimport_html/export_html). Keys: j/k (or ArrowDown/ArrowUp) move the\nselection, h (or Backspace) goes up one level, l or Enter enters a\ndirectory, Enter picks the selected file (l does nothing on a file),\ngg jumps to the first row, G to the last, / opens a case-insensitive\nfilter field that narrows the list as you type, Escape cancels.\nWhile the filter field is open, Enter keeps the filtered list and hides\nthe field; Escape clears the filter and closes the field. Escape with a\nfilter applied (field hidden) clears the filter; only Escape with no\nfilter cancels the dialog. Picking a file invokes\n`state->browser_pick` with its full path and closes the dialog.\nFor save/export-style commands the treeview also sets\n`state->browser_command` to the invoking command name (\"saveas\"/\"X\");\nthen Enter on a directory closes the dialog and reopens the command\nline prefilled with `:command <folder>/` so a filename can be typed\n(l still navigates into the directory). For open/import-style commands\nthe field stays empty and Enter on a directory navigates as usual.\n\n\n\n\n#todo",
+                "content": "Forward Declaration of the File Browser Dialog\n\nftxui::Component MakeFileBrowserDialog(std::shared_ptr<EditorState> state, bool* show);",
                 "children": [],
                 "expanded": false
               }
@@ -1568,7 +1568,7 @@
               {
                 "id": "7efa558e",
                 "title": "Introduction to Calc.cpp",
-                "content": "Introduction to Calc.cpp\n\nThis file handles the Command inputs and logic associated with the\ncalculator feature in Scribbolyth.",
+                "content": "Introduction to Calc.cpp\n\nThis file handles the Command inputs and logic associated with the\ncalculator feature in Scribbolyth.\n\nHelpers\n* Evaluate boolean.\n\nPublic Members\n* Run handles the evaluation.\n\nPrivate Members\n* The calculation work is done by these methods.\n* Formatting is also done here.",
                 "children": [],
                 "expanded": false
               },
@@ -1698,7 +1698,7 @@
               {
                 "id": "1ba3bb74",
                 "title": "Evaluate Forward Declaration",
-                "content": "Evaluate Forward Declaration\n\n!_method\n\n\nEvaluate a simple arithmetic expression, e.g. \"2(1+3)/4\" or \"7 * 3\".\nSupports + - * / % ^, parentheses, unary plus/minus, implicit\nmultiplication (\"2(1+3)\") and decimal numbers.\n\nOn success returns true and the formatted result in `result`; on\nfailure returns false and an explanation in `result`.",
+                "content": "Evaluate Forward Declaration\n\n!_method\n\n\nEvaluate a simple arithmetic expression, e.g. \"2(1+3)/4\" or \"7 * 3\".\nSupports + - * / % ^, parentheses, unary plus/minus, implicit\nmultiplication (\"2(1+3)\") and decimal numbers.\n\nOn success returns true and the formatted result in `result`; on\nfailure returns false and an explanation in `result`.\n\nbool Evaluate(const std::string& expr, std::string& result);",
                 "children": [],
                 "expanded": false
               }
@@ -2508,7 +2508,7 @@
                   {
                     "id": "24e14259",
                     "title": "Treeview Related",
-                    "content": "Treeview Related\n\n--------------------------------------------------------------------------------\n\n`active_node` is the selected node (null = none). `active_descendants`\nis the recursive count of every node beneath it, refreshed by the\ntreeview whenever the selection changes; the status bar shows it.\n\nint treeview_width = kDefaultTreeviewWidth;\n\nscribbolyth::treeview::TreeNode* active_node = nullptr;\nint active_descendants = 0;\nstd::string status;\n// Seconds before a status-bar message auto-hides; persisted to init.conf\n// as `status_timeout`. Zero or less disables the auto-hide.\nint status_timeout = 8;\nstd::string template_path;\nstd::string init_path;\nstd::vector<scribbolyth::bookmark::Bookmark> bookmarks;",
+                    "content": "Treeview Related\n\n--------------------------------------------------------------------------------\n\n`active_node` is the selected node (null = none). `active_descendants`\nis the recursive count of every node beneath it, refreshed by the\ntreeview whenever the selection changes; the status bar shows it.\n`current_file` is the path of the document backing the tree, kept in\nsync by the treeview on every save/open/new/import; empty for a new\nor HTML-imported document. The status bar shows it too.\n\nint treeview_width = kDefaultTreeviewWidth;\n\nscribbolyth::treeview::TreeNode* active_node = nullptr;\nint active_descendants = 0;\nstd::string current_file;\nstd::string status;\n// Seconds before a status-bar message auto-hides; persisted to init.conf\n// as `status_timeout`. Zero or less disables the auto-hide.\nint status_timeout = 8;\nstd::string template_path;\nstd::string init_path;\nstd::vector<scribbolyth::bookmark::Bookmark> bookmarks;",
                     "children": [],
                     "expanded": false
                   },
@@ -3931,7 +3931,7 @@
               {
                 "id": "35a17595",
                 "title": "Ftxui Status Bar Renderer",
-                "content": "Ftxui Status Bar Renderer\n\nHandles the active child in the state.\nCreates the containers to build the TUI.\nCreates the various dialogs and adds them to a modals list:\nHandles the showing of modal dialogs and the Screen loop.\n\n* Descendant count of the selected node, or of the whole document when\nnothing is selected (right after a load/import). Hidden on an empty\ndocument so a blank start shows only the mode.\n\n* Handles the disappearing status bar messages.\n\nauto container = Container::Vertical({\n    main_split | flex,\n    command_handler,\n    status_bar,\n}, &active_child);\n\nauto help_comp = scribbolyth::help::MakeHelpDialog(state, config_path.string(), &show_help);\nauto regex_comp = scribbolyth::regex::MakeRegexDialog(state, regex_path.string(), &show_regex);\nauto search_comp = scribbolyth::search::MakeSearchDialog(state, &show_search);\nauto link_picker_comp = scribbolyth::search::MakeSearchDialog(state, &show_link_picker, scribbolyth::search::DialogMode::InsertLink);\nauto search_results_comp = scribbolyth::search::MakeSearchDialog(state, &show_search_results, scribbolyth::search::DialogMode::CreateResults);\nauto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);\nauto links_comp = scribbolyth::links::MakeLinksDialog(state, &show_links);\nauto dead_links_comp = scribbolyth::brokenlinks::MakeDeadLinksDialog(state, &show_dead_links);\nauto history_comp = scribbolyth::history::MakeHistoryDialog(state, &show_history);\nauto recent_comp = scribbolyth::recent::MakeRecentDialog(state, &show_recent, recent_force);\nauto undo_comp = scribbolyth::undo::MakeUndoDialog(state, &show_undo);\nauto browser_comp = scribbolyth::browser::MakeFileBrowserDialog(state, &show_file_browser);\nauto modals = {\n    std::tuple(help_comp,        &show_help),\n    std::tuple(regex_comp,       &show_regex),\n    std::tuple(search_comp,      &show_search),\n    std::tuple(search_results_comp, &show_search_results),\n    std::tuple(link_picker_comp, &show_link_picker),\n    std::tuple(bookmarks_comp,   &show_bookmarks),\n    std::tuple(links_comp,       &show_links),\n    std::tuple(dead_links_comp,  &show_dead_links),\n    std::tuple(history_comp,     &show_history),\n    std::tuple(recent_comp,      &show_recent),\n    std::tuple(undo_comp,        &show_undo),\n    std::tuple(browser_comp,     &show_file_browser),\n};\n\nauto root = container;\nfor (auto& [comp, show] : modals)\n{\n    root = Modal(root, comp, show);\n}",
+                "content": "Ftxui Status Bar Renderer\n\nHandles the active child in the state.\nCreates the containers to build the TUI.\nCreates the various dialogs and adds them to a modals list:\nHandles the showing of modal dialogs and the Screen loop.\n\nShows the current mode, the open file path (when the document is\nbacked by a file) and the descendant count of the selected node.\n\n* Path of the open file, kept on the state by the treeview. Hidden\nwhen the document is new or was imported from HTML (empty path).\n\n* Descendant count of the selected node, or of the whole document when\nnothing is selected (right after a load/import). Hidden on an empty\ndocument so a blank start shows only the mode.\n\n* Handles the disappearing status bar messages.\n\nauto container = Container::Vertical({\n    main_split | flex,\n    command_handler,\n    status_bar,\n}, &active_child);\n\nauto help_comp = scribbolyth::help::MakeHelpDialog(state, config_path.string(), &show_help);\nauto regex_comp = scribbolyth::regex::MakeRegexDialog(state, regex_path.string(), &show_regex);\nauto search_comp = scribbolyth::search::MakeSearchDialog(state, &show_search);\nauto link_picker_comp = scribbolyth::search::MakeSearchDialog(state, &show_link_picker, scribbolyth::search::DialogMode::InsertLink);\nauto search_results_comp = scribbolyth::search::MakeSearchDialog(state, &show_search_results, scribbolyth::search::DialogMode::CreateResults);\nauto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);\nauto links_comp = scribbolyth::links::MakeLinksDialog(state, &show_links);\nauto dead_links_comp = scribbolyth::brokenlinks::MakeDeadLinksDialog(state, &show_dead_links);\nauto history_comp = scribbolyth::history::MakeHistoryDialog(state, &show_history);\nauto recent_comp = scribbolyth::recent::MakeRecentDialog(state, &show_recent, recent_force);\nauto undo_comp = scribbolyth::undo::MakeUndoDialog(state, &show_undo);\nauto browser_comp = scribbolyth::browser::MakeFileBrowserDialog(state, &show_file_browser);\nauto modals = {\n    std::tuple(help_comp,        &show_help),\n    std::tuple(regex_comp,       &show_regex),\n    std::tuple(search_comp,      &show_search),\n    std::tuple(search_results_comp, &show_search_results),\n    std::tuple(link_picker_comp, &show_link_picker),\n    std::tuple(bookmarks_comp,   &show_bookmarks),\n    std::tuple(links_comp,       &show_links),\n    std::tuple(dead_links_comp,  &show_dead_links),\n    std::tuple(history_comp,     &show_history),\n    std::tuple(recent_comp,      &show_recent),\n    std::tuple(undo_comp,        &show_undo),\n    std::tuple(browser_comp,     &show_file_browser),\n};\n\nauto root = container;\nfor (auto& [comp, show] : modals)\n{\n    root = Modal(root, comp, show);\n}",
                 "children": [],
                 "expanded": false
               },
@@ -4927,7 +4927,7 @@
               {
                 "id": "deee0c8a",
                 "title": "Export Subtree",
-                "content": "Export Subtree\n\nSignature: void TreeView::ExportScribbolyth(const std::string& path)\nMethod: ExportScribbolyth\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nExport the selected node and its whole subtree as a standalone\nScribbolyth document (its own .scribboleth file). Unlike SaveTo this\ndoes not repoint current_file_, touch the recent-files list or rewrite\ninit.conf: the branch is written to `path` and the open document is\nleft exactly as it was. Bookmarks and history are not carried over and\nthe pane width is preserved so the file reopens with the same layout.",
+                "content": "Export Subtree\n\nSignature: void TreeView::ExportScribbolyth(const std::string& path)\nMethod: ExportScribbolyth\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nExport the selected node and its whole subtree as a standalone\nScribbolyth document (its own .scribboleth file). Unlike SaveTo this\ndoes not repoint the current file path, touch the recent-files list or rewrite\ninit.conf: the branch is written to `path` and the open document is\nleft exactly as it was. Bookmarks and history are not carried over and\nthe pane width is preserved so the file reopens with the same layout.",
                 "children": [],
                 "expanded": false
               },
