@@ -71,6 +71,10 @@ namespace scribbolyth::recent
         */
         bool OnEvent(ftxui::Event event) override
         {
+            // FTXUI's own events (terminal resize, screen wakeups) are not
+            // key presses: they must not drop a pending "g" prefix.
+            if (IsSyntheticEvent(event)) return false;
+
             PickupForce();
             if (filter_active_) return OnFilterEvent(event);
             if (event == ftxui::Event::Escape)

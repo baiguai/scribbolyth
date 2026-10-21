@@ -32,6 +32,14 @@ Keymap::Result Keymap::Handle(ftxui::Event event)
 {
     auto& input = event.input();
 
+    // FTXUI's own events (terminal resize, screen wakeups) are not key
+    // presses: they must neither interrupt a pending sequence nor drop a
+    // pending count prefix.
+    if (IsSyntheticEvent(event))
+    {
+        return {"", "", "", false};
+    }
+
     if (enable_count_ && input.size() == 1 && input[0] >= '0' && input[0] <= '9')
     {
         int digit = input[0] - '0';

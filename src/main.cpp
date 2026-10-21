@@ -4,6 +4,7 @@
 #include <memory>
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/component/component.hpp>
+#include <ftxui/component/task.hpp>
 #include <ftxui/dom/elements.hpp>
 
 #include <atomic>
@@ -549,6 +550,10 @@ int main(int, char** argv) {
     // FTXUI only redraws on input events, so without this ticker a timed-out
     // status message would linger until the next keypress. Posts a wakeup
     // only while a status message is on screen, so there is no idle cost.
+    //
+    // The wakeup asks for an animation frame instead of posting a key event:
+    // a key event is delivered to the component tree like a keystroke, and
+    // would abort any pending multi-key sequence (e.g. "d d", "g t").
     std::atomic<bool> running{true};
     std::thread status_watcher([&]
     {
@@ -557,7 +562,7 @@ int main(int, char** argv) {
             std::this_thread::sleep_for(std::chrono::milliseconds(200));
             if (status_on_screen->load())
             {
-                screen.PostEvent(Event::Custom);
+                screen.Post(ftxui::Closure([&screen]() { screen.RequestAnimationFrame(); }));
             }
         }
     });
