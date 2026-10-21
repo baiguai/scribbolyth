@@ -167,6 +167,17 @@ class Session:
             time.sleep(0.02)
         self._feed(data)
 
+    def resize(self, rows=None, cols=None):
+        """Resize the terminal, which makes the app receive SIGWINCH."""
+        rows = self.rows if rows is None else rows
+        cols = self.cols if cols is None else cols
+        fcntl.ioctl(self.master, termios.TIOCSWINSZ,
+                    struct.pack('HHHH', rows, cols, 0, 0))
+        self.rows, self.cols = rows, cols
+        self.grid = [[(' ', set()) for _ in range(cols)] for _ in range(rows)]
+        self._r = self._c = 0
+        self.step(timeout=0.5)
+
     # -- assertions --------------------------------------------------------
 
     def find(self, substring, rows=None):

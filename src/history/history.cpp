@@ -104,6 +104,10 @@ namespace scribbolyth::history
         */
         bool OnEvent(ftxui::Event event) override
         {
+            // FTXUI's own events (terminal resize, screen wakeups) are not
+            // key presses: they must not drop a pending "g" prefix.
+            if (IsSyntheticEvent(event)) return false;
+
             if (event == ftxui::Event::Escape)
             {
                 Close();

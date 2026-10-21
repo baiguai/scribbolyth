@@ -7,6 +7,25 @@
 #include <string>
 
 /*!
+    Synthetic Event Detection
+
+    FTXUI delivers its own internal events (terminal resize, screen wakeups)
+    as "special" events carrying a single NUL byte. They look like a key
+    press but are not one: treating them as a key aborts the pending key
+    sequence (e.g. "d d") and drops a pending count prefix.
+
+    ----
+*/
+//>>
+inline bool IsSyntheticEvent(const ftxui::Event& event)
+{
+    const std::string& input = event.input();
+    return input.size() == 1 && input[0] == '\0';
+}
+//<<
+//!
+
+/*!
     Binding Struct
 
     ----
