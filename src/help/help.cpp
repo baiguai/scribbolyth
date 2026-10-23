@@ -285,6 +285,22 @@ namespace scribbolyth::help
                              entry.description;
                 out.push_back(std::move(entry));
             }
+
+            // A binding without a topic of its own (most GLOBAL entries, for
+            // example) reuses the topic of another binding that runs the
+            // same operation, so Enter still shows the detailed help.
+            for (auto& entry : out)
+            {
+                if (!entry.topic.empty() || entry.op.empty() || entry.op == "-") continue;
+                for (const auto& other : out)
+                {
+                    if (other.op == entry.op && !other.topic.empty())
+                    {
+                        entry.topic = other.topic;
+                        break;
+                    }
+                }
+            }
         }
         //!
     }
@@ -337,6 +353,7 @@ namespace scribbolyth::help
             {
                 *show_ = false;
                 filter_.clear();
+                selection_ = 0;
                 scroll_ = 0;
                 return true;
             }
@@ -347,22 +364,32 @@ namespace scribbolyth::help
             }
             if (event == ftxui::Event::ArrowDown)
             {
-                scroll_ = std::min(scroll_ + 1, MaxTop());
+                MoveSelection(+1);
                 return true;
             }
             if (event == ftxui::Event::ArrowUp)
             {
-                scroll_ = std::max(0, scroll_ - 1);
+                MoveSelection(-1);
                 return true;
             }
             if (event == ftxui::Event::PageDown)
             {
-                scroll_ = std::min(scroll_ + kVisibleRows, MaxTop());
+                MoveSelection(+kVisibleRows);
                 return true;
             }
             if (event == ftxui::Event::PageUp)
             {
-                scroll_ = std::max(0, scroll_ - kVisibleRows);
+                MoveSelection(-kVisibleRows);
+                return true;
+            }
+            if (event == ftxui::Event::Home)
+            {
+                MoveSelection(-std::max(0, static_cast<int>(Filtered().size())));
+                return true;
+            }
+            if (event == ftxui::Event::End)
+            {
+                MoveSelection(std::max(0, static_cast<int>(Filtered().size())));
                 return true;
             }
             if (event == ftxui::Event::Backspace)
@@ -370,14 +397,14 @@ namespace scribbolyth::help
                 if (!filter_.empty())
                 {
                     filter_.pop_back();
-                    scroll_ = 0;
+                    Refilter();
                 }
                 return true;
             }
             if (event.is_character())
             {
                 filter_ += event.character();
-                scroll_ = 0;
+                Refilter();
                 return true;
             }
             return true;
@@ -438,21 +465,25 @@ namespace scribbolyth::help
         /*!
             Open Topic
 
-            Show the full help topic of the highlighted key binding, if it
-            has one.
+            Show the full help topic of the highlighted key binding. Bindings
+            without a topic of their own fall back to their description, so
+            Enter always opens the help view.
 
             !_method
         */
         void OpenTopic()
         {
             const auto filtered = Filtered();
-            const int top = std::min(scroll_, MaxTop());
-            if (filtered.empty() || top >= static_cast<int>(filtered.size())) return;
+            if (filtered.empty()) return;
 
-            const HelpEntry& entry = entries_[filtered[top]];
-            if (entry.topic.empty()) return;
+            const int sel = std::min(selection_, static_cast<int>(filtered.size()) - 1);
+            const HelpEntry& entry = entries_[filtered[sel]];
+            if (entry.topic.empty() && entry.description.empty()) return;
 
-            topic_lines_ = WrapLines(ExpandTopic(entry.topic),
+            const std::string& topic =
+                entry.topic.empty() ? entry.description : entry.topic;
+
+            topic_lines_ = WrapLines(ExpandTopic(topic),
                                       static_cast<std::size_t>(std::max(8, InnerWidth() - 2)));
             topic_title_ = entry.mode + " " + entry.key;
             topic_summary_ = entry.description;
@@ -472,7 +503,16 @@ namespace scribbolyth::help
 
             const std::vector<int> filtered = Filtered();
             const int total = static_cast<int>(filtered.size());
-            const int top = std::min(scroll_, MaxTop());
+            const int sel = std::min(selection_, std::max(0, total - 1));
+
+            // Scroll just enough to keep the selected binding on screen.
+            const int max_top = std::max(0, total - kVisibleRows);
+            int top = std::min(scroll_, max_top);
+            if (sel < top) top = sel;
+            if (sel >= top + kVisibleRows) top = sel - kVisibleRows + 1;
+            top = std::max(0, std::min(top, max_top));
+            scroll_ = top;
+
             const int count = std::min(kVisibleRows, std::max(0, total - top));
 
             ftxui::Elements rows;
@@ -490,7 +530,7 @@ namespace scribbolyth::help
                 for (int i = 0; i < count; ++i)
                 {
                     ftxui::Element row = ftxui::text(" " + PadRight(entries_[filtered[top + i]].line, content_width_) + " ");
-                    if (i == 0) row = row | ftxui::inverted;
+                    if (top + i == sel) row = row | ftxui::inverted;
                     rows.push_back(row);
                 }
             }
@@ -584,13 +624,29 @@ namespace scribbolyth::help
         */
 
         /*!
-            Max Top Const
+            Move Selection Up / Down
 
             !_method
         */
-        int MaxTop() const
+        void MoveSelection(int dir)
         {
-            return std::max(0, static_cast<int>(Filtered().size()) - kVisibleRows);
+            const int total = static_cast<int>(Filtered().size());
+            if (total == 0) return;
+            selection_ = std::max(0, std::min(total - 1, selection_ + dir));
+        }
+        //!
+
+        /*!
+            Refilter
+
+            After the filter changes, select the first binding that matches.
+
+            !_method
+        */
+        void Refilter()
+        {
+            selection_ = 0;
+            scroll_ = 0;
         }
         //!
 
@@ -659,6 +715,7 @@ namespace scribbolyth::help
         bool* show_;
         std::vector<HelpEntry> entries_;
         std::string filter_;
+        int selection_ = 0;
         int scroll_ = 0;
         int content_width_ = 72;
         bool topic_open_ = false;
