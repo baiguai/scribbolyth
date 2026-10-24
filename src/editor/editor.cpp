@@ -17,6 +17,11 @@
 
 namespace scribbolyth::editor
 {
+    /*[./Introduction to Editor.cpp]
+        The Editor code file handles nearly ALL of the editor functionality.
+        If the user is in NORMAL/VISUAL/VISUAL LINE/VISUAL BLOCK mode, this
+        file is probably handling what they are doing.
+    */
 
     namespace
     {
@@ -359,6 +364,13 @@ namespace scribbolyth::editor
                 {
                     if (!Editable()) return;
                     for (int i = 0; i < count; ++i) DeleteWordForward();
+                    Clamp();
+                    Save();
+                };
+                state_->operations["delete_word_end"] = [this](const std::string&, int count)
+                {
+                    if (!Editable()) return;
+                    for (int i = 0; i < count; ++i) DeleteWordEnd();
                     Clamp();
                     Save();
                 };
@@ -1879,6 +1891,26 @@ namespace scribbolyth::editor
 
                 while (end < size && line[end] != ' ') ++end;
                 while (end < size && line[end] == ' ') ++end;
+
+                line.erase(static_cast<std::size_t>(col_),
+                           static_cast<std::size_t>(end - col_));
+                last_col_ = col_;
+            }
+            //!
+
+            /*!
+                Delete Word End
+
+                !_method
+            */
+            void DeleteWordEnd()
+            {
+                auto& line = lines_[row_];
+                const int size = static_cast<int>(line.size());
+                int end = col_;
+
+                while (end < size && line[end] != ' ') ++end;
+                // while (end < size && line[end] == ' ') ++end;
 
                 line.erase(static_cast<std::size_t>(col_),
                            static_cast<std::size_t>(end - col_));

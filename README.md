@@ -64,6 +64,7 @@ you hand someone just the binary, the app still runs, but with only the built-in
 - Needs the **X11 client libraries** (libX11, libxcb, libXi, libXext), which
   FTXUI uses for clipboard support. These ship with any desktop Linux by
   default; you won't need to install anything on a machine with a GUI.
+- xclip must be installed, for copy/paste functionality.
 - Works in GNOME Terminal, Konsole, xterm, or any other terminal emulator.
 
 ## Windows `.exe`

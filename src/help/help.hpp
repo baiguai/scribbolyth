@@ -21,6 +21,7 @@ namespace scribbolyth::help
         std::string command;
         std::string op;
         std::string description;
+        std::string topic;    // the full help topic, when the description has one
         std::string line;   // the diagram line shown in the dialog
     };
     //<<

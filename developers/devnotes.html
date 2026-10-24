@@ -941,13 +941,6 @@
             /** @type {NodeT[]} */
             let treeData = [
   {
-    "id": "3ff8280c",
-    "title": "Label",
-    "content": "",
-    "children": [],
-    "expanded": false
-  },
-  {
     "id": "69277a1d",
     "title": "Introduction",
     "content": "Introduction\nDeveloper documentation for Scribbolyth.",
@@ -956,6 +949,21 @@
         "id": "8b019cc8",
         "title": "Key Codes",
         "content": "Key Codes\n\nKey codes are defined within the ./config/commands.conf file.",
+        "children": [],
+        "expanded": false
+      }
+    ],
+    "expanded": false
+  },
+  {
+    "id": "6792a765",
+    "title": "How To Guides",
+    "content": "",
+    "children": [
+      {
+        "id": "6751658d",
+        "title": "Add a Key Binding",
+        "content": "Add a Key Binding\n\nTo add a key binding:\n\n* Add the key binding definition to the commands.conf file.\n* You can see how other bindings have been implemented by searching the\n  source code for the Op value. That is the starting point in the code.\n* Also note the MODE for the existing binding. If it is TREE, start\n  searching in the treeview.cpp file. If it is NORMAL, VISUAL, etc you\n  could start looking in the editor.cpp file. There are some exceptions\n  where methods are in other supporting code files, so you can check\n  those. A good recursive file contents search tool is helpful!",
         "children": [],
         "expanded": false
       }
@@ -977,6 +985,13 @@
             "title": "bookmark.cpp",
             "content": "",
             "children": [
+              {
+                "id": "ff7e998d",
+                "title": "Introduction to Bookmark.cpp",
+                "content": "Introduction to Bookmark.cpp\n\nThis file CURRENTLY houses just the NewId method.",
+                "children": [],
+                "expanded": false
+              },
               {
                 "id": "cf8b9eff",
                 "title": "NewId",
@@ -1022,6 +1037,13 @@
             "title": "bookmarks.cpp",
             "content": "",
             "children": [
+              {
+                "id": "88d76adc",
+                "title": "Introduction to Bookmarks.cpp",
+                "content": "Introduction to Bookmarks.cpp\n\nThis file handles the rendering of the Bookmarks dialog as well as\nits logic and its key handling.\n\nHelper Methods\n* PadRight - These will likely be consolidated into a single method in the future.\n* The Entry struct is defined here.\n\nPublic Members\n* The pending_g_ variable is used with navigating to the top.\n* The Ftxui OnEvent handles the key bindings\n\n* Navigation and removing bookmarks are private members of the class.",
+                "children": [],
+                "expanded": false
+              },
               {
                 "id": "f2ffc9b5",
                 "title": "BookmarksDialog Class",
@@ -1098,15 +1120,15 @@
                       },
                       {
                         "id": "ae61229c",
-                        "title": "Event Call",
-                        "content": "Event Call\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event\n\n\nThis is the ftxui Event override.\nIt handles navigation as well as Escape, Return, and deletes.\n\n\nExamples\n--------------------------------------------------------------------------------\n\nif (event == ftxui::Event::Escape)\n{\n    Close();\n    return true;\n}\n\nif (event.is_character() && event.character() == \"g\")\n{\n    if (pending_g_)\n    {\n        pending_g_ = false;\n        MoveToStart();\n        return true;\n    }\n    pending_g_ = true;\n    return true;\n}",
+                        "title": "Ftxui Bookmarks Dialog Event Call",
+                        "content": "Ftxui Bookmarks Dialog Event Call\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event\n\n\nThis is the ftxui Event override.\nIt handles navigation as well as Escape, Return, and deletes.\n\n\nExamples\n--------------------------------------------------------------------------------\n\nif (event == ftxui::Event::Escape)\n{\n    Close();\n    return true;\n}\n\nif (event.is_character() && event.character() == \"g\")\n{\n    if (pending_g_)\n    {\n        pending_g_ = false;\n        MoveToStart();\n        return true;\n    }\n    pending_g_ = true;\n    return true;\n}",
                         "children": [],
                         "expanded": false
                       },
                       {
                         "id": "9f7998e5",
-                        "title": "Render",
-                        "content": "Render\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\n\nRenders the bookmarks dialog.\n\n--------------------------------------------------------------------------------\n\n* First do a _Recompute Bookmarks_.\n\n* Gather the Bookmarks.\n\n* PadRight.\n\n* Build the footer.\n\n--------------------------------------------------------------------------------\n\nCreate the dialog's window:\n\nreturn ftxui::window(ftxui::text(\" ` Bookmarks \"),\n                    ftxui::vbox({\n                        ftxui::separator(),\n                        ftxui::vbox(std::move(rows)),\n                        ftxui::separator(),\n                        ftxui::text(PadRight(footer, row_width)) | ftxui::dim,\n                    })) |\n       ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |\n       ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);",
+                        "title": "Render the Bookmarks Dialog",
+                        "content": "Render the Bookmarks Dialog\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\n\nRenders the bookmarks dialog.\n\n--------------------------------------------------------------------------------\n\n* First do a _Recompute Bookmarks_.\n\n* Gather the Bookmarks.\n\n* PadRight.\n\n* Build the footer.\n\n--------------------------------------------------------------------------------\n\nCreate the dialog's window:\n\nreturn ftxui::window(ftxui::text(\" ` Bookmarks \"),\n                    ftxui::vbox({\n                        ftxui::separator(),\n                        ftxui::vbox(std::move(rows)),\n                        ftxui::separator(),\n                        ftxui::text(PadRight(footer, row_width)) | ftxui::dim,\n                    })) |\n       ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |\n       ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);",
                         "children": [],
                         "expanded": false
                       },
@@ -1155,7 +1177,7 @@
               {
                 "id": "5ad8b1c7",
                 "title": "Forward declares the EditorState Struct and MakeBookmarksDialog.",
-                "content": "Forward declares the EditorState Struct and MakeBookmarksDialog.",
+                "content": "Forward declares the EditorState Struct and MakeBookmarksDialog.\n\n--------------------------------------------------------------------------------\n\nstruct EditorState;\n\nnamespace scribbolyth::bookmarks\n{\n    ftxui::Component MakeBookmarksDialog(std::shared_ptr<EditorState> state, bool* show);\n}",
                 "children": [],
                 "expanded": false
               }
@@ -1175,6 +1197,13 @@
             "title": "browser.cpp",
             "content": "",
             "children": [
+              {
+                "id": "a7113d25",
+                "title": "Introduction to Browser.cpp",
+                "content": "Introduction to Browser.cpp\n\nThis file handles the file browsing dialog, as well as its key bindings.\n\nHelper Methods\n* PadRight - soon to be consolidated to a single method.\n* Tail - this also will likely be consolidated.\n\nPublic Members\n* The Ftxui OnEvent handles the key inputs.\n\nPrivate Members\n* The navigation and filtering is handled by these.\n* The initial directory is determined via: state_->browser_start_dir\n* Another state helper is: state_->browser_pick",
+                "children": [],
+                "expanded": false
+              },
               {
                 "id": "20d051b4",
                 "title": "Case Insensitive Less Check",
@@ -1344,8 +1373,8 @@
                       },
                       {
                         "id": "bf824ad1",
-                        "title": "Ftxui Event",
-                        "content": "Ftxui Event\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
+                        "title": "Ftxui Browser Dialog Event",
+                        "content": "Ftxui Browser Dialog Event\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
                         "children": [
                           {
                             "id": "b7edcdf5",
@@ -1507,6 +1536,21 @@
               }
             ],
             "expanded": false
+          },
+          {
+            "id": "01461ed3",
+            "title": "browser.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "59ddc0be",
+                "title": "Forward Declaration of the File Browser Dialog",
+                "content": "Forward Declaration of the File Browser Dialog\n\nftxui::Component MakeFileBrowserDialog(std::shared_ptr<EditorState> state, bool* show);",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
           }
         ],
         "expanded": false
@@ -1521,6 +1565,13 @@
             "title": "calc.cpp",
             "content": "",
             "children": [
+              {
+                "id": "7efa558e",
+                "title": "Introduction to Calc.cpp",
+                "content": "Introduction to Calc.cpp\n\nThis file handles the Command inputs and logic associated with the\ncalculator feature in Scribbolyth.\n\nHelpers\n* Evaluate boolean.\n\nPublic Members\n* Run handles the evaluation.\n\nPrivate Members\n* The calculation work is done by these methods.\n* Formatting is also done here.",
+                "children": [],
+                "expanded": false
+              },
               {
                 "id": "4054175d",
                 "title": "Evaluator Class",
@@ -1647,7 +1698,7 @@
               {
                 "id": "1ba3bb74",
                 "title": "Evaluate Forward Declaration",
-                "content": "Evaluate Forward Declaration\n\n!_method\n\n\nEvaluate a simple arithmetic expression, e.g. \"2(1+3)/4\" or \"7 * 3\".\nSupports + - * / % ^, parentheses, unary plus/minus, implicit\nmultiplication (\"2(1+3)\") and decimal numbers.\n\nOn success returns true and the formatted result in `result`; on\nfailure returns false and an explanation in `result`.",
+                "content": "Evaluate Forward Declaration\n\n!_method\n\n\nEvaluate a simple arithmetic expression, e.g. \"2(1+3)/4\" or \"7 * 3\".\nSupports + - * / % ^, parentheses, unary plus/minus, implicit\nmultiplication (\"2(1+3)\") and decimal numbers.\n\nOn success returns true and the formatted result in `result`; on\nfailure returns false and an explanation in `result`.\n\nbool Evaluate(const std::string& expr, std::string& result);",
                 "children": [],
                 "expanded": false
               }
@@ -1667,6 +1718,13 @@
             "title": "clipboard.hpp",
             "content": "",
             "children": [
+              {
+                "id": "690a6eb0",
+                "title": "Introduction to Clipboard.hpp",
+                "content": "Introduction to Clipboard.hpp\n\nThis file handles the management of the clipboard, cross-platform.",
+                "children": [],
+                "expanded": false
+              },
               {
                 "id": "8d0c63e8",
                 "title": "Reading the Clipboard",
@@ -1728,6 +1786,13 @@
             "content": "",
             "children": [
               {
+                "id": "07c5ee85",
+                "title": "Introduction to Config.cpp",
+                "content": "Introduction to Config.cpp\n\nThis file handles the loading and storing of configuration data.",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "b885e0f9",
                 "title": "Load Config and Set Keymap Objects",
                 "content": "Load Config and Set Keymap Objects\n\nSignature: bool LoadConfig(const std::string& path, std::shared_ptr<EditorState> state)\nMethod: LoadConfig\nReturns: bool\nParameters:\n    path  const std::string&\n    state std::shared_ptr<EditorState>",
@@ -1737,7 +1802,7 @@
               {
                 "id": "a766b9c4",
                 "title": "Read the Init Config",
-                "content": "Read the Init Config\n\nSignature: bool ReadInit(const std::string& path, std::string& last_file, std::vector<std::string>& recent_files, std::string& open_dir, std::string& import_dir)\nMethod: ReadInit\nReturns: bool\nParameters:\n    path         const std::string&\n    last_file    std::string&\n    recent_files std::vector<std::string>&\n    open_dir     std::string&\n    import_dir   std::string&",
+                "content": "Read the Init Config\n\nSignature: bool ReadInit(const std::string& path, std::string& last_file, std::vector<std::string>& recent_files, std::string& open_dir, std::string& import_dir, int& status_timeout)\nMethod: ReadInit\nReturns: bool\nParameters:\n    path           const std::string&\n    last_file      std::string&\n    recent_files   std::vector<std::string>&\n    open_dir       std::string&\n    import_dir     std::string&\n    status_timeout int&",
                 "children": [],
                 "expanded": false
               },
@@ -1765,7 +1830,7 @@
               {
                 "id": "2394ceac",
                 "title": "Update the Init Config",
-                "content": "Update the Init Config\n\nSignature: bool WriteInit(const std::string& path, const std::string& last_file, const std::vector<std::string>& recent_files, const std::string& open_dir, const std::string& import_dir)\nMethod: WriteInit\nReturns: bool\nParameters:\n    path         const std::string&\n    last_file    const std::string&\n    recent_files const std::vector<std::string>&\n    open_dir     const std::string&\n    import_dir   const std::string&",
+                "content": "Update the Init Config\n\nSignature: bool WriteInit(const std::string& path, const std::string& last_file, const std::vector<std::string>& recent_files, const std::string& open_dir, const std::string& import_dir, int status_timeout)\nMethod: WriteInit\nReturns: bool\nParameters:\n    path           const std::string&\n    last_file      const std::string&\n    recent_files   const std::vector<std::string>&\n    open_dir       const std::string&\n    import_dir     const std::string&\n    status_timeout int",
                 "children": [],
                 "expanded": false
               },
@@ -1773,6 +1838,42 @@
                 "id": "1e4389eb",
                 "title": "Update the Recent Files List",
                 "content": "Update the Recent Files List\n\nSignature: bool WriteRecentFiles(const std::string& path, const std::vector<std::string>& recent_files)\nMethod: WriteRecentFiles\nReturns: bool\nParameters:\n    path         const std::string&\n    recent_files const std::vector<std::string>&",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          },
+          {
+            "id": "a230afe1",
+            "title": "config.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "eb723d4a",
+                "title": "LoadConfig Forward Declaration",
+                "content": "LoadConfig Forward Declaration\n\nbool LoadConfig(const std::string& path, std::shared_ptr<EditorState> state);",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "4b7ae032",
+                "title": "ReadInit Forward Declaration",
+                "content": "ReadInit Forward Declaration\n\nbool ReadInit(const std::string& path, std::string& last_file,\n              std::vector<std::string>& recent_files,\n              std::string& open_dir, std::string& import_dir,\n              int& status_timeout);",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "f24f8bcf",
+                "title": "WriteInit Forward Declaration",
+                "content": "WriteInit Forward Declaration\n\nbool WriteInit(const std::string& path, const std::string& last_file,\n               const std::vector<std::string>& recent_files,\n               const std::string& open_dir, const std::string& import_dir,\n               int status_timeout);",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "fe752ae3",
+                "title": "WriteRecentFiles Forward Declaration",
+                "content": "WriteRecentFiles Forward Declaration\n\nbool WriteRecentFiles(const std::string& path, const std::vector<std::string>& recent_files);",
                 "children": [],
                 "expanded": false
               }
@@ -1792,6 +1893,13 @@
             "title": "editor.cpp",
             "content": "",
             "children": [
+              {
+                "id": "5aab9b1b",
+                "title": "Introduction to Editor.cpp",
+                "content": "Introduction to Editor.cpp\n\nThe Editor code file handles nearly ALL of the editor functionality.\nIf the user is in NORMAL/VISUAL/VISUAL LINE/VISUAL BLOCK mode, this\nfile is probably handling what they are doing.",
+                "children": [],
+                "expanded": false
+              },
               {
                 "id": "847c939d",
                 "title": "Full Trim",
@@ -1861,14 +1969,14 @@
                 "content": "The Editor Class",
                 "children": [
                   {
-                    "id": "943aae2d",
+                    "id": "3aa6f392",
                     "title": "Apply the Block Insert",
                     "content": "Apply the Block Insert\n\nSignature: void ApplyBlockInsert()\nMethod: ApplyBlockInsert\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "7fcc9d42",
+                    "id": "5e74384a",
                     "title": "Block Insert Struct",
                     "content": "Block Insert Struct\n\nstruct BlockInsert\n{\n    bool active = false;\n    bool at_end = false;\n    int col = 0;\n    std::vector<int> rows;\n    std::string pending;\n};",
                     "children": [],
@@ -1882,7 +1990,7 @@
                     "expanded": false
                   },
                   {
-                    "id": "3aa6f392",
+                    "id": "30d4c920",
                     "title": "Delete Character",
                     "content": "Delete Character\n\nSignature: void DeleteChar()\nMethod: DeleteChar\nReturns: void",
                     "children": [],
@@ -1896,21 +2004,21 @@
                     "expanded": false
                   },
                   {
-                    "id": "30d4c920",
+                    "id": "fad06de1",
                     "title": "Delete Line",
                     "content": "Delete Line\n\nSignature: void DeleteLine()\nMethod: DeleteLine\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "a78f1005",
+                    "id": "f0ae98ed",
                     "title": "Delete Selection",
                     "content": "Delete Selection\n\nSignature: void DeleteSelection()\nMethod: DeleteSelection\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "fad06de1",
+                    "id": "c06a299a",
                     "title": "Delete to End of Line",
                     "content": "Delete to End of Line\n\nSignature: void DeleteToEol()\nMethod: DeleteToEol\nReturns: void\n\nVim 'D' = 'd$': delete from the cursor to the end of the line,\nleaving the line itself (and the newline) in place.",
                     "children": [],
@@ -1924,6 +2032,13 @@
                     "expanded": false
                   },
                   {
+                    "id": "6435cfa1",
+                    "title": "Delete Word End",
+                    "content": "Delete Word End\n\nSignature: void DeleteWordEnd()\nMethod: DeleteWordEnd\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
                     "id": "2a375952",
                     "title": "Delete Word Forward",
                     "content": "Delete Word Forward\n\nSignature: void DeleteWordForward()\nMethod: DeleteWordForward\nReturns: void",
@@ -1931,7 +2046,7 @@
                     "expanded": false
                   },
                   {
-                    "id": "d1bd61a1",
+                    "id": "943aae2d",
                     "title": "Enter Block Insert Mode",
                     "content": "Enter Block Insert Mode\n\nSignature: void EnterBlockInsert(bool at_end)\nMethod: EnterBlockInsert\nReturns: void\nParameters:\n    at_end bool\n\nEnter INSERT mode with a pending block insert (Vim Ctrl+V then\nI/A). The text the user types is accumulated in block_insert_ and\nshown live on the top row; ApplyBlockInsert() replays it on the\nremaining rows when Esc is pressed.",
                     "children": [],
@@ -1952,21 +2067,21 @@
                     "expanded": false
                   },
                   {
-                    "id": "80d353fb",
+                    "id": "d1bd61a1",
                     "title": "Handle Backspace",
                     "content": "Handle Backspace\n\nSignature: void Backspace()\nMethod: Backspace\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "208870e2",
+                    "id": "80d353fb",
                     "title": "Insert New Line",
                     "content": "Insert New Line\n\nSignature: void InsertNewline()\nMethod: InsertNewline\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "6435cfa1",
+                    "id": "9eff12dd",
                     "title": "Insert Text",
                     "content": "Insert Text\n\nSignature: void InsertText(const std::string& text)\nMethod: InsertText\nReturns: void\nParameters:\n    text const std::string&",
                     "children": [],
@@ -2022,7 +2137,7 @@
                     "expanded": false
                   },
                   {
-                    "id": "c06a299a",
+                    "id": "fc6575a4",
                     "title": "Move Line",
                     "content": "Move Line\n\nSignature: void MoveLine(int dir)\nMethod: MoveLine\nReturns: void\nParameters:\n    dir int\n\nVim-style line move: swap the current line with the one above\n(dir < 0) or below (dir > 0), carrying the cursor with it.",
                     "children": [],
@@ -2050,7 +2165,7 @@
                     "expanded": false
                   },
                   {
-                    "id": "9eff12dd",
+                    "id": "208870e2",
                     "title": "Paste Text",
                     "content": "Paste Text\n\nSignature: void PasteText(const std::string& text)\nMethod: PasteText\nReturns: void\nParameters:\n    text const std::string&\n\nInsert clipboard-style text (possibly multi-line) at the cursor.",
                     "children": [],
@@ -2185,21 +2300,21 @@
                     "expanded": false
                   },
                   {
-                    "id": "fc6575a4",
+                    "id": "a78f1005",
                     "title": "Select Text",
                     "content": "Select Text\n\nSignature: std::string SelectionText() const\nMethod: SelectionText\nReturns: std::string\nQualifiers: const\n\nThe text currently under a VISUAL/VISUAL_LINE selection, or the\ncurrent line when no selection is active (NORMAL/INSERT).\nLine-based copies include a trailing newline so a cut+paste\nround-trip reproduces the lines.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "7807cbbb",
+                    "id": "1a1af5d8",
                     "title": "Selection to Lower",
                     "content": "Selection to Lower\n\nSignature: void LowerSelection()\nMethod: LowerSelection\nReturns: void\n\nVim 'u' (VISUAL): lowercase the selected text.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "f0ae98ed",
+                    "id": "7807cbbb",
                     "title": "Selection to Upper",
                     "content": "Selection to Upper\n\nSignature: void UpperSelection()\nMethod: UpperSelection\nReturns: void\n\nVim 'U' (VISUAL): uppercase the selected text. Folding never\nchanges line count or line length, so nothing is erased or\nreassembled; the cursor is placed at the start of the selection\nand the mode returns to NORMAL.",
                     "children": [],
@@ -2220,14 +2335,14 @@
                     "expanded": false
                   },
                   {
-                    "id": "1a1af5d8",
+                    "id": "7f2f4a1b",
                     "title": "Transform Selection",
                     "content": "Transform Selection\n\nSignature: void TransformSelection(char (*fold)(char), const char* status_msg)\nMethod: TransformSelection\nReturns: void\nParameters:\n    status_msg const char*",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "7f2f4a1b",
+                    "id": "7fcc9d42",
                     "title": "Variables",
                     "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nscribbolyth::treeview::TreeNode* active_ = nullptr;\nstd::string active_id_;\nstd::vector<std::string> lines_;\nint row_ = 0;\nint col_ = 0;\nint last_col_ = 0;\nint visual_row_ = -1;\nint visual_col_ = -1;\nint viewport_height_ = 0;",
                     "children": [],
@@ -2244,9 +2359,24 @@
                 "expanded": false
               },
               {
-                "id": "8c9c6b99",
+                "id": "1813d4b0",
                 "title": "Make the Editor",
                 "content": "Make the Editor\n\nSignature: ftxui::Component MakeEditor(std::shared_ptr<EditorState> state)\nMethod: MakeEditor\nReturns: ftxui::Component\nParameters:\nstate std::shared_ptr<EditorState>",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          },
+          {
+            "id": "446aa531",
+            "title": "editor.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "a0ed5c40",
+                "title": "MakeEditor Forward Declaration",
+                "content": "MakeEditor Forward Declaration\n\nftxui::Component MakeEditor(std::shared_ptr<EditorState> state);",
                 "children": [],
                 "expanded": false
               }
@@ -2258,6 +2388,13 @@
             "title": "editor_state.hpp",
             "content": "",
             "children": [
+              {
+                "id": "c5c1a51a",
+                "title": "Introduction to Editor_State.hpp",
+                "content": "Introduction to Editor_State.hpp\n\nThis file handles the state. So if you are working on code that touches\nthe state, you can look here for what is available etc.",
+                "children": [],
+                "expanded": false
+              },
               {
                 "id": "0277705b",
                 "title": "Editor State Struct",
@@ -2378,7 +2515,7 @@
                   {
                     "id": "24e14259",
                     "title": "Treeview Related",
-                    "content": "Treeview Related\n\n--------------------------------------------------------------------------------\n\n`active_node` is the selected node (null = none). `active_descendants`\nis the recursive count of every node beneath it, refreshed by the\ntreeview whenever the selection changes; the status bar shows it.\n\nint treeview_width = kDefaultTreeviewWidth;\n\nscribbolyth::treeview::TreeNode* active_node = nullptr;\nint active_descendants = 0;\nstd::string status;\nstd::string template_path;\nstd::string init_path;\nstd::vector<scribbolyth::bookmark::Bookmark> bookmarks;",
+                    "content": "Treeview Related\n\n--------------------------------------------------------------------------------\n\n`active_node` is the selected node (null = none). `active_descendants`\nis the recursive count of every node beneath it, refreshed by the\ntreeview whenever the selection changes; the status bar shows it.\n`current_file` is the path of the document backing the tree, kept in\nsync by the treeview on every save/open/new/import; empty for a new\nor HTML-imported document. The status bar shows it too.\n\nint treeview_width = kDefaultTreeviewWidth;\n\nscribbolyth::treeview::TreeNode* active_node = nullptr;\nint active_descendants = 0;\nstd::string current_file;\nstd::string status;\n// Seconds before a status-bar message auto-hides; persisted to init.conf\n// as `status_timeout`. Zero or less disables the auto-hide.\nint status_timeout = 8;\nstd::string template_path;\nstd::string init_path;\nstd::vector<scribbolyth::bookmark::Bookmark> bookmarks;",
                     "children": [],
                     "expanded": false
                   },
@@ -2415,6 +2552,13 @@
             "title": "help.cpp",
             "content": "",
             "children": [
+              {
+                "id": "f76c267b",
+                "title": "Introduction to Help.cpp",
+                "content": "Introduction to Help.cpp\n\nThis file handles the help dialog, and its key bindings.",
+                "children": [],
+                "expanded": false
+              },
               {
                 "id": "f09a7cfb",
                 "title": "Help Dialog Class",
@@ -2477,8 +2621,8 @@
                       },
                       {
                         "id": "d15f3fb0",
-                        "title": "Render",
-                        "content": "Render\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
+                        "title": "Render the Help Dialog",
+                        "content": "Render the Help Dialog\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
                         "children": [],
                         "expanded": false
                       }
@@ -2561,6 +2705,13 @@
             "title": "history.cpp",
             "content": "",
             "children": [
+              {
+                "id": "2c30c75e",
+                "title": "Introduction to History.cpp",
+                "content": "Introduction to History.cpp\n\nThe History.cpp file manages the history dialog and its key bindings.",
+                "children": [],
+                "expanded": false
+              },
               {
                 "id": "94400346",
                 "title": "Entry Struct",
@@ -2651,8 +2802,8 @@
                       },
                       {
                         "id": "ab58d6d0",
-                        "title": "Render",
-                        "content": "Render\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
+                        "title": "Render the History Dialog",
+                        "content": "Render the History Dialog\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
                         "children": [],
                         "expanded": false
                       },
@@ -2692,6 +2843,28 @@
               }
             ],
             "expanded": false
+          },
+          {
+            "id": "9ba1abc0",
+            "title": "history.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "025664da",
+                "title": "Forward Declaration of the MakeHistoryDialog Method.",
+                "content": "Forward Declaration of the MakeHistoryDialog Method.\n\nftxui::Component MakeHistoryDialog(std::shared_ptr<EditorState> state, bool* show);\n\nToDo: Organize this info-dump:\n\nBuild the history dialog. While *show is true it consumes every\nevent, so no app key bindings fire. j/k (and ArrowUp/ArrowDown) move\nthe selection, Enter jumps to the selected node (revealing it in the\ntree, staying in the current mode), Escape cancels. The list shows the\nmost recently viewed node first. Nodes that no longer exist are listed\nas \"(deleted node)\" and can be skipped with Enter.\n\n\n\n#todo",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "a34288db",
+                "title": "Forward Declaration of the Record Method.",
+                "content": "Forward Declaration of the Record Method.\n\nvoid Record(EditorState& state, const std::string& id);\n\nTodo: Organize this info-dump:\n\nRecord `id` as viewed (most recent last, deduplicated, capped at\nEditorState::kHistoryMax). Called by the treeview when a node with\ntext is selected and by the editor whenever it saves non-empty text.\n\n\n\n\n#todo",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
           }
         ],
         "expanded": false
@@ -2706,6 +2879,13 @@
             "title": "convert.cpp",
             "content": "",
             "children": [
+              {
+                "id": "8786f49e",
+                "title": "Introduction to Convert.cpp",
+                "content": "Introduction to Convert.cpp\n\nThe Convert.cpp file handles importing and exporting Scribboleth .html\nfiles.",
+                "children": [],
+                "expanded": false
+              },
               {
                 "id": "78dff0bd",
                 "title": "Append Bookmark.",
@@ -2977,9 +3157,23 @@
             "content": "",
             "children": [
               {
+                "id": "4959e17e",
+                "title": "Forward Declaration for ExportHtmlFile",
+                "content": "Forward Declaration for ExportHtmlFile\n\nbool ExportHtmlFile(const std::string& template_path, const std::string& out_path,\n                    const std::vector<TreeNode>& roots,\n                    const std::vector<bookmark::Bookmark>& bookmarks,\n                    const std::vector<std::string>& history,\n                    const HtmlTheme* theme = nullptr);",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "f2d73c20",
+                "title": "Forward Declaration for ImportHtmlFile",
+                "content": "Forward Declaration for ImportHtmlFile\n\nbool ImportHtmlFile(const std::string& path, std::vector<TreeNode>& roots,\n                    std::vector<bookmark::Bookmark>* bookmarks = nullptr,\n                    std::vector<std::string>* history = nullptr,\n                    HtmlTheme* theme = nullptr);",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "1ce3732b",
                 "title": "Html Theme Struct",
-                "content": "Html Theme Struct\n\nstruct HtmlTheme\n{\n    bool present = false;\n    std::string current_theme;\n    std::string themes;\n    std::string style_content;\n};\n\nThe theme material of an imported HTML file, captured verbatim from the\nweb app's own script declarations so a later export can reproduce it.\n`current_theme` and `themes` hold the full `let currentTheme = ...;` /\n`let themes = [...];` statements; `style_content` is the inner text of\nthe `<style id=\"theme_styles\">` block. Empty strings mean the piece was\nabsent from the source; `present` is true when any piece was found.",
+                "content": "Html Theme Struct\n\nstruct HtmlTheme\n{\n    bool present = false;\n    std::string current_theme;\n    std::string themes;\n    std::string style_content;\n};\n\nToDo: Organize this info-dump\n\nThe theme material of an imported HTML file, captured verbatim from the\nweb app's own script declarations so a later export can reproduce it.\n`current_theme` and `themes` hold the full `let currentTheme = ...;` /\n`let themes = [...];` statements; `style_content` is the inner text of\nthe `<style id=\"theme_styles\">` block. Empty strings mean the piece was\nabsent from the source; `present` is true when any piece was found.\n\n\n\n#todo",
                 "children": [],
                 "expanded": false
               }
@@ -3223,24 +3417,24 @@
             "content": "",
             "children": [
               {
-                "id": "020471a0",
+                "id": "854481b5",
                 "title": "Binding Struct",
                 "content": "Binding Struct\n\n--------------------------------------------------------------------------------\n\nstruct Binding\n{\n    std::string op;\n    std::string command;\n    std::string args;\n    bool can_repeat = false;\n};",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "854481b5",
+                "id": "075e2c00",
                 "title": "Keymap Class",
                 "content": "Keymap Class",
                 "children": [
                   {
-                    "id": "e8f88ab5",
+                    "id": "882595db",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "ee800319",
+                        "id": "88f1b14b",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::map<std::string, Binding> single_bindings_;\nstd::map<std::vector<std::string>, Binding> sequence_bindings_;\nstd::vector<std::string> pending_;\nbool enable_count_ = false;\nint count_ = 0;",
                         "children": [],
@@ -3250,26 +3444,26 @@
                     "expanded": false
                   },
                   {
-                    "id": "fcfa8278",
+                    "id": "6c915b39",
                     "title": "Public Members",
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "8bd4b1e9",
+                        "id": "cbdbbd23",
                         "title": "Forward Definitions",
                         "content": "Forward Definitions\n\nResult Handle(ftxui::Event event);\nvoid ResetPending() { pending_.clear(); }\nvoid EnableCounts() { enable_count_ = true; }",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "075e2c00",
+                        "id": "dede42ea",
                         "title": "Ftxui Event Wrappers",
                         "content": "Ftxui Event Wrappers\n\n--------------------------------------------------------------------------------\n\nvoid Bind(ftxui::Event event, Binding binding);\nvoid Bind(std::vector<ftxui::Event> sequence, Binding binding);",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "dede42ea",
+                        "id": "8bd4b1e9",
                         "title": "Result Struct",
                         "content": "Result Struct\n\nstruct Result\n{\n    std::string op;\n    std::string command;\n    std::string args;\n    bool pending = false;\n    int count = 1;\n};",
                         "children": [],
@@ -3279,6 +3473,13 @@
                     "expanded": false
                   }
                 ],
+                "expanded": false
+              },
+              {
+                "id": "020471a0",
+                "title": "Synthetic Event Detection",
+                "content": "Synthetic Event Detection\n\nFTXUI delivers its own internal events (terminal resize, screen wakeups)\nas \"special\" events carrying a single NUL byte. They look like a key\npress but are not one: treating them as a key aborts the pending key\nsequence (e.g. \"d d\") and drops a pending count prefix.\n\n--------------------------------------------------------------------------------\n\ninline bool IsSyntheticEvent(const ftxui::Event& event)\n{\n    const std::string& input = event.input();\n    return input.size() == 1 && input[0] == '\\0';\n}",
+                "children": [],
                 "expanded": false
               }
             ],
@@ -3716,6 +3917,13 @@
         "content": "",
         "children": [
           {
+            "id": "810670d0",
+            "title": "Introduction to Main.cpp",
+            "content": "Introduction to Main.cpp\n\nMain.cpp, of course, contains the main(...) entry point method.\nHowever it also defines the state variable as well as building the primary\nTUI interface.\nIt handles configuration path specifications as well as global level\nkey binding operators.\n\nIt handles TUI focus - between Editor and Treeview.\n\nAnd it also handles the Command input field.\n\nThis is also where you will set the application version value.\n\n\nIt also calls the Ftxui screen loop.",
+            "children": [],
+            "expanded": false
+          },
+          {
             "id": "886fe746",
             "title": "Main",
             "content": "Main\nScribbolyth's application entry point.\n\nSignature: int main(int, char** argv)\nMethod: main\nReturns: int\nParameters:\n         int\n    argv char**",
@@ -3736,8 +3944,8 @@
               },
               {
                 "id": "35a17595",
-                "title": "Ftxui",
-                "content": "Ftxui\nHandles the active child in the state.\nCreates the containers to build the TUI.\nCreates the various dialogs and adds them to a modals list:\nHandles the showing of modal dialogs and the Screen loop.\n\nauto container = Container::Vertical({\n    main_split | flex,\n    command_handler,\n    status_bar,\n}, &active_child);\n\nauto help_comp = scribbolyth::help::MakeHelpDialog(state, config_path.string(), &show_help);\nauto regex_comp = scribbolyth::regex::MakeRegexDialog(state, regex_path.string(), &show_regex);\nauto search_comp = scribbolyth::search::MakeSearchDialog(state, &show_search);\nauto link_picker_comp = scribbolyth::search::MakeSearchDialog(state, &show_link_picker, scribbolyth::search::DialogMode::InsertLink);\nauto search_results_comp = scribbolyth::search::MakeSearchDialog(state, &show_search_results, scribbolyth::search::DialogMode::CreateResults);\nauto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);\nauto links_comp = scribbolyth::links::MakeLinksDialog(state, &show_links);\nauto dead_links_comp = scribbolyth::brokenlinks::MakeDeadLinksDialog(state, &show_dead_links);\nauto history_comp = scribbolyth::history::MakeHistoryDialog(state, &show_history);\nauto recent_comp = scribbolyth::recent::MakeRecentDialog(state, &show_recent, recent_force);\nauto undo_comp = scribbolyth::undo::MakeUndoDialog(state, &show_undo);\nauto browser_comp = scribbolyth::browser::MakeFileBrowserDialog(state, &show_file_browser);\nauto modals = {\n    std::tuple(help_comp,        &show_help),\n    std::tuple(regex_comp,       &show_regex),\n    std::tuple(search_comp,      &show_search),\n    std::tuple(search_results_comp, &show_search_results),\n    std::tuple(link_picker_comp, &show_link_picker),\n    std::tuple(bookmarks_comp,   &show_bookmarks),\n    std::tuple(links_comp,       &show_links),\n    std::tuple(dead_links_comp,  &show_dead_links),\n    std::tuple(history_comp,     &show_history),\n    std::tuple(recent_comp,      &show_recent),\n    std::tuple(undo_comp,        &show_undo),\n    std::tuple(browser_comp,     &show_file_browser),\n};\n\nauto root = container;\nfor (auto& [comp, show] : modals)\n{\n    root = Modal(root, comp, show);\n}",
+                "title": "Ftxui Status Bar Renderer",
+                "content": "Ftxui Status Bar Renderer\n\nHandles the active child in the state.\nCreates the containers to build the TUI.\nCreates the various dialogs and adds them to a modals list:\nHandles the showing of modal dialogs and the Screen loop.\n\nShows the current mode, the open file path (when the document is\nbacked by a file) and the descendant count of the selected node.\n\n* Path of the open file, kept on the state by the treeview. Hidden\nwhen the document is new or was imported from HTML (empty path).\n\n* Descendant count of the selected node, or of the whole document when\nnothing is selected (right after a load/import). Hidden on an empty\ndocument so a blank start shows only the mode.\n\n* Handles the disappearing status bar messages.\n\nauto container = Container::Vertical({\n    main_split | flex,\n    command_handler,\n    status_bar,\n}, &active_child);\n\nauto help_comp = scribbolyth::help::MakeHelpDialog(state, config_path.string(), &show_help);\nauto regex_comp = scribbolyth::regex::MakeRegexDialog(state, regex_path.string(), &show_regex);\nauto search_comp = scribbolyth::search::MakeSearchDialog(state, &show_search);\nauto link_picker_comp = scribbolyth::search::MakeSearchDialog(state, &show_link_picker, scribbolyth::search::DialogMode::InsertLink);\nauto search_results_comp = scribbolyth::search::MakeSearchDialog(state, &show_search_results, scribbolyth::search::DialogMode::CreateResults);\nauto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);\nauto links_comp = scribbolyth::links::MakeLinksDialog(state, &show_links);\nauto dead_links_comp = scribbolyth::brokenlinks::MakeDeadLinksDialog(state, &show_dead_links);\nauto history_comp = scribbolyth::history::MakeHistoryDialog(state, &show_history);\nauto recent_comp = scribbolyth::recent::MakeRecentDialog(state, &show_recent, recent_force);\nauto undo_comp = scribbolyth::undo::MakeUndoDialog(state, &show_undo);\nauto browser_comp = scribbolyth::browser::MakeFileBrowserDialog(state, &show_file_browser);\nauto modals = {\n    std::tuple(help_comp,        &show_help),\n    std::tuple(regex_comp,       &show_regex),\n    std::tuple(search_comp,      &show_search),\n    std::tuple(search_results_comp, &show_search_results),\n    std::tuple(link_picker_comp, &show_link_picker),\n    std::tuple(bookmarks_comp,   &show_bookmarks),\n    std::tuple(links_comp,       &show_links),\n    std::tuple(dead_links_comp,  &show_dead_links),\n    std::tuple(history_comp,     &show_history),\n    std::tuple(recent_comp,      &show_recent),\n    std::tuple(undo_comp,        &show_undo),\n    std::tuple(browser_comp,     &show_file_browser),\n};\n\nauto root = container;\nfor (auto& [comp, show] : modals)\n{\n    root = Modal(root, comp, show);\n}",
                 "children": [],
                 "expanded": false
               },
@@ -3758,7 +3966,7 @@
               {
                 "id": "33648a43",
                 "title": "Variables",
-                "content": "Variables\nConstructs the persistent editor state as well as the editor and treeview elements.\n\n--------------------------------------------------------------------------------\n\nauto version = \"1.0.3\";\n\nauto state = std::make_shared<EditorState>();\n\nauto editor_comp = scribbolyth::editor::MakeEditor(state);\nauto treeview_comp = scribbolyth::treeview::MakeTreeView(state);\n\nstate->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };\nstate->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };\n\nauto treeview_wrap = treeview_comp;\nauto editor_wrap = editor_comp;\n\nauto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);\n\nauto screen = ScreenInteractive::Fullscreen();\nauto quit = screen.ExitLoopClosure();\n\n--------------------------------------------------------------------------------",
+                "content": "Variables\nConstructs the persistent editor state as well as the editor and treeview elements.\n\n--------------------------------------------------------------------------------\n\nauto version = \"1.0.4\";\n\nauto state = std::make_shared<EditorState>();\n\nauto editor_comp = scribbolyth::editor::MakeEditor(state);\nauto treeview_comp = scribbolyth::treeview::MakeTreeView(state);\n\nstate->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };\nstate->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };\n\nauto treeview_wrap = treeview_comp;\nauto editor_wrap = editor_comp;\n\nauto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);\n\nauto screen = ScreenInteractive::Fullscreen();\nauto quit = screen.ExitLoopClosure();\n\n--------------------------------------------------------------------------------",
                 "children": [],
                 "expanded": false
               },
@@ -3815,6 +4023,13 @@
             "title": "op.cpp",
             "content": "",
             "children": [
+              {
+                "id": "887a6877",
+                "title": "Introduction to Op.cpp",
+                "content": "Introduction to Op.cpp\n\nThis file handles a lot of the command inputs.\nIt is responsible for opening the command prompt, as well as executing commands that are entered.\n\n#command",
+                "children": [],
+                "expanded": false
+              },
               {
                 "id": "f7031a40",
                 "title": "Collect Path Matches",
@@ -4733,7 +4948,7 @@
               {
                 "id": "deee0c8a",
                 "title": "Export Subtree",
-                "content": "Export Subtree\n\nSignature: void TreeView::ExportScribbolyth(const std::string& path)\nMethod: ExportScribbolyth\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nExport the selected node and its whole subtree as a standalone\nScribbolyth document (its own .scribboleth file). Unlike SaveTo this\ndoes not repoint current_file_, touch the recent-files list or rewrite\ninit.conf: the branch is written to `path` and the open document is\nleft exactly as it was. Bookmarks and history are not carried over and\nthe pane width is preserved so the file reopens with the same layout.",
+                "content": "Export Subtree\n\nSignature: void TreeView::ExportScribbolyth(const std::string& path)\nMethod: ExportScribbolyth\nReturns: void TreeView\nParameters:\n    path const std::string&\n\nExport the selected node and its whole subtree as a standalone\nScribbolyth document (its own .scribboleth file). Unlike SaveTo this\ndoes not repoint the current file path, touch the recent-files list or rewrite\ninit.conf: the branch is written to `path` and the open document is\nleft exactly as it was. Bookmarks and history are not carried over and\nthe pane width is preserved so the file reopens with the same layout.",
                 "children": [],
                 "expanded": false
               },

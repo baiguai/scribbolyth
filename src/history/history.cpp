@@ -14,6 +14,10 @@
 
 namespace scribbolyth::history
 {
+    /*[./Introduction to History.cpp]
+        The History.cpp file manages the history dialog and its key bindings.
+    */
+
     /*!
         Record History String
 
@@ -100,6 +104,10 @@ namespace scribbolyth::history
         */
         bool OnEvent(ftxui::Event event) override
         {
+            // FTXUI's own events (terminal resize, screen wakeups) are not
+            // key presses: they must not drop a pending "g" prefix.
+            if (IsSyntheticEvent(event)) return false;
+
             if (event == ftxui::Event::Escape)
             {
                 Close();
@@ -148,7 +156,7 @@ namespace scribbolyth::history
         //!
 
         /*!
-            Render
+            Render the History Dialog
 
             !_method
         */

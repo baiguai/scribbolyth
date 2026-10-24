@@ -4,7 +4,12 @@
 #include <memory>
 #include <ftxui/component/screen_interactive.hpp>
 #include <ftxui/component/component.hpp>
+#include <ftxui/component/task.hpp>
 #include <ftxui/dom/elements.hpp>
+
+#include <atomic>
+#include <chrono>
+#include <thread>
 
 #ifndef _WIN32
 #include <termios.h>
@@ -30,19 +35,52 @@
 
 using namespace ftxui;
 
-/*[/Introduction]
-Introduction
-Developer documentation for Scribbolyth.
-*/
+//// Custom Help Topics ////////////////////////////////////////////////////////
+    /*[/Introduction]
+    Introduction
+    Developer documentation for Scribbolyth.
+    */
 
-/*[/Introduction/Key Codes]
-Key Codes
+    /*[/Introduction/Key Codes]
+    Key Codes
 
-Key codes are defined within the ./config/commands.conf file.
-*/
+    Key codes are defined within the ./config/commands.conf file.
+    */
 
+    /*[/How To Guides/Add a Key Binding]
+        To add a key binding:
+
+        * Add the key binding definition to the commands.conf file.
+        * You can see how other bindings have been implemented by searching the
+          source code for the Op value. That is the starting point in the code.
+        * Also note the MODE for the existing binding. If it is TREE, start
+          searching in the treeview.cpp file. If it is NORMAL, VISUAL, etc you
+          could start looking in the editor.cpp file. There are some exceptions
+          where methods are in other supporting code files, so you can check
+          those. A good recursive file contents search tool is helpful!
+
+    */
+////////////////////////////////////////////////////////////////////////////////
 
 //!_coderoot=/Source Code
+
+/*[./Introduction to Main.cpp]
+    Main.cpp, of course, contains the main(...) entry point method.
+    However it also defines the state variable as well as building the primary
+    TUI interface.
+    It handles configuration path specifications as well as global level
+    key binding operators.
+
+    It handles TUI focus - between Editor and Treeview.
+
+    And it also handles the Command input field.
+
+    This is also where you will set the application version value.
+
+
+    It also calls the Ftxui screen loop.
+*/
+
 
 /*!
     Main
@@ -58,7 +96,7 @@ int main(int, char** argv) {
         ----
     */
     //>>
-    auto version = "1.0.3";
+    auto version = "1.0.4";
 
     auto state = std::make_shared<EditorState>();
 
@@ -278,7 +316,8 @@ int main(int, char** argv) {
     */
     std::string last_file;
     if (scribbolyth::config::ReadInit(init_path.string(), last_file, state->recent_files,
-                                      state->last_open_dir, state->last_import_dir) && !last_file.empty())
+                                      state->last_open_dir, state->last_import_dir,
+                                      state->status_timeout) && !last_file.empty())
     {
         auto it = state->operations.find("open");
         std::error_code ec;
@@ -293,7 +332,8 @@ int main(int, char** argv) {
         std::cerr << "Removed " << removed << " stale recent entr"
                   << (removed == 1 ? "y" : "ies") << " from init.conf\n";
         scribbolyth::config::WriteInit(init_path.string(), last_file, state->recent_files,
-                                       state->last_open_dir, state->last_import_dir);
+                                       state->last_open_dir, state->last_import_dir,
+                                       state->status_timeout);
     }
     /*!*/
 
@@ -379,15 +419,23 @@ int main(int, char** argv) {
     });
     /*!*/
 
+
+    auto status_cache = std::make_shared<std::pair<std::string, std::chrono::steady_clock::time_point>>();
+    auto status_on_screen = std::make_shared<std::atomic<bool>>(false);
+
     /*!
-        Ftxui
+        Ftxui Status Bar Renderer
+
         Handles the active child in the state.
         Creates the containers to build the TUI.
         Creates the various dialogs and adds them to a modals list:
         Handles the showing of modal dialogs and the Screen loop.
 
+        Shows the current mode, the open file path (when the document is
+        backed by a file) and the descendant count of the selected node.
+
     */
-    auto status_bar = Renderer([state]
+    auto status_bar = Renderer([state, status_cache, status_on_screen]
     {
         std::string mode_str = ModeName(state->mode);
         if (state->changed)
@@ -399,9 +447,24 @@ int main(int, char** argv) {
             // separator(),
             // text(" scribbolyth ") | dim,
         };
-        // Descendant count of the selected node, or of the whole document when
-        // nothing is selected (right after a load/import). Hidden on an empty
-        // document so a blank start shows only the mode.
+        /*|
+
+        * Path of the open file, kept on the state by the treeview. Hidden
+        when the document is new or was imported from HTML (empty path).
+
+        */
+        if (!state->current_file.empty())
+        {
+            parts.push_back(separator());
+            parts.push_back(text(" " + state->current_file + " ") | dim);
+        }
+        /*|
+
+        * Descendant count of the selected node, or of the whole document when
+        nothing is selected (right after a load/import). Hidden on an empty
+        document so a blank start shows only the mode.
+
+        */
         if (state->active_node != nullptr || state->active_descendants > 0)
         {
             const int n = state->active_descendants;
@@ -409,6 +472,24 @@ int main(int, char** argv) {
             parts.push_back(text(" " + std::to_string(n)
                                  + (n == 1 ? " descendant " : " descendants ")) | dim);
         }
+
+        /*|
+
+        * Handles the disappearing status bar messages.
+
+        */
+        const auto now = std::chrono::steady_clock::now();
+        if (state->status != status_cache->first)
+        {
+            *status_cache = {state->status, now};
+        }
+        else if (!state->status.empty() && state->status_timeout > 0 &&
+                 now - status_cache->second >= std::chrono::seconds(state->status_timeout))
+        {
+            state->status.clear();
+            status_cache->first.clear();
+        }
+        status_on_screen->store(!state->status.empty());
         if (!state->status.empty())
         {
             parts.push_back(separator());
@@ -466,7 +547,30 @@ int main(int, char** argv) {
     }
     //<<
 
+    // FTXUI only redraws on input events, so without this ticker a timed-out
+    // status message would linger until the next keypress. Posts a wakeup
+    // only while a status message is on screen, so there is no idle cost.
+    //
+    // The wakeup asks for an animation frame instead of posting a key event:
+    // a key event is delivered to the component tree like a keystroke, and
+    // would abort any pending multi-key sequence (e.g. "d d", "g t").
+    std::atomic<bool> running{true};
+    std::thread status_watcher([&]
+    {
+        while (running)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            if (status_on_screen->load())
+            {
+                screen.Post(ftxui::Closure([&screen]() { screen.RequestAnimationFrame(); }));
+            }
+        }
+    });
+
     screen.Loop(root);
+
+    running = false;
+    status_watcher.join();
 
     // Break the shared_ptr cycles the UI graph creates (the editor/treeview
     // components hold `state_`, while `state` holds them via focus_*/the op

@@ -11,6 +11,10 @@
 
 namespace scribbolyth::config
 {
+    /*[./Introduction to Config.cpp]
+        This file handles the loading and storing of configuration data.
+    */
+
     namespace
     {
         using ftxui::Event;
@@ -167,7 +171,8 @@ namespace scribbolyth::config
     */
     bool ReadInit(const std::string& path, std::string& last_file,
                   std::vector<std::string>& recent_files,
-                  std::string& open_dir, std::string& import_dir)
+                  std::string& open_dir, std::string& import_dir,
+                  int& status_timeout)
     {
         std::ifstream file(path);
         if (!file.is_open()) return false;
@@ -220,6 +225,18 @@ namespace scribbolyth::config
                 // Last directory an HTML file was imported from.
                 import_dir = value;
             }
+            else if (key == "status_timeout")
+            {
+                // Seconds before a status-bar message auto-hides. A missing
+                // or malformed value keeps the caller's default.
+                try
+                {
+                    status_timeout = std::stoi(value);
+                }
+                catch (...)
+                {
+                }
+            }
         }
         return true;
     }
@@ -232,7 +249,8 @@ namespace scribbolyth::config
     */
     bool WriteInit(const std::string& path, const std::string& last_file,
                    const std::vector<std::string>& recent_files,
-                   const std::string& open_dir, const std::string& import_dir)
+                   const std::string& open_dir, const std::string& import_dir,
+                   int status_timeout)
     {
         std::ofstream file(path, std::ios::binary);
         if (!file.is_open()) return false;
@@ -244,6 +262,8 @@ namespace scribbolyth::config
         // corresponding command prompts and browser.
         file << "open_dir = " << open_dir << "\n";
         file << "import_dir = " << import_dir << "\n";
+        // Seconds before a status-bar message auto-hides (0 or less = never).
+        file << "status_timeout = " << status_timeout << "\n";
         for (const auto& recent : recent_files)
         {
             file << "recent_file = " << recent << "\n";
@@ -259,14 +279,16 @@ namespace scribbolyth::config
     */
     bool WriteRecentFiles(const std::string& path, const std::vector<std::string>& recent_files)
     {
-        // Read the settings this call does not own (last_file and the two
-        // remembered directories) so rewriting the recents does not drop them.
+        // Read the settings this call does not own (last_file, the two
+        // remembered directories and the status timeout) so rewriting the
+        // recents does not drop them.
         std::string last_file;
         std::string open_dir;
         std::string import_dir;
+        int status_timeout = 8; // matches EditorState's default
         std::vector<std::string> ignored;
-        ReadInit(path, last_file, ignored, open_dir, import_dir);
-        return WriteInit(path, last_file, recent_files, open_dir, import_dir);
+        ReadInit(path, last_file, ignored, open_dir, import_dir, status_timeout);
+        return WriteInit(path, last_file, recent_files, open_dir, import_dir, status_timeout);
     }
     //!
 }

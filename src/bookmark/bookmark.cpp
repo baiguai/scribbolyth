@@ -4,6 +4,10 @@
 
 namespace scribbolyth::bookmark
 {
+    /*[./Introduction to Bookmark.cpp]
+        This file CURRENTLY houses just the NewId method.
+    */
+
     /*!
         NewId
         Generates a new random ID for bookmarks using an alphabet char array.

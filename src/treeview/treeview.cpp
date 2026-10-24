@@ -302,12 +302,12 @@ namespace scribbolyth::treeview
 
                 state_->operations["save"] = [this](const std::string&, int)
                 {
-                    if (current_file_.empty())
+                    if (state_->current_file.empty())
                     {
                         state_->status = "No file path set - use :saveas to save";
                         return;
                     }
-                    SaveTo(current_file_);
+                    SaveTo(state_->current_file);
                 };
                 state_->operations["saveas"] = [this](const std::string& path, int)
                 {
@@ -534,9 +534,6 @@ namespace scribbolyth::treeview
             // change must reset the undo history.
             TreeNode* selected_ = nullptr;
             std::string selected_id_;
-
-            // Path of the file backing this tree ("" when unsaved/imported).
-            std::string current_file_;
     };
     //!
 
@@ -975,7 +972,7 @@ namespace scribbolyth::treeview
             state_->status = "Error: could not write " + path;
             return;
         }
-        current_file_ = path;
+        state_->current_file = path;
         state_->changed = false;
         state_->status = "Saved " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
         // Save-as and exports start next to the document being edited.
@@ -1025,7 +1022,7 @@ namespace scribbolyth::treeview
         state_->html_theme = scribbolyth::html::HtmlTheme{};
         EnsureIds(loaded);
         roots_ = std::move(loaded);
-        current_file_ = path;
+        state_->current_file = path;
         selected_ = nullptr;
         ClearUndo();
         RefreshActiveNode();
@@ -1065,7 +1062,7 @@ namespace scribbolyth::treeview
         state_->history = std::move(loaded_history);
         state_->html_theme = std::move(theme);
         roots_ = std::move(loaded);
-        current_file_.clear();
+        state_->current_file.clear();
         state_->current_dir.clear();
         selected_ = nullptr;
         ClearUndo();
@@ -1113,7 +1110,7 @@ namespace scribbolyth::treeview
     void TreeView::NewDocument()
     {
         roots_.clear();
-        current_file_.clear();
+        state_->current_file.clear();
         state_->current_dir.clear();
         selected_ = nullptr;
         state_->treeview_width = kDefaultTreeviewWidth;
@@ -1175,7 +1172,7 @@ namespace scribbolyth::treeview
 
         Export the selected node and its whole subtree as a standalone
         Scribbolyth document (its own .scribboleth file). Unlike SaveTo this
-        does not repoint current_file_, touch the recent-files list or rewrite
+        does not repoint the current file path, touch the recent-files list or rewrite
         init.conf: the branch is written to `path` and the open document is
         left exactly as it was. Bookmarks and history are not carried over and
         the pane width is preserved so the file reopens with the same layout.
@@ -1306,8 +1303,10 @@ namespace scribbolyth::treeview
     void TreeView::PersistLastFile()
     {
         if (state_->init_path.empty()) return;
-        scribbolyth::config::WriteInit(state_->init_path, current_file_, state_->recent_files,
-                                       state_->last_open_dir, state_->last_import_dir);
+        scribbolyth::config::WriteInit(state_->init_path, state_->current_file,
+                                       state_->recent_files,
+                                       state_->last_open_dir, state_->last_import_dir,
+                                       state_->status_timeout);
     }
     //!
 

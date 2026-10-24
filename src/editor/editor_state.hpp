@@ -16,6 +16,11 @@ inline constexpr int kDefaultTreeviewWidth = 30;
 inline constexpr int kMinTreeviewWidth = 10;
 inline constexpr int kMaxTreeviewWidth = 200;
 
+/*[./Introduction to Editor_State.hpp]
+    This file handles the state. So if you are working on code that touches
+    the state, you can look here for what is available etc.
+*/
+
 /*!
     Undo State Struct
 
@@ -82,13 +87,20 @@ struct EditorState {
         `active_node` is the selected node (null = none). `active_descendants`
         is the recursive count of every node beneath it, refreshed by the
         treeview whenever the selection changes; the status bar shows it.
+        `current_file` is the path of the document backing the tree, kept in
+        sync by the treeview on every save/open/new/import; empty for a new
+        or HTML-imported document. The status bar shows it too.
     */
     //>>
     int treeview_width = kDefaultTreeviewWidth;
 
     scribbolyth::treeview::TreeNode* active_node = nullptr;
     int active_descendants = 0;
+    std::string current_file;
     std::string status;
+    // Seconds before a status-bar message auto-hides; persisted to init.conf
+    // as `status_timeout`. Zero or less disables the auto-hide.
+    int status_timeout = 8;
     std::string template_path;
     std::string init_path;
     std::vector<scribbolyth::bookmark::Bookmark> bookmarks;

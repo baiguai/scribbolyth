@@ -9,6 +9,11 @@
 
 namespace scribbolyth::html
 {
+    /*[./Introduction to Convert.cpp]
+        The Convert.cpp file handles importing and exporting Scribboleth .html
+        files.
+    */
+
     namespace
     {
         /*!

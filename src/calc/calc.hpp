@@ -17,6 +17,8 @@ namespace scribbolyth::calc
         On success returns true and the formatted result in `result`; on
         failure returns false and an explanation in `result`.
     */
+    //>>
     bool Evaluate(const std::string& expr, std::string& result);
+    //<<
     //!
 }

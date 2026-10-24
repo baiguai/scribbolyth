@@ -13,6 +13,9 @@
 
 namespace scribbolyth::clipboard
 {
+    /*[./Introduction to Clipboard.hpp]
+        This file handles the management of the clipboard, cross-platform.
+    */
 
     /*!
         Reading the Clipboard

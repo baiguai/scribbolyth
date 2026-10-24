@@ -17,6 +17,22 @@ namespace fs = std::filesystem;
 
 namespace scribbolyth::browser
 {
+    /*[./Introduction to Browser.cpp]
+        This file handles the file browsing dialog, as well as its key bindings.
+
+        Helper Methods
+        * PadRight - soon to be consolidated to a single method.
+        * Tail - this also will likely be consolidated.
+
+        Public Members
+        * The Ftxui OnEvent handles the key inputs.
+
+        Private Members
+        * The navigation and filtering is handled by these.
+        * The initial directory is determined via: state_->browser_start_dir
+        * Another state helper is: state_->browser_pick
+    */
+
     namespace
     {
         /*!
@@ -125,12 +141,16 @@ namespace scribbolyth::browser
         //!
 
         /*!
-            Ftxui Event
+            Ftxui Browser Dialog Event
 
             !_method
         */
         bool OnEvent(ftxui::Event event) override
         {
+            // FTXUI's own events (terminal resize, screen wakeups) are not
+            // key presses: they must not drop a pending "g" prefix.
+            if (IsSyntheticEvent(event)) return false;
+
             if (filter_active_) return OnFilterEvent(event);
 
             /*>
