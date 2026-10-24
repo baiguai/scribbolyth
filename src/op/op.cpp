@@ -11,6 +11,13 @@
 
 namespace scribbolyth::op
 {
+    /*[./Introduction to Op.cpp]
+        This file handles a lot of the command inputs.
+        It is responsible for opening the command prompt, as well as executing commands that are entered.
+
+        #command
+    */
+
     namespace
     {
         /*!

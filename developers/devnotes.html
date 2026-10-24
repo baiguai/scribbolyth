@@ -1969,14 +1969,14 @@
                 "content": "The Editor Class",
                 "children": [
                   {
-                    "id": "943aae2d",
+                    "id": "3aa6f392",
                     "title": "Apply the Block Insert",
                     "content": "Apply the Block Insert\n\nSignature: void ApplyBlockInsert()\nMethod: ApplyBlockInsert\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "7fcc9d42",
+                    "id": "5e74384a",
                     "title": "Block Insert Struct",
                     "content": "Block Insert Struct\n\nstruct BlockInsert\n{\n    bool active = false;\n    bool at_end = false;\n    int col = 0;\n    std::vector<int> rows;\n    std::string pending;\n};",
                     "children": [],
@@ -1990,7 +1990,7 @@
                     "expanded": false
                   },
                   {
-                    "id": "3aa6f392",
+                    "id": "30d4c920",
                     "title": "Delete Character",
                     "content": "Delete Character\n\nSignature: void DeleteChar()\nMethod: DeleteChar\nReturns: void",
                     "children": [],
@@ -2004,21 +2004,21 @@
                     "expanded": false
                   },
                   {
-                    "id": "30d4c920",
+                    "id": "fad06de1",
                     "title": "Delete Line",
                     "content": "Delete Line\n\nSignature: void DeleteLine()\nMethod: DeleteLine\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "a78f1005",
+                    "id": "f0ae98ed",
                     "title": "Delete Selection",
                     "content": "Delete Selection\n\nSignature: void DeleteSelection()\nMethod: DeleteSelection\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "fad06de1",
+                    "id": "c06a299a",
                     "title": "Delete to End of Line",
                     "content": "Delete to End of Line\n\nSignature: void DeleteToEol()\nMethod: DeleteToEol\nReturns: void\n\nVim 'D' = 'd$': delete from the cursor to the end of the line,\nleaving the line itself (and the newline) in place.",
                     "children": [],
@@ -2032,6 +2032,13 @@
                     "expanded": false
                   },
                   {
+                    "id": "6435cfa1",
+                    "title": "Delete Word End",
+                    "content": "Delete Word End\n\nSignature: void DeleteWordEnd()\nMethod: DeleteWordEnd\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
                     "id": "2a375952",
                     "title": "Delete Word Forward",
                     "content": "Delete Word Forward\n\nSignature: void DeleteWordForward()\nMethod: DeleteWordForward\nReturns: void",
@@ -2039,7 +2046,7 @@
                     "expanded": false
                   },
                   {
-                    "id": "d1bd61a1",
+                    "id": "943aae2d",
                     "title": "Enter Block Insert Mode",
                     "content": "Enter Block Insert Mode\n\nSignature: void EnterBlockInsert(bool at_end)\nMethod: EnterBlockInsert\nReturns: void\nParameters:\n    at_end bool\n\nEnter INSERT mode with a pending block insert (Vim Ctrl+V then\nI/A). The text the user types is accumulated in block_insert_ and\nshown live on the top row; ApplyBlockInsert() replays it on the\nremaining rows when Esc is pressed.",
                     "children": [],
@@ -2060,21 +2067,21 @@
                     "expanded": false
                   },
                   {
-                    "id": "80d353fb",
+                    "id": "d1bd61a1",
                     "title": "Handle Backspace",
                     "content": "Handle Backspace\n\nSignature: void Backspace()\nMethod: Backspace\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "208870e2",
+                    "id": "80d353fb",
                     "title": "Insert New Line",
                     "content": "Insert New Line\n\nSignature: void InsertNewline()\nMethod: InsertNewline\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "6435cfa1",
+                    "id": "9eff12dd",
                     "title": "Insert Text",
                     "content": "Insert Text\n\nSignature: void InsertText(const std::string& text)\nMethod: InsertText\nReturns: void\nParameters:\n    text const std::string&",
                     "children": [],
@@ -2130,7 +2137,7 @@
                     "expanded": false
                   },
                   {
-                    "id": "c06a299a",
+                    "id": "fc6575a4",
                     "title": "Move Line",
                     "content": "Move Line\n\nSignature: void MoveLine(int dir)\nMethod: MoveLine\nReturns: void\nParameters:\n    dir int\n\nVim-style line move: swap the current line with the one above\n(dir < 0) or below (dir > 0), carrying the cursor with it.",
                     "children": [],
@@ -2158,7 +2165,7 @@
                     "expanded": false
                   },
                   {
-                    "id": "9eff12dd",
+                    "id": "208870e2",
                     "title": "Paste Text",
                     "content": "Paste Text\n\nSignature: void PasteText(const std::string& text)\nMethod: PasteText\nReturns: void\nParameters:\n    text const std::string&\n\nInsert clipboard-style text (possibly multi-line) at the cursor.",
                     "children": [],
@@ -2293,21 +2300,21 @@
                     "expanded": false
                   },
                   {
-                    "id": "fc6575a4",
+                    "id": "a78f1005",
                     "title": "Select Text",
                     "content": "Select Text\n\nSignature: std::string SelectionText() const\nMethod: SelectionText\nReturns: std::string\nQualifiers: const\n\nThe text currently under a VISUAL/VISUAL_LINE selection, or the\ncurrent line when no selection is active (NORMAL/INSERT).\nLine-based copies include a trailing newline so a cut+paste\nround-trip reproduces the lines.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "7807cbbb",
+                    "id": "1a1af5d8",
                     "title": "Selection to Lower",
                     "content": "Selection to Lower\n\nSignature: void LowerSelection()\nMethod: LowerSelection\nReturns: void\n\nVim 'u' (VISUAL): lowercase the selected text.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "f0ae98ed",
+                    "id": "7807cbbb",
                     "title": "Selection to Upper",
                     "content": "Selection to Upper\n\nSignature: void UpperSelection()\nMethod: UpperSelection\nReturns: void\n\nVim 'U' (VISUAL): uppercase the selected text. Folding never\nchanges line count or line length, so nothing is erased or\nreassembled; the cursor is placed at the start of the selection\nand the mode returns to NORMAL.",
                     "children": [],
@@ -2328,14 +2335,14 @@
                     "expanded": false
                   },
                   {
-                    "id": "1a1af5d8",
+                    "id": "7f2f4a1b",
                     "title": "Transform Selection",
                     "content": "Transform Selection\n\nSignature: void TransformSelection(char (*fold)(char), const char* status_msg)\nMethod: TransformSelection\nReturns: void\nParameters:\n    status_msg const char*",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "7f2f4a1b",
+                    "id": "7fcc9d42",
                     "title": "Variables",
                     "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nscribbolyth::treeview::TreeNode* active_ = nullptr;\nstd::string active_id_;\nstd::vector<std::string> lines_;\nint row_ = 0;\nint col_ = 0;\nint last_col_ = 0;\nint visual_row_ = -1;\nint visual_col_ = -1;\nint viewport_height_ = 0;",
                     "children": [],
@@ -2352,7 +2359,7 @@
                 "expanded": false
               },
               {
-                "id": "8c9c6b99",
+                "id": "1813d4b0",
                 "title": "Make the Editor",
                 "content": "Make the Editor\n\nSignature: ftxui::Component MakeEditor(std::shared_ptr<EditorState> state)\nMethod: MakeEditor\nReturns: ftxui::Component\nParameters:\nstate std::shared_ptr<EditorState>",
                 "children": [],
@@ -3410,24 +3417,24 @@
             "content": "",
             "children": [
               {
-                "id": "020471a0",
+                "id": "854481b5",
                 "title": "Binding Struct",
                 "content": "Binding Struct\n\n--------------------------------------------------------------------------------\n\nstruct Binding\n{\n    std::string op;\n    std::string command;\n    std::string args;\n    bool can_repeat = false;\n};",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "854481b5",
+                "id": "075e2c00",
                 "title": "Keymap Class",
                 "content": "Keymap Class",
                 "children": [
                   {
-                    "id": "e8f88ab5",
+                    "id": "882595db",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "ee800319",
+                        "id": "88f1b14b",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::map<std::string, Binding> single_bindings_;\nstd::map<std::vector<std::string>, Binding> sequence_bindings_;\nstd::vector<std::string> pending_;\nbool enable_count_ = false;\nint count_ = 0;",
                         "children": [],
@@ -3437,26 +3444,26 @@
                     "expanded": false
                   },
                   {
-                    "id": "fcfa8278",
+                    "id": "6c915b39",
                     "title": "Public Members",
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "8bd4b1e9",
+                        "id": "cbdbbd23",
                         "title": "Forward Definitions",
                         "content": "Forward Definitions\n\nResult Handle(ftxui::Event event);\nvoid ResetPending() { pending_.clear(); }\nvoid EnableCounts() { enable_count_ = true; }",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "075e2c00",
+                        "id": "dede42ea",
                         "title": "Ftxui Event Wrappers",
                         "content": "Ftxui Event Wrappers\n\n--------------------------------------------------------------------------------\n\nvoid Bind(ftxui::Event event, Binding binding);\nvoid Bind(std::vector<ftxui::Event> sequence, Binding binding);",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "dede42ea",
+                        "id": "8bd4b1e9",
                         "title": "Result Struct",
                         "content": "Result Struct\n\nstruct Result\n{\n    std::string op;\n    std::string command;\n    std::string args;\n    bool pending = false;\n    int count = 1;\n};",
                         "children": [],
@@ -3466,6 +3473,13 @@
                     "expanded": false
                   }
                 ],
+                "expanded": false
+              },
+              {
+                "id": "020471a0",
+                "title": "Synthetic Event Detection",
+                "content": "Synthetic Event Detection\n\nFTXUI delivers its own internal events (terminal resize, screen wakeups)\nas \"special\" events carrying a single NUL byte. They look like a key\npress but are not one: treating them as a key aborts the pending key\nsequence (e.g. \"d d\") and drops a pending count prefix.\n\n--------------------------------------------------------------------------------\n\ninline bool IsSyntheticEvent(const ftxui::Event& event)\n{\n    const std::string& input = event.input();\n    return input.size() == 1 && input[0] == '\\0';\n}",
+                "children": [],
                 "expanded": false
               }
             ],
@@ -4009,6 +4023,13 @@
             "title": "op.cpp",
             "content": "",
             "children": [
+              {
+                "id": "887a6877",
+                "title": "Introduction to Op.cpp",
+                "content": "Introduction to Op.cpp\n\nThis file handles a lot of the command inputs.\nIt is responsible for opening the command prompt, as well as executing commands that are entered.\n\n#command",
+                "children": [],
+                "expanded": false
+              },
               {
                 "id": "f7031a40",
                 "title": "Collect Path Matches",
