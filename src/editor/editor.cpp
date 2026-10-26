@@ -675,7 +675,7 @@ namespace scribbolyth::editor
                 LoadIfChanged();
                 if (active_ == nullptr)
                 {
-                    return ftxui::text("Keycode help, use: '?' in TREE mode") | ftxui::dim | ftxui::center;
+                    return ftxui::text("Keycode help, use: ?") | ftxui::dim | ftxui::center;
                 }
                 if (state_->search_reveal_pending)
                 {
