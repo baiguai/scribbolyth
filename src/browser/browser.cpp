@@ -450,17 +450,17 @@ namespace scribbolyth::browser
             }
 
             std::string help_move =
-                "    j/k move  h up  l enter  gg/G  Enter pick  / filter  Esc cancel  ";
+                "    j/k move  h up  l enter  gg/G  m bookmark  Enter pick  / filter  Esc cancel  ";
             if (!state_->browser_command.empty())
             {
                 help_move =
-                    "    j/k move  h up  l enter  gg/G  Enter pick  : name  / filter  Esc cancel  ";
+                    "    j/k move  h up  l enter  gg/G  m bookmark  Enter pick  : name  / filter  Esc cancel  ";
             }
             const std::string help_clear =
-                "    Esc clear  j/k move  h up  l enter  Enter pick  / filter  ";
+                "    Esc clear  j/k move  h up  l enter  m bookmark  Enter pick  / filter  ";
             const std::string help_type = "    type to filter  Enter keep  Esc clear  ";
             const std::string help_bookmarks =
-                "    j/k move  Enter open  D remove  m add current  Esc back  ";
+                "    j/k move  Enter open  D remove  Esc back  ";
 
             std::string footer;
             if (bookmarks_active_)
@@ -502,7 +502,7 @@ namespace scribbolyth::browser
                                      ftxui::text(PadRight(footer, dlg_width)) | ftxui::dim,
                                  })) |
                    ftxui::reflect(box_) |
-                   ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |
+                   ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 140) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
         }
         //!
