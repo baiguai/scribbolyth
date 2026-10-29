@@ -10,6 +10,7 @@
 #include <ftxui/dom/elements.hpp>
 #include <ftxui/screen/box.hpp>
 
+#include "../config/config.hpp"
 #include "../editor/editor_state.hpp"
 #include "../op/op.hpp"
 
@@ -31,6 +32,7 @@ namespace scribbolyth::browser
         * The navigation and filtering is handled by these.
         * The initial directory is determined via: state_->browser_start_dir
         * Another state helper is: state_->browser_pick
+        * `m` bookmarks the shown directory; ` shows the bookmark list.
     */
 
     namespace
@@ -106,7 +108,13 @@ namespace scribbolyth::browser
             std::error_code ec;
             fs::path abs = fs::absolute(path, ec);
             if (ec) return path;
-            return abs.string();
+            fs::path normalized = abs.lexically_normal();
+            if (!normalized.empty() && normalized != normalized.root_path()
+                && normalized.filename().empty())
+            {
+                normalized = normalized.parent_path();
+            }
+            return normalized.string();
         }
         //!
     }
@@ -152,6 +160,34 @@ namespace scribbolyth::browser
             if (IsSyntheticEvent(event)) return false;
 
             if (filter_active_) return OnFilterEvent(event);
+            if (bookmarks_active_) return OnBookmarksEvent(event);
+
+            if (event.is_character() && event.character() == "`")
+            {
+                /*>
+                    `
+
+                    Show the bookmarked directories.
+                */
+                //>>
+                OpenBookmarks();
+                return true;
+                //<<
+                //!
+            }
+            if (event.is_character() && event.character() == "m")
+            {
+                /*>
+                    m
+
+                    Bookmark the directory currently shown.
+                */
+                //>>
+                AddCurrentBookmark();
+                return true;
+                //<<
+                //!
+            }
 
             /*>
                 Key Events
@@ -339,6 +375,14 @@ namespace scribbolyth::browser
             const int dlg_width { 90 };
 
             const std::size_t row_width = static_cast<std::size_t>(content_width_ + 2);
+
+            const int bookmark_total = static_cast<int>(state_->bookmarked_dirs.size());
+            const int bookmark_sel = std::min(bookmark_selection_,
+                                              std::max(0, bookmark_total - 1));
+            const int bookmark_top = ComputeTop(bookmark_sel, bookmark_total);
+            const int bookmark_count = std::min(kVisibleRows,
+                                                std::max(0, bookmark_total - bookmark_top));
+            const std::size_t bookmark_width = static_cast<std::size_t>(dlg_width - 4);
             //<<
             //!
 
@@ -359,7 +403,28 @@ namespace scribbolyth::browser
             rows.push_back(ftxui::text(PadRight("  " + dir_, content_width_ + 2)) | ftxui::dim);
             rows.push_back(ftxui::separator());
 
-            if (total == 0)
+            if (bookmarks_active_)
+            {
+                if (bookmark_total == 0)
+                {
+                    rows.push_back(ftxui::text(
+                        PadRight("  (no bookmarked directories)", row_width)) | ftxui::dim);
+                }
+                else
+                {
+                    for (int i = 0; i < bookmark_count; ++i)
+                    {
+                        const int index = bookmark_top + i;
+                        const std::string& path =
+                            state_->bookmarked_dirs[static_cast<std::size_t>(index)];
+                        ftxui::Element row = ftxui::text(
+                            " " + PadRight(Tail(path, bookmark_width), bookmark_width) + " ");
+                        if (index == bookmark_sel) row = row | ftxui::inverted;
+                        rows.push_back(row);
+                    }
+                }
+            }
+            else if (total == 0)
             {
                 rows.push_back(ftxui::text(PadRight(
                     filter_.empty() ? "  (empty directory)" : "  (no matches)", row_width))
@@ -385,43 +450,59 @@ namespace scribbolyth::browser
             }
 
             std::string help_move =
-                "    j/k move  h up  l enter  gg/G  Enter pick  / filter  Esc cancel  ";
+                "    j/k move  h up  l enter  gg/G  m bookmark  Enter pick  / filter  Esc cancel  ";
             if (!state_->browser_command.empty())
             {
                 help_move =
-                    "    j/k move  h up  l enter  gg/G  Enter pick  : name  / filter  Esc cancel  ";
+                    "    j/k move  h up  l enter  gg/G  m bookmark  Enter pick  : name  / filter  Esc cancel  ";
             }
             const std::string help_clear =
-                "    Esc clear  j/k move  h up  l enter  Enter pick  / filter  ";
+                "    Esc clear  j/k move  h up  l enter  m bookmark  Enter pick  / filter  ";
             const std::string help_type = "    type to filter  Enter keep  Esc clear  ";
+            const std::string help_bookmarks =
+                "    j/k move  Enter open  D remove  Esc back  ";
 
-            std::string footer = "  " + std::to_string(total == 0 ? 0 : sel + 1) + "/"
-                                 + std::to_string(total);
-            if (!filter_.empty())
+            std::string footer;
+            if (bookmarks_active_)
             {
-                footer += " (of " + std::to_string(entries_.size()) + ")";
-            }
-            if (filter_active_)
-            {
-                footer += help_type;
-            }
-            else if (filter_.empty())
-            {
-                footer += help_move;
+                footer = "  " + std::to_string(bookmark_total == 0 ? 0 : bookmark_sel + 1)
+                         + "/" + std::to_string(bookmark_total);
+                footer += help_bookmarks;
             }
             else
             {
-                footer += help_clear;
+                footer = "  " + std::to_string(total == 0 ? 0 : sel + 1) + "/"
+                         + std::to_string(total);
+                if (!filter_.empty())
+                {
+                    footer += " (of " + std::to_string(entries_.size()) + ")";
+                }
+                if (filter_active_)
+                {
+                    footer += help_type;
+                }
+                else if (filter_.empty())
+                {
+                    footer += help_move;
+                }
+                else
+                {
+                    footer += help_clear;
+                }
             }
 
-            return ftxui::window(ftxui::text(" File Browser "),
+            const std::string title = bookmarks_active_
+                                          ? " File Browser - Bookmarks "
+                                          : " File Browser ";
+
+            return ftxui::window(ftxui::text(title),
                                  ftxui::vbox({
                                      ftxui::vbox(std::move(rows)),
                                      ftxui::separator(),
                                      ftxui::text(PadRight(footer, dlg_width)) | ftxui::dim,
                                  })) |
                    ftxui::reflect(box_) |
-                   ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |
+                   ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 140) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
         }
         //!
@@ -470,9 +551,87 @@ namespace scribbolyth::browser
             pending_g_ = false;
             filter_.clear();
             filter_active_ = false;
+            bookmarks_active_ = false;
+            bookmark_selection_ = 0;
             state_->browser_command.clear();
             start_dir_.clear();
             needs_refresh_ = true;
+        }
+        //!
+
+        /*!
+            Show Bookmarked Directories
+
+            !_method
+        */
+        void OpenBookmarks()
+        {
+            bookmarks_active_ = true;
+            bookmark_selection_ = 0;
+            pending_g_ = false;
+        }
+        //!
+
+        /*!
+            Add the Current Directory to the Bookmarks
+
+            !_method
+        */
+        void AddCurrentBookmark()
+        {
+            const std::string target = Normalize(dir_);
+            auto& dirs = state_->bookmarked_dirs;
+            if (std::find(dirs.begin(), dirs.end(), target) != dirs.end())
+            {
+                state_->status = "Directory already bookmarked: " + target;
+                return;
+            }
+            dirs.push_back(target);
+            PersistBookmarks();
+            state_->status = "Bookmarked directory: " + target;
+        }
+        //!
+
+        /*!
+            Remove the Selected Bookmarked Directory
+
+            !_method
+        */
+        void RemoveSelectedBookmark()
+        {
+            auto& dirs = state_->bookmarked_dirs;
+            if (dirs.empty()) return;
+            const int total = static_cast<int>(dirs.size());
+            const int index = std::max(0, std::min(bookmark_selection_, total - 1));
+            const std::string removed = dirs[static_cast<std::size_t>(index)];
+            dirs.erase(dirs.begin() + index);
+            if (!dirs.empty())
+            {
+                bookmark_selection_ = std::max(0, std::min(bookmark_selection_,
+                                                         static_cast<int>(dirs.size()) - 1));
+            }
+            else
+            {
+                bookmark_selection_ = 0;
+            }
+            PersistBookmarks();
+            state_->status = "Removed bookmarked directory: " + removed;
+        }
+        //!
+
+        /*!
+            Persist the Bookmarked Directories
+
+            !_method
+        */
+        void PersistBookmarks()
+        {
+            if (state_->init_path.empty()) return;
+            scribbolyth::config::WriteInit(state_->init_path, state_->current_file,
+                                           state_->recent_files,
+                                           state_->last_open_dir, state_->last_import_dir,
+                                           state_->bookmarked_dirs,
+                                           state_->status_timeout);
         }
         //!
 
@@ -692,6 +851,109 @@ namespace scribbolyth::browser
         //!
 
         /*!
+            Handle Bookmark List Event
+
+            !_method
+        */
+        bool OnBookmarksEvent(ftxui::Event event)
+        {
+            if (event == ftxui::Event::Escape)
+            {
+                //>>
+                bookmarks_active_ = false;
+                bookmark_selection_ = 0;
+                pending_g_ = false;
+                return true;
+                //<<
+            }
+
+            if (event == ftxui::Event::Return)
+            {
+                //>>
+                const int total = static_cast<int>(state_->bookmarked_dirs.size());
+                if (total == 0) return true;
+                const int index = std::max(0, std::min(bookmark_selection_, total - 1));
+                SetDir(state_->bookmarked_dirs[static_cast<std::size_t>(index)]);
+                ClearFilter();
+                bookmarks_active_ = false;
+                bookmark_selection_ = 0;
+                return true;
+                //<<
+            }
+
+            if (event.is_character() && event.character() == "D")
+            {
+                //>>
+                RemoveSelectedBookmark();
+                return true;
+                //<<
+            }
+
+            if (event.is_character() && event.character() == "m")
+            {
+                //>>
+                AddCurrentBookmark();
+                return true;
+                //<<
+            }
+
+            if (event == ftxui::Event::ArrowDown
+                || (event.is_character() && event.character() == "j"))
+            {
+                //>>
+                const int total = static_cast<int>(state_->bookmarked_dirs.size());
+                if (total > 0)
+                {
+                    bookmark_selection_ =
+                        std::max(0, std::min(total - 1, bookmark_selection_ + 1));
+                }
+                pending_g_ = false;
+                return true;
+                //<<
+            }
+
+            if (event == ftxui::Event::ArrowUp
+                || (event.is_character() && event.character() == "k"))
+            {
+                //>>
+                bookmark_selection_ = std::max(0, bookmark_selection_ - 1);
+                pending_g_ = false;
+                return true;
+                //<<
+            }
+
+            if (event.is_character() && event.character() == "g")
+            {
+                //>>
+                if (pending_g_)
+                {
+                    bookmark_selection_ = 0;
+                    pending_g_ = false;
+                }
+                else
+                {
+                    pending_g_ = true;
+                }
+                return true;
+                //<<
+            }
+
+            if (event.is_character() && event.character() == "G")
+            {
+                //>>
+                const int total = static_cast<int>(state_->bookmarked_dirs.size());
+                bookmark_selection_ = std::max(0, total - 1);
+                pending_g_ = false;
+                return true;
+                //<<
+            }
+
+            pending_g_ = false;
+            return true;
+        }
+        //!
+
+        /*!
             Recompute
 
             !_method
@@ -815,6 +1077,8 @@ namespace scribbolyth::browser
         std::string filter_;
         std::string last_filter_;
         bool filter_active_ = false;
+        bool bookmarks_active_ = false;
+        int bookmark_selection_ = 0;
         int selection_ = 0;
         int scroll_ = 0;
         int content_width_ = 24;
