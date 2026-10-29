@@ -1306,7 +1306,7 @@ namespace scribbolyth::treeview
         scribbolyth::config::WriteInit(state_->init_path, state_->current_file,
                                        state_->recent_files,
                                        state_->last_open_dir, state_->last_import_dir,
-                                       state_->status_timeout);
+                                       state_->bookmarked_dirs, state_->status_timeout);
     }
     //!
 

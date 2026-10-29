@@ -148,6 +148,20 @@ struct EditorState {
     //!
 
     /*!
+        Bookmarked Directories
+
+        Directories saved from the file browser for quick access. Pressing
+        'm' in the browser adds the current directory; the list is shown with
+        '`' and persisted to init.conf.
+
+        ----
+    */
+    //>>
+    std::vector<std::string> bookmarked_dirs;
+    //<<
+    //!
+
+    /*!
         Path Prompt Directories
 
         The directories used to prefill the file prompts, chosen per command:
