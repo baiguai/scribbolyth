@@ -27,6 +27,7 @@ namespace scribbolyth::browser
 
         Public Members
         * The Ftxui OnEvent handles the key inputs.
+        * The Ftxui Render handles the properties of the dialog itself. You can explicitly set its size etc.
 
         Private Members
         * The navigation and filtering is handled by these.
@@ -495,6 +496,13 @@ namespace scribbolyth::browser
                                           ? " File Browser - Bookmarks "
                                           : " File Browser ";
 
+            /*|
+
+            ----
+
+            To explicitly set the file dialog size, locate the following:
+            */
+            //>>
             return ftxui::window(ftxui::text(title),
                                  ftxui::vbox({
                                      ftxui::vbox(std::move(rows)),
@@ -504,6 +512,7 @@ namespace scribbolyth::browser
                    ftxui::reflect(box_) |
                    ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 140) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
+            //<<
         }
         //!
 

@@ -1200,7 +1200,7 @@
               {
                 "id": "a7113d25",
                 "title": "Introduction to Browser.cpp",
-                "content": "Introduction to Browser.cpp\n\nThis file handles the file browsing dialog, as well as its key bindings.\n\nHelper Methods\n* PadRight - soon to be consolidated to a single method.\n* Tail - this also will likely be consolidated.\n\nPublic Members\n* The Ftxui OnEvent handles the key inputs.\n\nPrivate Members\n* The navigation and filtering is handled by these.\n* The initial directory is determined via: state_->browser_start_dir\n* Another state helper is: state_->browser_pick\n* `m` bookmarks the shown directory; ` shows the bookmark list.",
+                "content": "Introduction to Browser.cpp\n\nThis file handles the file browsing dialog, as well as its key bindings.\n\nHelper Methods\n* PadRight - soon to be consolidated to a single method.\n* Tail - this also will likely be consolidated.\n\nPublic Members\n* The Ftxui OnEvent handles the key inputs.\n* The Ftxui Render handles the properties of the dialog itself. You can explicitly set its size etc.\n\nPrivate Members\n* The navigation and filtering is handled by these.\n* The initial directory is determined via: state_->browser_start_dir\n* Another state helper is: state_->browser_pick\n* `m` bookmarks the shown directory; ` shows the bookmark list.",
                 "children": [],
                 "expanded": false
               },
@@ -1509,7 +1509,7 @@
                       {
                         "id": "eea6bf61",
                         "title": "Render the Element",
-                        "content": "Render the Element\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
+                        "content": "Render the Element\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\n\n--------------------------------------------------------------------------------\n\nTo explicitly set the file dialog size, locate the following:\n\nreturn ftxui::window(ftxui::text(title),\n                     ftxui::vbox({\n                         ftxui::vbox(std::move(rows)),\n                         ftxui::separator(),\n                         ftxui::text(PadRight(footer, dlg_width)) | ftxui::dim,\n                     })) |\n       ftxui::reflect(box_) |\n       ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 140) |\n       ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);",
                         "children": [
                           {
                             "id": "b67dc721",
