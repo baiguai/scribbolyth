@@ -1200,7 +1200,7 @@
               {
                 "id": "a7113d25",
                 "title": "Introduction to Browser.cpp",
-                "content": "Introduction to Browser.cpp\n\nThis file handles the file browsing dialog, as well as its key bindings.\n\nHelper Methods\n* PadRight - soon to be consolidated to a single method.\n* Tail - this also will likely be consolidated.\n\nPublic Members\n* The Ftxui OnEvent handles the key inputs.\n\nPrivate Members\n* The navigation and filtering is handled by these.\n* The initial directory is determined via: state_->browser_start_dir\n* Another state helper is: state_->browser_pick\n* `m` bookmarks the shown directory; ` shows the bookmark list.",
+                "content": "Introduction to Browser.cpp\n\nThis file handles the file browsing dialog, as well as its key bindings.\n\nHelper Methods\n* PadRight - soon to be consolidated to a single method.\n* Tail - this also will likely be consolidated.\n\nPublic Members\n* The Ftxui OnEvent handles the key inputs.\n* The Ftxui Render handles the properties of the dialog itself. You can explicitly set its size etc.\n\nPrivate Members\n* The navigation and filtering is handled by these.\n* The initial directory is determined via: state_->browser_start_dir\n* Another state helper is: state_->browser_pick\n* `m` bookmarks the shown directory; ` shows the bookmark list.\n    * _Render Browser Dialog_ was updated to accomodate the bookmarks footer information.",
                 "children": [],
                 "expanded": false
               },
@@ -1508,8 +1508,8 @@
                       },
                       {
                         "id": "eea6bf61",
-                        "title": "Render the Element",
-                        "content": "Render the Element\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
+                        "title": "Render Browser Dialog",
+                        "content": "Render Browser Dialog\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\n\n--------------------------------------------------------------------------------\n\nTo explicitly set the file dialog size, locate the following:\n\nreturn ftxui::window(ftxui::text(title),\n                     ftxui::vbox({\n                         ftxui::vbox(std::move(rows)),\n                         ftxui::separator(),\n                         ftxui::text(PadRight(footer, dlg_width)) | ftxui::dim,\n                     })) |\n       ftxui::reflect(box_) |\n       ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 140) |\n       ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);",
                         "children": [
                           {
                             "id": "b67dc721",
@@ -1851,7 +1851,7 @@
               {
                 "id": "a766b9c4",
                 "title": "Read the Init Config",
-                "content": "Read the Init Config\n\nSignature: bool ReadInit(const std::string& path, std::string& last_file, std::vector<std::string>& recent_files, std::string& open_dir, std::string& import_dir, std::vector<std::string>& bookmarked_dirs, int& status_timeout)\nMethod: ReadInit\nReturns: bool\nParameters:\n    path            const std::string&\n    last_file       std::string&\n    recent_files    std::vector<std::string>&\n    open_dir        std::string&\n    import_dir      std::string&\n    bookmarked_dirs std::vector<std::string>&\n    status_timeout  int&",
+                "content": "Read the Init Config\n\nSignature: bool ReadInit(const std::string& path, std::string& last_file, std::vector<std::string>& recent_files, std::vector<std::string>& bookmarked_dirs, int& status_timeout)\nMethod: ReadInit\nReturns: bool\nParameters:\n    path            const std::string&\n    last_file       std::string&\n    recent_files    std::vector<std::string>&\n    bookmarked_dirs std::vector<std::string>&\n    status_timeout  int&",
                 "children": [],
                 "expanded": false
               },
@@ -1879,7 +1879,7 @@
               {
                 "id": "2394ceac",
                 "title": "Update the Init Config",
-                "content": "Update the Init Config\n\nSignature: bool WriteInit(const std::string& path, const std::string& last_file, const std::vector<std::string>& recent_files, const std::string& open_dir, const std::string& import_dir, const std::vector<std::string>& bookmarked_dirs, int status_timeout)\nMethod: WriteInit\nReturns: bool\nParameters:\n    path            const std::string&\n    last_file       const std::string&\n    recent_files    const std::vector<std::string>&\n    open_dir        const std::string&\n    import_dir      const std::string&\n    bookmarked_dirs const std::vector<std::string>&\n    status_timeout  int",
+                "content": "Update the Init Config\n\nSignature: bool WriteInit(const std::string& path, const std::string& last_file, const std::vector<std::string>& recent_files, const std::vector<std::string>& bookmarked_dirs, int status_timeout)\nMethod: WriteInit\nReturns: bool\nParameters:\n    path            const std::string&\n    last_file       const std::string&\n    recent_files    const std::vector<std::string>&\n    bookmarked_dirs const std::vector<std::string>&\n    status_timeout  int",
                 "children": [],
                 "expanded": false
               },
@@ -1908,14 +1908,14 @@
               {
                 "id": "4b7ae032",
                 "title": "ReadInit Forward Declaration",
-                "content": "ReadInit Forward Declaration\n\nbool ReadInit(const std::string& path, std::string& last_file,\n              std::vector<std::string>& recent_files,\n              std::string& open_dir, std::string& import_dir,\n              std::vector<std::string>& bookmarked_dirs,\n              int& status_timeout);",
+                "content": "ReadInit Forward Declaration\n\nbool ReadInit(const std::string& path, std::string& last_file,\n              std::vector<std::string>& recent_files,\n              std::vector<std::string>& bookmarked_dirs,\n              int& status_timeout);",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "f24f8bcf",
                 "title": "WriteInit Forward Declaration",
-                "content": "WriteInit Forward Declaration\n\nbool WriteInit(const std::string& path, const std::string& last_file,\n               const std::vector<std::string>& recent_files,\n               const std::string& open_dir, const std::string& import_dir,\n               const std::vector<std::string>& bookmarked_dirs,\n               int status_timeout);",
+                "content": "WriteInit Forward Declaration\n\nbool WriteInit(const std::string& path, const std::string& last_file,\n               const std::vector<std::string>& recent_files,\n               const std::vector<std::string>& bookmarked_dirs,\n               int status_timeout);",
                 "children": [],
                 "expanded": false
               },
@@ -2263,8 +2263,8 @@
                       },
                       {
                         "id": "8ffdfd76",
-                        "title": "Ftxui Event",
-                        "content": "Ftxui Event\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
+                        "title": "Ftxui Editor Event Handler",
+                        "content": "Ftxui Editor Event Handler\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
                         "children": [],
                         "expanded": false
                       },
@@ -2457,6 +2457,13 @@
                     "expanded": false
                   },
                   {
+                    "id": "6c0d499e",
+                    "title": "Command Path Prefix",
+                    "content": "Command Path Prefix\n\nThe path automatically inserted into the command prompt by the most\nrecent `prompt` binding (e.g. pressing `o` gives `:o /`). Typing '\\'\nin the prompt strips exactly this text back out, so the user can start\nfrom a blank path without backspacing. Empty when the current prompt\nwas not prefilled.\n\n--------------------------------------------------------------------------------\n\nstd::string command_path_prefix;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
                     "id": "13dc4c67",
                     "title": "Expand to Node",
                     "content": "Expand to Node\n\nSelect `node` in the tree, expanding every ancestor so it is visible.\nSet by the treeview.\n\n--------------------------------------------------------------------------------\n\nstd::function<void(scribbolyth::treeview::TreeNode*)> reveal_node;",
@@ -2523,13 +2530,6 @@
                     "id": "cf6905d7",
                     "title": "Operations and Commands",
                     "content": "Operations and Commands\n\n--------------------------------------------------------------------------------\n\nstd::map<std::string, scribbolyth::op::Operation> operations;\nstd::map<std::string, std::string> commands;",
-                    "children": [],
-                    "expanded": false
-                  },
-                  {
-                    "id": "6c0d499e",
-                    "title": "Path Prompt Directories",
-                    "content": "Path Prompt Directories\n\nThe directories used to prefill the file prompts, chosen per command:\n\n    open     - `last_open_dir`   last folder a document was opened from\n    import   - `last_import_dir` last folder an HTML file was imported from\n    save/exp - `current_dir`     folder the current document lives in\n\nSo `:open ` returns you to where you last opened from, `:U ` to where\nyou last imported from, while save-as and every export start next to\nthe document being edited. `last_open_dir` and `last_import_dir` are\npersisted to init.conf (`open_dir` / `import_dir`) and survive a\nrestart; `current_dir` is derived and tracked as the file is saved or\nloaded.\n\n--------------------------------------------------------------------------------\n\nstd::string last_open_dir;\nstd::string last_import_dir;\nstd::string current_dir;\n\n// The directory automatically inserted into the command prompt by the\n// most recent `prompt` binding (e.g. pressing `o` gives `:o /dir/`).\n// Typing '\\' in the prompt strips exactly this text back out, so the\n// user can start from a blank path without backspacing. Empty when the\n// current prompt was not prefilled.\nstd::string command_path_prefix;",
                     "children": [],
                     "expanded": false
                   },
@@ -4157,30 +4157,30 @@
                 "expanded": false
               },
               {
-                "id": "f7031a40",
+                "id": "fe287978",
                 "title": "Collect Path Matches",
                 "content": "Collect Path Matches\n\nSignature: void CollectPathMatches(const std::string& arg, std::vector<std::string>& matches)\nMethod: CollectPathMatches\nReturns: void\nParameters:\n    arg     const std::string&\n    matches std::vector<std::string>&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "fe287978",
+                "id": "b6b4e1f3",
                 "title": "Common Prefix",
                 "content": "Common Prefix\n\nSignature: std::string CommonPrefix(const std::vector<std::string>& items)\nMethod: CommonPrefix\nReturns: std::string\nParameters:\n    items const std::vector<std::string>&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "04696b9e",
+                "id": "eb16506d",
                 "title": "Complete Command",
                 "content": "Complete Command\n\nSignature: void CompleteCommand(std::shared_ptr<EditorState> state)\nMethod: CompleteCommand\nReturns: void\nParameters:\n    state std::shared_ptr<EditorState>",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "8658f8f7",
+                "id": "b65e1b77",
                 "title": "Default Directory For Operation",
-                "content": "Default Directory For Operation\n\nSignature: std::string DefaultDirForOp(const std::shared_ptr<EditorState>& state, const std::string& op)\nMethod: DefaultDirForOp\nReturns: std::string\nParameters:\n    state const std::shared_ptr<EditorState>&\n    op    const std::string&\n\nThe directory to prefill for a path command, chosen per operation:\n\n    open / open!         - `last_open_dir`   (where we last opened)\n    import_html          - `last_import_dir` (where we last imported)\n    saveas / export...   - `current_dir`     (where the file lives)\n\nReturns \"\" for a non-path op or when no directory is known yet.",
+                "content": "Default Directory For Operation\n\nSignature: std::string DefaultDirForOp(const std::string& op)\nMethod: DefaultDirForOp\nReturns: std::string\nParameters:\n    op const std::string&\n\nEvery path prompt starts at the filesystem root. The browser's\ndirectory bookmarks provide the shortcuts that the old last-used\ndirectory defaults used to supply.\n\nReturns \"\" for a non-path operation.",
                 "children": [],
                 "expanded": false
               },
@@ -4192,28 +4192,28 @@
                 "expanded": false
               },
               {
-                "id": "1ae6b52f",
+                "id": "208540a7",
                 "title": "Dispatch",
                 "content": "Dispatch\n\nSignature: bool Dispatch(std::shared_ptr<EditorState> state, const Keymap::Result& result)\nMethod: Dispatch\nReturns: bool\nParameters:\n    state  std::shared_ptr<EditorState>\n    result const Keymap::Result&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "9d51f8f2",
+                "id": "4af54b1c",
                 "title": "Execute Command",
                 "content": "Execute Command\n\nSignature: bool ExecuteCommand(std::shared_ptr<EditorState> state, const std::string& input)\nMethod: ExecuteCommand\nReturns: bool\nParameters:\n    state std::shared_ptr<EditorState>\n    input const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "4af54b1c",
+                "id": "85a13679",
                 "title": "Execute Search",
                 "content": "Execute Search\n\nSignature: bool ExecuteSearch(std::shared_ptr<EditorState> state, const std::string& input)\nMethod: ExecuteSearch\nReturns: bool\nParameters:\n    state std::shared_ptr<EditorState>\n    input const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "208540a7",
+                "id": "34bbd7e3",
                 "title": "Handle Key",
                 "content": "Handle Key\n\nSignature: bool HandleKey(std::shared_ptr<EditorState> state, ftxui::Event event)\nMethod: HandleKey\nReturns: bool\nParameters:\n    state std::shared_ptr<EditorState>\n    event ftxui::Event",
                 "children": [],
@@ -4227,42 +4227,49 @@
                 "expanded": false
               },
               {
-                "id": "b6b4e1f3",
+                "id": "8658f8f7",
+                "title": "Is Path Operation",
+                "content": "Is Path Operation\n\nSignature: bool IsPathOp(const std::string& op)\nMethod: IsPathOp\nReturns: bool\nParameters:\n    op const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "04696b9e",
                 "title": "Join",
                 "content": "Join\n\nSignature: std::string Join(const std::vector<std::string>& items)\nMethod: Join\nReturns: std::string\nParameters:\n    items const std::vector<std::string>&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "b65e1b77",
+                "id": "f7031a40",
                 "title": "Last Directory For Command",
                 "content": "Last Directory For Command\n\nSignature: std::string LastDirForCommand(const std::shared_ptr<EditorState>& state, const std::string& name)\nMethod: LastDirForCommand\nReturns: std::string\nParameters:\n    state const std::shared_ptr<EditorState>&\n    name  const std::string&\n\nThe default directory (with trailing separator) for the path\ncommand `name`, or \"\" when the command is not a path command or no\ndirectory is known yet. Used to prefill the command line when Tab\ncompletes a path command name.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "eb16506d",
+                "id": "10ca5ce3",
                 "title": "Open Command Line",
                 "content": "Open Command Line\n\nSignature: void OpenCommandLine(std::shared_ptr<EditorState> state, const std::string& command, const std::string& initial_prefix)\nMethod: OpenCommandLine\nReturns: void\nParameters:\n    state          std::shared_ptr<EditorState>\n    command        const std::string&\n    initial_prefix const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "549fb366",
+                "id": "9d51f8f2",
                 "title": "Open Command Line With Args",
                 "content": "Open Command Line With Args\n\nSignature: void OpenCommandLineWithArgs(std::shared_ptr<EditorState> state, const std::string& command, const std::string& args)\nMethod: OpenCommandLineWithArgs\nReturns: void\nParameters:\n    state   std::shared_ptr<EditorState>\n    command const std::string&\n    args    const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "10ca5ce3",
+                "id": "549fb366",
                 "title": "Open Search Command",
                 "content": "Open Search Command\n\nSignature: void OpenSearchCommand(std::shared_ptr<EditorState> state)\nMethod: OpenSearchCommand\nReturns: void\nParameters:\n    state std::shared_ptr<EditorState>",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "85a13679",
+                "id": "1ae6b52f",
                 "title": "Resolve",
                 "content": "Resolve\n\nSignature: Keymap::Result Resolve(std::shared_ptr<EditorState> state, ftxui::Event event)\nMethod: Resolve\nReturns: Keymap::Result\nParameters:\n    state std::shared_ptr<EditorState>\n    event ftxui::Event",
                 "children": [],

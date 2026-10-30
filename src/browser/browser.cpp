@@ -27,12 +27,14 @@ namespace scribbolyth::browser
 
         Public Members
         * The Ftxui OnEvent handles the key inputs.
+        * The Ftxui Render handles the properties of the dialog itself. You can explicitly set its size etc.
 
         Private Members
         * The navigation and filtering is handled by these.
         * The initial directory is determined via: state_->browser_start_dir
         * Another state helper is: state_->browser_pick
         * `m` bookmarks the shown directory; ` shows the bookmark list.
+            * _Render Browser Dialog_ was updated to accomodate the bookmarks footer information.
     */
 
     namespace
@@ -346,7 +348,7 @@ namespace scribbolyth::browser
         //!
 
         /*!
-            Render the Element
+            Render Browser Dialog
 
             !_method
         */
@@ -450,11 +452,11 @@ namespace scribbolyth::browser
             }
 
             std::string help_move =
-                "    j/k move  h up  l enter  gg/G  m bookmark  Enter pick  / filter  Esc cancel  ";
+                "  j/k move h up l enter gg/G m bookmark Enter pick / filter Esc cancel";
             if (!state_->browser_command.empty())
             {
                 help_move =
-                    "    j/k move  h up  l enter  gg/G  m bookmark  Enter pick  : name  / filter  Esc cancel  ";
+                    "  j/k move h up l enter gg/G m mark Enter pick : name / filter Esc cancel";
             }
             const std::string help_clear =
                 "    Esc clear  j/k move  h up  l enter  m bookmark  Enter pick  / filter  ";
@@ -495,6 +497,13 @@ namespace scribbolyth::browser
                                           ? " File Browser - Bookmarks "
                                           : " File Browser ";
 
+            /*|
+
+            ----
+
+            To explicitly set the file dialog size, locate the following:
+            */
+            //>>
             return ftxui::window(ftxui::text(title),
                                  ftxui::vbox({
                                      ftxui::vbox(std::move(rows)),
@@ -504,6 +513,7 @@ namespace scribbolyth::browser
                    ftxui::reflect(box_) |
                    ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 140) |
                    ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);
+            //<<
         }
         //!
 
@@ -629,7 +639,6 @@ namespace scribbolyth::browser
             if (state_->init_path.empty()) return;
             scribbolyth::config::WriteInit(state_->init_path, state_->current_file,
                                            state_->recent_files,
-                                           state_->last_open_dir, state_->last_import_dir,
                                            state_->bookmarked_dirs,
                                            state_->status_timeout);
         }

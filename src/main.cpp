@@ -316,7 +316,6 @@ int main(int, char** argv) {
     */
     std::string last_file;
     if (scribbolyth::config::ReadInit(init_path.string(), last_file, state->recent_files,
-                                      state->last_open_dir, state->last_import_dir,
                                       state->bookmarked_dirs,
                                       state->status_timeout) && !last_file.empty())
     {
@@ -333,7 +332,6 @@ int main(int, char** argv) {
         std::cerr << "Removed " << removed << " stale recent entr"
                   << (removed == 1 ? "y" : "ies") << " from init.conf\n";
         scribbolyth::config::WriteInit(init_path.string(), last_file, state->recent_files,
-                                       state->last_open_dir, state->last_import_dir,
                                        state->bookmarked_dirs, state->status_timeout);
     }
     /*!*/

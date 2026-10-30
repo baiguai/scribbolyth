@@ -48,7 +48,7 @@ try:
     s.send(b'\x1b'); s.send(b'\x1b')              # NORMAL -> TREE
     s.send(b'S')
     s.require('saveas')
-    s.send(b'alpha.json'); s.send(b'\r')
+    s.send(b'\\'); s.send(b'alpha.json'); s.send(b'\r')
     s.require('Saved', 'save should write the document')
 
     # fresh doc, then doc B (saved last -> auto-restore target)
@@ -62,7 +62,7 @@ try:
     s.send(b'\x1b'); s.send(b'\x1b')
     s.send(b'S')
     s.require('saveas')
-    s.send(b'beta.json'); s.send(b'\r')
+    s.send(b'\\'); s.send(b'beta.json'); s.send(b'\r')
     s.require('Saved', 'save should write the document')
 finally:
     s.quit()
@@ -168,12 +168,12 @@ try:
     s.send(b'a'); s.require('create_node')
     s.send(b'one'); s.send(b'\r')
     s.send(b'S'); s.require('saveas')
-    s.send(b'a.json'); s.send(b'\r')
+    s.send(b'\\'); s.send(b'a.json'); s.send(b'\r')
     s.require('Saved', 'move: save a.json')
     s.send(b'a'); s.require('create_node')
     s.send(b'two'); s.send(b'\r')
     s.send(b'S'); s.require('saveas')
-    s.send(b'\\')                     # '\' clears the prefilled last-used dir
+    s.send(b'\\')                     # '\' clears the prefilled root
     s.send(b'b.json'); s.send(b'\r')
     s.require('Saved', 'move: save b.json')
     s.send(b':enew'); s.send(b'\r')       # clear last_file so relaunch stays blank
@@ -239,12 +239,12 @@ try:
     s.send(b'a'); s.require('create_node')
     s.send(b'one'); s.send(b'\r')
     s.send(b'S'); s.require('saveas')
-    s.send(b'p1.json'); s.send(b'\r')
+    s.send(b'\\'); s.send(b'p1.json'); s.send(b'\r')
     s.require('Saved', 'prune: save p1.json')
     s.send(b'a'); s.require('create_node')
     s.send(b'two'); s.send(b'\r')
     s.send(b'S'); s.require('saveas')
-    s.send(b'p2.json'); s.send(b'\r')
+    s.send(b'\\'); s.send(b'p2.json'); s.send(b'\r')
     s.require('Saved', 'prune: save p2.json')
 finally:
     s.quit()
