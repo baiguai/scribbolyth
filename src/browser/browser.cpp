@@ -452,11 +452,11 @@ namespace scribbolyth::browser
             }
 
             std::string help_move =
-                "    j/k move  h up  l enter  gg/G  m bookmark  Enter pick  / filter  Esc cancel  ";
+                "  j/k move h up l enter gg/G m bookmark Enter pick / filter Esc cancel";
             if (!state_->browser_command.empty())
             {
                 help_move =
-                    "    j/k move  h up  l enter  gg/G  m bookmark  Enter pick  : name  / filter  Esc cancel  ";
+                    "  j/k move h up l enter gg/G m mark Enter pick : name / filter Esc cancel";
             }
             const std::string help_clear =
                 "    Esc clear  j/k move  h up  l enter  m bookmark  Enter pick  / filter  ";
@@ -639,7 +639,6 @@ namespace scribbolyth::browser
             if (state_->init_path.empty()) return;
             scribbolyth::config::WriteInit(state_->init_path, state_->current_file,
                                            state_->recent_files,
-                                           state_->last_open_dir, state_->last_import_dir,
                                            state_->bookmarked_dirs,
                                            state_->status_timeout);
         }

@@ -162,33 +162,17 @@ struct EditorState {
     //!
 
     /*!
-        Path Prompt Directories
+        Command Path Prefix
 
-        The directories used to prefill the file prompts, chosen per command:
-
-            open     - `last_open_dir`   last folder a document was opened from
-            import   - `last_import_dir` last folder an HTML file was imported from
-            save/exp - `current_dir`     folder the current document lives in
-
-        So `:open ` returns you to where you last opened from, `:U ` to where
-        you last imported from, while save-as and every export start next to
-        the document being edited. `last_open_dir` and `last_import_dir` are
-        persisted to init.conf (`open_dir` / `import_dir`) and survive a
-        restart; `current_dir` is derived and tracked as the file is saved or
-        loaded.
+        The path automatically inserted into the command prompt by the most
+        recent `prompt` binding (e.g. pressing `o` gives `:o /`). Typing '\'
+        in the prompt strips exactly this text back out, so the user can start
+        from a blank path without backspacing. Empty when the current prompt
+        was not prefilled.
 
         ----
     */
     //>>
-    std::string last_open_dir;
-    std::string last_import_dir;
-    std::string current_dir;
-
-    // The directory automatically inserted into the command prompt by the
-    // most recent `prompt` binding (e.g. pressing `o` gives `:o /dir/`).
-    // Typing '\' in the prompt strips exactly this text back out, so the
-    // user can start from a blank path without backspacing. Empty when the
-    // current prompt was not prefilled.
     std::string command_path_prefix;
     //<<
     //!

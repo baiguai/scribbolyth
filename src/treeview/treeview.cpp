@@ -975,8 +975,6 @@ namespace scribbolyth::treeview
         state_->current_file = path;
         state_->changed = false;
         state_->status = "Saved " + std::to_string(CountNodes(roots_)) + " nodes to " + path;
-        // Save-as and exports start next to the document being edited.
-        state_->current_dir = ParentDir(path);
         PushRecentFile(path);
         PersistLastFile();
     }
@@ -1028,10 +1026,6 @@ namespace scribbolyth::treeview
         RefreshActiveNode();
         state_->changed = false;
         state_->status.clear();
-        // Opening records both the folder we opened from (for the next open)
-        // and where the current document lives (for save-as / exports).
-        state_->last_open_dir = ParentDir(path);
-        state_->current_dir = state_->last_open_dir;
         PushRecentFile(path);
         PersistLastFile();
     }
@@ -1063,14 +1057,11 @@ namespace scribbolyth::treeview
         state_->html_theme = std::move(theme);
         roots_ = std::move(loaded);
         state_->current_file.clear();
-        state_->current_dir.clear();
         selected_ = nullptr;
         ClearUndo();
         RefreshActiveNode();
         state_->changed = false;
         state_->status.clear();
-        // Remember where we imported from for the next import.
-        state_->last_import_dir = ParentDir(path);
         // PushRecentFile(path);
         PersistLastFile();
     }
@@ -1111,7 +1102,6 @@ namespace scribbolyth::treeview
     {
         roots_.clear();
         state_->current_file.clear();
-        state_->current_dir.clear();
         selected_ = nullptr;
         state_->treeview_width = kDefaultTreeviewWidth;
         state_->bookmarks.clear();
@@ -1305,7 +1295,6 @@ namespace scribbolyth::treeview
         if (state_->init_path.empty()) return;
         scribbolyth::config::WriteInit(state_->init_path, state_->current_file,
                                        state_->recent_files,
-                                       state_->last_open_dir, state_->last_import_dir,
                                        state_->bookmarked_dirs, state_->status_timeout);
     }
     //!
