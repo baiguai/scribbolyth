@@ -20,6 +20,10 @@ namespace scribbolyth::calc
         Private Members
         * The calculation work is done by these methods.
         * Formatting is also done here.
+
+
+
+        #intro
     */
 
     namespace

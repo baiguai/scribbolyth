@@ -19,6 +19,14 @@
 
 namespace scribbolyth::brokenlinks
 {
+    /*[./Introduction to Brokelinks.cpp]
+        The broke links code handles the Broke Links dialog and its functionality.
+
+
+
+        #intro
+    */
+
     namespace
     {
         /*!
@@ -191,7 +199,7 @@ namespace scribbolyth::brokenlinks
         */
 
         /*!
-            Entry Struct
+            Brokelinks Entry Struct
         */
         //>>
         struct Entry
@@ -201,6 +209,12 @@ namespace scribbolyth::brokenlinks
             int line = 0;
         };
         //<<
+        /*|
+
+
+
+            #struct
+        */
         //!
 
         /*!

@@ -16,6 +16,14 @@
 
 namespace scribbolyth::search
 {
+    /*[./Introduction to Search.cpp]
+        The Search code file handles the Search dialog and its functionality.
+
+
+
+        #intro
+    */
+
     namespace
     {
         /*!
@@ -103,7 +111,7 @@ namespace scribbolyth::search
         //!
 
         /*!
-            Result Struct
+            Search Result Struct
         */
         //>>
         struct Result
@@ -112,10 +120,16 @@ namespace scribbolyth::search
             std::string line;
         };
         //<<
+        /*|
+
+
+
+            #struct
+        */
         //!
 
         /*!
-             Filter
+             Filter Struct
 
              !_method
 
@@ -130,6 +144,12 @@ namespace scribbolyth::search
             bool all_words = false;
             bool title_only = false;
         };
+        /*|
+
+
+
+            #struct
+        */
         //!
 
         /*!
@@ -459,6 +479,10 @@ namespace scribbolyth::search
 
     /*!
         Search Dialog Class
+
+
+
+        #class
     */
     class SearchDialog : public ftxui::ComponentBase
     {

@@ -1,4 +1,4 @@
-/*[./Introduction]
+/*[./Introduction to Treeview.cpp]
     TreeView is the notes sidebar tree: an FTXUI component that owns the
     document's node tree, the current selection, and all tree-mode behavior:
 
@@ -12,6 +12,10 @@
     names ("move_up", "new_node", ...). The tree keymap in commands.conf maps
     keys to those names and op::HandleKey()/op::Dispatch() invoke the matching
     callback, so this file contains no key-decoding logic of its own.
+
+
+
+    #intro
 */
 #include "treeview.hpp"
 
@@ -116,6 +120,10 @@ namespace scribbolyth::treeview
         selection, and every tree-mode operation. Key events arrive through
         the operation map installed in the constructor; this file never
         decodes keys itself.
+
+
+
+        #class
     */
     class TreeView : public ftxui::ComponentBase
     {

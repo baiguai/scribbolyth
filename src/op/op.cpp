@@ -16,6 +16,7 @@ namespace scribbolyth::op
         It is responsible for opening the command prompt, as well as executing commands that are entered.
 
         #command
+        #intro
     */
 
     namespace
@@ -363,7 +364,7 @@ namespace scribbolyth::op
     //!
 
     /*!
-        Execute Command
+        Op Execute Command
 
         !_method
     */
@@ -390,7 +391,7 @@ namespace scribbolyth::op
     //!
 
     /*!
-        Execute Search
+        Op Execute Search
 
         !_method
     */
@@ -431,7 +432,7 @@ namespace scribbolyth::op
     //!
 
     /*!
-        Resolve
+        Op Resolve
 
         !_method
     */
@@ -442,7 +443,7 @@ namespace scribbolyth::op
     //!
 
     /*!
-        Dispatch
+        Op Dispatch
 
         !_method
     */
@@ -471,20 +472,29 @@ namespace scribbolyth::op
 
 
     /*!
-        Handle Key
+        Op Handle Key
 
         !_method
     */
     bool HandleKey(std::shared_ptr<EditorState> state, ftxui::Event event)
     {
-        // Some terminals deliver Enter as an ESC sequence instead of CR/LF:
-        // SS3 "ESC O M" (application-keypad Enter) and CSI "ESC [ 1 9 ~".
-        // Normalize them so Return bindings fire in every mode.
+        /*|
+
+        Note:
+        Some terminals deliver Enter as an ESC sequence instead of CR/LF:
+        SS3 "ESC O M" (application-keypad Enter) and CSI "ESC [ 1 9 ~".
+        Normalize them so Return bindings fire in every mode.
+
+        ----
+
+        */
+        //>>
         if (event == ftxui::Event::Special("\x1bOM")
             || event == ftxui::Event::Special("\x1b[19~"))
         {
             event = ftxui::Event::Return;
         }
+        //<<
         return Dispatch(state, Resolve(state, event));
     }
     //!

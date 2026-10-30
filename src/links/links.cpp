@@ -20,6 +20,15 @@
 
 namespace scribbolyth::links
 {
+    /*[./Introduction to Links.cpp]
+        The Links code handles identifying links as well as navigating to whichever link is selected.
+
+
+
+        #intro
+    */
+
+
     /*!
         Pad Right
 
@@ -328,6 +337,10 @@ namespace scribbolyth::links
 
     /*!
         Links Dialog Class
+
+
+
+        #class
     */
     class LinksDialog : public ftxui::ComponentBase
     {

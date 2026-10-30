@@ -6,6 +6,10 @@ namespace scribbolyth::bookmark
 {
     /*[./Introduction to Bookmark.cpp]
         This file CURRENTLY houses just the NewId method.
+
+
+
+        #intro
     */
 
     /*!

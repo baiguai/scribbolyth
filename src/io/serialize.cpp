@@ -6,6 +6,14 @@
 
 namespace scribbolyth::io
 {
+    /*[./Introduction to IO.cpp]
+        The IO code file defines some helper methods used when reading and writing files.
+
+
+
+        #intro
+    */
+
     namespace
     {
         /*!
