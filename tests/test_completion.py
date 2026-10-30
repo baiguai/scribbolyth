@@ -17,10 +17,10 @@ try:
         with open(path, 'w') as f:
             f.write(rel)
 
-    # command-name completion: `:ope` + Tab -> `:open `
+    # command-name completion: `:ope` + Tab -> `:open /`
     s.send(b':ope')
     s.send(b'\t')
-    s.require(':open ', 'Tab should complete :ope to :open ')
+    s.require(':open /', 'Tab should complete :ope to :open at the root')
 
     # relative filename completion: `:open fin` + Tab -> `:open final.json`
     s.send(b'\x1b')                  # Esc closes the command line
@@ -49,12 +49,11 @@ try:
     s.require(':open subdir/beta.txt',
               'Tab should complete the file inside subdir')
 
-    # Tab with an empty path lists every candidate in the status bar
+    # Tab with an empty path inserts the root default
     s.send(b'\x1b')
     s.send(b':open ')
     s.send(b'\t')
-    s.require('Matches: alpha.txt final.json subdir/',
-              'Tab on an empty path should list the matches')
+    s.require(':open /', 'Tab on an empty path should insert the root')
 
     # a partial path with no match reports it
     s.send(b'\x1b')

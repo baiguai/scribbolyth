@@ -2,6 +2,15 @@
 
 #include <algorithm>
 
+/*[./Introduction to Keymap.cpp]
+    This code handles both single and multiple key combination key bindings.
+
+
+
+    #intro
+*/
+
+
 /*!
     Single Keymap Bind Call
     This is a single binding.

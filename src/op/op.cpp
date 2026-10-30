@@ -16,6 +16,7 @@ namespace scribbolyth::op
         It is responsible for opening the command prompt, as well as executing commands that are entered.
 
         #command
+        #intro
     */
 
     namespace
@@ -55,30 +56,34 @@ namespace scribbolyth::op
         //!
 
         /*!
+            Is Path Operation
+
+            !_method
+        */
+        bool IsPathOp(const std::string& op)
+        {
+            return op == "open" || op == "open_force"
+                || op == "import_html"
+                || op == "saveas" || op == "export_html"
+                || op == "export_scribbolyth"
+                || op == "export_note_txt" || op == "export_tree_txt";
+        }
+        //!
+
+        /*!
             Default Directory For Operation
 
             !_method
 
-            The directory to prefill for a path command, chosen per operation:
+            Every path prompt starts at the filesystem root. The browser's
+            directory bookmarks provide the shortcuts that the old last-used
+            directory defaults used to supply.
 
-                open / open!         - `last_open_dir`   (where we last opened)
-                import_html          - `last_import_dir` (where we last imported)
-                saveas / export...   - `current_dir`     (where the file lives)
-
-            Returns "" for a non-path op or when no directory is known yet.
+            Returns "" for a non-path operation.
         */
-        std::string DefaultDirForOp(const std::shared_ptr<EditorState>& state,
-                                    const std::string& op)
+        std::string DefaultDirForOp(const std::string& op)
         {
-            if (op == "open" || op == "open_force")
-                return DirPrefix(state->last_open_dir);
-            if (op == "import_html")
-                return DirPrefix(state->last_import_dir);
-            if (op == "saveas" || op == "export_html"
-                || op == "export_scribbolyth"
-                || op == "export_note_txt" || op == "export_tree_txt")
-                return DirPrefix(state->current_dir);
-            return "";
+            return IsPathOp(op) ? DirPrefix("/") : "";
         }
         //!
 
@@ -97,7 +102,7 @@ namespace scribbolyth::op
         {
             auto it = state->commands.find(name);
             if (it == state->commands.end()) return "";
-            return DefaultDirForOp(state, it->second);
+            return DefaultDirForOp(it->second);
         }
         //!
 
@@ -237,8 +242,8 @@ namespace scribbolyth::op
             if (!resolved.empty())
             {
                 // Command name is settled: leave a space for the argument and,
-                // for a path command, pre-fill the last-used directory so Tab
-                // lands on the folder used last (`:open `/`:U ` etc.).
+                // for a path command, pre-fill the root so Tab lands there
+                // (`:open /`, `:U /` etc.).
                 std::string completed = resolved + " ";
                 const std::string dir = LastDirForCommand(state, resolved);
                 if (!dir.empty())
@@ -264,7 +269,7 @@ namespace scribbolyth::op
         std::string arg = cmd.substr(space + 1);
         if (arg.empty())
         {
-            // Tab on an empty path argument drops in the last-used directory;
+            // Tab on an empty path argument drops in the root directory;
             // the browser / further Tab-completion then work from there.
             const std::string dir = LastDirForCommand(state, name);
             if (!dir.empty())
@@ -274,7 +279,7 @@ namespace scribbolyth::op
                 state->command_cursor = static_cast<int>(state->command_buffer.size());
                 return;
             }
-            // Nothing remembered yet: fall through and list the working dir.
+            // No root prefix: fall through and list the working dir.
         }
 
         std::vector<std::string> matches;
@@ -313,9 +318,9 @@ namespace scribbolyth::op
         state->mode_before_command = state->mode;
         state->mode = Mode::COMMAND;
         state->command_buffer = command.empty() ? ":" : (":" + command + " ");
-        // Pre-fill the last-used directory for a path prompt (e.g. `:open
-        // /dir/`).  Remember exactly what we inserted so the '\' handler in
-        // main.cpp can remove it again.
+        // Pre-fill the path prompt (path operations use the root, e.g.
+        // `:open /`). Remember exactly what we inserted so the '\' handler
+        // in main.cpp can remove it again.
         state->command_path_prefix.clear();
         if (!command.empty() && !initial_prefix.empty())
         {
@@ -359,7 +364,7 @@ namespace scribbolyth::op
     //!
 
     /*!
-        Execute Command
+        Op Execute Command
 
         !_method
     */
@@ -386,7 +391,7 @@ namespace scribbolyth::op
     //!
 
     /*!
-        Execute Search
+        Op Execute Search
 
         !_method
     */
@@ -427,7 +432,7 @@ namespace scribbolyth::op
     //!
 
     /*!
-        Resolve
+        Op Resolve
 
         !_method
     */
@@ -438,7 +443,7 @@ namespace scribbolyth::op
     //!
 
     /*!
-        Dispatch
+        Op Dispatch
 
         !_method
     */
@@ -451,10 +456,9 @@ namespace scribbolyth::op
 
         if (result.args == "prompt" && !result.command.empty() && result.command != "-")
         {
-            // Default a path prompt to the directory for its operation
-            // (open / import / save-as+export), so the user can extend it with
-            // a filename instead of retyping the whole path.
-            OpenCommandLine(state, result.command, DefaultDirForOp(state, result.op));
+            // Path prompts start at the root; bookmarked directories in the
+            // browser provide quick access to the folders the user uses.
+            OpenCommandLine(state, result.command, DefaultDirForOp(result.op));
             return true;
         }
 
@@ -468,20 +472,29 @@ namespace scribbolyth::op
 
 
     /*!
-        Handle Key
+        Op Handle Key
 
         !_method
     */
     bool HandleKey(std::shared_ptr<EditorState> state, ftxui::Event event)
     {
-        // Some terminals deliver Enter as an ESC sequence instead of CR/LF:
-        // SS3 "ESC O M" (application-keypad Enter) and CSI "ESC [ 1 9 ~".
-        // Normalize them so Return bindings fire in every mode.
+        /*|
+
+        Note:
+        Some terminals deliver Enter as an ESC sequence instead of CR/LF:
+        SS3 "ESC O M" (application-keypad Enter) and CSI "ESC [ 1 9 ~".
+        Normalize them so Return bindings fire in every mode.
+
+        ----
+
+        */
+        //>>
         if (event == ftxui::Event::Special("\x1bOM")
             || event == ftxui::Event::Special("\x1b[19~"))
         {
             event = ftxui::Event::Return;
         }
+        //<<
         return Dispatch(state, Resolve(state, event));
     }
     //!

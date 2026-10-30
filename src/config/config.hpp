@@ -24,7 +24,7 @@ namespace scribbolyth::config
     //>>
     bool ReadInit(const std::string& path, std::string& last_file,
                   std::vector<std::string>& recent_files,
-                  std::string& open_dir, std::string& import_dir,
+                  std::vector<std::string>& bookmarked_dirs,
                   int& status_timeout);
     //<<
     //!
@@ -36,7 +36,7 @@ namespace scribbolyth::config
     //>>
     bool WriteInit(const std::string& path, const std::string& last_file,
                    const std::vector<std::string>& recent_files,
-                   const std::string& open_dir, const std::string& import_dir,
+                   const std::vector<std::string>& bookmarked_dirs,
                    int status_timeout);
     //<<
     //!

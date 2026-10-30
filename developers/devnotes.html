@@ -988,7 +988,7 @@
               {
                 "id": "ff7e998d",
                 "title": "Introduction to Bookmark.cpp",
-                "content": "Introduction to Bookmark.cpp\n\nThis file CURRENTLY houses just the NewId method.",
+                "content": "Introduction to Bookmark.cpp\n\nThis file CURRENTLY houses just the NewId method.\n\n\n\n#intro",
                 "children": [],
                 "expanded": false
               },
@@ -1010,7 +1010,7 @@
               {
                 "id": "0cc94aaf",
                 "title": "Bookmark Struct",
-                "content": "Bookmark Struct\n\nstruct Bookmark\n{\n    std::string id;\n    int line = -1;\n};",
+                "content": "Bookmark Struct\n\n\n\n#struct\n\nstruct Bookmark\n{\n    std::string id;\n    int line = -1;\n};",
                 "children": [],
                 "expanded": false
               },
@@ -1040,14 +1040,21 @@
               {
                 "id": "88d76adc",
                 "title": "Introduction to Bookmarks.cpp",
-                "content": "Introduction to Bookmarks.cpp\n\nThis file handles the rendering of the Bookmarks dialog as well as\nits logic and its key handling.\n\nHelper Methods\n* PadRight - These will likely be consolidated into a single method in the future.\n* The Entry struct is defined here.\n\nPublic Members\n* The pending_g_ variable is used with navigating to the top.\n* The Ftxui OnEvent handles the key bindings\n\n* Navigation and removing bookmarks are private members of the class.",
+                "content": "Introduction to Bookmarks.cpp\n\nThis file handles the rendering of the Bookmarks dialog as well as\nits logic and its key handling.\n\nHelper Methods\n* PadRight - These will likely be consolidated into a single method in the future.\n* The Entry struct is defined here.\n\nPublic Members\n* The pending_g_ variable is used with navigating to the top.\n* The Ftxui OnEvent handles the key bindings\n\n* Navigation and removing bookmarks are private members of the class.\n\n\n\n#intro",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "731cf756",
+                "title": "Bookmarks Entry Struct",
+                "content": "Bookmarks Entry Struct\nUsed to create the treeview nodes.\nThe line value denotes whether it is a line specific bookmark.\nIf the value is -1 it is NOT.\n\n\n\n#struct\n\nstruct Entry\n{\n    treeview::TreeNode* node = nullptr;\n    int depth = 0;\n    int line = -1;\n};",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "f2ffc9b5",
                 "title": "BookmarksDialog Class",
-                "content": "BookmarksDialog Class\n(ftxui::ComponentBase)",
+                "content": "BookmarksDialog Class\n(ftxui::ComponentBase)\n\n\n\n#class",
                 "children": [
                   {
                     "id": "4aabdd9b",
@@ -1146,13 +1153,6 @@
                 "expanded": false
               },
               {
-                "id": "731cf756",
-                "title": "Entry Struct",
-                "content": "Entry Struct\nUsed to create the treeview nodes.\nThe line value denotes whether it is a line specific bookmark.\nIf the value is -1 it is NOT.\n\nstruct Entry\n{\n    treeview::TreeNode* node = nullptr;\n    int depth = 0;\n    int line = -1;\n};",
-                "children": [],
-                "expanded": false
-              },
-              {
                 "id": "6e263fb9",
                 "title": "Right Padding",
                 "content": "Right Padding\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t\n\nThis indents the bookmarks to match their depth in the treeview.\n#todo : We should be able to make this a globally accessible method.",
@@ -1200,7 +1200,7 @@
               {
                 "id": "a7113d25",
                 "title": "Introduction to Browser.cpp",
-                "content": "Introduction to Browser.cpp\n\nThis file handles the file browsing dialog, as well as its key bindings.\n\nHelper Methods\n* PadRight - soon to be consolidated to a single method.\n* Tail - this also will likely be consolidated.\n\nPublic Members\n* The Ftxui OnEvent handles the key inputs.\n\nPrivate Members\n* The navigation and filtering is handled by these.\n* The initial directory is determined via: state_->browser_start_dir\n* Another state helper is: state_->browser_pick",
+                "content": "Introduction to Browser.cpp\n\nThis file handles the file browsing dialog, as well as its key bindings.\n\nHelper Methods\n* PadRight - soon to be consolidated to a single method.\n* Tail - this also will likely be consolidated.\n\nPublic Members\n* The Ftxui OnEvent handles the key inputs.\n* The Ftxui Render handles the properties of the dialog itself. You can explicitly set its size etc.\n\nPrivate Members\n* The navigation and filtering is handled by these.\n* The initial directory is determined via: state_->browser_start_dir\n* Another state helper is: state_->browser_pick\n* `m` bookmarks the shown directory; ` shows the bookmark list.\n    * _Render Browser Dialog_ was updated to accomodate the bookmarks footer information.\n\n\n\n#intro",
                 "children": [],
                 "expanded": false
               },
@@ -1214,116 +1214,137 @@
               {
                 "id": "40a0ed0b",
                 "title": "FileBrowserDialog Class",
-                "content": "FileBrowserDialog Class\n(ftxui::ComponentBase)",
+                "content": "FileBrowserDialog Class\n(ftxui::ComponentBase)\n\n\n\n#class",
                 "children": [
                   {
-                    "id": "efdf24e8",
+                    "id": "f97b1000",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "57f0c07b",
+                        "id": "33982852",
+                        "title": "Add the Current Directory to the Bookmarks",
+                        "content": "Add the Current Directory to the Bookmarks\n\nSignature: void AddCurrentBookmark()\nMethod: AddCurrentBookmark\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "7f275e89",
+                        "title": "Browser Entry Struct",
+                        "content": "Browser Entry Struct\n\nstruct Entry\n{\n    bool is_dir = false;\n    std::string display;\n    std::string path;\n};\n\n#struct",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "36dceee0",
                         "title": "Close the Dialog",
                         "content": "Close the Dialog\n\nSignature: void Close()\nMethod: Close\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "ad700c71",
+                        "id": "57f0c07b",
                         "title": "Constants",
                         "content": "Constants\n\n--------------------------------------------------------------------------------\n\nstatic constexpr int kVisibleRows = 16;",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "b93ba126",
-                        "title": "Entry Struct",
-                        "content": "Entry Struct\n\nstruct Entry\n{\n    bool is_dir = false;\n    std::string display;\n    std::string path;\n};",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "63953a64",
+                        "id": "44655cb1",
                         "title": "Jump to Top / Bottom",
                         "content": "Jump to Top / Bottom\n\nSignature: void JumpToTop()\nMethod: JumpToTop\nReturns: void\n\nSignature: void JumpToBottom()\nMethod: JumpToBottom\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "33982852",
+                        "id": "25b90d2c",
                         "title": "Move Up a Directory",
                         "content": "Move Up a Directory\n\nSignature: void GoUp()\nMethod: GoUp\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "36dceee0",
+                        "id": "6eefde9b",
                         "title": "Navigate Items",
                         "content": "Navigate Items\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "435017c9",
+                        "id": "9fde7621",
+                        "title": "Persist the Bookmarked Directories",
+                        "content": "Persist the Bookmarked Directories\n\nSignature: void PersistBookmarks()\nMethod: PersistBookmarks\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "e8d1ddd7",
                         "title": "Pick a File",
                         "content": "Pick a File\n\nSignature: void Activate()\nMethod: Activate\nReturns: void",
                         "children": [
                           {
-                            "id": "5751ff6e",
+                            "id": "18cc3a9d",
                             "title": "Apply the Filter",
                             "content": "Apply the Filter\n\nSignature: void ApplyFilter()\nMethod: ApplyFilter\nReturns: void\n\n* Applies the currently set filter.",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "ec8baedf",
+                            "id": "79bda04e",
                             "title": "Clear the Filter",
                             "content": "Clear the Filter\n\nSignature: void ClearFilter()\nMethod: ClearFilter\nReturns: void\n\nSimply clear out the filter variables.",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "a5e8af9d",
+                            "id": "1c07ed35",
                             "title": "Compute the Top",
                             "content": "Compute the Top\n\nSignature: int ComputeTop(int sel, int total) const\nMethod: ComputeTop\nReturns: int\nQualifiers: const\nParameters:\n    sel   int\n    total int\n\nComputation logic:\n\nconst int max_top = std::max(0, total - kVisibleRows);\nint top = std::min(scroll_, max_top);\nif (sel < top) top = sel;\nif (sel >= top + kVisibleRows) top = sel - kVisibleRows + 1;\nreturn std::max(0, std::min(top, max_top));",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "c533cd86",
+                            "id": "764b12f2",
                             "title": "Enter At",
                             "content": "Enter At\n\nSignature: void EnterAt(bool pick_file)\nMethod: EnterAt\nReturns: void\nParameters:\n    pick_file bool\n\n`l` always navigates into the folder. For save/export-style\nops (`browser_command` set) the dialog is a folder picker:\nEnter hands the chosen folder back to the command line so a\nfilename can be typed. `:` picks the currently shown folder\nthe same way.",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "e8d6da58",
+                            "id": "dea3aca7",
+                            "title": "Handle Bookmark List Event",
+                            "content": "Handle Bookmark List Event\n\nSignature: bool OnBookmarksEvent(ftxui::Event event)\nMethod: OnBookmarksEvent\nReturns: bool\nParameters:\n    event ftxui::Event\n\nbookmarks_active_ = false;\nbookmark_selection_ = 0;\npending_g_ = false;\nreturn true;\n\nconst int total = static_cast<int>(state_->bookmarked_dirs.size());\nif (total == 0) return true;\nconst int index = std::max(0, std::min(bookmark_selection_, total - 1));\nSetDir(state_->bookmarked_dirs[static_cast<std::size_t>(index)]);\nClearFilter();\nbookmarks_active_ = false;\nbookmark_selection_ = 0;\nreturn true;\n\nRemoveSelectedBookmark();\nreturn true;\n\nAddCurrentBookmark();\nreturn true;\n\nconst int total = static_cast<int>(state_->bookmarked_dirs.size());\nif (total > 0)\n{\n    bookmark_selection_ =\n        std::max(0, std::min(total - 1, bookmark_selection_ + 1));\n}\npending_g_ = false;\nreturn true;\n\nbookmark_selection_ = std::max(0, bookmark_selection_ - 1);\npending_g_ = false;\nreturn true;\n\nif (pending_g_)\n{\n    bookmark_selection_ = 0;\n    pending_g_ = false;\n}\nelse\n{\n    pending_g_ = true;\n}\nreturn true;\n\nconst int total = static_cast<int>(state_->bookmarked_dirs.size());\nbookmark_selection_ = std::max(0, total - 1);\npending_g_ = false;\nreturn true;",
+                            "children": [],
+                            "expanded": false
+                          },
+                          {
+                            "id": "5751ff6e",
                             "title": "Handle Filter Event",
                             "content": "Handle Filter Event\n\nSignature: bool OnFilterEvent(ftxui::Event event)\nMethod: OnFilterEvent\nReturns: bool\nParameters:\n    event ftxui::Event",
                             "children": [
                               {
-                                "id": "44655cb1",
+                                "id": "fd07a6e0",
                                 "title": "Escape Key",
                                 "content": "Escape Key\n\nClearFilter();\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "25b90d2c",
+                                "id": "89f9c811",
                                 "title": "Return Key",
                                 "content": "Return Key\n\nfilter_active_ = false;\nselection_ = 0;\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "e8d1ddd7",
+                                "id": "31042050",
                                 "title": "Backspace Key",
                                 "content": "Backspace Key\n\nif (!filter_.empty()) filter_.pop_back();\nselection_ = 0;\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "01e7ca0a",
+                                "id": "de6f3ac7",
                                 "title": "General Key Processing",
                                 "content": "General Key Processing\n\nfilter_ += event.character();\nselection_ = 0;\nreturn true;",
                                 "children": [],
@@ -1333,16 +1354,16 @@
                             "expanded": false
                           },
                           {
-                            "id": "1c07ed35",
+                            "id": "f6adb709",
                             "title": "Recompute",
                             "content": "Recompute\n\nSignature: void Recompute()\nMethod: Recompute\nReturns: void\n\n* Refresh this dialog via the state_\n\nSignature: void Relist()\nMethod: Relist\nReturns: void\n\n            * List the currently selected directory's contents.",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "34c0d9a1",
+                            "id": "741d2c82",
                             "title": "Variables",
-                            "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nftxui::Box box_;\nstd::string dir_;\nstd::string start_dir_;\nbool needs_refresh_ = true;\nstd::vector<Entry> entries_;\nstd::vector<std::size_t> visible_;\nstd::string filter_;\nstd::string last_filter_;\nbool filter_active_ = false;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 24;\nbool pending_g_ = false;",
+                            "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nftxui::Box box_;\nstd::string dir_;\nstd::string start_dir_;\nbool needs_refresh_ = true;\nstd::vector<Entry> entries_;\nstd::vector<std::size_t> visible_;\nstd::string filter_;\nstd::string last_filter_;\nbool filter_active_ = false;\nbool bookmarks_active_ = false;\nint bookmark_selection_ = 0;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 24;\nbool pending_g_ = false;",
                             "children": [],
                             "expanded": false
                           }
@@ -1350,9 +1371,23 @@
                         "expanded": false
                       },
                       {
-                        "id": "7f275e89",
+                        "id": "435017c9",
+                        "title": "Remove the Selected Bookmarked Directory",
+                        "content": "Remove the Selected Bookmarked Directory\n\nSignature: void RemoveSelectedBookmark()\nMethod: RemoveSelectedBookmark\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "8b48af2b",
                         "title": "Set the Directory",
                         "content": "Set the Directory\n\nSignature: void SetDir(const std::string& path)\nMethod: SetDir\nReturns: void\nParameters:\n    path const std::string&",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "63953a64",
+                        "title": "Show Bookmarked Directories",
+                        "content": "Show Bookmarked Directories\n\nSignature: void OpenBookmarks()\nMethod: OpenBookmarks\nReturns: void",
                         "children": [],
                         "expanded": false
                       }
@@ -1378,74 +1413,88 @@
                         "children": [
                           {
                             "id": "b7edcdf5",
+                            "title": "`",
+                            "content": "`\n\nShow the bookmarked directories.\n\nOpenBookmarks();\nreturn true;",
+                            "children": [],
+                            "expanded": false
+                          },
+                          {
+                            "id": "321218e3",
+                            "title": "m",
+                            "content": "m\n\nBookmark the directory currently shown.\n\nAddCurrentBookmark();\nreturn true;",
+                            "children": [],
+                            "expanded": false
+                          },
+                          {
+                            "id": "36a0cf51",
                             "title": "Key Events",
                             "content": "Key Events",
                             "children": [
                               {
-                                "id": "3d07040f",
+                                "id": "f2256427",
                                 "title": "Escape",
                                 "content": "Escape\n\nif (!filter_.empty())\n{\n    ClearFilter();\n    return true;\n}\nClose();\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "2380739b",
+                                "id": "aa09f907",
                                 "title": "/",
                                 "content": "/\n\nfilter_active_ = true;\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "f2256427",
+                                "id": "a81fbfe7",
                                 "title": ":",
                                 "content": ":\n\nThe dialog just picks a directory; `:` hands the currently\nshown directory back to the save/export command line so the\nuser can type a filename.\n\nconst std::string command = std::move(state_->browser_command);\nstate_->browser_command.clear();\nconst std::string target = (fs::path(dir_) / \"\").string();\nClose();\nscribbolyth::op::OpenCommandLineWithArgs(state_, command, target);\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "aa09f907",
+                                "id": "99679b1c",
                                 "title": "Return",
                                 "content": "Return\n\nSelect the file.\n\nActivate();\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "a81fbfe7",
+                                "id": "8ff6e388",
                                 "title": "l",
                                 "content": "l\n\nEnter the selected directory.\n\nEnterAt(/*pick_file=*/false);\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "99679b1c",
+                                "id": "67d292f6",
                                 "title": "j / Arrow Down",
                                 "content": "j / Arrow Down\n\nMove the selection down.\n\nMoveSelection(+1);\npending_g_ = false;\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "8ff6e388",
+                                "id": "eeb48cff",
                                 "title": "k / Arrow Up",
                                 "content": "k / Arrow Up\n\nMove the selection up.\n\nMoveSelection(-1);\npending_g_ = false;\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "67d292f6",
+                                "id": "0191a615",
                                 "title": "h",
                                 "content": "h\n\nMove up one directory.\n\nGoUp();\npending_g_ = false;\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "eeb48cff",
+                                "id": "75253f27",
                                 "title": "g",
                                 "content": "g\n\nIf the first 'g', await for a second 'g'.\nIf the second 'g', move to the top.\n\nif (pending_g_) JumpToTop();\nelse pending_g_ = true;\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "0191a615",
+                                "id": "f4e3e181",
                                 "title": "G",
                                 "content": "G\n\nMove to the bottom.\n\nJumpToBottom();\nreturn true;",
                                 "children": [],
@@ -1458,26 +1507,26 @@
                         "expanded": false
                       },
                       {
-                        "id": "f4e3e181",
-                        "title": "Render the Element",
-                        "content": "Render the Element\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
+                        "id": "eea6bf61",
+                        "title": "Render Browser Dialog",
+                        "content": "Render Browser Dialog\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\n\n--------------------------------------------------------------------------------\n\nTo explicitly set the file dialog size, locate the following:\n\nreturn ftxui::window(ftxui::text(title),\n                     ftxui::vbox({\n                         ftxui::vbox(std::move(rows)),\n                         ftxui::separator(),\n                         ftxui::text(PadRight(footer, dlg_width)) | ftxui::dim,\n                     })) |\n       ftxui::reflect(box_) |\n       ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 140) |\n       ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);",
                         "children": [
                           {
-                            "id": "d116215c",
+                            "id": "b67dc721",
                             "title": "Recompute",
                             "content": "Recompute\n\nBefore rendering ensure that everything is in sync with the state_.\n\nRecompute();",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "840ceee8",
+                            "id": "c86a6653",
                             "title": "Const Variables",
-                            "content": "Const Variables\n\n--------------------------------------------------------------------------------\n\nconst int total = static_cast<int>(visible_.size());\nconst int sel = std::min(selection_, std::max(0, total - 1));\nconst int top = ComputeTop(sel, total);\nconst int count = std::min(kVisibleRows, std::max(0, total - top));\nconst int dlg_width { 90 };\n\nconst std::size_t row_width = static_cast<std::size_t>(content_width_ + 2);",
+                            "content": "Const Variables\n\n--------------------------------------------------------------------------------\n\nconst int total = static_cast<int>(visible_.size());\nconst int sel = std::min(selection_, std::max(0, total - 1));\nconst int top = ComputeTop(sel, total);\nconst int count = std::min(kVisibleRows, std::max(0, total - top));\nconst int dlg_width { 90 };\n\nconst std::size_t row_width = static_cast<std::size_t>(content_width_ + 2);\n\nconst int bookmark_total = static_cast<int>(state_->bookmarked_dirs.size());\nconst int bookmark_sel = std::min(bookmark_selection_,\n                                  std::max(0, bookmark_total - 1));\nconst int bookmark_top = ComputeTop(bookmark_sel, bookmark_total);\nconst int bookmark_count = std::min(kVisibleRows,\n                                    std::max(0, bookmark_total - bookmark_top));\nconst std::size_t bookmark_width = static_cast<std::size_t>(dlg_width - 4);",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "b67dc721",
+                            "id": "efdf24e8",
                             "title": "Fetch the items.",
                             "content": "Fetch the items.\n\nIf there are none, output (empty directory).\nThis is driven by the total const value.",
                             "children": [],
@@ -1497,7 +1546,7 @@
                     "expanded": false
                   },
                   {
-                    "id": "c9ac86ef",
+                    "id": "7094cd05",
                     "title": "Make the File Browser Dialog",
                     "content": "Make the File Browser Dialog\n\nSignature: ftxui::Component MakeFileBrowserDialog(std::shared_ptr<EditorState> state, bool* show)\nMethod: MakeFileBrowserDialog\nReturns: ftxui::Component\nParameters:\nstate std::shared_ptr<EditorState>\nshow  bool*",
                     "children": [],
@@ -1568,7 +1617,7 @@
               {
                 "id": "7efa558e",
                 "title": "Introduction to Calc.cpp",
-                "content": "Introduction to Calc.cpp\n\nThis file handles the Command inputs and logic associated with the\ncalculator feature in Scribbolyth.\n\nHelpers\n* Evaluate boolean.\n\nPublic Members\n* Run handles the evaluation.\n\nPrivate Members\n* The calculation work is done by these methods.\n* Formatting is also done here.",
+                "content": "Introduction to Calc.cpp\n\nThis file handles the Command inputs and logic associated with the\ncalculator feature in Scribbolyth.\n\nHelpers\n* Evaluate boolean.\n\nPublic Members\n* Run handles the evaluation.\n\nPrivate Members\n* The calculation work is done by these methods.\n* Formatting is also done here.\n\n\n\n#intro",
                 "children": [],
                 "expanded": false
               },
@@ -1721,7 +1770,7 @@
               {
                 "id": "690a6eb0",
                 "title": "Introduction to Clipboard.hpp",
-                "content": "Introduction to Clipboard.hpp\n\nThis file handles the management of the clipboard, cross-platform.",
+                "content": "Introduction to Clipboard.hpp\n\nThis file handles the management of the clipboard, cross-platform.\n\n\n\n#intro",
                 "children": [],
                 "expanded": false
               },
@@ -1788,7 +1837,7 @@
               {
                 "id": "07c5ee85",
                 "title": "Introduction to Config.cpp",
-                "content": "Introduction to Config.cpp\n\nThis file handles the loading and storing of configuration data.",
+                "content": "Introduction to Config.cpp\n\nThis file handles the loading and storing of configuration data.\n\n\n\n#intro",
                 "children": [],
                 "expanded": false
               },
@@ -1802,7 +1851,7 @@
               {
                 "id": "a766b9c4",
                 "title": "Read the Init Config",
-                "content": "Read the Init Config\n\nSignature: bool ReadInit(const std::string& path, std::string& last_file, std::vector<std::string>& recent_files, std::string& open_dir, std::string& import_dir, int& status_timeout)\nMethod: ReadInit\nReturns: bool\nParameters:\n    path           const std::string&\n    last_file      std::string&\n    recent_files   std::vector<std::string>&\n    open_dir       std::string&\n    import_dir     std::string&\n    status_timeout int&",
+                "content": "Read the Init Config\n\nSignature: bool ReadInit(const std::string& path, std::string& last_file, std::vector<std::string>& recent_files, std::vector<std::string>& bookmarked_dirs, int& status_timeout)\nMethod: ReadInit\nReturns: bool\nParameters:\n    path            const std::string&\n    last_file       std::string&\n    recent_files    std::vector<std::string>&\n    bookmarked_dirs std::vector<std::string>&\n    status_timeout  int&",
                 "children": [],
                 "expanded": false
               },
@@ -1830,7 +1879,7 @@
               {
                 "id": "2394ceac",
                 "title": "Update the Init Config",
-                "content": "Update the Init Config\n\nSignature: bool WriteInit(const std::string& path, const std::string& last_file, const std::vector<std::string>& recent_files, const std::string& open_dir, const std::string& import_dir, int status_timeout)\nMethod: WriteInit\nReturns: bool\nParameters:\n    path           const std::string&\n    last_file      const std::string&\n    recent_files   const std::vector<std::string>&\n    open_dir       const std::string&\n    import_dir     const std::string&\n    status_timeout int",
+                "content": "Update the Init Config\n\nSignature: bool WriteInit(const std::string& path, const std::string& last_file, const std::vector<std::string>& recent_files, const std::vector<std::string>& bookmarked_dirs, int status_timeout)\nMethod: WriteInit\nReturns: bool\nParameters:\n    path            const std::string&\n    last_file       const std::string&\n    recent_files    const std::vector<std::string>&\n    bookmarked_dirs const std::vector<std::string>&\n    status_timeout  int",
                 "children": [],
                 "expanded": false
               },
@@ -1859,14 +1908,14 @@
               {
                 "id": "4b7ae032",
                 "title": "ReadInit Forward Declaration",
-                "content": "ReadInit Forward Declaration\n\nbool ReadInit(const std::string& path, std::string& last_file,\n              std::vector<std::string>& recent_files,\n              std::string& open_dir, std::string& import_dir,\n              int& status_timeout);",
+                "content": "ReadInit Forward Declaration\n\nbool ReadInit(const std::string& path, std::string& last_file,\n              std::vector<std::string>& recent_files,\n              std::vector<std::string>& bookmarked_dirs,\n              int& status_timeout);",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "f24f8bcf",
                 "title": "WriteInit Forward Declaration",
-                "content": "WriteInit Forward Declaration\n\nbool WriteInit(const std::string& path, const std::string& last_file,\n               const std::vector<std::string>& recent_files,\n               const std::string& open_dir, const std::string& import_dir,\n               int status_timeout);",
+                "content": "WriteInit Forward Declaration\n\nbool WriteInit(const std::string& path, const std::string& last_file,\n               const std::vector<std::string>& recent_files,\n               const std::vector<std::string>& bookmarked_dirs,\n               int status_timeout);",
                 "children": [],
                 "expanded": false
               },
@@ -1896,7 +1945,7 @@
               {
                 "id": "5aab9b1b",
                 "title": "Introduction to Editor.cpp",
-                "content": "Introduction to Editor.cpp\n\nThe Editor code file handles nearly ALL of the editor functionality.\nIf the user is in NORMAL/VISUAL/VISUAL LINE/VISUAL BLOCK mode, this\nfile is probably handling what they are doing.",
+                "content": "Introduction to Editor.cpp\n\nThe Editor code file handles nearly ALL of the editor functionality.\nIf the user is in NORMAL/VISUAL/VISUAL LINE/VISUAL BLOCK mode, this\nfile is probably handling what they are doing.\n\n\n\n#intro",
                 "children": [],
                 "expanded": false
               },
@@ -1966,7 +2015,7 @@
               {
                 "id": "e0380d55",
                 "title": "The Editor Class",
-                "content": "The Editor Class",
+                "content": "The Editor Class\n\n\n\n#class",
                 "children": [
                   {
                     "id": "3aa6f392",
@@ -2214,8 +2263,8 @@
                       },
                       {
                         "id": "8ffdfd76",
-                        "title": "Ftxui Event",
-                        "content": "Ftxui Event\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
+                        "title": "Ftxui Editor Event Handler",
+                        "content": "Ftxui Editor Event Handler\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
                         "children": [],
                         "expanded": false
                       },
@@ -2391,7 +2440,7 @@
               {
                 "id": "c5c1a51a",
                 "title": "Introduction to Editor_State.hpp",
-                "content": "Introduction to Editor_State.hpp\n\nThis file handles the state. So if you are working on code that touches\nthe state, you can look here for what is available etc.",
+                "content": "Introduction to Editor_State.hpp\n\nThis file handles the state. So if you are working on code that touches\nthe state, you can look here for what is available etc.\n\n\n\n#intro",
                 "children": [],
                 "expanded": false
               },
@@ -2401,35 +2450,49 @@
                 "content": "Editor State Struct",
                 "children": [
                   {
-                    "id": "73783b1f",
+                    "id": "044c3ae9",
+                    "title": "Bookmarked Directories",
+                    "content": "Bookmarked Directories\n\nDirectories saved from the file browser for quick access. Pressing\n'm' in the browser adds the current directory; the list is shown with\n'`' and persisted to init.conf.\n\n--------------------------------------------------------------------------------\n\nstd::vector<std::string> bookmarked_dirs;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "6c0d499e",
+                    "title": "Command Path Prefix",
+                    "content": "Command Path Prefix\n\nThe path automatically inserted into the command prompt by the most\nrecent `prompt` binding (e.g. pressing `o` gives `:o /`). Typing '\\'\nin the prompt strips exactly this text back out, so the user can start\nfrom a blank path without backspacing. Empty when the current prompt\nwas not prefilled.\n\n--------------------------------------------------------------------------------\n\nstd::string command_path_prefix;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "13dc4c67",
                     "title": "Expand to Node",
                     "content": "Expand to Node\n\nSelect `node` in the tree, expanding every ancestor so it is visible.\nSet by the treeview.\n\n--------------------------------------------------------------------------------\n\nstd::function<void(scribbolyth::treeview::TreeNode*)> reveal_node;",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "b9534292",
+                    "id": "6e90fb60",
                     "title": "File Browser Related",
                     "content": "File Browser Related\n\nFile browser dialog. `show_file_browser` is the Modal visibility flag;\n`browser_start_dir` is the directory to open in; `browser_pick` is\ninvoked with the chosen file's path when the user presses Enter.\n`browser_command` is the `:command` name of the invoking op for\nsave/export-style ops: when non-empty, Enter on a folder closes the\ndialog and reopens the command line prefilled with that folder so the\nuser can type a filename (open/import-style ops leave it empty and\nEnter on a folder simply navigates into it).\n\n--------------------------------------------------------------------------------\n\nbool* show_file_browser = nullptr;\nstd::string browser_start_dir;\nstd::string browser_command;\nstd::function<void(const std::string&)> browser_pick;",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "8afacbc9",
+                    "id": "3fbceae2",
                     "title": "Find in Node Related",
                     "content": "Find in Node Related\n\nVim-style find state (the last '/' search). `search_matches` holds the\nnodes that matched the last query, in document order; `search_index` is\nthe currently selected match (n/N move it, wrapping). `search_active`\nis cleared by ':noh' to hide the match highlight; the query and match\nlist are kept so n/N keep working, as in Vim.\n\n--------------------------------------------------------------------------------\n\nstd::string search_query;\nstd::vector<scribbolyth::treeview::TreeNode*> search_matches;\nint search_index = -1;\nbool search_active = false;\n\n// Set when a '/' find executes; the editor consumes it to move its cursor\n// to the first occurrence in the (possibly unchanged) active node so the\n// match is revealed in the text, as in Vim.\nbool search_reveal_pending = false;\n\n// Step to the next (dir > 0) or previous (dir < 0) find result. Set by the\n// editor: it moves the cursor through the occurrences of the query inside\n// the active node's text (wrapping within the node), as in Vim.\nstd::function<void(int)> search_jump;",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "6e90fb60",
+                    "id": "4be4f201",
                     "title": "Focus",
                     "content": "Focus\n\n--------------------------------------------------------------------------------\n\nstd::function<void()> focus_editor;\nstd::function<void()> focus_treeview;",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "4be4f201",
+                    "id": "73783b1f",
                     "title": "Getting All Nodes",
                     "content": "Getting All Nodes\n\nFlat enumeration of the document: (node pointer, depth) in document\norder, ignoring expansion state. Set by the treeview.\n\n--------------------------------------------------------------------------------\n\nstd::function<std::vector<std::pair<scribbolyth::treeview::TreeNode*, int>>()> collect_all_nodes;",
                     "children": [],
@@ -2443,7 +2506,7 @@
                     "expanded": false
                   },
                   {
-                    "id": "cf6905d7",
+                    "id": "416acbfc",
                     "title": "Key Map Related",
                     "content": "Key Map Related\n\n--------------------------------------------------------------------------------\n\nKeymap normal_keymap;\nKeymap insert_keymap;\nKeymap visual_keymap;\nKeymap visual_block_keymap;\nKeymap tree_keymap;\n\nKeymap& ActiveKeymap() {\n    switch (mode) {\n        case Mode::TREE:            return tree_keymap;\n        case Mode::INSERT:          return insert_keymap;\n        case Mode::VISUAL:\n        case Mode::VISUAL_LINE:     return visual_keymap;\n        case Mode::VISUAL_BLOCK:    return visual_block_keymap;\n        case Mode::COMMAND:         return normal_keymap;\n        default:                    return normal_keymap;\n    }\n}",
                     "children": [],
@@ -2457,23 +2520,16 @@
                     "expanded": false
                   },
                   {
-                    "id": "6c0d499e",
+                    "id": "b9534292",
                     "title": "Node Undo History",
                     "content": "Node Undo History\n\nDocument undo history. A snapshot is pushed before every content\nmutation (tree edits and text edits); `undo_stack` is newest last,\n`redo_stack` newest first. `snapshot_undo`/`apply_undo`/`clear_undo`\nare installed by the treeview. The undo dialog reads the stacks\ndirectly and applies a rollback through `apply_undo`.\n\n--------------------------------------------------------------------------------\n\nstd::vector<UndoState> undo_stack;\nstd::vector<UndoState> redo_stack;\nstatic constexpr std::size_t kUndoMax = 50;\n\nstd::function<void()> snapshot_undo;\n// `index` 0 = newest snapshot.\nstd::function<void(std::size_t index)> apply_undo;\nstd::function<void()> clear_undo;",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "3fbceae2",
+                    "id": "cf6905d7",
                     "title": "Operations and Commands",
                     "content": "Operations and Commands\n\n--------------------------------------------------------------------------------\n\nstd::map<std::string, scribbolyth::op::Operation> operations;\nstd::map<std::string, std::string> commands;",
-                    "children": [],
-                    "expanded": false
-                  },
-                  {
-                    "id": "044c3ae9",
-                    "title": "Path Prompt Directories",
-                    "content": "Path Prompt Directories\n\nThe directories used to prefill the file prompts, chosen per command:\n\n    open     - `last_open_dir`   last folder a document was opened from\n    import   - `last_import_dir` last folder an HTML file was imported from\n    save/exp - `current_dir`     folder the current document lives in\n\nSo `:open ` returns you to where you last opened from, `:U ` to where\nyou last imported from, while save-as and every export start next to\nthe document being edited. `last_open_dir` and `last_import_dir` are\npersisted to init.conf (`open_dir` / `import_dir`) and survive a\nrestart; `current_dir` is derived and tracked as the file is saved or\nloaded.\n\n--------------------------------------------------------------------------------\n\nstd::string last_open_dir;\nstd::string last_import_dir;\nstd::string current_dir;\n\n// The directory automatically inserted into the command prompt by the\n// most recent `prompt` binding (e.g. pressing `o` gives `:o /dir/`).\n// Typing '\\' in the prompt strips exactly this text back out, so the\n// user can start from a blank path without backspacing. Empty when the\n// current prompt was not prefilled.\nstd::string command_path_prefix;",
                     "children": [],
                     "expanded": false
                   },
@@ -2485,14 +2541,14 @@
                     "expanded": false
                   },
                   {
-                    "id": "13dc4c67",
+                    "id": "341b2976",
                     "title": "Reset Cursor Position",
                     "content": "Reset Cursor Position\n\nPosition the editor cursor on a 0-based line of the currently active\nnode. Set by the editor.\n\n--------------------------------------------------------------------------------\n\nstd::function<void(int)> reveal_line;",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "341b2976",
+                    "id": "8afacbc9",
                     "title": "Text Insertion",
                     "content": "Text Insertion\n\nInsert `text` into the currently active node at the editor cursor, as a\nsingle undoable edit. Set by the editor; used by dialogs to inject text\n(e.g. a node link picked from a search) at the cursor.\n\n--------------------------------------------------------------------------------\n\nstd::function<void(const std::string&)> insert_text_at_cursor;",
                     "children": [],
@@ -2555,38 +2611,66 @@
               {
                 "id": "f76c267b",
                 "title": "Introduction to Help.cpp",
-                "content": "Introduction to Help.cpp\n\nThis file handles the help dialog, and its key bindings.",
+                "content": "Introduction to Help.cpp\n\nThis file handles the help dialog, and its key bindings.\n\n\n\n#intro",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "f09a7cfb",
+                "id": "2556314b",
+                "title": "Expand Topic",
+                "content": "Expand Topic\n\nTurn the escape sequences of a help topic into their literal\nmeaning: '\\n' becomes a line break, '\\t' four spaces and '\\\\' a\nsingle backslash. The result is returned as the lines to show.\n\nSignature: std::vector<std::string> ExpandTopic(const std::string& text)\nMethod: ExpandTopic\nReturns: std::vector<std::string>\nParameters:\n    text const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "d15f3fb0",
                 "title": "Help Dialog Class",
-                "content": "Help Dialog Class",
+                "content": "Help Dialog Class\n\n\n\n#class",
                 "children": [
                   {
-                    "id": "a5fd3663",
+                    "id": "25211aa4",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "49aa3b3a",
+                        "id": "95eacb2e",
                         "title": "Filtered Vector",
                         "content": "Filtered Vector\n\nstd::vector<int> Filtered() const\n{\n    std::vector<int> result;\n\n    std::string needle = Lower(filter_);\n    bool key_only = false;\n    if (!needle.empty() && needle[0] == ':')\n    {\n        key_only = true;\n        needle = needle.substr(1);\n    }\n\n    for (std::size_t i = 0; i < entries_.size(); ++i)\n    {\n        const std::string& hay = key_only ? entries_[i].key : entries_[i].line;\n        if (needle.empty() || Lower(hay).find(needle) != std::string::npos)\n        {\n            result.push_back(static_cast<int>(i));\n        }\n    }\n    return result;\n}",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "7c8feb87",
-                        "title": "Max Top Const",
-                        "content": "Max Top Const\n\nSignature: int MaxTop() const\nMethod: MaxTop\nReturns: int\nQualifiers: const",
+                        "id": "214a11ee",
+                        "title": "Inner Width Const",
+                        "content": "Inner Width Const\n\nThe width of the dialog content: as wide as the widest binding\nline, but never wider than the dialog itself.\n\nSignature: int InnerWidth() const\nMethod: InnerWidth\nReturns: int\nQualifiers: const",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "69501ccf",
+                        "id": "bb779db1",
+                        "title": "Max Topic Top Const",
+                        "content": "Max Topic Top Const\n\nSignature: int MaxTopicTop() const\nMethod: MaxTopicTop\nReturns: int\nQualifiers: const",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "05531b1c",
+                        "title": "Move Selection Up / Down",
+                        "content": "Move Selection Up / Down\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "861c173e",
+                        "title": "Refilter",
+                        "content": "Refilter\n\nAfter the filter changes, select the first binding that matches.\n\nSignature: void Refilter()\nMethod: Refilter\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "e48be0ca",
                         "title": "Variables",
-                        "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nstd::vector<HelpEntry> entries_;\nstd::string filter_;\nint scroll_ = 0;\nint content_width_ = 72;\nstatic constexpr int kVisibleRows = 18;",
+                        "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nstd::vector<HelpEntry> entries_;\nstd::string filter_;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 72;\nbool topic_open_ = false;\nstd::string topic_title_;\nstd::string topic_summary_;\nstd::vector<std::string> topic_lines_;\nint topic_scroll_ = 0;\nstatic constexpr int kVisibleRows = 18;\nstatic constexpr int kMaxInnerWidth = 90;",
                         "children": [],
                         "expanded": false
                       }
@@ -2594,35 +2678,56 @@
                     "expanded": false
                   },
                   {
-                    "id": "75db87a0",
+                    "id": "dde0173c",
                     "title": "Public Members",
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "01a36305",
+                        "id": "135dbc4d",
                         "title": "Constructor",
                         "content": "Constructor\n\nSignature: HelpDialog(std::shared_ptr<EditorState> state, const std::string& path, bool* show) : state_(std::move(state)), show_(show)\nConstructor: HelpDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    path  const std::string&\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "70ea2660",
+                        "id": "49aa3b3a",
                         "title": "Event Handler",
                         "content": "Event Handler\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "b863889f",
+                        "id": "7c8feb87",
                         "title": "Focusable Const",
                         "content": "Focusable Const\n\nbool Focusable() const override { return true; }",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "d15f3fb0",
+                        "id": "f1fe093e",
+                        "title": "Open Topic",
+                        "content": "Open Topic\n\nShow the full help topic of the highlighted key binding. Bindings\nwithout a topic of their own fall back to their description, so\nEnter always opens the help view.\n\nSignature: void OpenTopic()\nMethod: OpenTopic\nReturns: void",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "685aaf0a",
                         "title": "Render the Help Dialog",
                         "content": "Render the Help Dialog\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "ade9bd58",
+                        "title": "Render Topic",
+                        "content": "Render Topic\n\nFill the help dialog with the full help topic.\n\nSignature: ftxui::Element RenderTopic()\nMethod: RenderTopic\nReturns: ftxui::Element",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "69501ccf",
+                        "title": "Topic Event Handler",
+                        "content": "Topic Event Handler\n\nWhile the full help topic is shown every key is consumed, except\nfor the keys that scroll it and the ones that close it again.\n\nSignature: bool OnTopicEvent(ftxui::Event event)\nMethod: OnTopicEvent\nReturns: bool\nParameters:\n    event ftxui::Event",
                         "children": [],
                         "expanded": false
                       }
@@ -2633,37 +2738,58 @@
                 "expanded": false
               },
               {
-                "id": "ec9eb068",
+                "id": "01a36305",
                 "title": "Pad Right",
                 "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "2556314b",
+                "id": "70ea2660",
                 "title": "Parse Entries",
                 "content": "Parse Entries\n\nSignature: void ParseEntries(const std::string& path, std::vector<HelpEntry>& out)\nMethod: ParseEntries\nReturns: void\nParameters:\n    path const std::string&\n    out  std::vector<HelpEntry>&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "d85377e5",
-                "title": "Split Fields",
-                "content": "Split Fields\n\nSignature: std::vector<std::string> SplitFields(const std::string& line)\nMethod: SplitFields\nReturns: std::vector<std::string>\nParameters:\n    line const std::string&",
+                "id": "481e7a85",
+                "title": "Split Description",
+                "content": "Split Description\n\nThe description field may hold two parts separated by a pipe: a\nshort one shown in the list of key bindings, and the full help\ntopic shown when the entry is opened. Split on the pipe when it\nis not inside quotes, and drop the quotes of every part.\n\nSignature: std::vector<std::string> SplitDescription(const std::string& text)\nMethod: SplitDescription\nReturns: std::vector<std::string>\nParameters:\n    text const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "481e7a85",
+                "id": "d85377e5",
+                "title": "Split Fields",
+                "content": "Split Fields\n\nRead the first `limit` fields of the line. Quoted fields may hold\nspaces. `end` receives the offset just after the last field that\nwas read, so the caller can pick up the remainder of the line.\n\nSignature: std::vector<std::string> SplitFields(const std::string& line, std::size_t limit, std::size_t& end)\nMethod: SplitFields\nReturns: std::vector<std::string>\nParameters:\n    line  const std::string&\n    limit std::size_t\n    end   std::size_t&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "b863889f",
                 "title": "To Lower",
                 "content": "To Lower\n\nSignature: std::string Lower(std::string s)\nMethod: Lower\nReturns: std::string\nParameters:\n    s std::string",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "685aaf0a",
+                "id": "ec9eb068",
+                "title": "Trim",
+                "content": "Trim\n\nSignature: std::string Trim(const std::string& s)\nMethod: Trim\nReturns: std::string\nParameters:\n    s const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "f09a7cfb",
+                "title": "Wrap Lines",
+                "content": "Wrap Lines\n\nWrap the lines of a help topic so they fit the dialog. Words are\nkept whole; a word longer than the width is split up.\n\nSignature: std::vector<std::string> WrapLines(const std::vector<std::string>& lines, std::size_t width)\nMethod: WrapLines\nReturns: std::vector<std::string>\nParameters:\n    lines const std::vector<std::string>&\n    width std::size_t",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "197d61e6",
                 "title": "Make Help Dialog",
-                "content": "Make Help Dialog\n\nSignature: ftxui::Component MakeHelpDialog(std::shared_ptr<EditorState> state, const std::string& config_path, bool* show)\nMethod: MakeHelpDialog\nReturns: ftxui::Component\nParameters:\nstate       std::shared_ptr<EditorState>\nconfig_path const std::string&\nshow        bool*",
+                "content": "Make Help Dialog\n\nSignature: ftxui::Component MakeHelpDialog(std::shared_ptr<EditorState> state, const std::string& config_path, bool* show)\nMethod: MakeHelpDialog\nReturns: ftxui::Component\nParameters:\nstate       std::shared_ptr<EditorState>\nconfig_path const std::string&\nshow        bool*\n\n#config",
                 "children": [],
                 "expanded": false
               }
@@ -2678,7 +2804,7 @@
               {
                 "id": "9d8d1b00",
                 "title": "Help Entry Struct",
-                "content": "Help Entry Struct\n\nstruct HelpEntry\n{\n    std::string mode;\n    std::string key;\n    std::string command;\n    std::string op;\n    std::string description;\n    std::string line;   // the diagram line shown in the dialog\n};",
+                "content": "Help Entry Struct\n\nstruct HelpEntry\n{\n    std::string mode;\n    std::string key;\n    std::string command;\n    std::string op;\n    std::string description;\n    std::string topic;    // the full help topic, when the description has one\n    std::string line;   // the diagram line shown in the dialog\n};",
                 "children": [],
                 "expanded": false
               },
@@ -2708,21 +2834,14 @@
               {
                 "id": "2c30c75e",
                 "title": "Introduction to History.cpp",
-                "content": "Introduction to History.cpp\n\nThe History.cpp file manages the history dialog and its key bindings.",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "94400346",
-                "title": "Entry Struct",
-                "content": "Entry Struct\n\nstruct Entry\n{\n    treeview::TreeNode* node = nullptr;\n    int depth = 0;\n};",
+                "content": "Introduction to History.cpp\n\nThe History.cpp file manages the history dialog and its key bindings.\n\n\n\n#intro",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "7cd0d7c7",
                 "title": "History Dialog Class",
-                "content": "History Dialog Class",
+                "content": "History Dialog Class\n\n\n\n#class",
                 "children": [
                   {
                     "id": "0165acaa",
@@ -2821,6 +2940,13 @@
                 "expanded": false
               },
               {
+                "id": "94400346",
+                "title": "History Entry Struct",
+                "content": "History Entry Struct\n\nstruct Entry\n{\n    treeview::TreeNode* node = nullptr;\n    int depth = 0;\n};\n\n#struct",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "e5d268bd",
                 "title": "Pad Right",
                 "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t",
@@ -2882,7 +3008,7 @@
               {
                 "id": "8786f49e",
                 "title": "Introduction to Convert.cpp",
-                "content": "Introduction to Convert.cpp\n\nThe Convert.cpp file handles importing and exporting Scribboleth .html\nfiles.",
+                "content": "Introduction to Convert.cpp\n\nThe Convert.cpp file handles importing and exporting Scribboleth .html\nfiles.\n\n\n\n#intro",
                 "children": [],
                 "expanded": false
               },
@@ -3194,6 +3320,13 @@
             "content": "",
             "children": [
               {
+                "id": "8f2df59a",
+                "title": "Introduction to IO.cpp",
+                "content": "Introduction to IO.cpp\n\nThe IO code file defines some helper methods used when reading and writing files.\n\n\n\n#intro",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "72410a42",
                 "title": "Append Node",
                 "content": "Append Node\n\nSignature: void AppendNode(std::string& out, const TreeNode& node, int depth)\nMethod: AppendNode\nReturns: void\nParameters:\n    out   std::string&\n    node  const TreeNode&\n    depth int",
@@ -3388,6 +3521,13 @@
             "content": "",
             "children": [
               {
+                "id": "40397118",
+                "title": "Introduction to Keymap.cpp",
+                "content": "Introduction to Keymap.cpp\n\nThis code handles both single and multiple key combination key bindings.\n\n\n\n#intro",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "2ae09014",
                 "title": "Multiple Keymap Bind Call",
                 "content": "Multiple Keymap Bind Call\nThis is a key sequence binding.",
@@ -3499,6 +3639,13 @@
             "content": "",
             "children": [
               {
+                "id": "a6e3d539",
+                "title": "Introduction to Brokelinks.cpp",
+                "content": "Introduction to Brokelinks.cpp\n\nThe broke links code handles the Broke Links dialog and its functionality.\n\n\n\n#intro",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "7afb3deb",
                 "title": "Dead Link Dialog Class",
                 "content": "Dead Link Dialog Class",
@@ -3516,6 +3663,13 @@
                         "expanded": false
                       },
                       {
+                        "id": "9fc290b0",
+                        "title": "Brokelinks Entry Struct",
+                        "content": "Brokelinks Entry Struct\n\nstruct Entry\n{\n    std::string target;\n    treeview::TreeNode* node = nullptr;\n    int line = 0;\n};\n\n#struct",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
                         "id": "71d73004",
                         "title": "Close",
                         "content": "Close\n\nSignature: void Close()\nMethod: Close\nReturns: void",
@@ -3526,13 +3680,6 @@
                         "id": "193148e7",
                         "title": "Compute the Top",
                         "content": "Compute the Top\n\nSignature: int ComputeTop(int sel, int total) const\nMethod: ComputeTop\nReturns: int\nQualifiers: const\nParameters:\n    sel   int\n    total int",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
-                        "id": "9fc290b0",
-                        "title": "Entry Struct",
-                        "content": "Entry Struct\n\nstruct Entry\n{\n    std::string target;\n    treeview::TreeNode* node = nullptr;\n    int line = 0;\n};",
                         "children": [],
                         "expanded": false
                       },
@@ -3643,6 +3790,13 @@
             "content": "",
             "children": [
               {
+                "id": "7561343b",
+                "title": "Introduction to Links.cpp",
+                "content": "Introduction to Links.cpp\n\nThe Links code handles identifying links as well as navigating to whichever link is selected.\n\n\n\n#intro",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "8549a575",
                 "title": "Collect Links",
                 "content": "Collect Links\n\nSignature: void CollectLinks(const std::string& content, std::vector<Link>& out)\nMethod: CollectLinks\nReturns: void\nParameters:\n    content const std::string&\n    out     std::vector<Link>&",
@@ -3694,7 +3848,7 @@
               {
                 "id": "f16ae7a3",
                 "title": "Links Dialog Class",
-                "content": "Links Dialog Class",
+                "content": "Links Dialog Class\n\n\n\n#class",
                 "children": [
                   {
                     "id": "7f63dc44",
@@ -4026,35 +4180,35 @@
               {
                 "id": "887a6877",
                 "title": "Introduction to Op.cpp",
-                "content": "Introduction to Op.cpp\n\nThis file handles a lot of the command inputs.\nIt is responsible for opening the command prompt, as well as executing commands that are entered.\n\n#command",
+                "content": "Introduction to Op.cpp\n\nThis file handles a lot of the command inputs.\nIt is responsible for opening the command prompt, as well as executing commands that are entered.\n\n#command\n#intro",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "f7031a40",
+                "id": "fe287978",
                 "title": "Collect Path Matches",
                 "content": "Collect Path Matches\n\nSignature: void CollectPathMatches(const std::string& arg, std::vector<std::string>& matches)\nMethod: CollectPathMatches\nReturns: void\nParameters:\n    arg     const std::string&\n    matches std::vector<std::string>&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "fe287978",
+                "id": "b6b4e1f3",
                 "title": "Common Prefix",
                 "content": "Common Prefix\n\nSignature: std::string CommonPrefix(const std::vector<std::string>& items)\nMethod: CommonPrefix\nReturns: std::string\nParameters:\n    items const std::vector<std::string>&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "04696b9e",
+                "id": "eb16506d",
                 "title": "Complete Command",
                 "content": "Complete Command\n\nSignature: void CompleteCommand(std::shared_ptr<EditorState> state)\nMethod: CompleteCommand\nReturns: void\nParameters:\n    state std::shared_ptr<EditorState>",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "8658f8f7",
+                "id": "b65e1b77",
                 "title": "Default Directory For Operation",
-                "content": "Default Directory For Operation\n\nSignature: std::string DefaultDirForOp(const std::shared_ptr<EditorState>& state, const std::string& op)\nMethod: DefaultDirForOp\nReturns: std::string\nParameters:\n    state const std::shared_ptr<EditorState>&\n    op    const std::string&\n\nThe directory to prefill for a path command, chosen per operation:\n\n    open / open!         - `last_open_dir`   (where we last opened)\n    import_html          - `last_import_dir` (where we last imported)\n    saveas / export...   - `current_dir`     (where the file lives)\n\nReturns \"\" for a non-path op or when no directory is known yet.",
+                "content": "Default Directory For Operation\n\nSignature: std::string DefaultDirForOp(const std::string& op)\nMethod: DefaultDirForOp\nReturns: std::string\nParameters:\n    op const std::string&\n\nEvery path prompt starts at the filesystem root. The browser's\ndirectory bookmarks provide the shortcuts that the old last-used\ndirectory defaults used to supply.\n\nReturns \"\" for a non-path operation.",
                 "children": [],
                 "expanded": false
               },
@@ -4066,34 +4220,6 @@
                 "expanded": false
               },
               {
-                "id": "1ae6b52f",
-                "title": "Dispatch",
-                "content": "Dispatch\n\nSignature: bool Dispatch(std::shared_ptr<EditorState> state, const Keymap::Result& result)\nMethod: Dispatch\nReturns: bool\nParameters:\n    state  std::shared_ptr<EditorState>\n    result const Keymap::Result&",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "9d51f8f2",
-                "title": "Execute Command",
-                "content": "Execute Command\n\nSignature: bool ExecuteCommand(std::shared_ptr<EditorState> state, const std::string& input)\nMethod: ExecuteCommand\nReturns: bool\nParameters:\n    state std::shared_ptr<EditorState>\n    input const std::string&",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "4af54b1c",
-                "title": "Execute Search",
-                "content": "Execute Search\n\nSignature: bool ExecuteSearch(std::shared_ptr<EditorState> state, const std::string& input)\nMethod: ExecuteSearch\nReturns: bool\nParameters:\n    state std::shared_ptr<EditorState>\n    input const std::string&",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "208540a7",
-                "title": "Handle Key",
-                "content": "Handle Key\n\nSignature: bool HandleKey(std::shared_ptr<EditorState> state, ftxui::Event event)\nMethod: HandleKey\nReturns: bool\nParameters:\n    state std::shared_ptr<EditorState>\n    event ftxui::Event",
-                "children": [],
-                "expanded": false
-              },
-              {
                 "id": "f42fe01f",
                 "title": "Is Path Command",
                 "content": "Is Path Command\n\nSignature: bool IsPathCommand(const std::string& name)\nMethod: IsPathCommand\nReturns: bool\nParameters:\n    name const std::string&",
@@ -4101,44 +4227,79 @@
                 "expanded": false
               },
               {
-                "id": "b6b4e1f3",
+                "id": "8658f8f7",
+                "title": "Is Path Operation",
+                "content": "Is Path Operation\n\nSignature: bool IsPathOp(const std::string& op)\nMethod: IsPathOp\nReturns: bool\nParameters:\n    op const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "04696b9e",
                 "title": "Join",
                 "content": "Join\n\nSignature: std::string Join(const std::vector<std::string>& items)\nMethod: Join\nReturns: std::string\nParameters:\n    items const std::vector<std::string>&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "b65e1b77",
+                "id": "f7031a40",
                 "title": "Last Directory For Command",
                 "content": "Last Directory For Command\n\nSignature: std::string LastDirForCommand(const std::shared_ptr<EditorState>& state, const std::string& name)\nMethod: LastDirForCommand\nReturns: std::string\nParameters:\n    state const std::shared_ptr<EditorState>&\n    name  const std::string&\n\nThe default directory (with trailing separator) for the path\ncommand `name`, or \"\" when the command is not a path command or no\ndirectory is known yet. Used to prefill the command line when Tab\ncompletes a path command name.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "eb16506d",
+                "id": "208540a7",
+                "title": "Op Dispatch",
+                "content": "Op Dispatch\n\nSignature: bool Dispatch(std::shared_ptr<EditorState> state, const Keymap::Result& result)\nMethod: Dispatch\nReturns: bool\nParameters:\n    state  std::shared_ptr<EditorState>\n    result const Keymap::Result&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "4af54b1c",
+                "title": "Op Execute Command",
+                "content": "Op Execute Command\n\nSignature: bool ExecuteCommand(std::shared_ptr<EditorState> state, const std::string& input)\nMethod: ExecuteCommand\nReturns: bool\nParameters:\n    state std::shared_ptr<EditorState>\n    input const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "85a13679",
+                "title": "Op Execute Search",
+                "content": "Op Execute Search\n\nSignature: bool ExecuteSearch(std::shared_ptr<EditorState> state, const std::string& input)\nMethod: ExecuteSearch\nReturns: bool\nParameters:\n    state std::shared_ptr<EditorState>\n    input const std::string&",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "34bbd7e3",
+                "title": "Op Handle Key",
+                "content": "Op Handle Key\n\nSignature: bool HandleKey(std::shared_ptr<EditorState> state, ftxui::Event event)\nMethod: HandleKey\nReturns: bool\nParameters:\n    state std::shared_ptr<EditorState>\n    event ftxui::Event\n\nNote:\nSome terminals deliver Enter as an ESC sequence instead of CR/LF:\nSS3 \"ESC O M\" (application-keypad Enter) and CSI \"ESC [ 1 9 ~\".\nNormalize them so Return bindings fire in every mode.\n\n--------------------------------------------------------------------------------\n\nif (event == ftxui::Event::Special(\"\\x1bOM\")\n    || event == ftxui::Event::Special(\"\\x1b[19~\"))\n{\n    event = ftxui::Event::Return;\n}",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "1ae6b52f",
+                "title": "Op Resolve",
+                "content": "Op Resolve\n\nSignature: Keymap::Result Resolve(std::shared_ptr<EditorState> state, ftxui::Event event)\nMethod: Resolve\nReturns: Keymap::Result\nParameters:\n    state std::shared_ptr<EditorState>\n    event ftxui::Event",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "10ca5ce3",
                 "title": "Open Command Line",
                 "content": "Open Command Line\n\nSignature: void OpenCommandLine(std::shared_ptr<EditorState> state, const std::string& command, const std::string& initial_prefix)\nMethod: OpenCommandLine\nReturns: void\nParameters:\n    state          std::shared_ptr<EditorState>\n    command        const std::string&\n    initial_prefix const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "549fb366",
+                "id": "9d51f8f2",
                 "title": "Open Command Line With Args",
                 "content": "Open Command Line With Args\n\nSignature: void OpenCommandLineWithArgs(std::shared_ptr<EditorState> state, const std::string& command, const std::string& args)\nMethod: OpenCommandLineWithArgs\nReturns: void\nParameters:\n    state   std::shared_ptr<EditorState>\n    command const std::string&\n    args    const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "10ca5ce3",
+                "id": "549fb366",
                 "title": "Open Search Command",
                 "content": "Open Search Command\n\nSignature: void OpenSearchCommand(std::shared_ptr<EditorState> state)\nMethod: OpenSearchCommand\nReturns: void\nParameters:\n    state std::shared_ptr<EditorState>",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "85a13679",
-                "title": "Resolve",
-                "content": "Resolve\n\nSignature: Keymap::Result Resolve(std::shared_ptr<EditorState> state, ftxui::Event event)\nMethod: Resolve\nReturns: Keymap::Result\nParameters:\n    state std::shared_ptr<EditorState>\n    event ftxui::Event",
                 "children": [],
                 "expanded": false
               }
@@ -4158,6 +4319,13 @@
             "title": "recent.cpp",
             "content": "",
             "children": [
+              {
+                "id": "b556f8e6",
+                "title": "Introduction to Recent.cpp",
+                "content": "Introduction to Recent.cpp\n\nThe Recent code file handles the recents dialog and its functionality.\n\n\n\n#intro",
+                "children": [],
+                "expanded": false
+              },
               {
                 "id": "bd2c9c20",
                 "title": "Ftxui Make Dialog",
@@ -4182,7 +4350,7 @@
               {
                 "id": "79e22933",
                 "title": "Recent Dialog Class",
-                "content": "Recent Dialog Class",
+                "content": "Recent Dialog Class\n\n\n\n#class",
                 "children": [
                   {
                     "id": "a1f42e7c",
@@ -4355,6 +4523,13 @@
             "content": "",
             "children": [
               {
+                "id": "0d5ad4da",
+                "title": "Introduction to Regex.cpp",
+                "content": "Introduction to Regex.cpp\n\nThe Regex code file handles the Regex cheatsheet dialog and its functionality.\n\n\n\n#intro",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "c351411b",
                 "title": "Pad Right",
                 "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t",
@@ -4371,7 +4546,7 @@
               {
                 "id": "5b952df2",
                 "title": "Regex Dialog Class",
-                "content": "Regex Dialog Class",
+                "content": "Regex Dialog Class\n\n\n\n#class",
                 "children": [
                   {
                     "id": "b175ef4f",
@@ -4501,6 +4676,13 @@
             "content": "",
             "children": [
               {
+                "id": "6e23a7ce",
+                "title": "Introduction to Search.cpp",
+                "content": "Introduction to Search.cpp\n\nThe Search code file handles the Search dialog and its functionality.\n\n\n\n#intro",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "3b17656f",
                 "title": "All Words Regex",
                 "content": "All Words Regex\n\nSignature: std::string AllWordsRegex(const std::string& query)\nMethod: AllWordsRegex\nReturns: std::string\nParameters:\n    query const std::string&\n\nBuilds `(?=[\\s\\S]*\\bw1\\b)(?=[\\s\\S]*\\bw2\\b)...(?=[\\s\\S]*\\bwn\\b)[\\s\\S]*`\nfrom the whitespace-separated words of `query`, requiring every word\nto be present anywhere in the text (any order, any line). `[\\s\\S]`\nis the ECMAScript stand-in for DOTALL, so words on different lines\nstill satisfy the lookaheads.",
@@ -4537,8 +4719,8 @@
               },
               {
                 "id": "df0cac25",
-                "title": "Filter",
-                "content": "Filter\n\n!_method\n\nParsed search query: a leading \"r:\" selects case-insensitive regex\nmatching, a leading \":\" restricts the match to node titles and a\nleading \"+:\" requires every word to appear (in any order).",
+                "title": "Filter Struct",
+                "content": "Filter Struct\n\n!_method\n\nParsed search query: a leading \"r:\" selects case-insensitive regex\nmatching, a leading \":\" restricts the match to node titles and a\nleading \"+:\" requires every word to appear (in any order).\n\n#struct",
                 "children": [],
                 "expanded": false
               },
@@ -4606,16 +4788,9 @@
                 "expanded": false
               },
               {
-                "id": "bc74a7c2",
-                "title": "Result Struct",
-                "content": "Result Struct\n\nstruct Result\n{\n    treeview::TreeNode* node;\n    std::string line;\n};",
-                "children": [],
-                "expanded": false
-              },
-              {
                 "id": "750d0797",
                 "title": "Search Dialog Class",
-                "content": "Search Dialog Class",
+                "content": "Search Dialog Class\n\n\n\n#class",
                 "children": [
                   {
                     "id": "ce7788f9",
@@ -4707,6 +4882,13 @@
                 "expanded": false
               },
               {
+                "id": "bc74a7c2",
+                "title": "Search Result Struct",
+                "content": "Search Result Struct\n\nstruct Result\n{\n    treeview::TreeNode* node;\n    std::string line;\n};\n\n#struct",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "1e8ae06e",
                 "title": "To Lower",
                 "content": "To Lower\n\nSignature: std::string Lower(std::string s)\nMethod: Lower\nReturns: std::string\nParameters:\n    s std::string",
@@ -4781,6 +4963,13 @@
             "content": "",
             "children": [
               {
+                "id": "795188e3",
+                "title": "Introduction to Text.cpp",
+                "content": "Introduction to Text.cpp\n\nThe Text code file handles the conversion of special characters to the ASCII characters the app can handle.\n\n\n\n#intro",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "b9c1d8c8",
                 "title": "Punctuation Vector",
                 "content": "Punctuation Vector\n\n--------------------------------------------------------------------------------\n\nconst std::vector<std::pair<std::string, std::string>>& PunctuationMap()\n{\n    static const std::vector<std::pair<std::string, std::string>> kMap = {\n        {\"\\xE2\\x80\\x98\", \"'\"},    // U+2018 left single quote\n        {\"\\xE2\\x80\\x99\", \"'\"},    // U+2019 right single quote\n        {\"\\xE2\\x80\\x9A\", \"'\"},    // U+201A low single quote\n        {\"\\xE2\\x80\\x9C\", \"\\\"\"},   // U+201C left double quote\n        {\"\\xE2\\x80\\x9D\", \"\\\"\"},   // U+201D right double quote\n        {\"\\xE2\\x80\\x9E\", \"\\\"\"},   // U+201E low double quote\n        {\"\\xE2\\x80\\x93\", \"-\"},    // U+2013 en dash\n        {\"\\xE2\\x80\\x94\", \"-\"},    // U+2014 em dash\n        {\"\\xE2\\x80\\xA6\", \"...\"},  // U+2026 ellipsis\n        {\"\\xE2\\x88\\x92\", \"-\"},    // U+2212 minus sign\n    };\n    return kMap;\n}",
@@ -4841,9 +5030,9 @@
             "content": "",
             "children": [
               {
-                "id": "ca37fe8e",
-                "title": "Introduction",
-                "content": "Introduction\n\nTreeView is the notes sidebar tree: an FTXUI component that owns the\ndocument's node tree, the current selection, and all tree-mode behavior:\n\n  - selection / cursor movement across the visible tree (j/k, gg/G, /find)\n  - structural edits: add, rename, delete and move nodes, expand & collapse\n  - document persistence: open, save, import and export\n  - undo history, scoped to the currently selected node\n  - the record of viewed nodes that powers the history dialog\n\nTreeView installs callbacks into EditorState.operations under formal op\nnames (\"move_up\", \"new_node\", ...). The tree keymap in commands.conf maps\nkeys to those names and op::HandleKey()/op::Dispatch() invoke the matching\ncallback, so this file contains no key-decoding logic of its own.",
+                "id": "1450dd26",
+                "title": "Introduction to Treeview.cpp",
+                "content": "Introduction to Treeview.cpp\n\nTreeView is the notes sidebar tree: an FTXUI component that owns the\ndocument's node tree, the current selection, and all tree-mode behavior:\n\n  - selection / cursor movement across the visible tree (j/k, gg/G, /find)\n  - structural edits: add, rename, delete and move nodes, expand & collapse\n  - document persistence: open, save, import and export\n  - undo history, scoped to the currently selected node\n  - the record of viewed nodes that powers the history dialog\n\nTreeView installs callbacks into EditorState.operations under formal op\nnames (\"move_up\", \"new_node\", ...). The tree keymap in commands.conf maps\nkeys to those names and op::HandleKey()/op::Dispatch() invoke the matching\ncallback, so this file contains no key-decoding logic of its own.\n\n\n\n#intro",
                 "children": [],
                 "expanded": false
               },
@@ -5186,7 +5375,7 @@
               {
                 "id": "88457db9",
                 "title": "TreeView Component Class",
-                "content": "TreeView Component Class\n\nFTXUI component owning the document tree (roots_), the current\nselection, and every tree-mode operation. Key events arrive through\nthe operation map installed in the constructor; this file never\ndecodes keys itself.",
+                "content": "TreeView Component Class\n\nFTXUI component owning the document tree (roots_), the current\nselection, and every tree-mode operation. Key events arrive through\nthe operation map installed in the constructor; this file never\ndecodes keys itself.\n\n\n\n#class",
                 "children": [],
                 "expanded": false
               },
@@ -5264,6 +5453,13 @@
             "content": "",
             "children": [
               {
+                "id": "2b1d350e",
+                "title": "Introduction to Undo.cpp",
+                "content": "Introduction to Undo.cpp\n\nThe Undo code file handles the undo dialog and its functionality.\n\n\n\n#intro",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "1b7dd36e",
                 "title": "Diff Marks",
                 "content": "Diff Marks \n\nSignature: std::vector<int> DiffMark(const std::vector<std::string>& snap, const std::vector<std::string>& cur)\nMethod: DiffMark\nReturns: std::vector<int>\nParameters:\n    snap const std::vector<std::string>&\n    cur  const std::vector<std::string>&\n\n\nDiff markers for the preview pane: 0 = unchanged, 1 = changed,\n2 = first changed line.",
@@ -5308,7 +5504,7 @@
               {
                 "id": "8ac92e81",
                 "title": "Undo Dialog Class",
-                "content": "Undo Dialog Class ",
+                "content": "Undo Dialog Class \n\n\n\n#class",
                 "children": [
                   {
                     "id": "d43491e7",
@@ -5408,6 +5604,13 @@
             "title": "visual_block.cpp",
             "content": "",
             "children": [
+              {
+                "id": "7feea1a1",
+                "title": "Introduction to Visual_Block.cpp",
+                "content": "Introduction to Visual_Block.cpp\n\nThe Visual Block code file handles the Editor's Visual Block logic.\n\n\n\n#intro",
+                "children": [],
+                "expanded": false
+              },
               {
                 "id": "d63c4f3e",
                 "title": "Erase",

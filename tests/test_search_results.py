@@ -31,7 +31,7 @@ def make_doc(s):
 # The dialog window's rows (the tree rows sit at the top of the screen).
 DLG = range(3, 27)
 
-s = harness.launch(cols=92, rows=30)
+s = harness.launch(cols=120, rows=30)
 try:
     s.send((':open %s\r' % make_doc(s)).encode())
     s.require('descendant', 'doc should load')
@@ -82,7 +82,7 @@ finally:
     s.quit()
 
 # ---- deferred '+:' search through the '\' dialog ----
-d = harness.launch(cols=92, rows=30)
+d = harness.launch(cols=120, rows=30)
 try:
     d.send((':open %s\r' % make_doc(d)).encode())
     d.require('descendant', 'doc should load')

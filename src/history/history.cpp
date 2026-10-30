@@ -16,6 +16,10 @@ namespace scribbolyth::history
 {
     /*[./Introduction to History.cpp]
         The History.cpp file manages the history dialog and its key bindings.
+
+
+
+        #intro
     */
 
     /*!
@@ -53,7 +57,7 @@ namespace scribbolyth::history
         //!
 
         /*!
-            Entry Struct
+            History Entry Struct
 
         */
         //>>
@@ -63,11 +67,21 @@ namespace scribbolyth::history
             int depth = 0;
         };
         //<<
+        /*|
+
+
+
+            #struct
+        */
         //!
     }
 
     /*!
         History Dialog Class
+
+
+
+        #class
     */
     class HistoryDialog : public ftxui::ComponentBase
     {

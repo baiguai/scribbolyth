@@ -4,6 +4,15 @@
 
 namespace scribbolyth::visual_block
 {
+    /*[./Introduction to Visual_Block.cpp]
+        The Visual Block code file handles the Editor's Visual Block logic.
+
+
+
+        #intro
+    */
+
+
     /*!
         Line Span 
 

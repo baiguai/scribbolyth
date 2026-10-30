@@ -21,6 +21,10 @@ namespace scribbolyth::editor
         The Editor code file handles nearly ALL of the editor functionality.
         If the user is in NORMAL/VISUAL/VISUAL LINE/VISUAL BLOCK mode, this
         file is probably handling what they are doing.
+
+
+
+        #intro
     */
 
     namespace
@@ -264,6 +268,10 @@ namespace scribbolyth::editor
 
     /*!
         The Editor Class
+
+
+
+        #class
     */
     class Editor : public ftxui::ComponentBase
     {
@@ -876,7 +884,7 @@ namespace scribbolyth::editor
             //!
 
             /*!
-                Ftxui Event
+                Ftxui Editor Event Handler
 
                 !_method
             */

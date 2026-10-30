@@ -28,6 +28,10 @@ namespace scribbolyth::bookmarks
         * The Ftxui OnEvent handles the key bindings
 
         * Navigation and removing bookmarks are private members of the class.
+
+
+
+        #intro
     */
 
     namespace
@@ -48,10 +52,14 @@ namespace scribbolyth::bookmarks
         //!
 
         /*!
-            Entry Struct
+            Bookmarks Entry Struct
             Used to create the treeview nodes.
             The line value denotes whether it is a line specific bookmark.
             If the value is -1 it is NOT.
+
+
+
+            #struct
         */
         //>>
         struct Entry
@@ -68,6 +76,10 @@ namespace scribbolyth::bookmarks
     /*!
         BookmarksDialog Class
         (ftxui::ComponentBase)
+
+
+
+        #class
     */
     class BookmarksDialog : public ftxui::ComponentBase
     {

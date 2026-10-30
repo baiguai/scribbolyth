@@ -12,6 +12,14 @@
 
 namespace scribbolyth::regex
 {
+    /*[./Introduction to Regex.cpp]
+        The Regex code file handles the Regex cheatsheet dialog and its functionality.
+
+
+
+        #intro
+    */
+
     namespace
     {
         /*!
@@ -111,6 +119,10 @@ namespace scribbolyth::regex
 
     /*!
         Regex Dialog Class
+
+
+
+        #class
     */
     class RegexDialog : public ftxui::ComponentBase
     {

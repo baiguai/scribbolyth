@@ -19,6 +19,10 @@ inline constexpr int kMaxTreeviewWidth = 200;
 /*[./Introduction to Editor_State.hpp]
     This file handles the state. So if you are working on code that touches
     the state, you can look here for what is available etc.
+
+
+
+    #intro
 */
 
 /*!
@@ -148,33 +152,31 @@ struct EditorState {
     //!
 
     /*!
-        Path Prompt Directories
+        Bookmarked Directories
 
-        The directories used to prefill the file prompts, chosen per command:
-
-            open     - `last_open_dir`   last folder a document was opened from
-            import   - `last_import_dir` last folder an HTML file was imported from
-            save/exp - `current_dir`     folder the current document lives in
-
-        So `:open ` returns you to where you last opened from, `:U ` to where
-        you last imported from, while save-as and every export start next to
-        the document being edited. `last_open_dir` and `last_import_dir` are
-        persisted to init.conf (`open_dir` / `import_dir`) and survive a
-        restart; `current_dir` is derived and tracked as the file is saved or
-        loaded.
+        Directories saved from the file browser for quick access. Pressing
+        'm' in the browser adds the current directory; the list is shown with
+        '`' and persisted to init.conf.
 
         ----
     */
     //>>
-    std::string last_open_dir;
-    std::string last_import_dir;
-    std::string current_dir;
+    std::vector<std::string> bookmarked_dirs;
+    //<<
+    //!
 
-    // The directory automatically inserted into the command prompt by the
-    // most recent `prompt` binding (e.g. pressing `o` gives `:o /dir/`).
-    // Typing '\' in the prompt strips exactly this text back out, so the
-    // user can start from a blank path without backspacing. Empty when the
-    // current prompt was not prefilled.
+    /*!
+        Command Path Prefix
+
+        The path automatically inserted into the command prompt by the most
+        recent `prompt` binding (e.g. pressing `o` gives `:o /`). Typing '\'
+        in the prompt strips exactly this text back out, so the user can start
+        from a blank path without backspacing. Empty when the current prompt
+        was not prefilled.
+
+        ----
+    */
+    //>>
     std::string command_path_prefix;
     //<<
     //!

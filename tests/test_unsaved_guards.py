@@ -31,13 +31,13 @@ try:
     s.send(b'a'); s.send(b'Alpha'); s.send(b'\r')
     s.send(b'I'); s.send(b'alpha body'); s.send(b'\x1b')
     s.send(b'\x1b')             # TREE
-    s.send(b'S'); s.send(b'doc1.json'); s.send(b'\r')
+    s.send(b'S'); s.send(b'\\'); s.send(b'doc1.json'); s.send(b'\r')
     s.require('Alpha', 'doc1 saved')
 
     s.send(b'a'); s.send(b'Beta'); s.send(b'\r')
     s.send(b'I'); s.send(b'beta body'); s.send(b'\x1b')
     s.send(b'\x1b')             # TREE
-    s.send(b'S'); s.send(b'doc2.json'); s.send(b'\r')
+    s.send(b'S'); s.send(b'\\'); s.send(b'doc2.json'); s.send(b'\r')
     s.require('Beta', 'doc2 saved')
 
     # active document is doc1

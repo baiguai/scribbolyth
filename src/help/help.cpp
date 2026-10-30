@@ -15,6 +15,10 @@ namespace scribbolyth::help
 {
     /*[./Introduction to Help.cpp]
         This file handles the help dialog, and its key bindings.
+
+
+
+        #intro
     */
 
     namespace
@@ -307,6 +311,10 @@ namespace scribbolyth::help
 
     /*!
         Help Dialog Class
+
+
+
+        #class
     */
     class HelpDialog : public ftxui::ComponentBase
     {
@@ -743,5 +751,11 @@ namespace scribbolyth::help
     {
         return ftxui::Make<HelpDialog>(std::move(state), config_path, show);
     }
+    /*|
+
+
+
+        #config
+    */
     //!
 }

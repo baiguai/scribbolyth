@@ -13,6 +13,10 @@ namespace scribbolyth::config
 {
     /*[./Introduction to Config.cpp]
         This file handles the loading and storing of configuration data.
+
+
+
+        #intro
     */
 
     namespace
@@ -171,7 +175,7 @@ namespace scribbolyth::config
     */
     bool ReadInit(const std::string& path, std::string& last_file,
                   std::vector<std::string>& recent_files,
-                  std::string& open_dir, std::string& import_dir,
+                  std::vector<std::string>& bookmarked_dirs,
                   int& status_timeout)
     {
         std::ifstream file(path);
@@ -179,8 +183,7 @@ namespace scribbolyth::config
 
         last_file.clear();
         recent_files.clear();
-        open_dir.clear();
-        import_dir.clear();
+        bookmarked_dirs.clear();
         std::string line;
         while (std::getline(file, line))
         {
@@ -215,15 +218,13 @@ namespace scribbolyth::config
                     recent_files.push_back(value);
                 }
             }
-            else if (key == "open_dir")
+            else if (key == "bookmark_dir")
             {
-                // Last directory a document was opened from.
-                open_dir = value;
-            }
-            else if (key == "import_dir")
-            {
-                // Last directory an HTML file was imported from.
-                import_dir = value;
+                // A directory bookmarked from the file browser.
+                if (!value.empty())
+                {
+                    bookmarked_dirs.push_back(value);
+                }
             }
             else if (key == "status_timeout")
             {
@@ -249,7 +250,7 @@ namespace scribbolyth::config
     */
     bool WriteInit(const std::string& path, const std::string& last_file,
                    const std::vector<std::string>& recent_files,
-                   const std::string& open_dir, const std::string& import_dir,
+                   const std::vector<std::string>& bookmarked_dirs,
                    int status_timeout)
     {
         std::ofstream file(path, std::ios::binary);
@@ -258,12 +259,13 @@ namespace scribbolyth::config
         file << "# scribbolyth init configuration - written by the app\n";
         file << "# On startup the app reopens `last_file` when it still exists.\n";
         file << "last_file = " << last_file << "\n";
-        // Last directories opened from and imported from; they prefill the
-        // corresponding command prompts and browser.
-        file << "open_dir = " << open_dir << "\n";
-        file << "import_dir = " << import_dir << "\n";
         // Seconds before a status-bar message auto-hides (0 or less = never).
         file << "status_timeout = " << status_timeout << "\n";
+        // Directories bookmarked from the file browser.
+        for (const auto& dir : bookmarked_dirs)
+        {
+            file << "bookmark_dir = " << dir << "\n";
+        }
         for (const auto& recent : recent_files)
         {
             file << "recent_file = " << recent << "\n";
@@ -279,16 +281,15 @@ namespace scribbolyth::config
     */
     bool WriteRecentFiles(const std::string& path, const std::vector<std::string>& recent_files)
     {
-        // Read the settings this call does not own (last_file, the two
-        // remembered directories and the status timeout) so rewriting the
-        // recents does not drop them.
+        // Read the settings this call does not own (last_file, the status
+        // timeout and directory bookmarks) so rewriting the recents does not
+        // drop them.
         std::string last_file;
-        std::string open_dir;
-        std::string import_dir;
         int status_timeout = 8; // matches EditorState's default
         std::vector<std::string> ignored;
-        ReadInit(path, last_file, ignored, open_dir, import_dir, status_timeout);
-        return WriteInit(path, last_file, recent_files, open_dir, import_dir, status_timeout);
+        std::vector<std::string> bookmarked_dirs;
+        ReadInit(path, last_file, ignored, bookmarked_dirs, status_timeout);
+        return WriteInit(path, last_file, recent_files, bookmarked_dirs, status_timeout);
     }
     //!
 }
