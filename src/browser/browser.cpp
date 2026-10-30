@@ -34,6 +34,7 @@ namespace scribbolyth::browser
         * The initial directory is determined via: state_->browser_start_dir
         * Another state helper is: state_->browser_pick
         * `m` bookmarks the shown directory; ` shows the bookmark list.
+            * _Render Browser Dialog_ was updated to accomodate the bookmarks footer information.
     */
 
     namespace
@@ -347,7 +348,7 @@ namespace scribbolyth::browser
         //!
 
         /*!
-            Render the Element
+            Render Browser Dialog
 
             !_method
         */

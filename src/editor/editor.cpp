@@ -876,7 +876,7 @@ namespace scribbolyth::editor
             //!
 
             /*!
-                Ftxui Event
+                Ftxui Editor Event Handler
 
                 !_method
             */
