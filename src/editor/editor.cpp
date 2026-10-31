@@ -606,6 +606,10 @@ namespace scribbolyth::editor
                 {
                     FormatTable();
                 };
+                state_->operations["indent"] = [this](const std::string&, int count)
+                {
+                    IndentText(count);
+                };
 
                 state_->reveal_line = [this](int line)
                 {
@@ -1575,6 +1579,40 @@ namespace scribbolyth::editor
                 state_->mode = Mode::NORMAL;
                 Save();
                 state_->status = "Table updated";
+            }
+            //!
+
+            /*!
+                Indent Text
+
+                !_method
+
+                Indents the selected text by n tabs.
+            */
+            void IndentText(int count)
+            {
+                if (active_ == nullptr) return;
+                LoadIfChanged();
+                if (lines_.empty()) lines_.push_back("");
+
+                const int tabs = std::max(1, count);
+                int a = (visual_row_ >= 0) ? std::min(visual_row_, row_) : row_;
+                int b = (visual_row_ >= 0) ? std::max(visual_row_, row_) : row_;
+                if (a > b) std::swap(a, b);
+
+                const std::string indent(static_cast<std::size_t>(tabs) * 4, ' ');
+                for (int r = a; r <= b; ++r)
+                {
+                    lines_[r].insert(0, indent);
+                }
+
+                row_ = a;
+                col_ = 0;
+                last_col_ = 0;
+                visual_row_ = -1;
+                visual_col_ = -1;
+                state_->mode = Mode::NORMAL;
+                Save();
             }
             //!
 
