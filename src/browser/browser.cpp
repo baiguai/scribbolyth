@@ -35,6 +35,10 @@ namespace scribbolyth::browser
         * Another state helper is: state_->browser_pick
         * `m` bookmarks the shown directory; ` shows the bookmark list.
             * _Render Browser Dialog_ was updated to accomodate the bookmarks footer information.
+
+
+
+        #intro
     */
 
     namespace
@@ -124,6 +128,10 @@ namespace scribbolyth::browser
     /*!
         FileBrowserDialog Class
         (ftxui::ComponentBase)
+
+
+
+        #class
     */
     class FileBrowserDialog : public ftxui::ComponentBase
     {
@@ -535,7 +543,7 @@ namespace scribbolyth::browser
         //!
 
         /*!
-            Entry Struct
+            Browser Entry Struct
 
         */
         //>>
@@ -546,6 +554,12 @@ namespace scribbolyth::browser
             std::string path;
         };
         //<<
+        /*|
+
+
+
+            #struct
+        */
         //!
 
         /*!

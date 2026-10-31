@@ -6,6 +6,14 @@
 
 namespace scribbolyth::text
 {
+    /*[./Introduction to Text.cpp]
+        The Text code file handles the conversion of special characters to the ASCII characters the app can handle.
+
+
+
+        #intro
+    */
+
     namespace
     {
         /*!

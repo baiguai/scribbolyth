@@ -17,6 +17,14 @@
 
 namespace scribbolyth::recent
 {
+    /*[./Introduction to Recent.cpp]
+        The Recent code file handles the recents dialog and its functionality.
+
+
+
+        #intro
+    */
+
     namespace
     {
         /*!
@@ -34,6 +42,10 @@ namespace scribbolyth::recent
 
     /*!
         Recent Dialog Class
+
+
+
+        #class
     */
     class RecentDialog : public ftxui::ComponentBase
     {

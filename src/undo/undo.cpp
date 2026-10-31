@@ -13,6 +13,14 @@
 
 namespace scribbolyth::undo
 {
+    /*[./Introduction to Undo.cpp]
+        The Undo code file handles the undo dialog and its functionality.
+
+
+
+        #intro
+    */
+
     namespace
     {
         /*!
@@ -142,6 +150,10 @@ namespace scribbolyth::undo
 
     /*!
         Undo Dialog Class 
+
+
+
+        #class
     */
     class UndoDialog : public ftxui::ComponentBase
     {

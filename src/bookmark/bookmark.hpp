@@ -8,6 +8,9 @@ namespace scribbolyth::bookmark
     /*!
         Bookmark Struct
 
+
+
+        #struct
     */
     //>>
     struct Bookmark
