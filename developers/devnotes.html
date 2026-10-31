@@ -2628,47 +2628,47 @@
                 "content": "Help Dialog Class\n\n\n\n#class",
                 "children": [
                   {
-                    "id": "25211aa4",
+                    "id": "146e7da4",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "95eacb2e",
+                        "id": "53c098f4",
                         "title": "Filtered Vector",
                         "content": "Filtered Vector\n\nstd::vector<int> Filtered() const\n{\n    std::vector<int> result;\n\n    std::string needle = Lower(filter_);\n    bool key_only = false;\n    if (!needle.empty() && needle[0] == ':')\n    {\n        key_only = true;\n        needle = needle.substr(1);\n    }\n\n    for (std::size_t i = 0; i < entries_.size(); ++i)\n    {\n        const std::string& hay = key_only ? entries_[i].key : entries_[i].line;\n        if (needle.empty() || Lower(hay).find(needle) != std::string::npos)\n        {\n            result.push_back(static_cast<int>(i));\n        }\n    }\n    return result;\n}",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "214a11ee",
+                        "id": "272c69f5",
                         "title": "Inner Width Const",
                         "content": "Inner Width Const\n\nThe width of the dialog content: as wide as the widest binding\nline, but never wider than the dialog itself.\n\nSignature: int InnerWidth() const\nMethod: InnerWidth\nReturns: int\nQualifiers: const",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "bb779db1",
+                        "id": "efecc692",
                         "title": "Max Topic Top Const",
                         "content": "Max Topic Top Const\n\nSignature: int MaxTopicTop() const\nMethod: MaxTopicTop\nReturns: int\nQualifiers: const",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "05531b1c",
+                        "id": "eb83e4dc",
                         "title": "Move Selection Up / Down",
                         "content": "Move Selection Up / Down\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "861c173e",
+                        "id": "f5cd805c",
                         "title": "Refilter",
                         "content": "Refilter\n\nAfter the filter changes, select the first binding that matches.\n\nSignature: void Refilter()\nMethod: Refilter\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "e48be0ca",
+                        "id": "658eca4a",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nstd::vector<HelpEntry> entries_;\nstd::string filter_;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 72;\nbool topic_open_ = false;\nstd::string topic_title_;\nstd::string topic_summary_;\nstd::vector<std::string> topic_lines_;\nint topic_scroll_ = 0;\nstatic constexpr int kVisibleRows = 18;\nstatic constexpr int kMaxInnerWidth = 90;",
                         "children": [],
@@ -2693,7 +2693,78 @@
                         "id": "49aa3b3a",
                         "title": "Event Handler",
                         "content": "Event Handler\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
-                        "children": [],
+                        "children": [
+                          {
+                            "id": "f376bd73",
+                            "title": "Escape",
+                            "content": "Escape\n\nHide the help dialog.\n\n*show_ = false;\nfilter_.clear();\nselection_ = 0;\nscroll_ = 0;\nreturn true;",
+                            "children": [],
+                            "expanded": false
+                          },
+                          {
+                            "id": "ea4a59d3",
+                            "title": "Return",
+                            "content": "Return\n\nOpen detailed help on the selected topic.\n\nOpenTopic();\nreturn true;",
+                            "children": [],
+                            "expanded": false
+                          },
+                          {
+                            "id": "bb3627e0",
+                            "title": "Arrow Down",
+                            "content": "Arrow Down\n\nMove selection down.\n\nMoveSelection(+1);\nreturn true;",
+                            "children": [],
+                            "expanded": false
+                          },
+                          {
+                            "id": "0f19bde3",
+                            "title": "Arrow Up",
+                            "content": "Arrow Up\n\nMove selection up.\n\nMoveSelection(-1);\nreturn true;",
+                            "children": [],
+                            "expanded": false
+                          },
+                          {
+                            "id": "7658d3ed",
+                            "title": "Page Down",
+                            "content": "Page Down\n\nMoves one page down (page being the count of visible rows).\n\nMoveSelection(+kVisibleRows);\nreturn true;",
+                            "children": [],
+                            "expanded": false
+                          },
+                          {
+                            "id": "25211aa4",
+                            "title": "Page Up",
+                            "content": "Page Up\n\nMoves one page up (page being the count of visible rows).\n\nMoveSelection(-kVisibleRows);\nreturn true;",
+                            "children": [],
+                            "expanded": false
+                          },
+                          {
+                            "id": "74b29524",
+                            "title": "Home",
+                            "content": "Home\n\nMove to the top of the help topics.\n\nMoveSelection(-std::max(0, static_cast<int>(Filtered().size())));\nreturn true;",
+                            "children": [],
+                            "expanded": false
+                          },
+                          {
+                            "id": "e2e23b6e",
+                            "title": "End",
+                            "content": "End\n\nMove to the bottom of the help topics.\n\nMoveSelection(std::max(0, static_cast<int>(Filtered().size())));\nreturn true;",
+                            "children": [],
+                            "expanded": false
+                          },
+                          {
+                            "id": "98e884b8",
+                            "title": "Backspace",
+                            "content": "Backspace\n\nWhen filtering, deletes the character before the cursor.\n\nif (!filter_.empty())\n{\n    filter_.pop_back();\n    Refilter();\n}\nreturn true;",
+                            "children": [],
+                            "expanded": false
+                          },
+                          {
+                            "id": "81dbab8d",
+                            "title": "Normal Character",
+                            "content": "Normal Character\n\nWhen filtering enters the specified character.\n\nfilter_ += event.character();\nRefilter();\nreturn true;",
+                            "children": [],
+                            "expanded": false
+                          }
+                        ],
                         "expanded": false
                       },
                       {
@@ -2704,28 +2775,28 @@
                         "expanded": false
                       },
                       {
-                        "id": "f1fe093e",
+                        "id": "b4baf93e",
                         "title": "Open Topic",
                         "content": "Open Topic\n\nShow the full help topic of the highlighted key binding. Bindings\nwithout a topic of their own fall back to their description, so\nEnter always opens the help view.\n\nSignature: void OpenTopic()\nMethod: OpenTopic\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "685aaf0a",
+                        "id": "197d61e6",
                         "title": "Render the Help Dialog",
                         "content": "Render the Help Dialog\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "ade9bd58",
+                        "id": "eef19775",
                         "title": "Render Topic",
                         "content": "Render Topic\n\nFill the help dialog with the full help topic.\n\nSignature: ftxui::Element RenderTopic()\nMethod: RenderTopic\nReturns: ftxui::Element",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "69501ccf",
+                        "id": "e48be0ca",
                         "title": "Topic Event Handler",
                         "content": "Topic Event Handler\n\nWhile the full help topic is shown every key is consumed, except\nfor the keys that scroll it and the ones that close it again.\n\nSignature: bool OnTopicEvent(ftxui::Event event)\nMethod: OnTopicEvent\nReturns: bool\nParameters:\n    event ftxui::Event",
                         "children": [],
@@ -2787,7 +2858,7 @@
                 "expanded": false
               },
               {
-                "id": "197d61e6",
+                "id": "313f8f3d",
                 "title": "Make Help Dialog",
                 "content": "Make Help Dialog\n\nSignature: ftxui::Component MakeHelpDialog(std::shared_ptr<EditorState> state, const std::string& config_path, bool* show)\nMethod: MakeHelpDialog\nReturns: ftxui::Component\nParameters:\nstate       std::shared_ptr<EditorState>\nconfig_path const std::string&\nshow        bool*\n\n#config",
                 "children": [],
