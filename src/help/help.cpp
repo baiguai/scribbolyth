@@ -414,38 +414,86 @@ namespace scribbolyth::help
             }
             if (event == ftxui::Event::PageDown)
             {
+                /*>
+                    Page Down
+
+                    Moves one page down (page being the count of visible rows).
+                */
+                //>>
                 MoveSelection(+kVisibleRows);
                 return true;
+                //<<
+                //!
             }
             if (event == ftxui::Event::PageUp)
             {
+                /*>
+                    Page Up
+
+                    Moves one page up (page being the count of visible rows).
+                */
+                //>>
                 MoveSelection(-kVisibleRows);
                 return true;
+                //<<
+                //!
             }
             if (event == ftxui::Event::Home)
             {
+                /*>
+                    Home
+
+                    Move to the top of the help topics.
+                */
+                //>>
                 MoveSelection(-std::max(0, static_cast<int>(Filtered().size())));
                 return true;
+                //<<
+                //!
             }
             if (event == ftxui::Event::End)
             {
+                /*>
+                    End
+
+                    Move to the bottom of the help topics.
+                */
+                //>>
                 MoveSelection(std::max(0, static_cast<int>(Filtered().size())));
                 return true;
+                //<<
+                //!
             }
             if (event == ftxui::Event::Backspace)
             {
+                /*>
+                    Backspace
+
+                    When filtering, deletes the character before the cursor.
+                */
+                //>>
                 if (!filter_.empty())
                 {
                     filter_.pop_back();
                     Refilter();
                 }
                 return true;
+                //<<
+                //!
             }
             if (event.is_character())
             {
+                /*>
+                    Normal Character
+
+                    When filtering enters the specified character.
+                */
+                //>>
                 filter_ += event.character();
                 Refilter();
                 return true;
+                //<<
+                //!
             }
             return true;
         }
