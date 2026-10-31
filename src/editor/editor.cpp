@@ -281,18 +281,27 @@ namespace scribbolyth::editor
             */
 
             /*!
-                Constructor
+                Editor Constructor
 
                 !_ctor
             */
             Editor(std::shared_ptr<EditorState> state) : state_(std::move(state))
             {
+                /*!
+                    cursor_up
+
+                    Method:
+                    CurorUp()
+
+                    #keycodes
+                */
                 state_->operations["cursor_up"] = [this](const std::string&, int count)
                 {
                     if (!Editable()) return;
                     for (int i = 0; i < count; ++i) CursorUp();
                     Clamp();
                 };
+                //!
                 state_->operations["cursor_down"] = [this](const std::string&, int count)
                 {
                     if (!Editable()) return;

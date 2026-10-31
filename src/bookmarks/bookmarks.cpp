@@ -88,7 +88,7 @@ namespace scribbolyth::bookmarks
             Public Members
         */
         /*!
-            Constructor
+            Bookmarks Constructor
 
             !_ctor
 

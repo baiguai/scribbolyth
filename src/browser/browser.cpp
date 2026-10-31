@@ -140,7 +140,7 @@ namespace scribbolyth::browser
             Public Members
         */
         /*!
-            Constructor
+            Browser Constructor
 
             !_ctor
         */

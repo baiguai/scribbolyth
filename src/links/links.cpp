@@ -350,7 +350,7 @@ namespace scribbolyth::links
         */
 
         /*!
-            Constructor
+            LinksDialog Constructor
 
             !_ctor
         */

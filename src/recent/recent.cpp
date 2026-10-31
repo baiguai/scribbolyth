@@ -55,7 +55,7 @@ namespace scribbolyth::recent
         */
 
         /*!
-            Constructor
+            Recent Dialog Constructor
 
             !_cstor
         */

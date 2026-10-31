@@ -324,7 +324,7 @@ namespace scribbolyth::help
         */
 
         /*!
-            Constructor
+            Help Constructor
 
             !_ctor
         */

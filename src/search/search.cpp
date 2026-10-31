@@ -492,7 +492,7 @@ namespace scribbolyth::search
         */
 
         /*!
-            Constructor
+            Search Dialog Constructor
 
             !_ctor
         */
