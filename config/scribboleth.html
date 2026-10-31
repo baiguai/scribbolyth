@@ -1343,6 +1343,8 @@
                     { key: "y", mode: "VISUAL", description: "Copy selection" },
                     { key: "U", mode: "VISUAL", description: "Convert to uppercase" },
                     { key: "u", mode: "VISUAL", description: "Convert to lowercase" },
+                    { key: "*", mode: "VISUAL LINE", description: "Add bullet prefix to selected lines" },
+                    { key: "#", mode: "VISUAL LINE", description: "Number selected lines" },
                     { key: "Control+#", mode: "VISUAL", description: "Order numbered list" },
                     { key: "Control+;", mode: "VISUAL", description: "Create/Update table" },
                     { key: "Escape", mode: "VISUAL BLOCK", description: "Exit to NORMAL mode" },
@@ -3152,6 +3154,20 @@
                             for (let i = 0; i < mode_repeat; i++) moveSpace();
                             keyPerformed();
                             return true;
+                        case '*':
+                            if (mode_visual_line) {
+                                applyVisualLinePrefix('*');
+                                keyPerformed();
+                                return true;
+                            }
+                            break;
+                        case '#':
+                            if (mode_visual_line) {
+                                applyVisualLinePrefix('#');
+                                keyPerformed();
+                                return true;
+                            }
+                            break;
                         case 'd': // Delete selection
                             doVisualDelete(e);
                             return true;
@@ -5481,6 +5497,47 @@
                 editorArea.selectionEnd = start + convertedText.length;
                 syncFile();
                 exitVisualMode();
+            }
+
+            function applyVisualLinePrefix(type) {
+                let start = editorArea.selectionStart;
+                let end = editorArea.selectionEnd;
+
+                if (end < start) {
+                    [start, end] = [end, start];
+                }
+
+                let trailingNewline = false;
+                if (end > start && editorArea.value[end - 1] === '\n') {
+                    trailingNewline = true;
+                    end -= 1;
+                }
+
+                const lines = editorArea.value.slice(start, end).split('\n');
+                let lineNumber = 1;
+
+                const transformed = lines.map(line => {
+                    if (type === '*') {
+                        return /^\* /.test(line) ? line : '* ' + line;
+                    }
+
+                    let newLine;
+                    if (/^\d+\.\s+/.test(line)) {
+                        newLine = line.replace(/^\d+\.\s+/, `${lineNumber}. `);
+                    } else {
+                        newLine = `${lineNumber}. ${line}`;
+                    }
+                    lineNumber++;
+                    return newLine;
+                });
+
+                const result = transformed.join('\n') + (trailingNewline ? '\n' : '');
+
+                recordUndoState();
+                editorArea.setRangeText(result, start, end + (trailingNewline ? 1 : 0), 'start');
+                editorArea.selectionStart = editorArea.selectionEnd = start;
+                syncFile();
+                exitVisualMode(false);
             }
 
         //---- Theme Methods ---------------------------------------------------
