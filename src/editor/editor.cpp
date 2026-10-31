@@ -614,7 +614,14 @@ namespace scribbolyth::editor
                 {
                     OutdentText(count);
                 };
-
+                state_->operations["bullet"] = [this](const std::string&, int)
+                {
+                    Bullet();
+                };
+                state_->operations["number"] = [this](const std::string&, int)
+                {
+                    Number();
+                };
                 state_->reveal_line = [this](int line)
                 {
                     LoadIfChanged();
@@ -1645,6 +1652,98 @@ namespace scribbolyth::editor
                     std::size_t leading = line.find_first_not_of(' ');
                     if (leading == std::string::npos) leading = line.size();
                     line.erase(0, std::min(leading, remove));
+                }
+                
+                row_ = a;
+                col_ = 0;
+                last_col_ = 0;
+                visual_row_ = -1;
+                visual_col_ = -1;
+                state_->mode = Mode::NORMAL;
+                Save();
+            }
+            //!
+
+            /*!
+                Bullet
+
+                !_method
+
+                Adds bullets (*) to the start of all of the selected lines of text.
+            */
+            void Bullet()
+            {
+                if (active_ == nullptr) return;
+                LoadIfChanged();
+                if (lines_.empty()) lines_.push_back("");
+
+                int a = (visual_row_ >= 0) ? std::min(visual_row_, row_) : row_;
+                int b = (visual_row_ >= 0) ? std::max(visual_row_, row_) : row_;
+                if (a > b) std::swap(a, b);
+
+                const std::string bullet { "* " };
+                for (int r = a; r <= b; ++r)
+                {
+                    if (lines_[r].rfind(bullet, 0) != 0)
+                    {
+                        lines_[r].insert(0, bullet);
+                    }
+                }
+
+                row_ = a;
+                col_ = 0;
+                last_col_ = 0;
+                visual_row_ = -1;
+                visual_col_ = -1;
+                state_->mode = Mode::NORMAL;
+                Save();
+            }
+            //!
+
+            /*!
+                Numbered List
+
+                !_method
+
+                Adds Numbered Bullets to the start of all of the selected lines of text OR updates existing numbered lists.
+            */
+            void Number()
+            {
+                if (active_ == nullptr) return;
+                LoadIfChanged();
+                if (lines_.empty()) lines_.push_back("");
+
+                int a = (visual_row_ >= 0) ? std::min(visual_row_, row_) : row_;
+                int b = (visual_row_ >= 0) ? std::max(visual_row_, row_) : row_;
+                if (a > b) std::swap(a, b);
+
+                int curNum = 1;
+                for (int r = a; r <= b; ++r)
+                {
+                    std::string& line = lines_[r];
+                    const std::string num = std::to_string(curNum) + ". ";
+                
+                    std::size_t digits = 0;
+                    while (digits < line.size() && line[digits] >= '0' && line[digits] <= '9')
+                    {
+                        ++digits;
+                    }
+                
+                    const bool numbered = digits > 0
+                        && digits + 1 < line.size()
+                        && line[digits] == '.'
+                        && line[digits + 1] == ' ';
+                
+                    if (numbered)
+                    {
+                        line.replace(0, digits + 2, num);
+                    }
+                    else
+                    {
+                        line.insert(0, num);
+                    }
+                
+                    ++curNum;
                 }
                 
                 row_ = a;
