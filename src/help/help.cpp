@@ -359,26 +359,58 @@ namespace scribbolyth::help
 
             if (event == ftxui::Event::Escape)
             {
+                /*>
+                    Escape
+
+                    Hide the help dialog.
+                */
+                //>>
                 *show_ = false;
                 filter_.clear();
                 selection_ = 0;
                 scroll_ = 0;
                 return true;
+                //<<
+                //!
             }
             if (event == ftxui::Event::Return)
             {
+                /*>
+                    Return
+
+                    Open detailed help on the selected topic.
+                */
+                //>>
                 OpenTopic();
                 return true;
+                //<<
+                //!
             }
             if (event == ftxui::Event::ArrowDown)
             {
+                /*>
+                    Arrow Down
+
+                    Move selection down.
+                */
+                //>>
                 MoveSelection(+1);
                 return true;
+                //<<
+                //!
             }
             if (event == ftxui::Event::ArrowUp)
             {
+                /*>
+                    Arrow Up
+
+                    Move selection up.
+                */
+                //>>
                 MoveSelection(-1);
                 return true;
+                //<<
+                //!
             }
             if (event == ftxui::Event::PageDown)
             {
