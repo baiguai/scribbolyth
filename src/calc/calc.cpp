@@ -38,7 +38,7 @@ namespace scribbolyth::calc
                     Public Members
                 */
                 /*!
-                    Constructor
+                    Evaluator Constructor
 
                     !_ctor
                 */

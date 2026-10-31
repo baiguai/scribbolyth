@@ -89,7 +89,7 @@ namespace scribbolyth::brokenlinks
         */
 
         /*!
-            Constructor
+            DeadLinksDialog Constructor
 
             !_ctor
         */

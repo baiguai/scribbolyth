@@ -132,7 +132,7 @@ namespace scribbolyth::regex
         */
 
         /*!
-            Constructor
+            Regex Dialog Constructor
 
             !_ctor
         */

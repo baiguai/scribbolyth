@@ -1120,8 +1120,8 @@
                     "children": [
                       {
                         "id": "276e0339",
-                        "title": "Constructor",
-                        "content": "Constructor\n\nSignature: BookmarksDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: BookmarksDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
+                        "title": "Bookmarks Constructor",
+                        "content": "Bookmarks Constructor\n\nSignature: BookmarksDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: BookmarksDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
                         "children": [],
                         "expanded": false
                       },
@@ -1401,8 +1401,8 @@
                     "children": [
                       {
                         "id": "c8ec3c4a",
-                        "title": "Constructor",
-                        "content": "Constructor\n\nSignature: FileBrowserDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: FileBrowserDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
+                        "title": "Browser Constructor",
+                        "content": "Browser Constructor\n\nSignature: FileBrowserDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: FileBrowserDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
                         "children": [],
                         "expanded": false
                       },
@@ -1718,8 +1718,8 @@
                     "children": [
                       {
                         "id": "f28cf7db",
-                        "title": "Constructor",
-                        "content": "Constructor\n\nSignature: explicit Evaluator(const std::string& s) : s_(s)\nConstructor: Evaluator\nQualifiers: explicit\nParameters:\n    s const std::string&\nInitializers:\n    s_ s",
+                        "title": "Evaluator Constructor",
+                        "content": "Evaluator Constructor\n\nSignature: explicit Evaluator(const std::string& s) : s_(s)\nConstructor: Evaluator\nQualifiers: explicit\nParameters:\n    s const std::string&\nInitializers:\n    s_ s",
                         "children": [],
                         "expanded": false
                       },
@@ -2018,250 +2018,250 @@
                 "content": "The Editor Class\n\n\n\n#class",
                 "children": [
                   {
-                    "id": "fc6575a4",
+                    "id": "a78f1005",
                     "title": "Apply the Block Insert",
                     "content": "Apply the Block Insert\n\nSignature: void ApplyBlockInsert()\nMethod: ApplyBlockInsert\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "939af84f",
+                    "id": "606a8492",
                     "title": "Block Insert Struct",
                     "content": "Block Insert Struct\n\nstruct BlockInsert\n{\n    bool active = false;\n    bool at_end = false;\n    int col = 0;\n    std::vector<int> rows;\n    std::string pending;\n};",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "7e4fbe6f",
+                    "id": "07f5a469",
                     "title": "Bullet",
                     "content": "Bullet\n\nSignature: void Bullet()\nMethod: Bullet\nReturns: void\n\nAdds bullets (*) to the start of all of the selected lines of text.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "d34427ee",
+                    "id": "0128d795",
                     "title": "Clamp",
                     "content": "Clamp\n\nSignature: void Clamp()\nMethod: Clamp\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "a78f1005",
+                    "id": "f0ae98ed",
                     "title": "Delete Character",
                     "content": "Delete Character\n\nSignature: void DeleteChar()\nMethod: DeleteChar\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "9eff12dd",
+                    "id": "208870e2",
                     "title": "Delete Inner Word",
                     "content": "Delete Inner Word\n\nSignature: void DeleteInnerWord()\nMethod: DeleteInnerWord\nReturns: void\n\nDelete the inner word under the cursor (diw): the word's\ncharacters only, keeping surrounding whitespace, mirroring the\nbounds chosen by SelectInnerWord().",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "f0ae98ed",
+                    "id": "7807cbbb",
                     "title": "Delete Line",
                     "content": "Delete Line\n\nSignature: void DeleteLine()\nMethod: DeleteLine\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "7fcc9d42",
+                    "id": "5e74384a",
                     "title": "Delete Selection",
                     "content": "Delete Selection\n\nSignature: void DeleteSelection()\nMethod: DeleteSelection\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "7807cbbb",
+                    "id": "1a1af5d8",
                     "title": "Delete to End of Line",
                     "content": "Delete to End of Line\n\nSignature: void DeleteToEol()\nMethod: DeleteToEol\nReturns: void\n\nVim 'D' = 'd$': delete from the cursor to the end of the line,\nleaving the line itself (and the newline) in place.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "208870e2",
+                    "id": "80d353fb",
                     "title": "Delete Word Back",
                     "content": "Delete Word Back\n\nSignature: void DeleteWordBack()\nMethod: DeleteWordBack\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "d1bd61a1",
+                    "id": "943aae2d",
                     "title": "Delete Word End",
                     "content": "Delete Word End\n\nSignature: void DeleteWordEnd()\nMethod: DeleteWordEnd\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "80d353fb",
+                    "id": "d1bd61a1",
                     "title": "Delete Word Forward",
                     "content": "Delete Word Forward\n\nSignature: void DeleteWordForward()\nMethod: DeleteWordForward\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "c06a299a",
+                    "id": "fc6575a4",
                     "title": "Enter Block Insert Mode",
                     "content": "Enter Block Insert Mode\n\nSignature: void EnterBlockInsert(bool at_end)\nMethod: EnterBlockInsert\nReturns: void\nParameters:\n    at_end bool\n\nEnter INSERT mode with a pending block insert (Vim Ctrl+V then\nI/A). The text the user types is accumulated in block_insert_ and\nshown live on the top row; ApplyBlockInsert() replays it on the\nremaining rows when Esc is pressed.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "76f23bf7",
+                    "id": "70d3e5b5",
                     "title": "Follow Link Under Cursor",
                     "content": "Follow Link Under Cursor\n\nSignature: void FollowLinkUnderCursor()\nMethod: FollowLinkUnderCursor\nReturns: void\n\nIf the cursor sits on a link, open it (URL) or reveal its target\nnode (`_Note_`). Otherwise report it in the status area.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "4889b012",
+                    "id": "76f23bf7",
                     "title": "Get Word Under Cursor",
                     "content": "Get Word Under Cursor\n\nSignature: std::string WordUnderCursor() const\nMethod: WordUnderCursor\nReturns: std::string\nQualifiers: const\n\nThe word (letters, digits, '_') under the editor cursor, as Vim\ndefines it for '*'. When the cursor sits right after a word,\nthat word is used.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "fad06de1",
+                    "id": "c06a299a",
                     "title": "Handle Backspace",
                     "content": "Handle Backspace\n\nSignature: void Backspace()\nMethod: Backspace\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "46c80e8d",
+                    "id": "ac5632b8",
                     "title": "Indent Text",
                     "content": "Indent Text\n\nSignature: void IndentText(int count)\nMethod: IndentText\nReturns: void\nParameters:\n    count int\n\nIndents the selected text by n tabs.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "30d4c920",
+                    "id": "fad06de1",
                     "title": "Insert New Line",
                     "content": "Insert New Line\n\nSignature: void InsertNewline()\nMethod: InsertNewline\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "943aae2d",
+                    "id": "3aa6f392",
                     "title": "Insert Text",
                     "content": "Insert Text\n\nSignature: void InsertText(const std::string& text)\nMethod: InsertText\nReturns: void\nParameters:\n    text const std::string&",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "ab938768",
+                    "id": "2a375952",
                     "title": "Move Back Word",
                     "content": "Move Back Word\n\nSignature: void CursorWordBack()\nMethod: CursorWordBack\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "32494df7",
+                    "id": "f5bf1b9c",
                     "title": "Move Cursor Down",
                     "content": "Move Cursor Down\n\nSignature: void CursorDown()\nMethod: CursorDown\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "f5bf1b9c",
+                    "id": "a222a350",
                     "title": "Move Cursor Left",
                     "content": "Move Cursor Left\n\nSignature: void CursorLeft()\nMethod: CursorLeft\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "a222a350",
+                    "id": "25bbfd02",
                     "title": "Move Cursor Right",
                     "content": "Move Cursor Right\n\nSignature: void CursorRight()\nMethod: CursorRight\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "28d34adf",
+                    "id": "8e5e3f57",
                     "title": "Move Cursor to Position",
                     "content": "Move Cursor to Position\n\nSignature: void SetCursor(int row, int col)\nMethod: SetCursor\nReturns: void\nParameters:\n    row int\n    col int\n\nPlace the cursor on (row, col), clamped to the document.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "0128d795",
+                    "id": "32494df7",
                     "title": "Move Cursor Up",
                     "content": "Move Cursor Up\n\nSignature: void CursorUp()\nMethod: CursorUp\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "df35cf44",
+                    "id": "ab938768",
                     "title": "Move Forward Word",
                     "content": "Move Forward Word\n\nSignature: void CursorWordForward()\nMethod: CursorWordForward\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "1a1af5d8",
+                    "id": "7f2f4a1b",
                     "title": "Move Line",
                     "content": "Move Line\n\nSignature: void MoveLine(int dir)\nMethod: MoveLine\nReturns: void\nParameters:\n    dir int\n\nVim-style line move: swap the current line with the one above\n(dir < 0) or below (dir > 0), carrying the cursor with it.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "2a375952",
+                    "id": "6435cfa1",
                     "title": "Move to Word End",
                     "content": "Move to Word End\n\nSignature: void CursorWordEnd()\nMethod: CursorWordEnd\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "07f5a469",
+                    "id": "f5aeecdb",
                     "title": "Numbered List",
                     "content": "Numbered List\n\nSignature: void Number()\nMethod: Number\nReturns: void\n\nAdds Numbered Bullets to the start of all of the selected lines of text OR updates existing numbered lists.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "ac5632b8",
+                    "id": "7e4fbe6f",
                     "title": "Outdent Text",
                     "content": "Outdent Text\n\nSignature: void OutdentText(int count)\nMethod: OutdentText\nReturns: void\nParameters:\n    count int\n\n'Outdents' the selected text by n tabs.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "6e602de8",
+                    "id": "df35cf44",
                     "title": "Page Down",
                     "content": "Page Down\n\nSignature: void CursorPageDown()\nMethod: CursorPageDown\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "25bbfd02",
+                    "id": "6e602de8",
                     "title": "Page Up",
                     "content": "Page Up\n\nSignature: void CursorPageUp()\nMethod: CursorPageUp\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "3aa6f392",
+                    "id": "30d4c920",
                     "title": "Paste Text",
                     "content": "Paste Text\n\nSignature: void PasteText(const std::string& text)\nMethod: PasteText\nReturns: void\nParameters:\n    text const std::string&\n\nInsert clipboard-style text (possibly multi-line) at the cursor.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "606c38b0",
+                    "id": "4a8c769a",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "cefb667a",
+                        "id": "514e462d",
                         "title": "Editable Flag",
                         "content": "Editable Flag\n\nSignature: bool Editable()\nMethod: Editable\nReturns: bool",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "514e462d",
+                        "id": "39cf9c0d",
                         "title": "Load if Changed",
                         "content": "Load if Changed\n\nSignature: void LoadIfChanged()\nMethod: LoadIfChanged\nReturns: void\n\nHow Comparison is Done:\n\nCompare by id, not just pointer: nodes live in std::vectors,\nso erasing one (e.g. deleting a node) can leave a different\nnode at the same address as the previously loaded one.",
                         "children": [],
@@ -2277,27 +2277,35 @@
                     "children": [
                       {
                         "id": "371eef95",
-                        "title": "Constructor",
-                        "content": "Constructor\n\nSignature: Editor(std::shared_ptr<EditorState> state) : state_(std::move(state))\nConstructor: Editor\nParameters:\n    state std::shared_ptr<EditorState>\nInitializers:\n    state_ std::move(state)",
-                        "children": [],
+                        "title": "Editor Constructor",
+                        "content": "Editor Constructor\n\nSignature: Editor(std::shared_ptr<EditorState> state) : state_(std::move(state))\nConstructor: Editor\nParameters:\n    state std::shared_ptr<EditorState>\nInitializers:\n    state_ std::move(state)",
+                        "children": [
+                          {
+                            "id": "763386f8",
+                            "title": "cursor_up",
+                            "content": "cursor_up\n\nMethod:\nCurorUp()\n\n#keycodes",
+                            "children": [],
+                            "expanded": false
+                          }
+                        ],
                         "expanded": false
                       },
                       {
-                        "id": "adcb0629",
+                        "id": "8ffdfd76",
                         "title": "Focusable Const",
                         "content": "Focusable Const\n\nbool Focusable() const override\n{\n    return true;\n}",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "8ffdfd76",
+                        "id": "1d65cfc1",
                         "title": "Ftxui Editor Event Handler",
                         "content": "Ftxui Editor Event Handler\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "b5b7722d",
+                        "id": "adcb0629",
                         "title": "Render the Editor",
                         "content": "Render the Editor\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
                         "children": [],
@@ -2307,119 +2315,119 @@
                     "expanded": false
                   },
                   {
-                    "id": "fd8c4b6e",
+                    "id": "46c80e8d",
                     "title": "Rebuild Table",
                     "content": "Rebuild Table\n\nSignature: void FormatTable()\nMethod: FormatTable\nReturns: void\n\nRebuild the selected rows (or the current line when no VISUAL\nselection is active) into a padded markdown table with a\n\"+---+\" separator, mirroring the web app's formatMarkdownTable.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "fd4ff245",
+                    "id": "f874bf8c",
                     "title": "Replace All Text",
                     "content": "Replace All Text\n\nSignature: void ReplaceAllInString(std::string& line, const std::string& old_text, const std::string& new_text, int& count)\nMethod: ReplaceAllInString\nReturns: void\nParameters:\n    line     std::string&\n    old_text const std::string&\n    new_text const std::string&\n    count    int&\n\nReplace every occurrence of `old_text` in `line` with `new_text`,\ncounting the replacements.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "f9cd7916",
+                    "id": "6ae5a092",
                     "title": "Replace Text",
                     "content": "Replace Text\n\nSignature: void ReplaceText(const std::string& args)\nMethod: ReplaceText\nReturns: void\nParameters:\n    args const std::string&\n\nVim ':replace old/new' (also bound to 'R'): literal, global\nreplace of `old` with `new` inside the current node's text. In\nNORMAL mode the whole node text is processed (like :%s/../g);\nin VISUAL/VISUAL_LINE/VISUAL_BLOCK only the selected range is\ntouched. Only this node's text is ever changed.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "f874bf8c",
+                    "id": "58c4ae22",
                     "title": "Replace Text in Range",
                     "content": "Replace Text in Range\n\nSignature: void ReplaceRange(std::string& line, int lo, int hi, const std::string& old_text, const std::string& new_text, int& count)\nMethod: ReplaceRange\nReturns: void\nParameters:\n    line     std::string&\n    lo       int\n    hi       int\n    old_text const std::string&\n    new_text const std::string&\n    count    int&\n\nReplace within the half-open column range [lo, hi) of `line`.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "58c4ae22",
+                    "id": "f9cd7916",
                     "title": "Replaced Message",
                     "content": "Replaced Message\n\nSignature: void FinishReplace(int count)\nMethod: FinishReplace\nReturns: void\nParameters:\n    count int",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "6ae5a092",
+                    "id": "fd8c4b6e",
                     "title": "Save Current File",
                     "content": "Save Current File\n\nSignature: void Save()\nMethod: Save\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "8e5e3f57",
+                    "id": "4889b012",
                     "title": "Search Results Navigation",
                     "content": "Search Results Navigation\n\nSignature: void StepSearchOccurrence(int dir)\nMethod: StepSearchOccurrence\nReturns: void\nParameters:\n    dir int\n\nStep the cursor to the next (dir > 0) or previous (dir < 0)\noccurrence of the active search query inside the current node's\ntext, wrapping around like Vim's n/N. Also works while the\nhighlight is hidden by ':noh' (the query is kept). Does nothing\nwhen there is no search or the node has no occurrences.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "70d3e5b5",
+                    "id": "fd4ff245",
                     "title": "Search Word Under Cursor",
                     "content": "Search Word Under Cursor\n\nSignature: void SearchWordUnderCursor()\nMethod: SearchWordUnderCursor\nReturns: void\n\nVim '*': search for the word under the cursor and jump to its\nnext occurrence (wrapping). The word becomes the active find\nquery, so n/N continue stepping through it and the highlight\nshows every node that contains it.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "cea2cac0",
+                    "id": "28d34adf",
                     "title": "Select First Search Match",
                     "content": "Select First Search Match\n\nSignature: void JumpToFirstSearchMatch()\nMethod: JumpToFirstSearchMatch\nReturns: void\n\nMove the cursor to the first occurrence of the active search\nquery in the freshly loaded node, so the '/' find and n/N\nnavigation reveal the match in the editor (as in Vim).",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "6435cfa1",
+                    "id": "9eff12dd",
                     "title": "Select Inner Word",
                     "content": "Select Inner Word\n\nSignature: void SelectInnerWord()\nMethod: SelectInnerWord\nReturns: void",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "7f2f4a1b",
+                    "id": "7fcc9d42",
                     "title": "Select Text",
                     "content": "Select Text\n\nSignature: std::string SelectionText() const\nMethod: SelectionText\nReturns: std::string\nQualifiers: const\n\nThe text currently under a VISUAL/VISUAL_LINE selection, or the\ncurrent line when no selection is active (NORMAL/INSERT).\nLine-based copies include a trailing newline so a cut+paste\nround-trip reproduces the lines.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "8c9c6b99",
+                    "id": "1813d4b0",
                     "title": "Selection to Lower",
                     "content": "Selection to Lower\n\nSignature: void LowerSelection()\nMethod: LowerSelection\nReturns: void\n\nVim 'u' (VISUAL): lowercase the selected text.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "5e74384a",
+                    "id": "8c9c6b99",
                     "title": "Selection to Upper",
                     "content": "Selection to Upper\n\nSignature: void UpperSelection()\nMethod: UpperSelection\nReturns: void\n\nVim 'U' (VISUAL): uppercase the selected text. Folding never\nchanges line count or line length, so nothing is erased or\nreassembled; the cursor is placed at the start of the selection\nand the mode returns to NORMAL.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "f5aeecdb",
+                    "id": "b1c576e0",
                     "title": "Split Lines",
                     "content": "Split Lines\n\nSignature: static std::vector<std::string> SplitLines(const std::string& text)\nMethod: SplitLines\nReturns: static std::vector<std::string>\nParameters:\n    text const std::string&",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "b1c576e0",
+                    "id": "d34427ee",
                     "title": "To Upper / To Lower",
                     "content": "To Upper / To Lower\n\nSignature: static char ToUpperAscii(char c)\nMethod: ToUpperAscii\nReturns: static char\nParameters:\n    c char\n\nSignature: static char ToLowerAscii(char c)\nMethod: ToLowerAscii\nReturns: static char\nParameters:\n    c char\n\n                ASCII-only case folding: the editor is byte-oriented (columns =\n                bytes), so folding a full byte would corrupt UTF-8 text. Other\n                bytes (letters with diacritics, CJK, emoji, ...) are left as-is.",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "1813d4b0",
+                    "id": "e7fef13b",
                     "title": "Transform Selection",
                     "content": "Transform Selection\n\nSignature: void TransformSelection(char (*fold)(char), const char* status_msg)\nMethod: TransformSelection\nReturns: void\nParameters:\n    status_msg const char*",
                     "children": [],
                     "expanded": false
                   },
                   {
-                    "id": "e7fef13b",
+                    "id": "939af84f",
                     "title": "Variables",
                     "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nscribbolyth::treeview::TreeNode* active_ = nullptr;\nstd::string active_id_;\nstd::vector<std::string> lines_;\nint row_ = 0;\nint col_ = 0;\nint last_col_ = 0;\nint visual_row_ = -1;\nint visual_col_ = -1;\nint viewport_height_ = 0;",
                     "children": [],
@@ -2436,7 +2444,7 @@
                 "expanded": false
               },
               {
-                "id": "c422c979",
+                "id": "586c4ab5",
                 "title": "Make the Editor",
                 "content": "Make the Editor\n\nSignature: ftxui::Component MakeEditor(std::shared_ptr<EditorState> state)\nMethod: MakeEditor\nReturns: ftxui::Component\nParameters:\nstate std::shared_ptr<EditorState>",
                 "children": [],
@@ -2711,13 +2719,6 @@
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "135dbc4d",
-                        "title": "Constructor",
-                        "content": "Constructor\n\nSignature: HelpDialog(std::shared_ptr<EditorState> state, const std::string& path, bool* show) : state_(std::move(state)), show_(show)\nConstructor: HelpDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    path  const std::string&\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
                         "id": "49aa3b3a",
                         "title": "Event Handler",
                         "content": "Event Handler\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
@@ -2799,6 +2800,13 @@
                         "id": "7c8feb87",
                         "title": "Focusable Const",
                         "content": "Focusable Const\n\nbool Focusable() const override { return true; }",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "135dbc4d",
+                        "title": "Help Constructor",
+                        "content": "Help Constructor\n\nSignature: HelpDialog(std::shared_ptr<EditorState> state, const std::string& path, bool* show) : state_(std::move(state)), show_(show)\nConstructor: HelpDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    path  const std::string&\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
                         "children": [],
                         "expanded": false
                       },
@@ -3291,13 +3299,6 @@
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "70702d8b",
-                        "title": "Constructor",
-                        "content": "Constructor\n\nSignature: explicit Parser(const std::string& s) : s_(s)\nConstructor: Parser\nQualifiers: explicit\nParameters:\n    s const std::string&\nInitializers:\n    s_ s",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
                         "id": "7a34e9d9",
                         "title": "Parse a Bookmark",
                         "content": "Parse a Bookmark\n\nSignature: bool ParseBookmark(bookmark::Bookmark& mark)\nMethod: ParseBookmark\nReturns: bool\nParameters:\n    mark bookmark::Bookmark&",
@@ -3322,6 +3323,13 @@
                         "id": "aa7e719e",
                         "title": "Parse the Bookmarks",
                         "content": "Parse the Bookmarks\n\nSignature: bool ParseBookmarks(std::vector<bookmark::Bookmark>& marks)\nMethod: ParseBookmarks\nReturns: bool\nParameters:\n    marks std::vector<bookmark::Bookmark>&",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "70702d8b",
+                        "title": "Parser Constructor",
+                        "content": "Parser Constructor\n\nSignature: explicit Parser(const std::string& s) : s_(s)\nConstructor: Parser\nQualifiers: explicit\nParameters:\n    s const std::string&\nInitializers:\n    s_ s",
                         "children": [],
                         "expanded": false
                       }
@@ -3563,16 +3571,16 @@
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "0a993552",
-                        "title": "Constructor",
-                        "content": "Constructor\n\nSignature: explicit Parser(const std::string& s) : s_(s)\nConstructor: Parser\nQualifiers: explicit\nParameters:\n    s const std::string&\nInitializers:\n    s_ s",
+                        "id": "fc63461b",
+                        "title": "Deserialize",
+                        "content": "Deserialize\n\nSignature: bool Deserialize(std::vector<TreeNode>& roots, int* tree_width, std::vector<bookmark::Bookmark>* bookmarks, std::vector<std::string>* history)\nMethod: Deserialize\nReturns: bool\nParameters:\n    roots      std::vector<TreeNode>&\n    tree_width int*\n    bookmarks  std::vector<bookmark::Bookmark>*\n    history    std::vector<std::string>*",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "fc63461b",
-                        "title": "Deserialize",
-                        "content": "Deserialize\n\nSignature: bool Deserialize(std::vector<TreeNode>& roots, int* tree_width, std::vector<bookmark::Bookmark>* bookmarks, std::vector<std::string>* history)\nMethod: Deserialize\nReturns: bool\nParameters:\n    roots      std::vector<TreeNode>&\n    tree_width int*\n    bookmarks  std::vector<bookmark::Bookmark>*\n    history    std::vector<std::string>*",
+                        "id": "0a993552",
+                        "title": "Parser Constructor",
+                        "content": "Parser Constructor\n\nSignature: explicit Parser(const std::string& s) : s_(s)\nConstructor: Parser\nQualifiers: explicit\nParameters:\n    s const std::string&\nInitializers:\n    s_ s",
                         "children": [],
                         "expanded": false
                       }
@@ -3827,8 +3835,8 @@
                     "children": [
                       {
                         "id": "106002a3",
-                        "title": "Constructor",
-                        "content": "Constructor\n\nSignature: DeadLinksDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: DeadLinksDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
+                        "title": "DeadLinksDialog Constructor",
+                        "content": "DeadLinksDialog Constructor\n\nSignature: DeadLinksDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: DeadLinksDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
                         "children": [],
                         "expanded": false
                       },
@@ -4040,13 +4048,6 @@
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "334fa214",
-                        "title": "Constructor",
-                        "content": "Constructor\n\nSignature: LinksDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: LinksDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
                         "id": "fd7b2b5b",
                         "title": "Ftxui Event Call",
                         "content": "Ftxui Event Call\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
@@ -4057,6 +4058,13 @@
                         "id": "c87db8b7",
                         "title": "Ftxui Render Call",
                         "content": "Ftxui Render Call\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "334fa214",
+                        "title": "LinksDialog Constructor",
+                        "content": "LinksDialog Constructor\n\nSignature: LinksDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: LinksDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
                         "children": [],
                         "expanded": false
                       },
@@ -4542,13 +4550,6 @@
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "a7bcc75b",
-                        "title": "Constructor",
-                        "content": "Constructor\n\n!_cstor",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
                         "id": "68fb1c62",
                         "title": "Filter Mode Event Handler",
                         "content": "Filter Mode Event Handler\n\nIgnore the vim-style bindings while filtering - every\nprintable character extends the filter instead - while\narrows still move, Return opens and Escape clears.\n\nSignature: bool OnFilterEvent(ftxui::Event event)\nMethod: OnFilterEvent\nReturns: bool\nParameters:\n    event ftxui::Event",
@@ -4566,6 +4567,13 @@
                         "id": "739aec77",
                         "title": "Ftxui Render Method",
                         "content": "Ftxui Render Method\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "a7bcc75b",
+                        "title": "Recent Dialog Constructor",
+                        "content": "Recent Dialog Constructor\n\n!_cstor",
                         "children": [],
                         "expanded": false
                       },
@@ -4682,13 +4690,6 @@
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "51bb0073",
-                        "title": "Constructor",
-                        "content": "Constructor\n\nSignature: RegexDialog(std::shared_ptr<EditorState> state, const std::string& path, bool* show) : state_(std::move(state)), show_(show)\nConstructor: RegexDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    path  const std::string&\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
                         "id": "6d8fcc14",
                         "title": "Ftxui Event Handler",
                         "content": "Ftxui Event Handler\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
@@ -4699,6 +4700,13 @@
                         "id": "8b75e7a4",
                         "title": "Ftxui Render",
                         "content": "Ftxui Render\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "51bb0073",
+                        "title": "Regex Dialog Constructor",
+                        "content": "Regex Dialog Constructor\n\nSignature: RegexDialog(std::shared_ptr<EditorState> state, const std::string& path, bool* show) : state_(std::move(state)), show_(show)\nConstructor: RegexDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    path  const std::string&\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
                         "children": [],
                         "expanded": false
                       },
@@ -4947,13 +4955,6 @@
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "184cabce",
-                        "title": "Constructor",
-                        "content": "Constructor\n\nSignature: SearchDialog(std::shared_ptr<EditorState> state, bool* show, DialogMode mode) : state_(std::move(state)), show_(show), mode_(mode)\nConstructor: SearchDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\n    mode  DialogMode\nInitializers:\n    state_ std::move(state)\n    show_  show\n    mode_  mode",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
                         "id": "3da861ca",
                         "title": "Ftxui Event Method",
                         "content": "Ftxui Event Method\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
@@ -4964,6 +4965,13 @@
                         "id": "73a6ff4b",
                         "title": "Ftxui Render Method",
                         "content": "Ftxui Render Method\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "184cabce",
+                        "title": "Search Dialog Constructor",
+                        "content": "Search Dialog Constructor\n\nSignature: SearchDialog(std::shared_ptr<EditorState> state, bool* show, DialogMode mode) : state_(std::move(state)), show_(show), mode_(mode)\nConstructor: SearchDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\n    mode  DialogMode\nInitializers:\n    state_ std::move(state)\n    show_  show\n    mode_  mode",
                         "children": [],
                         "expanded": false
                       },
@@ -5647,13 +5655,6 @@
                     "content": "Public Members ",
                     "children": [
                       {
-                        "id": "9a9e24d7",
-                        "title": "Constructor",
-                        "content": "Constructor \n\nSignature: UndoDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: UndoDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
-                        "children": [],
-                        "expanded": false
-                      },
-                      {
                         "id": "a0c398f5",
                         "title": "Ftxui Event Method",
                         "content": "Ftxui Event Method \n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
@@ -5664,6 +5665,13 @@
                         "id": "f0b577b3",
                         "title": "Render",
                         "content": "Render \n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
+                        "children": [],
+                        "expanded": false
+                      },
+                      {
+                        "id": "9a9e24d7",
+                        "title": "Undo Dialog Constructor",
+                        "content": "Undo Dialog Constructor \n\nSignature: UndoDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: UndoDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
                         "children": [],
                         "expanded": false
                       },

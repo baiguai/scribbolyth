@@ -163,7 +163,7 @@ namespace scribbolyth::undo
         */
 
         /*!
-            Constructor 
+            Undo Dialog Constructor 
 
             !_ctor
         */
