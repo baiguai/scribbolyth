@@ -41,7 +41,7 @@ namespace scribbolyth::search
         }
         //!
 
-        // Pad Right - now the shared helper from ../text/text.hpp.
+        // Pad Right - shared helper from ../text/text.hpp.
         using scribbolyth::text::PadRight;
 
         /*!

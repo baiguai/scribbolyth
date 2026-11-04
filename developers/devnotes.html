@@ -1040,71 +1040,71 @@
               {
                 "id": "88d76adc",
                 "title": "Introduction to Bookmarks.cpp",
-                "content": "Introduction to Bookmarks.cpp\n\nThis file handles the rendering of the Bookmarks dialog as well as\nits logic and its key handling.\n\nHelper Methods\n* PadRight - These will likely be consolidated into a single method in the future.\n* The Entry struct is defined here.\n\nPublic Members\n* The pending_g_ variable is used with navigating to the top.\n* The Ftxui OnEvent handles the key bindings\n\n* Navigation and removing bookmarks are private members of the class.\n\n\n\n#intro",
+                "content": "Introduction to Bookmarks.cpp\n\nThis file handles the rendering of the Bookmarks dialog as well as\nits logic and its key handling.\n\nHelper Methods\n* PadRight - Shared text::PadRight helper (../text/text.hpp).\n* The Entry struct is defined here.\n\nPublic Members\n* The pending_g_ variable is used with navigating to the top.\n* The Ftxui OnEvent handles the key bindings\n\n* Navigation and removing bookmarks are private members of the class.\n\n\n\n#intro",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "731cf756",
+                "id": "6e263fb9",
                 "title": "Bookmarks Entry Struct",
                 "content": "Bookmarks Entry Struct\nUsed to create the treeview nodes.\nThe line value denotes whether it is a line specific bookmark.\nIf the value is -1 it is NOT.\n\n\n\n#struct\n\nstruct Entry\n{\n    treeview::TreeNode* node = nullptr;\n    int depth = 0;\n    int line = -1;\n};",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "f2ffc9b5",
+                "id": "731cf756",
                 "title": "BookmarksDialog Class",
                 "content": "BookmarksDialog Class\n(ftxui::ComponentBase)\n\n\n\n#class",
                 "children": [
                   {
-                    "id": "4aabdd9b",
+                    "id": "bd70f5a9",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "9e869c63",
+                        "id": "ef592bb2",
                         "title": "Close",
                         "content": "Close\nCloses the bookmarks dialog by updating the related variables.",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "1c3bfc71",
+                        "id": "9e869c63",
                         "title": "Jump",
                         "content": "Jump\n\nNavigates to the selected bookmark's node.\nIf it is a line specific bookmark, it navigates to that particular line.",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "871140ee",
+                        "id": "1c3bfc71",
                         "title": "Move Selection",
                         "content": "Move Selection\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int\n\n\nMoves the selection up or down among the bookmarks list.",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "979ca95a",
+                        "id": "871140ee",
                         "title": "Move to Start / End",
                         "content": "Move to Start / End\nMoveToStart()\nMoveToEnd()",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "12656e17",
+                        "id": "ddc57cb4",
                         "title": "Recompute Bookmarks",
                         "content": "Recompute Bookmarks\n\nSignature: void Recompute()\nMethod: Recompute\nReturns: void\n\nRebuilds the entries_ from the state_->bookmarks.\nGathers all the nodes for looking them up by id.\nSets the selection_.\nIt also displays the line number if the bookmark is to a specific line of text.",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "ddc57cb4",
+                        "id": "979ca95a",
                         "title": "Unbookmark",
                         "content": "Unbookmark\nRemoves the selected bookmark.\nThe entries_ mirrors state_->bookmarks.\nThis also handles scroll to top.",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "40459064",
+                        "id": "12656e17",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nstd::vector<Entry> entries_;\nstd::vector<std::string> rendered_;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 20;\nstatic constexpr int kVisibleRows = 18;",
                         "children": [],
@@ -1114,33 +1114,33 @@
                     "expanded": false
                   },
                   {
-                    "id": "200c852e",
+                    "id": "37dad1fb",
                     "title": "Public Members",
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "276e0339",
+                        "id": "f2ffc9b5",
                         "title": "Bookmarks Constructor",
                         "content": "Bookmarks Constructor\n\nSignature: BookmarksDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: BookmarksDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "ae61229c",
+                        "id": "46f73897",
                         "title": "Ftxui Bookmarks Dialog Event Call",
                         "content": "Ftxui Bookmarks Dialog Event Call\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event\n\n\nThis is the ftxui Event override.\nIt handles navigation as well as Escape, Return, and deletes.\n\n\nExamples\n--------------------------------------------------------------------------------\n\nif (event == ftxui::Event::Escape)\n{\n    Close();\n    return true;\n}\n\nif (event.is_character() && event.character() == \"g\")\n{\n    if (pending_g_)\n    {\n        pending_g_ = false;\n        MoveToStart();\n        return true;\n    }\n    pending_g_ = true;\n    return true;\n}",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "9f7998e5",
+                        "id": "ae61229c",
                         "title": "Render the Bookmarks Dialog",
                         "content": "Render the Bookmarks Dialog\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\n\nRenders the bookmarks dialog.\n\n--------------------------------------------------------------------------------\n\n* First do a _Recompute Bookmarks_.\n\n* Gather the Bookmarks.\n\n* PadRight.\n\n* Build the footer.\n\n--------------------------------------------------------------------------------\n\nCreate the dialog's window:\n\nreturn ftxui::window(ftxui::text(\" ` Bookmarks \"),\n                    ftxui::vbox({\n                        ftxui::separator(),\n                        ftxui::vbox(std::move(rows)),\n                        ftxui::separator(),\n                        ftxui::text(PadRight(footer, row_width)) | ftxui::dim,\n                    })) |\n       ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |\n       ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "46f73897",
+                        "id": "276e0339",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nbool Focusable() const override { return true; }\n\nbool pending_g_ = false;",
                         "children": [],
@@ -1153,14 +1153,7 @@
                 "expanded": false
               },
               {
-                "id": "6e263fb9",
-                "title": "Right Padding",
-                "content": "Right Padding\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t\n\nThis indents the bookmarks to match their depth in the treeview.\n#todo : We should be able to make this a globally accessible method.",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "d97cdff3",
+                "id": "e14a9344",
                 "title": "Create the Dialog",
                 "content": "Create the Dialog\n\nSignature: ftxui::Component MakeBookmarksDialog(std::shared_ptr<EditorState> state, bool* show)\nMethod: MakeBookmarksDialog\nReturns: ftxui::Component\nParameters:\nstate std::shared_ptr<EditorState>\nshow  bool*\n\n\nFtxui Make of type BookmarksDialog.",
                 "children": [],
@@ -1200,151 +1193,151 @@
               {
                 "id": "a7113d25",
                 "title": "Introduction to Browser.cpp",
-                "content": "Introduction to Browser.cpp\n\nThis file handles the file browsing dialog, as well as its key bindings.\n\nHelper Methods\n* PadRight - soon to be consolidated to a single method.\n* Tail - this also will likely be consolidated.\n\nPublic Members\n* The Ftxui OnEvent handles the key inputs.\n* The Ftxui Render handles the properties of the dialog itself. You can explicitly set its size etc.\n\nPrivate Members\n* The navigation and filtering is handled by these.\n* The initial directory is determined via: state_->browser_start_dir\n* Another state helper is: state_->browser_pick\n* `m` bookmarks the shown directory; ` shows the bookmark list.\n    * _Render Browser Dialog_ was updated to accomodate the bookmarks footer information.\n\n\n\n#intro",
+                "content": "Introduction to Browser.cpp\n\nThis file handles the file browsing dialog, as well as its key bindings.\n\nHelper Methods\n* PadRight - shared text::PadRight helper (../text/text.hpp).\n* Tail - this also will likely be consolidated.\n\nPublic Members\n* The Ftxui OnEvent handles the key inputs.\n* The Ftxui Render handles the properties of the dialog itself. You can explicitly set its size etc.\n\nPrivate Members\n* The navigation and filtering is handled by these.\n* The initial directory is determined via: state_->browser_start_dir\n* Another state helper is: state_->browser_pick\n* `m` bookmarks the shown directory; ` shows the bookmark list.\n    * _Render Browser Dialog_ was updated to accomodate the bookmarks footer information.\n\n\n\n#intro",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "20d051b4",
+                "id": "74225a0b",
                 "title": "Case Insensitive Less Check",
                 "content": "Case Insensitive Less Check\n\nSignature: bool NoCaseLess(const std::string& a, const std::string& b)\nMethod: NoCaseLess\nReturns: bool\nParameters:\n    a const std::string&\n    b const std::string&\n\n#todo : We should be able to make this a globally accessible method.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "40a0ed0b",
+                "id": "9cd32dc3",
                 "title": "FileBrowserDialog Class",
                 "content": "FileBrowserDialog Class\n(ftxui::ComponentBase)\n\n\n\n#class",
                 "children": [
                   {
-                    "id": "f97b1000",
+                    "id": "7566667d",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "33982852",
+                        "id": "63953a64",
                         "title": "Add the Current Directory to the Bookmarks",
                         "content": "Add the Current Directory to the Bookmarks\n\nSignature: void AddCurrentBookmark()\nMethod: AddCurrentBookmark\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "7f275e89",
+                        "id": "57f0c07b",
                         "title": "Browser Entry Struct",
                         "content": "Browser Entry Struct\n\nstruct Entry\n{\n    bool is_dir = false;\n    std::string display;\n    std::string path;\n};\n\n#struct",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "36dceee0",
+                        "id": "7f275e89",
                         "title": "Close the Dialog",
                         "content": "Close the Dialog\n\nSignature: void Close()\nMethod: Close\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "57f0c07b",
+                        "id": "b93ba126",
                         "title": "Constants",
                         "content": "Constants\n\n--------------------------------------------------------------------------------\n\nstatic constexpr int kVisibleRows = 16;",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "44655cb1",
+                        "id": "6eefde9b",
                         "title": "Jump to Top / Bottom",
                         "content": "Jump to Top / Bottom\n\nSignature: void JumpToTop()\nMethod: JumpToTop\nReturns: void\n\nSignature: void JumpToBottom()\nMethod: JumpToBottom\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "25b90d2c",
+                        "id": "44655cb1",
                         "title": "Move Up a Directory",
                         "content": "Move Up a Directory\n\nSignature: void GoUp()\nMethod: GoUp\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "6eefde9b",
+                        "id": "8b48af2b",
                         "title": "Navigate Items",
                         "content": "Navigate Items\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "9fde7621",
+                        "id": "435017c9",
                         "title": "Persist the Bookmarked Directories",
                         "content": "Persist the Bookmarked Directories\n\nSignature: void PersistBookmarks()\nMethod: PersistBookmarks\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "e8d1ddd7",
+                        "id": "25b90d2c",
                         "title": "Pick a File",
                         "content": "Pick a File\n\nSignature: void Activate()\nMethod: Activate\nReturns: void",
                         "children": [
                           {
-                            "id": "18cc3a9d",
+                            "id": "f6adb709",
                             "title": "Apply the Filter",
                             "content": "Apply the Filter\n\nSignature: void ApplyFilter()\nMethod: ApplyFilter\nReturns: void\n\n* Applies the currently set filter.",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "79bda04e",
+                            "id": "764b12f2",
                             "title": "Clear the Filter",
                             "content": "Clear the Filter\n\nSignature: void ClearFilter()\nMethod: ClearFilter\nReturns: void\n\nSimply clear out the filter variables.",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "1c07ed35",
+                            "id": "79bda04e",
                             "title": "Compute the Top",
                             "content": "Compute the Top\n\nSignature: int ComputeTop(int sel, int total) const\nMethod: ComputeTop\nReturns: int\nQualifiers: const\nParameters:\n    sel   int\n    total int\n\nComputation logic:\n\nconst int max_top = std::max(0, total - kVisibleRows);\nint top = std::min(scroll_, max_top);\nif (sel < top) top = sel;\nif (sel >= top + kVisibleRows) top = sel - kVisibleRows + 1;\nreturn std::max(0, std::min(top, max_top));",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "764b12f2",
+                            "id": "f5140da3",
                             "title": "Enter At",
                             "content": "Enter At\n\nSignature: void EnterAt(bool pick_file)\nMethod: EnterAt\nReturns: void\nParameters:\n    pick_file bool\n\n`l` always navigates into the folder. For save/export-style\nops (`browser_command` set) the dialog is a folder picker:\nEnter hands the chosen folder back to the command line so a\nfilename can be typed. `:` picks the currently shown folder\nthe same way.",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "dea3aca7",
+                            "id": "e1c23e92",
                             "title": "Handle Bookmark List Event",
                             "content": "Handle Bookmark List Event\n\nSignature: bool OnBookmarksEvent(ftxui::Event event)\nMethod: OnBookmarksEvent\nReturns: bool\nParameters:\n    event ftxui::Event\n\nbookmarks_active_ = false;\nbookmark_selection_ = 0;\npending_g_ = false;\nreturn true;\n\nconst int total = static_cast<int>(state_->bookmarked_dirs.size());\nif (total == 0) return true;\nconst int index = std::max(0, std::min(bookmark_selection_, total - 1));\nSetDir(state_->bookmarked_dirs[static_cast<std::size_t>(index)]);\nClearFilter();\nbookmarks_active_ = false;\nbookmark_selection_ = 0;\nreturn true;\n\nRemoveSelectedBookmark();\nreturn true;\n\nAddCurrentBookmark();\nreturn true;\n\nconst int total = static_cast<int>(state_->bookmarked_dirs.size());\nif (total > 0)\n{\n    bookmark_selection_ =\n        std::max(0, std::min(total - 1, bookmark_selection_ + 1));\n}\npending_g_ = false;\nreturn true;\n\nbookmark_selection_ = std::max(0, bookmark_selection_ - 1);\npending_g_ = false;\nreturn true;\n\nif (pending_g_)\n{\n    bookmark_selection_ = 0;\n    pending_g_ = false;\n}\nelse\n{\n    pending_g_ = true;\n}\nreturn true;\n\nconst int total = static_cast<int>(state_->bookmarked_dirs.size());\nbookmark_selection_ = std::max(0, total - 1);\npending_g_ = false;\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "5751ff6e",
+                            "id": "1c07ed35",
                             "title": "Handle Filter Event",
                             "content": "Handle Filter Event\n\nSignature: bool OnFilterEvent(ftxui::Event event)\nMethod: OnFilterEvent\nReturns: bool\nParameters:\n    event ftxui::Event",
                             "children": [
                               {
-                                "id": "fd07a6e0",
+                                "id": "4b267d59",
                                 "title": "Escape Key",
                                 "content": "Escape Key\n\nClearFilter();\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "89f9c811",
+                                "id": "fd07a6e0",
                                 "title": "Return Key",
                                 "content": "Return Key\n\nfilter_active_ = false;\nselection_ = 0;\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "31042050",
+                                "id": "89f9c811",
                                 "title": "Backspace Key",
                                 "content": "Backspace Key\n\nif (!filter_.empty()) filter_.pop_back();\nselection_ = 0;\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "de6f3ac7",
+                                "id": "31042050",
                                 "title": "General Key Processing",
                                 "content": "General Key Processing\n\nfilter_ += event.character();\nselection_ = 0;\nreturn true;",
                                 "children": [],
@@ -1354,14 +1347,14 @@
                             "expanded": false
                           },
                           {
-                            "id": "f6adb709",
+                            "id": "dea3aca7",
                             "title": "Recompute",
                             "content": "Recompute\n\nSignature: void Recompute()\nMethod: Recompute\nReturns: void\n\n* Refresh this dialog via the state_\n\nSignature: void Relist()\nMethod: Relist\nReturns: void\n\n            * List the currently selected directory's contents.",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "741d2c82",
+                            "id": "18cc3a9d",
                             "title": "Variables",
                             "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nftxui::Box box_;\nstd::string dir_;\nstd::string start_dir_;\nbool needs_refresh_ = true;\nstd::vector<Entry> entries_;\nstd::vector<std::size_t> visible_;\nstd::string filter_;\nstd::string last_filter_;\nbool filter_active_ = false;\nbool bookmarks_active_ = false;\nint bookmark_selection_ = 0;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 24;\nbool pending_g_ = false;",
                             "children": [],
@@ -1371,21 +1364,21 @@
                         "expanded": false
                       },
                       {
-                        "id": "435017c9",
+                        "id": "33982852",
                         "title": "Remove the Selected Bookmarked Directory",
                         "content": "Remove the Selected Bookmarked Directory\n\nSignature: void RemoveSelectedBookmark()\nMethod: RemoveSelectedBookmark\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "8b48af2b",
+                        "id": "9fde7621",
                         "title": "Set the Directory",
                         "content": "Set the Directory\n\nSignature: void SetDir(const std::string& path)\nMethod: SetDir\nReturns: void\nParameters:\n    path const std::string&",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "63953a64",
+                        "id": "36dceee0",
                         "title": "Show Bookmarked Directories",
                         "content": "Show Bookmarked Directories\n\nSignature: void OpenBookmarks()\nMethod: OpenBookmarks\nReturns: void",
                         "children": [],
@@ -1395,106 +1388,106 @@
                     "expanded": false
                   },
                   {
-                    "id": "2704b157",
+                    "id": "b3e0a6bb",
                     "title": "Public Members",
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "c8ec3c4a",
+                        "id": "40a0ed0b",
                         "title": "Browser Constructor",
                         "content": "Browser Constructor\n\nSignature: FileBrowserDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: FileBrowserDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "bf824ad1",
+                        "id": "325b5754",
                         "title": "Ftxui Browser Dialog Event",
                         "content": "Ftxui Browser Dialog Event\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
                         "children": [
                           {
-                            "id": "b7edcdf5",
+                            "id": "4cb2730b",
                             "title": "`",
                             "content": "`\n\nShow the bookmarked directories.\n\nOpenBookmarks();\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "321218e3",
+                            "id": "b7edcdf5",
                             "title": "m",
                             "content": "m\n\nBookmark the directory currently shown.\n\nAddCurrentBookmark();\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "36a0cf51",
+                            "id": "321218e3",
                             "title": "Key Events",
                             "content": "Key Events",
                             "children": [
                               {
-                                "id": "f2256427",
+                                "id": "2380739b",
                                 "title": "Escape",
                                 "content": "Escape\n\nif (!filter_.empty())\n{\n    ClearFilter();\n    return true;\n}\nClose();\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "aa09f907",
+                                "id": "f2256427",
                                 "title": "/",
                                 "content": "/\n\nfilter_active_ = true;\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "a81fbfe7",
+                                "id": "aa09f907",
                                 "title": ":",
                                 "content": ":\n\nThe dialog just picks a directory; `:` hands the currently\nshown directory back to the save/export command line so the\nuser can type a filename.\n\nconst std::string command = std::move(state_->browser_command);\nstate_->browser_command.clear();\nconst std::string target = (fs::path(dir_) / \"\").string();\nClose();\nscribbolyth::op::OpenCommandLineWithArgs(state_, command, target);\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "99679b1c",
+                                "id": "a81fbfe7",
                                 "title": "Return",
                                 "content": "Return\n\nSelect the file.\n\nActivate();\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "8ff6e388",
+                                "id": "99679b1c",
                                 "title": "l",
                                 "content": "l\n\nEnter the selected directory.\n\nEnterAt(/*pick_file=*/false);\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "67d292f6",
+                                "id": "8ff6e388",
                                 "title": "j / Arrow Down",
                                 "content": "j / Arrow Down\n\nMove the selection down.\n\nMoveSelection(+1);\npending_g_ = false;\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "eeb48cff",
+                                "id": "67d292f6",
                                 "title": "k / Arrow Up",
                                 "content": "k / Arrow Up\n\nMove the selection up.\n\nMoveSelection(-1);\npending_g_ = false;\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "0191a615",
+                                "id": "eeb48cff",
                                 "title": "h",
                                 "content": "h\n\nMove up one directory.\n\nGoUp();\npending_g_ = false;\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "75253f27",
+                                "id": "0191a615",
                                 "title": "g",
                                 "content": "g\n\nIf the first 'g', await for a second 'g'.\nIf the second 'g', move to the top.\n\nif (pending_g_) JumpToTop();\nelse pending_g_ = true;\nreturn true;",
                                 "children": [],
                                 "expanded": false
                               },
                               {
-                                "id": "f4e3e181",
+                                "id": "75253f27",
                                 "title": "G",
                                 "content": "G\n\nMove to the bottom.\n\nJumpToBottom();\nreturn true;",
                                 "children": [],
@@ -1507,26 +1500,26 @@
                         "expanded": false
                       },
                       {
-                        "id": "eea6bf61",
+                        "id": "5bf4a573",
                         "title": "Render Browser Dialog",
                         "content": "Render Browser Dialog\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\n\n--------------------------------------------------------------------------------\n\nTo explicitly set the file dialog size, locate the following:\n\nreturn ftxui::window(ftxui::text(title),\n                     ftxui::vbox({\n                         ftxui::vbox(std::move(rows)),\n                         ftxui::separator(),\n                         ftxui::text(PadRight(footer, dlg_width)) | ftxui::dim,\n                     })) |\n       ftxui::reflect(box_) |\n       ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 140) |\n       ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);",
                         "children": [
                           {
-                            "id": "b67dc721",
+                            "id": "840ceee8",
                             "title": "Recompute",
                             "content": "Recompute\n\nBefore rendering ensure that everything is in sync with the state_.\n\nRecompute();",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "c86a6653",
+                            "id": "b67dc721",
                             "title": "Const Variables",
                             "content": "Const Variables\n\n--------------------------------------------------------------------------------\n\nconst int total = static_cast<int>(visible_.size());\nconst int sel = std::min(selection_, std::max(0, total - 1));\nconst int top = ComputeTop(sel, total);\nconst int count = std::min(kVisibleRows, std::max(0, total - top));\nconst int dlg_width { 90 };\n\nconst std::size_t row_width = static_cast<std::size_t>(content_width_ + 2);\n\nconst int bookmark_total = static_cast<int>(state_->bookmarked_dirs.size());\nconst int bookmark_sel = std::min(bookmark_selection_,\n                                  std::max(0, bookmark_total - 1));\nconst int bookmark_top = ComputeTop(bookmark_sel, bookmark_total);\nconst int bookmark_count = std::min(kVisibleRows,\n                                    std::max(0, bookmark_total - bookmark_top));\nconst std::size_t bookmark_width = static_cast<std::size_t>(dlg_width - 4);",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "efdf24e8",
+                            "id": "c86a6653",
                             "title": "Fetch the items.",
                             "content": "Fetch the items.\n\nIf there are none, output (empty directory).\nThis is driven by the total const value.",
                             "children": [],
@@ -1536,7 +1529,7 @@
                         "expanded": false
                       },
                       {
-                        "id": "325b5754",
+                        "id": "c8ec3c4a",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nbool Focusable() const override { return true; }",
                         "children": [],
@@ -1546,7 +1539,7 @@
                     "expanded": false
                   },
                   {
-                    "id": "7094cd05",
+                    "id": "e0836546",
                     "title": "Make the File Browser Dialog",
                     "content": "Make the File Browser Dialog\n\nSignature: ftxui::Component MakeFileBrowserDialog(std::shared_ptr<EditorState> state, bool* show)\nMethod: MakeFileBrowserDialog\nReturns: ftxui::Component\nParameters:\nstate std::shared_ptr<EditorState>\nshow  bool*",
                     "children": [],
@@ -1556,7 +1549,7 @@
                 "expanded": false
               },
               {
-                "id": "9cd32dc3",
+                "id": "20d051b4",
                 "title": "Path Check",
                 "content": "Path Check\n\nSignature: std::string Normalize(const std::string& path)\nMethod: Normalize\nReturns: std::string\nParameters:\n    path const std::string&\n\nGets the absolute path from the path input variable.",
                 "children": [],
@@ -1564,20 +1557,13 @@
               },
               {
                 "id": "b2745d40",
-                "title": "Right Padding",
-                "content": "Right Padding\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t\n\n#todo : We should be able to make this a globally accessible method.",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "4a92b96e",
                 "title": "Tailing",
                 "content": "Tailing\n\nSignature: std::string Tail(const std::string& s, std::size_t width)\nMethod: Tail\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t\n\n#todo : We should be able to make this a globally accessible method.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "74225a0b",
+                "id": "4a92b96e",
                 "title": "To Lower Case",
                 "content": "To Lower Case\n\nSignature: std::string Lower(const std::string& s)\nMethod: Lower\nReturns: std::string\nParameters:\n    s const std::string&\n\n#todo : We should be able to make this a globally accessible method.",
                 "children": [],
@@ -2659,52 +2645,52 @@
                 "expanded": false
               },
               {
-                "id": "d15f3fb0",
+                "id": "70ea2660",
                 "title": "Help Dialog Class",
                 "content": "Help Dialog Class\n\n\n\n#class",
                 "children": [
                   {
-                    "id": "146e7da4",
+                    "id": "0a92b15e",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "53c098f4",
+                        "id": "efecc692",
                         "title": "Filtered Vector",
                         "content": "Filtered Vector\n\nstd::vector<int> Filtered() const\n{\n    std::vector<int> result;\n\n    std::string needle = Lower(filter_);\n    bool key_only = false;\n    if (!needle.empty() && needle[0] == ':')\n    {\n        key_only = true;\n        needle = needle.substr(1);\n    }\n\n    for (std::size_t i = 0; i < entries_.size(); ++i)\n    {\n        const std::string& hay = key_only ? entries_[i].key : entries_[i].line;\n        if (needle.empty() || Lower(hay).find(needle) != std::string::npos)\n        {\n            result.push_back(static_cast<int>(i));\n        }\n    }\n    return result;\n}",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "272c69f5",
+                        "id": "f5cd805c",
                         "title": "Inner Width Const",
                         "content": "Inner Width Const\n\nThe width of the dialog content: as wide as the widest binding\nline, but never wider than the dialog itself.\n\nSignature: int InnerWidth() const\nMethod: InnerWidth\nReturns: int\nQualifiers: const",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "efecc692",
+                        "id": "272c69f5",
                         "title": "Max Topic Top Const",
                         "content": "Max Topic Top Const\n\nSignature: int MaxTopicTop() const\nMethod: MaxTopicTop\nReturns: int\nQualifiers: const",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "eb83e4dc",
+                        "id": "a7b47c30",
                         "title": "Move Selection Up / Down",
                         "content": "Move Selection Up / Down\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "f5cd805c",
+                        "id": "eb83e4dc",
                         "title": "Refilter",
                         "content": "Refilter\n\nAfter the filter changes, select the first binding that matches.\n\nSignature: void Refilter()\nMethod: Refilter\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "658eca4a",
+                        "id": "53c098f4",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nstd::vector<HelpEntry> entries_;\nstd::string filter_;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 72;\nbool topic_open_ = false;\nstd::string topic_title_;\nstd::string topic_summary_;\nstd::vector<std::string> topic_lines_;\nint topic_scroll_ = 0;\nstatic constexpr int kVisibleRows = 18;\nstatic constexpr int kMaxInnerWidth = 90;",
                         "children": [],
@@ -2714,80 +2700,80 @@
                     "expanded": false
                   },
                   {
-                    "id": "dde0173c",
+                    "id": "987867eb",
                     "title": "Public Members",
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "49aa3b3a",
+                        "id": "7c8feb87",
                         "title": "Event Handler",
                         "content": "Event Handler\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
                         "children": [
                           {
-                            "id": "f376bd73",
+                            "id": "5b044af6",
                             "title": "Escape",
                             "content": "Escape\n\nHide the help dialog.\n\n*show_ = false;\nfilter_.clear();\nselection_ = 0;\nscroll_ = 0;\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "ea4a59d3",
+                            "id": "f376bd73",
                             "title": "Return",
                             "content": "Return\n\nOpen detailed help on the selected topic.\n\nOpenTopic();\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "bb3627e0",
+                            "id": "ea4a59d3",
                             "title": "Arrow Down",
                             "content": "Arrow Down\n\nMove selection down.\n\nMoveSelection(+1);\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "0f19bde3",
+                            "id": "bb3627e0",
                             "title": "Arrow Up",
                             "content": "Arrow Up\n\nMove selection up.\n\nMoveSelection(-1);\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "7658d3ed",
+                            "id": "0f19bde3",
                             "title": "Page Down",
                             "content": "Page Down\n\nMoves one page down (page being the count of visible rows).\n\nMoveSelection(+kVisibleRows);\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "25211aa4",
+                            "id": "7658d3ed",
                             "title": "Page Up",
                             "content": "Page Up\n\nMoves one page up (page being the count of visible rows).\n\nMoveSelection(-kVisibleRows);\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "74b29524",
+                            "id": "25211aa4",
                             "title": "Home",
                             "content": "Home\n\nMove to the top of the help topics.\n\nMoveSelection(-std::max(0, static_cast<int>(Filtered().size())));\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "e2e23b6e",
+                            "id": "74b29524",
                             "title": "End",
                             "content": "End\n\nMove to the bottom of the help topics.\n\nMoveSelection(std::max(0, static_cast<int>(Filtered().size())));\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "98e884b8",
+                            "id": "e2e23b6e",
                             "title": "Backspace",
                             "content": "Backspace\n\nWhen filtering, deletes the character before the cursor.\n\nif (!filter_.empty())\n{\n    filter_.pop_back();\n    Refilter();\n}\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "81dbab8d",
+                            "id": "98e884b8",
                             "title": "Normal Character",
                             "content": "Normal Character\n\nWhen filtering enters the specified character.\n\nfilter_ += event.character();\nRefilter();\nreturn true;",
                             "children": [],
@@ -2797,42 +2783,42 @@
                         "expanded": false
                       },
                       {
-                        "id": "7c8feb87",
+                        "id": "135dbc4d",
                         "title": "Focusable Const",
                         "content": "Focusable Const\n\nbool Focusable() const override { return true; }",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "135dbc4d",
+                        "id": "d15f3fb0",
                         "title": "Help Constructor",
                         "content": "Help Constructor\n\nSignature: HelpDialog(std::shared_ptr<EditorState> state, const std::string& path, bool* show) : state_(std::move(state)), show_(show)\nConstructor: HelpDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    path  const std::string&\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "b4baf93e",
+                        "id": "e48be0ca",
                         "title": "Open Topic",
                         "content": "Open Topic\n\nShow the full help topic of the highlighted key binding. Bindings\nwithout a topic of their own fall back to their description, so\nEnter always opens the help view.\n\nSignature: void OpenTopic()\nMethod: OpenTopic\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "197d61e6",
+                        "id": "b4baf93e",
                         "title": "Render the Help Dialog",
                         "content": "Render the Help Dialog\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "eef19775",
+                        "id": "197d61e6",
                         "title": "Render Topic",
                         "content": "Render Topic\n\nFill the help dialog with the full help topic.\n\nSignature: ftxui::Element RenderTopic()\nMethod: RenderTopic\nReturns: ftxui::Element",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "e48be0ca",
+                        "id": "95eacb2e",
                         "title": "Topic Event Handler",
                         "content": "Topic Event Handler\n\nWhile the full help topic is shown every key is consumed, except\nfor the keys that scroll it and the ones that close it again.\n\nSignature: bool OnTopicEvent(ftxui::Event event)\nMethod: OnTopicEvent\nReturns: bool\nParameters:\n    event ftxui::Event",
                         "children": [],
@@ -2845,14 +2831,7 @@
                 "expanded": false
               },
               {
-                "id": "01a36305",
-                "title": "Pad Right",
-                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "70ea2660",
+                "id": "b863889f",
                 "title": "Parse Entries",
                 "content": "Parse Entries\n\nSignature: void ParseEntries(const std::string& path, std::vector<HelpEntry>& out)\nMethod: ParseEntries\nReturns: void\nParameters:\n    path const std::string&\n    out  std::vector<HelpEntry>&",
                 "children": [],
@@ -2873,7 +2852,7 @@
                 "expanded": false
               },
               {
-                "id": "b863889f",
+                "id": "01a36305",
                 "title": "To Lower",
                 "content": "To Lower\n\nSignature: std::string Lower(std::string s)\nMethod: Lower\nReturns: std::string\nParameters:\n    s std::string",
                 "children": [],
@@ -2894,7 +2873,7 @@
                 "expanded": false
               },
               {
-                "id": "313f8f3d",
+                "id": "73353597",
                 "title": "Make Help Dialog",
                 "content": "Make Help Dialog\n\nSignature: ftxui::Component MakeHelpDialog(std::shared_ptr<EditorState> state, const std::string& config_path, bool* show)\nMethod: MakeHelpDialog\nReturns: ftxui::Component\nParameters:\nstate       std::shared_ptr<EditorState>\nconfig_path const std::string&\nshow        bool*\n\n#config",
                 "children": [],
@@ -2946,59 +2925,59 @@
                 "expanded": false
               },
               {
-                "id": "7cd0d7c7",
+                "id": "94400346",
                 "title": "History Dialog Class",
                 "content": "History Dialog Class\n\n\n\n#class",
                 "children": [
                   {
-                    "id": "0165acaa",
+                    "id": "5dcb992f",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "c58e1987",
+                        "id": "8b0b8803",
                         "title": "Change Selection Up / Down",
                         "content": "Change Selection Up / Down\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "b798b88f",
+                        "id": "171fb526",
                         "title": "Close the Dialog",
                         "content": "Close the Dialog\n\nSignature: void Close()\nMethod: Close\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "67bd3882",
+                        "id": "b798b88f",
                         "title": "Jump to Tree Node",
                         "content": "Jump to Tree Node\n\nSignature: void Jump()\nMethod: Jump\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "8b0b8803",
+                        "id": "42711de6",
                         "title": "Move Selection to End",
                         "content": "Move Selection to End\n\nSignature: void MoveToEnd()\nMethod: MoveToEnd\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "42711de6",
+                        "id": "67bd3882",
                         "title": "Move Selection to Start",
                         "content": "Move Selection to Start\n\nSignature: void MoveToStart()\nMethod: MoveToStart\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "edf450b5",
+                        "id": "c58e1987",
                         "title": "Recompute",
                         "content": "Recompute\n\nSignature: void Recompute()\nMethod: Recompute\nReturns: void\n\nRecomputes values etc from the state_",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "7d30f911",
+                        "id": "edf450b5",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nstd::vector<Entry> entries_;\nstd::vector<std::string> rendered_;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 20;\nstatic constexpr int kVisibleRows = 18;",
                         "children": [],
@@ -3008,33 +2987,33 @@
                     "expanded": false
                   },
                   {
-                    "id": "6ce50cdd",
+                    "id": "f36623fa",
                     "title": "Public Members",
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "95e511e2",
+                        "id": "2d253003",
                         "title": "Ftxui Event",
                         "content": "Ftxui Event\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "90f49343",
+                        "id": "7cd0d7c7",
                         "title": "History Dialog Constructor",
                         "content": "History Dialog Constructor\n\nSignature: HistoryDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: HistoryDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "ab58d6d0",
+                        "id": "95e511e2",
                         "title": "Render the History Dialog",
                         "content": "Render the History Dialog\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "2d253003",
+                        "id": "90f49343",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nbool Focusable() const override { return true; }\n\nbool pending_g_ = false;",
                         "children": [],
@@ -3047,16 +3026,9 @@
                 "expanded": false
               },
               {
-                "id": "94400346",
+                "id": "e5d268bd",
                 "title": "History Entry Struct",
                 "content": "History Entry Struct\n\nstruct Entry\n{\n    treeview::TreeNode* node = nullptr;\n    int depth = 0;\n};\n\n#struct",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "e5d268bd",
-                "title": "Pad Right",
-                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t",
                 "children": [],
                 "expanded": false
               },
@@ -3068,7 +3040,7 @@
                 "expanded": false
               },
               {
-                "id": "fcf19e33",
+                "id": "62bdfdeb",
                 "title": "Make History Dialog",
                 "content": "Make History Dialog\n\nSignature: ftxui::Component MakeHistoryDialog(std::shared_ptr<EditorState> state, bool* show)\nMethod: MakeHistoryDialog\nReturns: ftxui::Component\nParameters:\nstate std::shared_ptr<EditorState>\nshow  bool*",
                 "children": [],
@@ -3753,73 +3725,73 @@
                 "expanded": false
               },
               {
-                "id": "7afb3deb",
+                "id": "cd7b4a11",
                 "title": "Dead Link Dialog Class",
                 "content": "Dead Link Dialog Class",
                 "children": [
                   {
-                    "id": "920cfda6",
+                    "id": "c9e3e62a",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "5edaca6e",
+                        "id": "71d73004",
                         "title": "Activate",
                         "content": "Activate\n\nSignature: void Activate()\nMethod: Activate\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "9fc290b0",
+                        "id": "93b2f914",
                         "title": "Brokelinks Entry Struct",
                         "content": "Brokelinks Entry Struct\n\nstruct Entry\n{\n    std::string target;\n    treeview::TreeNode* node = nullptr;\n    int line = 0;\n};\n\n#struct",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "71d73004",
+                        "id": "dd8976de",
                         "title": "Close",
                         "content": "Close\n\nSignature: void Close()\nMethod: Close\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "193148e7",
+                        "id": "2a2002c3",
                         "title": "Compute the Top",
                         "content": "Compute the Top\n\nSignature: int ComputeTop(int sel, int total) const\nMethod: ComputeTop\nReturns: int\nQualifiers: const\nParameters:\n    sel   int\n    total int",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "dd8976de",
+                        "id": "a533f609",
                         "title": "On Mouse",
                         "content": "On Mouse\n\nSignature: bool OnMouse(ftxui::Mouse mouse)\nMethod: OnMouse\nReturns: bool\nParameters:\n    mouse ftxui::Mouse",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "3e351b1d",
+                        "id": "193148e7",
                         "title": "Recompute",
                         "content": "Recompute\n\nSignature: void Recompute()\nMethod: Recompute\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "2a2002c3",
+                        "id": "5edaca6e",
                         "title": "Select Next/Previous Item",
                         "content": "Select Next/Previous Item\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "a533f609",
+                        "id": "9fc290b0",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstatic constexpr int kVisibleRows = 18;\nstatic constexpr int kDoubleClickMs = 500;",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "8d37149f",
+                        "id": "3e351b1d",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nftxui::Box box_;\nstd::vector<Entry> entries_;\nstd::vector<std::string> rendered_;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 20;\nint last_click_index_ = -1;\nstd::chrono::steady_clock::time_point last_click_time_;",
                         "children": [],
@@ -3829,33 +3801,33 @@
                     "expanded": false
                   },
                   {
-                    "id": "535a4961",
+                    "id": "a263cf95",
                     "title": "Public Members",
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "106002a3",
+                        "id": "7afb3deb",
                         "title": "DeadLinksDialog Constructor",
                         "content": "DeadLinksDialog Constructor\n\nSignature: DeadLinksDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: DeadLinksDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "29434a4a",
+                        "id": "106002a3",
                         "title": "Focusable Variable",
                         "content": "Focusable Variable\n\nbool Focusable() const override { return true; }",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "0921f1bf",
+                        "id": "29434a4a",
                         "title": "Ftxui Event Call",
                         "content": "Ftxui Event Call",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "f2f8b7d2",
+                        "id": "0921f1bf",
                         "title": "Ftxui Render Call",
                         "content": "Ftxui Render Call",
                         "children": [],
@@ -3868,21 +3840,14 @@
                 "expanded": false
               },
               {
-                "id": "cd7b4a11",
+                "id": "92fcf7b2",
                 "title": "First Occurrence in Line",
                 "content": "First Occurrence in Line\n\nSignature: int FirstOccurrenceLine(const std::string& text, const std::string& target)\nMethod: FirstOccurrenceLine\nReturns: int\nParameters:\n    text   const std::string&\n    target const std::string&\n\n0-based line of the first real occurrence of `target` (a `_Title_`\nreference) in `text`. A candidate counts only when its neighbours\nare not word characters, mirroring the `_Note_` scanning rules.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "92fcf7b2",
-                "title": "Pad Right",
-                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "f7764a48",
+                "id": "185c85de",
                 "title": "Make Dead Link Dialog",
                 "content": "Make Dead Link Dialog\n\nSignature: ftxui::Component MakeDeadLinksDialog(std::shared_ptr<EditorState> state, bool* show)\nMethod: MakeDeadLinksDialog\nReturns: ftxui::Component\nParameters:\nstate std::shared_ptr<EditorState>\nshow  bool*",
                 "children": [],
@@ -3904,136 +3869,136 @@
                 "expanded": false
               },
               {
-                "id": "8549a575",
+                "id": "4320097b",
                 "title": "Collect Links",
                 "content": "Collect Links\n\nSignature: void CollectLinks(const std::string& content, std::vector<Link>& out)\nMethod: CollectLinks\nReturns: void\nParameters:\n    content const std::string&\n    out     std::vector<Link>&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "4320097b",
+                "id": "0af63c98",
                 "title": "Constants",
                 "content": "Constants\n\n--------------------------------------------------------------------------------\n\nconst std::regex kMarkdownRegex(\n    R\"(\\[([^\\]]+)\\](?:[ \\t]*\\r?\\n[ \\t]*|[ \\t]*)(https?://\\S+|file://\\S+|_[^_]+_))\",\n    std::regex_constants::icase);\nconst std::regex kUrlRegex(R\"(\\b(?:https?|file)://[^\\s]+)\",\n                           std::regex_constants::icase);\nconst std::regex kNoteRegex(\n    R\"((?:^|\\s|\\()_([^_]|[^_].*?[^_])_(?=\\s|[.,!?;:)]|$))\");",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "047be61b",
+                "id": "7a8a87cb",
                 "title": "Copy to Clipboard",
                 "content": "Copy to Clipboard\n\nSignature: bool CopyToClipboard(const std::string& text)\nMethod: CopyToClipboard\nReturns: bool\nParameters:\n    text const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "52f69581",
+                "id": "047be61b",
                 "title": "Find Link In Line",
                 "content": "Find Link In Line\n\nSignature: bool FindLinkInLine(const std::string& line, int col, Link& out)\nMethod: FindLinkInLine\nReturns: bool\nParameters:\n    line const std::string&\n    col  int\n    out  Link&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "5d216d7f",
+                "id": "52f69581",
                 "title": "Follow Link",
                 "content": "Follow Link\n\nSignature: void FollowLink(Link link, const std::shared_ptr<EditorState>& state)\nMethod: FollowLink\nReturns: void\nParameters:\n    link  Link\n    state const std::shared_ptr<EditorState>&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "96a24701",
+                "id": "24379e48",
                 "title": "Is Note Target",
                 "content": "Is Note Target\n\nSignature: bool IsNoteTarget(const std::string& target)\nMethod: IsNoteTarget\nReturns: bool\nParameters:\n    target const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "d7943fbc",
+                "id": "96a24701",
                 "title": "Is Url Target",
                 "content": "Is Url Target\n\nSignature: bool IsUrlTarget(const std::string& target)\nMethod: IsUrlTarget\nReturns: bool\nParameters:\n    target const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "f16ae7a3",
+                "id": "5d216d7f",
                 "title": "Links Dialog Class",
                 "content": "Links Dialog Class\n\n\n\n#class",
                 "children": [
                   {
-                    "id": "7f63dc44",
+                    "id": "0e103806",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "c2a65f3e",
+                        "id": "a8e874a5",
                         "title": "Activate",
                         "content": "Activate\n\nSignature: void Activate()\nMethod: Activate\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "a8e874a5",
+                        "id": "81ba27ed",
                         "title": "Close",
                         "content": "Close\n\nSignature: void Close()\nMethod: Close\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "a11e8a65",
+                        "id": "5132d756",
                         "title": "Compute Top",
                         "content": "Compute Top\n\nSignature: int ComputeTop(int sel, int total) const\nMethod: ComputeTop\nReturns: int\nQualifiers: const\nParameters:\n    sel   int\n    total int",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "5132d756",
+                        "id": "f7c1bda6",
                         "title": "Copy Selected",
                         "content": "Copy Selected\n\nSignature: void CopySelected()\nMethod: CopySelected\nReturns: void\n\nMirror of the HTML app's `y` key: copy a URL verbatim, or a note\nlink as its `_Title_` reference. Missing notes copy nothing.",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "49af98ad",
+                        "id": "c2a65f3e",
                         "title": "Move Selection Up/Down",
                         "content": "Move Selection Up/Down\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "f7c1bda6",
+                        "id": "18aa5235",
                         "title": "Move To End",
                         "content": "Move To End\n\nSignature: void MoveToEnd()\nMethod: MoveToEnd\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "18aa5235",
+                        "id": "49af98ad",
                         "title": "Move To Start",
                         "content": "Move To Start\n\nSignature: void MoveToStart()\nMethod: MoveToStart\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "81ba27ed",
+                        "id": "2e1dc3e8",
                         "title": "On Mouse",
                         "content": "On Mouse\n\nSignature: bool OnMouse(ftxui::Mouse mouse)\nMethod: OnMouse\nReturns: bool\nParameters:\n    mouse ftxui::Mouse",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "209f30f6",
+                        "id": "a11e8a65",
                         "title": "Recompute",
                         "content": "Recompute\n\nSignature: void Recompute()\nMethod: Recompute\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "2e1dc3e8",
+                        "id": "c6e8deec",
                         "title": "Static Variables",
                         "content": "Static Variables\n\n--------------------------------------------------------------------------------\n\nstatic constexpr int kVisibleRows = 18;\nstatic constexpr int kDoubleClickMs = 500;",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "5a9c204f",
+                        "id": "209f30f6",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nftxui::Box box_;\nstd::vector<Link> entries_;\nstd::vector<std::string> rendered_;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 20;\nint last_click_index_ = -1;\nstd::chrono::steady_clock::time_point last_click_time_;",
                         "children": [],
@@ -4043,33 +4008,33 @@
                     "expanded": false
                   },
                   {
-                    "id": "ad062dbe",
+                    "id": "df80623a",
                     "title": "Public Members",
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "fd7b2b5b",
+                        "id": "cd2a63d7",
                         "title": "Ftxui Event Call",
                         "content": "Ftxui Event Call\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "c87db8b7",
+                        "id": "fd7b2b5b",
                         "title": "Ftxui Render Call",
                         "content": "Ftxui Render Call\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "334fa214",
+                        "id": "f16ae7a3",
                         "title": "LinksDialog Constructor",
                         "content": "LinksDialog Constructor\n\nSignature: LinksDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: LinksDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "cd2a63d7",
+                        "id": "334fa214",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nbool Focusable() const override { return true; }\n\nbool pending_g_ = false;",
                         "children": [],
@@ -4082,21 +4047,21 @@
                 "expanded": false
               },
               {
-                "id": "24379e48",
+                "id": "6377b628",
                 "title": "Lower",
                 "content": "Lower\n\nSignature: std::string Lower(const std::string& s)\nMethod: Lower\nReturns: std::string\nParameters:\n    s const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "0af63c98",
+                "id": "d7943fbc",
                 "title": "Note Title",
                 "content": "Note Title\n\nSignature: std::string NoteTitle(const std::string& target)\nMethod: NoteTitle\nReturns: std::string\nParameters:\n    target const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "7a8a87cb",
+                "id": "8549a575",
                 "title": "Open External",
                 "content": "Open External\n\nSignature: void OpenExternal(const std::string& url)\nMethod: OpenExternal\nReturns: void\nParameters:\n    url const std::string&",
                 "children": [],
@@ -4104,20 +4069,13 @@
               },
               {
                 "id": "ecef2a09",
-                "title": "Pad Right",
-                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "6377b628",
                 "title": "Trim",
                 "content": "Trim\n\nSignature: std::string Trim(const std::string& s)\nMethod: Trim\nReturns: std::string\nParameters:\n    s const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "fd5db5ef",
+                "id": "d4342d91",
                 "title": "Make Links Dialog",
                 "content": "Make Links Dialog\n\nSignature: ftxui::Component MakeLinksDialog(std::shared_ptr<EditorState> state, bool* show)\nMethod: MakeLinksDialog\nReturns: ftxui::Component\nParameters:\nstate std::shared_ptr<EditorState>\nshow  bool*",
                 "children": [],
@@ -4434,14 +4392,14 @@
                 "expanded": false
               },
               {
-                "id": "bd2c9c20",
+                "id": "a73643fa",
                 "title": "Ftxui Make Dialog",
                 "content": "Ftxui Make Dialog\n\nSignature: ftxui::Component MakeRecentDialog(std::shared_ptr<EditorState> state, bool* show, std::shared_ptr<bool> force)\nMethod: MakeRecentDialog\nReturns: ftxui::Component\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\n    force std::shared_ptr<bool>",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "9bb9a694",
+                "id": "bd2c9c20",
                 "title": "Limit Recent List Size",
                 "content": "Limit Recent List Size\n\nSignature: std::size_t PruneRecentFiles(std::vector<std::string>& recent_files)\nMethod: PruneRecentFiles\nReturns: std::size_t\nParameters:\n    recent_files std::vector<std::string>&",
                 "children": [],
@@ -4449,93 +4407,86 @@
               },
               {
                 "id": "aee486ab",
-                "title": "Pad Right",
-                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "79e22933",
                 "title": "Recent Dialog Class",
                 "content": "Recent Dialog Class\n\n\n\n#class",
                 "children": [
                   {
-                    "id": "a1f42e7c",
+                    "id": "f1d15ed4",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "d30f0175",
+                        "id": "e192dd02",
                         "title": "Clamp Selection to Filter",
                         "content": "Clamp Selection to Filter\n\nSignature: void ClampToFilter()\nMethod: ClampToFilter\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "45effa58",
+                        "id": "022e81c3",
                         "title": "Close Recent Dialog",
                         "content": "Close Recent Dialog\n\nSignature: void Close()\nMethod: Close\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "e192dd02",
+                        "id": "0b4e1a42",
                         "title": "Filtered Indices",
                         "content": "Filtered Indices\n\nSignature: std::vector<std::size_t> Matches() const\nMethod: Matches\nReturns: std::vector<std::size_t>\nQualifiers: const",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "022e81c3",
+                        "id": "d2071eda",
                         "title": "Force Flag",
                         "content": "Force Flag\n\nSignature: void PickupForce()\nMethod: PickupForce\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "0b4e1a42",
+                        "id": "a2a1de78",
                         "title": "Move Selected Entry",
                         "content": "Move Selected Entry\n\nSignature: void MoveEntry(int dir)\nMethod: MoveEntry\nReturns: void\nParameters:\n    dir int",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "dda1c9a1",
+                        "id": "92832789",
                         "title": "Move Selection to Bottom",
                         "content": "Move Selection to Bottom\n\nSignature: void MoveToEnd()\nMethod: MoveToEnd\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "92832789",
+                        "id": "ae3a3be4",
                         "title": "Move Selection to Top",
                         "content": "Move Selection to Top\n\nSignature: void MoveToStart()\nMethod: MoveToStart\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "78fea19e",
+                        "id": "dda1c9a1",
                         "title": "Move Selection Up / Down",
                         "content": "Move Selection Up / Down\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "ae3a3be4",
+                        "id": "45effa58",
                         "title": "Open Recent Dialog",
                         "content": "Open Recent Dialog\n\nSignature: void Open()\nMethod: Open\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "a2a1de78",
+                        "id": "78fea19e",
                         "title": "Remove Selected Item",
                         "content": "Remove Selected Item\n\nSignature: void RemoveSelected()\nMethod: RemoveSelected\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "7413642f",
+                        "id": "d30f0175",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nstd::shared_ptr<bool> force_flag_;\nint selection_ = 0;\nint scroll_ = 0;\nbool force_ = false;\nstd::string filter_;\nbool filter_active_ = false;\nstatic constexpr int kVisibleRows = 18;\nstatic constexpr std::size_t kMaxContent = 88;\nstatic constexpr std::size_t kMaxFilter = 64;",
                         "children": [],
@@ -4545,40 +4496,40 @@
                     "expanded": false
                   },
                   {
-                    "id": "41552d17",
+                    "id": "80af1834",
                     "title": "Public Members",
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "68fb1c62",
+                        "id": "cb930163",
                         "title": "Filter Mode Event Handler",
                         "content": "Filter Mode Event Handler\n\nIgnore the vim-style bindings while filtering - every\nprintable character extends the filter instead - while\narrows still move, Return opens and Escape clears.\n\nSignature: bool OnFilterEvent(ftxui::Event event)\nMethod: OnFilterEvent\nReturns: bool\nParameters:\n    event ftxui::Event",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "cb930163",
+                        "id": "930af458",
                         "title": "Ftxui Event Handler",
                         "content": "Ftxui Event Handler\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "739aec77",
+                        "id": "68fb1c62",
                         "title": "Ftxui Render Method",
                         "content": "Ftxui Render Method\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "a7bcc75b",
+                        "id": "79e22933",
                         "title": "Recent Dialog Constructor",
                         "content": "Recent Dialog Constructor\n\n!_cstor",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "930af458",
+                        "id": "a7bcc75b",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nbool Focusable() const override { return true; }\n\nbool pending_g_ = false;",
                         "children": [],
@@ -4637,45 +4588,38 @@
                 "expanded": false
               },
               {
-                "id": "c351411b",
-                "title": "Pad Right",
-                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "3a713435",
+                "id": "c38873d4",
                 "title": "Parse Entries",
                 "content": "Parse Entries\n\nSignature: void ParseEntries(const std::string& path, std::vector<RegexEntry>& out)\nMethod: ParseEntries\nReturns: void\nParameters:\n    path const std::string&\n    out  std::vector<RegexEntry>&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "5b952df2",
+                "id": "3a713435",
                 "title": "Regex Dialog Class",
                 "content": "Regex Dialog Class\n\n\n\n#class",
                 "children": [
                   {
-                    "id": "b175ef4f",
+                    "id": "fab7a94b",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "72a8b9ff",
+                        "id": "366e97ca",
                         "title": "Filtered",
                         "content": "Filtered\n\nSignature: std::vector<int> Filtered() const\nMethod: Filtered\nReturns: std::vector<int>\nQualifiers: const",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "366e97ca",
+                        "id": "91af28a5",
                         "title": "Max Top",
                         "content": "Max Top\n\nSignature: int MaxTop() const\nMethod: MaxTop\nReturns: int\nQualifiers: const",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "64e7063c",
+                        "id": "72a8b9ff",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------",
                         "children": [],
@@ -4685,33 +4629,33 @@
                     "expanded": false
                   },
                   {
-                    "id": "4695a9c0",
+                    "id": "43d8d7f1",
                     "title": "Public Members",
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "6d8fcc14",
+                        "id": "05d0a2ee",
                         "title": "Ftxui Event Handler",
                         "content": "Ftxui Event Handler\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "8b75e7a4",
+                        "id": "6d8fcc14",
                         "title": "Ftxui Render",
                         "content": "Ftxui Render\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "51bb0073",
+                        "id": "5b952df2",
                         "title": "Regex Dialog Constructor",
                         "content": "Regex Dialog Constructor\n\nSignature: RegexDialog(std::shared_ptr<EditorState> state, const std::string& path, bool* show) : state_(std::move(state)), show_(show)\nConstructor: RegexDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    path  const std::string&\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "05d0a2ee",
+                        "id": "51bb0073",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nbool Focusable() const override { return true; }",
                         "children": [],
@@ -4731,14 +4675,14 @@
                 "expanded": false
               },
               {
-                "id": "c38873d4",
+                "id": "c351411b",
                 "title": "To Lower",
                 "content": "To Lower\n\nSignature: std::string Lower(std::string s)\nMethod: Lower\nReturns: std::string\nParameters:\n    s std::string",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "8f0d4842",
+                "id": "ee872fa4",
                 "title": "Ftxui Make Dialog",
                 "content": "Ftxui Make Dialog\n\nSignature: ftxui::Component MakeRegexDialog(std::shared_ptr<EditorState> state, const std::string& config_path, bool* show)\nMethod: MakeRegexDialog\nReturns: ftxui::Component\nParameters:\nstate       std::shared_ptr<EditorState>\nconfig_path const std::string&\nshow        bool*",
                 "children": [],
@@ -4790,157 +4734,150 @@
                 "expanded": false
               },
               {
-                "id": "3b17656f",
+                "id": "6fc5e374",
                 "title": "All Words Regex",
                 "content": "All Words Regex\n\nSignature: std::string AllWordsRegex(const std::string& query)\nMethod: AllWordsRegex\nReturns: std::string\nParameters:\n    query const std::string&\n\nBuilds `(?=[\\s\\S]*\\bw1\\b)(?=[\\s\\S]*\\bw2\\b)...(?=[\\s\\S]*\\bwn\\b)[\\s\\S]*`\nfrom the whitespace-separated words of `query`, requiring every word\nto be present anywhere in the text (any order, any line). `[\\s\\S]`\nis the ECMAScript stand-in for DOTALL, so words on different lines\nstill satisfy the lookaheads.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "6bf99daf",
+                "id": "c5a444d6",
                 "title": "Collect Tags",
                 "content": "Collect Tags\n\nSignature: void CollectTags(const std::string& text, std::map<std::string, int>& counts)\nMethod: CollectTags\nReturns: void\nParameters:\n    text   const std::string&\n    counts std::map<std::string, int>&\n\nCollect `#tag` tokens from `text` into `counts` (keyed by lowercase\ntag, so the map iteration is sorted and de-duplicated). HTML color\ncodes such as \"#fff\" or \"#ff8800\" are ignored.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "6e655bed",
+                "id": "6bf99daf",
                 "title": "Contains Tag",
                 "content": "Contains Tag\n\nSignature: bool ContainsTag(const std::string& text, const std::string& tag)\nMethod: ContainsTag\nReturns: bool\nParameters:\n    text const std::string&\n    tag  const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "6f6ee854",
+                "id": "aed5c9ce",
                 "title": "Create Search Results",
                 "content": "Create Search Results\n\nSignature: treeview::TreeNode* CreateSearchResults(std::shared_ptr<EditorState> state, const std::vector<treeview::TreeNode*>& nodes, const std::string& raw_query, std::string* status)\nMethod: CreateSearchResults\nReturns: treeview::TreeNode*\nParameters:\n    state     std::shared_ptr<EditorState>\n    nodes     const std::vector<treeview::TreeNode*>&\n    raw_query const std::string&\n    status    std::string*",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "6fc5e374",
+                "id": "fb4551b5",
                 "title": "Escape Regex",
                 "content": "Escape Regex\n\nSignature: std::string EscapeRegex(const std::string& s)\nMethod: EscapeRegex\nReturns: std::string\nParameters:\n    s const std::string&\n\nEscape the ECMAScript metacharacters so an \"all words\" search term\nkeeps its literal meaning inside the generated regex.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "df0cac25",
+                "id": "bc74a7c2",
                 "title": "Filter Struct",
                 "content": "Filter Struct\n\n!_method\n\nParsed search query: a leading \"r:\" selects case-insensitive regex\nmatching, a leading \":\" restricts the match to node titles and a\nleading \"+:\" requires every word to appear (in any order).\n\n#struct",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "aed5c9ce",
+                "id": "2532e7a1",
                 "title": "Find All Matches",
                 "content": "Find All Matches\n\nSignature: std::vector<treeview::TreeNode*> FindAllMatches(std::shared_ptr<EditorState> state, const std::string& raw_query)\nMethod: FindAllMatches\nReturns: std::vector<treeview::TreeNode*>\nParameters:\n    state     std::shared_ptr<EditorState>\n    raw_query const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "2c5c8140",
+                "id": "6f6ee854",
                 "title": "Find Line Matches",
                 "content": "Find Line Matches\n\nSignature: std::vector<std::pair<int, int>> FindLineMatches(const std::string& line, const std::string& raw_query)\nMethod: FindLineMatches\nReturns: std::vector<std::pair<int, int>>\nParameters:\n    line      const std::string&\n    raw_query const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "2532e7a1",
+                "id": "6e655bed",
                 "title": "Find Matches",
                 "content": "Find Matches\n\nSignature: std::vector<treeview::TreeNode*> FindMatches(std::shared_ptr<EditorState> state, const std::string& raw_query)\nMethod: FindMatches\nReturns: std::vector<treeview::TreeNode*>\nParameters:\n    state     std::shared_ptr<EditorState>\n    raw_query const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "0189a9bf",
+                "id": "3b17656f",
                 "title": "Indent Name",
                 "content": "Indent Name\n\nSignature: std::string IndentName(int depth, const std::string& name)\nMethod: IndentName\nReturns: std::string\nParameters:\n    depth int\n    name  const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "c5a444d6",
+                "id": "5a762413",
                 "title": "Is Hex Color",
                 "content": "Is Hex Color\n\nSignature: bool IsHexColor(const std::string& tag)\nMethod: IsHexColor\nReturns: bool\nParameters:\n    tag const std::string&\n\nA tag that is purely hex digits of length 3, 4, 6 or 8 (e.g. \"#fff\"\nor \"#ff8800\") is an HTML color, not a tag.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "e0496dfc",
+                "id": "b749e04c",
                 "title": "Is Regex Filter",
                 "content": "Is Regex Filter\n\nSignature: bool IsRegexFilter(const std::string& raw)\nMethod: IsRegexFilter\nReturns: bool\nParameters:\n    raw const std::string&\n\nWhether the filter runs a regex-based match (\"r:\" regex or\n\"+:\" all-words). These are deferred until Return is pressed so\nthat typing stays responsive instead of re-scanning the tree\n(and re-compiling a regex) on every keystroke.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "5a762413",
+                "id": "e0496dfc",
                 "title": "Node Matches",
                 "content": "Node Matches\n\nSignature: bool NodeMatches(const treeview::TreeNode& node, const Filter& f, bool* regex_error)\nMethod: NodeMatches\nReturns: bool\nParameters:\n    node        const treeview::TreeNode&\n    f           const Filter&\n    regex_error bool*\n\nCase-insensitive match of a node against a parsed filter. An empty\nquery matches everything. When `query` is a regex that fails to\ncompile, returns false and sets `*regex_error`.",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "fb4551b5",
-                "title": "Pad Right",
-                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t",
-                "children": [],
-                "expanded": false
-              },
-              {
-                "id": "b749e04c",
+                "id": "df0cac25",
                 "title": "Parse Filter",
                 "content": "Parse Filter\n\nSignature: Filter ParseFilter(const std::string& raw)\nMethod: ParseFilter\nReturns: Filter\nParameters:\n    raw const std::string&",
                 "children": [],
                 "expanded": false
               },
               {
-                "id": "750d0797",
+                "id": "2c5c8140",
                 "title": "Search Dialog Class",
                 "content": "Search Dialog Class\n\n\n\n#class",
                 "children": [
                   {
-                    "id": "ce7788f9",
+                    "id": "48a20352",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "061bf55b",
+                        "id": "e6bd6bbf",
                         "title": "Close",
                         "content": "Close\n\nSignature: void Close()\nMethod: Close\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "e6bd6bbf",
+                        "id": "2b272c20",
                         "title": "Invalidate",
                         "content": "Invalidate\n\nSignature: void Invalidate()\nMethod: Invalidate\nReturns: void",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "417566b2",
+                        "id": "061bf55b",
                         "title": "Move Selection Up / Down",
                         "content": "Move Selection Up / Down\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "cb506583",
+                        "id": "417566b2",
                         "title": "Recompute from state_",
                         "content": "Recompute from state_\n\nSignature: void Recompute(bool force = false)\nMethod: Recompute\nReturns: void\nParameters:\n    force bool",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "53b8c430",
+                        "id": "cb506583",
                         "title": "Recompute Tags",
                         "content": "Recompute Tags\n\nSignature: void RecomputeTags(const std::vector<std::pair<treeview::TreeNode*, int>>& all)\nMethod: RecomputeTags\nReturns: void\nParameters:\n    all const std::vector<std::pair<treeview::TreeNode*, int>>&\n\nTag search: a leading '#' lists matching tags; picking one (or an\nexact match) lists the nodes whose content carries that tag.",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "909cb308",
+                        "id": "53b8c430",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nDialogMode mode_ = DialogMode::Jump;\nstd::string filter_;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 72;\nbool results_valid_ = false;\nbool regex_error_ = false;\nbool tag_phase_ = false;\nstd::string searched_filter_;\nstd::vector<Result> results_;\nstatic constexpr int kVisibleRows = 18;",
                         "children": [],
@@ -4950,33 +4887,33 @@
                     "expanded": false
                   },
                   {
-                    "id": "c4d8e6c3",
+                    "id": "9b9af353",
                     "title": "Public Members",
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "3da861ca",
+                        "id": "68cd15b3",
                         "title": "Ftxui Event Method",
                         "content": "Ftxui Event Method\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "73a6ff4b",
+                        "id": "3da861ca",
                         "title": "Ftxui Render Method",
                         "content": "Ftxui Render Method\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "184cabce",
+                        "id": "750d0797",
                         "title": "Search Dialog Constructor",
                         "content": "Search Dialog Constructor\n\nSignature: SearchDialog(std::shared_ptr<EditorState> state, bool* show, DialogMode mode) : state_(std::move(state)), show_(show), mode_(mode)\nConstructor: SearchDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\n    mode  DialogMode\nInitializers:\n    state_ std::move(state)\n    show_  show\n    mode_  mode",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "68cd15b3",
+                        "id": "184cabce",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nbool Focusable() const override { return true; }",
                         "children": [],
@@ -4989,7 +4926,7 @@
                 "expanded": false
               },
               {
-                "id": "bc74a7c2",
+                "id": "0189a9bf",
                 "title": "Search Result Struct",
                 "content": "Search Result Struct\n\nstruct Result\n{\n    treeview::TreeNode* node;\n    std::string line;\n};\n\n#struct",
                 "children": [],
@@ -5003,7 +4940,7 @@
                 "expanded": false
               },
               {
-                "id": "88aa80a6",
+                "id": "e6b3a3ca",
                 "title": "Ftxui Make Dialog",
                 "content": "Ftxui Make Dialog\n\nSignature: ftxui::Component MakeSearchDialog(std::shared_ptr<EditorState> state, bool* show, DialogMode mode)\nMethod: MakeSearchDialog\nReturns: ftxui::Component\nParameters:\nstate std::shared_ptr<EditorState>\nshow  bool*\nmode  DialogMode",
                 "children": [],
@@ -5077,6 +5014,13 @@
                 "expanded": false
               },
               {
+                "id": "7f201a0f",
+                "title": "Pad Right",
+                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "b9c1d8c8",
                 "title": "Punctuation Vector",
                 "content": "Punctuation Vector\n\n--------------------------------------------------------------------------------\n\nconst std::vector<std::pair<std::string, std::string>>& PunctuationMap()\n{\n    static const std::vector<std::pair<std::string, std::string>> kMap = {\n        {\"\\xE2\\x80\\x98\", \"'\"},    // U+2018 left single quote\n        {\"\\xE2\\x80\\x99\", \"'\"},    // U+2019 right single quote\n        {\"\\xE2\\x80\\x9A\", \"'\"},    // U+201A low single quote\n        {\"\\xE2\\x80\\x9C\", \"\\\"\"},   // U+201C left double quote\n        {\"\\xE2\\x80\\x9D\", \"\\\"\"},   // U+201D right double quote\n        {\"\\xE2\\x80\\x9E\", \"\\\"\"},   // U+201E low double quote\n        {\"\\xE2\\x80\\x93\", \"-\"},    // U+2013 en dash\n        {\"\\xE2\\x80\\x94\", \"-\"},    // U+2014 em dash\n        {\"\\xE2\\x80\\xA6\", \"...\"},  // U+2026 ellipsis\n        {\"\\xE2\\x88\\x92\", \"-\"},    // U+2212 minus sign\n    };\n    return kMap;\n}",
@@ -5102,6 +5046,13 @@
                 "id": "2a99ba0c",
                 "title": "Ascii to Punctuation",
                 "content": "Ascii to Punctuation\n\n!_method\n\nReplace typographic (smart) punctuation with plain ASCII equivalents so\nthe result is always renderable in the terminal (\"smart\" quote/dash\ncharacters often do not display). Only the exact UTF-8 sequences of the\nmapped characters are consumed; every other byte, including other\nmulti-byte characters, passes through untouched.",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "75e38a46",
+                "title": "Pad Right",
+                "content": "Pad Right\n\n!_method\n\nPad `s` on the right with spaces until it is `width` columns long.\nStrings that are already at least `width` long are returned unchanged.\nShared by the dialog modules that align their table columns.",
                 "children": [],
                 "expanded": false
               }
