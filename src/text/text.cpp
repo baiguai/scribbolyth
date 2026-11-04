@@ -77,4 +77,16 @@ namespace scribbolyth::text
         return out;
     }
     //!
+
+    /*!
+        Pad Right
+
+        !_method
+    */
+    std::string PadRight(const std::string& s, std::size_t width)
+    {
+        if (s.size() >= width) return s;
+        return s + std::string(width - s.size(), ' ');
+    }
+    //!
 }

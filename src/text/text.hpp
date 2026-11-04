@@ -17,4 +17,16 @@ namespace scribbolyth::text
     */
     std::string ToAsciiPunctuation(const std::string& text);
     //!
+
+    /*!
+        Pad Right
+
+        !_method
+
+        Pad `s` on the right with spaces until it is `width` columns long.
+        Strings that are already at least `width` long are returned unchanged.
+        Shared by the dialog modules that align their table columns.
+    */
+    std::string PadRight(const std::string& s, std::size_t width);
+    //!
 }

@@ -11,6 +11,7 @@
 
 #include "../editor/editor_state.hpp"
 #include "../mode/mode.hpp"
+#include "../text/text.hpp"
 #include "../treeview/tree_node.hpp"
 
 namespace scribbolyth::bookmarks
@@ -20,7 +21,7 @@ namespace scribbolyth::bookmarks
         its logic and its key handling.
 
         Helper Methods
-        * PadRight - These will likely be consolidated into a single method in the future.
+        * PadRight - now the shared text::PadRight helper (../text/text.hpp).
         * The Entry struct is defined here.
 
         Public Members
@@ -36,20 +37,8 @@ namespace scribbolyth::bookmarks
 
     namespace
     {
-        /*!
-            Right Padding
-
-            !_method
-
-            This indents the bookmarks to match their depth in the treeview.
-            #todo : We should be able to make this a globally accessible method.
-        */
-        std::string PadRight(const std::string& s, std::size_t width)
-        {
-            if (s.size() >= width) return s;
-            return s + std::string(width - s.size(), ' ');
-        }
-        //!
+        // Pad Right - now the shared helper from ../text/text.hpp.
+        using scribbolyth::text::PadRight;
 
         /*!
             Bookmarks Entry Struct
