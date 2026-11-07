@@ -77,4 +77,20 @@ namespace scribbolyth::text
         return out;
     }
     //!
+
+    /*!
+        Pad Right
+
+        !_method
+
+        This is a shared helper method
+
+        #helper
+    */
+    std::string PadRight(const std::string& s, std::size_t width)
+    {
+        if (s.size() >= width) return s;
+        return s + std::string(width - s.size(), ' ');
+    }
+    //!
 }

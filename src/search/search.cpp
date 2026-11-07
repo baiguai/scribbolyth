@@ -13,6 +13,7 @@
 
 #include "../editor/editor_state.hpp"
 #include "../history/history.hpp"
+#include "../text/text.hpp"
 
 namespace scribbolyth::search
 {
@@ -40,17 +41,8 @@ namespace scribbolyth::search
         }
         //!
 
-        /*!
-            Pad Right
-
-            !_method
-        */
-        std::string PadRight(const std::string& s, std::size_t width)
-        {
-            if (s.size() >= width) return s;
-            return s + std::string(width - s.size(), ' ');
-        }
-        //!
+        // Pad Right - shared helper from ../text/text.hpp.
+        using scribbolyth::text::PadRight;
 
         /*!
             Escape Regex

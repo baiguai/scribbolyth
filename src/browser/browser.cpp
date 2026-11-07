@@ -13,6 +13,7 @@
 #include "../config/config.hpp"
 #include "../editor/editor_state.hpp"
 #include "../op/op.hpp"
+#include "../text/text.hpp"
 
 namespace fs = std::filesystem;
 
@@ -22,7 +23,7 @@ namespace scribbolyth::browser
         This file handles the file browsing dialog, as well as its key bindings.
 
         Helper Methods
-        * PadRight - soon to be consolidated to a single method.
+        * PadRight - shared text::PadRight helper (../text/text.hpp).
         * Tail - this also will likely be consolidated.
 
         Public Members
@@ -43,19 +44,8 @@ namespace scribbolyth::browser
 
     namespace
     {
-        /*!
-            Right Padding
-
-            !_method
-
-            #todo : We should be able to make this a globally accessible method.
-        */
-        std::string PadRight(const std::string& s, std::size_t width)
-        {
-            if (s.size() >= width) return s;
-            return s + std::string(width - s.size(), ' ');
-        }
-        //!
+        // Pad Right - now the shared helper from ../text/text.hpp.
+        using scribbolyth::text::PadRight;
 
         /*!
             Tailing

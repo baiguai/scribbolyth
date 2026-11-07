@@ -15,6 +15,7 @@
 #include <ftxui/screen/box.hpp>
 
 #include "../editor/editor_state.hpp"
+#include "../text/text.hpp"
 #include "../treeview/tree_node.hpp"
 
 namespace scribbolyth::brokenlinks
@@ -29,17 +30,8 @@ namespace scribbolyth::brokenlinks
 
     namespace
     {
-        /*!
-            Pad Right
-
-            !_method
-        */
-        std::string PadRight(const std::string& s, std::size_t width)
-        {
-            if (s.size() >= width) return s;
-            return s + std::string(width - s.size(), ' ');
-        }
-        //!
+        // Pad Right - shared helper from ../text/text.hpp.
+        using scribbolyth::text::PadRight;
 
         /*!
             First Occurrence in Line

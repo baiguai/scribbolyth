@@ -47,6 +47,18 @@ using namespace ftxui;
     Key codes are defined within the ./config/commands.conf file.
     */
 
+    /*[/How To Guides/Edit a Specific Method]
+        If you need to work on a specific method, you can use this help system
+        to do so...
+
+        * If you have an idea what the method does, search for related words here.
+        * Or search for part of its name, this help system will show the file name.
+        * In the code file, search for the node title in the help system - or the actual method name as called out here.
+
+        For example, if you need to modify the treeview's expand all feature, search for
+        expand all. You will see the treeview.cpp has a method called: ExpandAll - search for that in treeview.cpp.
+    */
+
     /*[/How To Guides/Add a Key Binding]
         To add a key binding:
 
