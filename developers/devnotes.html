@@ -961,6 +961,13 @@
     "content": "",
     "children": [
       {
+        "id": "25a87674",
+        "title": "Edit a Specific Method",
+        "content": "Edit a Specific Method\n\nIf you need to work on a specific method, you can use this help system\nto do so...\n\n* If you have an idea what the method does, search for related words here.\n* Or search for part of its name, this help system will show the file name.\n* In the code file, search for the node title in the help system - or the actual method name as called out here.\n\nFor example, if you need to modify the treeview's expand all feature, search for\nexpand all. You will see the treeview.cpp has a method called: ExpandAll - search for that in treeview.cpp.",
+        "children": [],
+        "expanded": false
+      },
+      {
         "id": "6751658d",
         "title": "Add a Key Binding",
         "content": "Add a Key Binding\n\nTo add a key binding:\n\n* Add the key binding definition to the commands.conf file.\n* You can see how other bindings have been implemented by searching the\n  source code for the Op value. That is the starting point in the code.\n* Also note the MODE for the existing binding. If it is TREE, start\n  searching in the treeview.cpp file. If it is NORMAL, VISUAL, etc you\n  could start looking in the editor.cpp file. There are some exceptions\n  where methods are in other supporting code files, so you can check\n  those. A good recursive file contents search tool is helpful!",
@@ -5016,7 +5023,7 @@
               {
                 "id": "7f201a0f",
                 "title": "Pad Right",
-                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t",
+                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t\n\nThis is a shared helper method\n\n#helper",
                 "children": [],
                 "expanded": false
               },

@@ -1460,7 +1460,7 @@ namespace scribbolyth::treeview
 
         !_method
 
-        Select the first visible node (gg).
+        Select the first visible node (gg by default).
     */
     void TreeView::MoveToStart()
     {
@@ -1546,7 +1546,7 @@ namespace scribbolyth::treeview
 
         !_method
 
-        Expand every folder in the tree (E).
+        Expand every folder in the tree (E by default).
     */
     void TreeView::ExpandAll()
     {
@@ -1562,7 +1562,7 @@ namespace scribbolyth::treeview
 
         !_method
 
-        Expand the selected node and its entire subtree of children (e).
+        Expand the selected node and its entire subtree of children (e by default).
     */
     void TreeView::ExpandSelectedBranch()
     {
@@ -1576,7 +1576,7 @@ namespace scribbolyth::treeview
 
         !_method
 
-        Collapse every folder in the tree (C); deselect when the selection ends
+        Collapse every folder in the tree (C by default); deselect when the selection ends
         up hidden.
     */
     void TreeView::CollapseAll()
@@ -1631,7 +1631,7 @@ namespace scribbolyth::treeview
 
         !_method
 
-        Add `name` as the first child of the selected node (A), expanding it; with
+        Add `name` as the first child of the selected node (A by default), expanding it; with
         no selection the new node becomes a root.
     */
     void TreeView::InsertChild(const std::string& name)
@@ -1655,7 +1655,7 @@ namespace scribbolyth::treeview
         !_method
 
 
-        Add `name` as the sibling just below the selected node (a); with no
+        Add `name` as the sibling just below the selected node (a by default); with no
         selection the new node becomes a root.
     */
     void TreeView::InsertNode(const std::string& name)
@@ -1685,7 +1685,7 @@ namespace scribbolyth::treeview
 
         !_method
 
-        Remove the selected node (D), then select its next sibling, the parent, or
+        Remove the selected node (D by default), then select its next sibling, the parent, or
         nothing, whichever is available.
     */
     void TreeView::DeleteNode()
