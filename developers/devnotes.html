@@ -19,19 +19,17 @@
 <!-- Styles -->
             <style id="theme_styles">
                 :root {
-                    --bg: #000;
-                    --fg: #f5f5f5;
-                    --muted: #555;
-                    --accent: #00d1b2;
-                    --danger: #ff5577;
-                    --sel-bg: #111827;
-                    --btn-border: #555;
-                    --border: #222;
-                    --border-radius: 8px;
-                    --pill-radius: 1px;
-                    --vim-cursor: #00d1b2;
-                    --insert-cursor: #00ff88;
-                }
+                        --bg: #000000;
+                        --fg: #d5e5ff;
+                        --muted: #555555;
+                        --accent: #00d1b2;
+                        --danger: #ff5577;
+                        --sel-bg: #111827;
+                        --btn-border: #555555;
+                        --border: #222222;
+                        --vim-cursor: #00d1b2;
+                        --insert-cursor: #00ff88;
+                    }
             </style>
             <style>
                 .app {
@@ -943,8 +941,15 @@
   {
     "id": "69277a1d",
     "title": "Introduction",
-    "content": "Introduction\nDeveloper documentation for Scribbolyth.",
+    "content": "Introduction\nDeveloper documentation for Scribbolyth.\n\nSee: _Using This Help System_",
     "children": [
+      {
+        "id": "2be15afe",
+        "title": "Using This Help System",
+        "content": "Using This Help System\n\nThis help system is built in the .html version of Scribbolyth (called Scribboleth).\n\nUse: ?\n    For the key bindings help.\n\nSaving this File:\n    You will want to use 'S' in TREE mode, and save it with the file name: devnotes\n    Then replace the original file with the downloaded copy.\n\nNotes:\n    It has most of the features that Scribbolyth has.\n    If you change the theme of this file, and add bookmarks in it - and save that, replacing this file\n    if you re-generate it, those are preserved.",
+        "children": [],
+        "expanded": false
+      },
       {
         "id": "8b019cc8",
         "title": "Key Codes",
@@ -963,7 +968,7 @@
       {
         "id": "25a87674",
         "title": "Edit a Specific Method",
-        "content": "Edit a Specific Method\n\nIf you need to work on a specific method, you can use this help system\nto do so...\n\n* If you have an idea what the method does, search for related words here.\n* Or search for part of its name, this help system will show the file name.\n* In the code file, search for the node title in the help system - or the actual method name as called out here.\n\nFor example, if you need to modify the treeview's expand all feature, search for\nexpand all. You will see the treeview.cpp has a method called: ExpandAll - search for that in treeview.cpp.",
+        "content": "Edit a Specific Method\n\nIf you need to work on a specific method, you can use this help system\nto do so...\n\n* If you have an idea what the method does, search for related words here.\n* Or search for part of its name, this help system will show the file name.\n* You can use the search features of the help system, like REGEX search etc.\n* In the code file, search for the node title in the help system - or the actual method name as called out here.\n\nFor example, if you need to modify the treeview's expand all feature, search for\nexpand all. You will see the treeview.cpp has a method called: ExpandAll - search for that in treeview.cpp.",
         "children": [],
         "expanded": false
       },
@@ -4192,7 +4197,7 @@
               {
                 "id": "33648a43",
                 "title": "Variables",
-                "content": "Variables\nConstructs the persistent editor state as well as the editor and treeview elements.\n\n--------------------------------------------------------------------------------\n\nauto version = \"1.0.4\";\n\nauto state = std::make_shared<EditorState>();\n\nauto editor_comp = scribbolyth::editor::MakeEditor(state);\nauto treeview_comp = scribbolyth::treeview::MakeTreeView(state);\n\nstate->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };\nstate->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };\n\nauto treeview_wrap = treeview_comp;\nauto editor_wrap = editor_comp;\n\nauto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);\n\nauto screen = ScreenInteractive::Fullscreen();\nauto quit = screen.ExitLoopClosure();\n\n--------------------------------------------------------------------------------",
+                "content": "Variables\nConstructs the persistent editor state as well as the editor and treeview elements.\n\n--------------------------------------------------------------------------------\n\nauto version = \"1.0.5\";\n\nauto state = std::make_shared<EditorState>();\n\nauto editor_comp = scribbolyth::editor::MakeEditor(state);\nauto treeview_comp = scribbolyth::treeview::MakeTreeView(state);\n\nstate->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };\nstate->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };\n\nauto treeview_wrap = treeview_comp;\nauto editor_wrap = editor_comp;\n\nauto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);\n\nauto screen = ScreenInteractive::Fullscreen();\nauto quit = screen.ExitLoopClosure();\n\n--------------------------------------------------------------------------------",
                 "children": [],
                 "expanded": false
               },
@@ -5125,7 +5130,7 @@
               {
                 "id": "a75de894",
                 "title": "Collapse All",
-                "content": "Collapse All \n\nSignature: void TreeView::CollapseAll()\nMethod: CollapseAll\nReturns: void TreeView\n\nCollapse every folder in the tree (C); deselect when the selection ends\nup hidden.",
+                "content": "Collapse All \n\nSignature: void TreeView::CollapseAll()\nMethod: CollapseAll\nReturns: void TreeView\n\nCollapse every folder in the tree (C by default); deselect when the selection ends\nup hidden.",
                 "children": [],
                 "expanded": false
               },
@@ -5160,7 +5165,7 @@
               {
                 "id": "d3bdb207",
                 "title": "Delete Node",
-                "content": "Delete Node \n\nSignature: void TreeView::DeleteNode()\nMethod: DeleteNode\nReturns: void TreeView\n\nRemove the selected node (D), then select its next sibling, the parent, or\nnothing, whichever is available.",
+                "content": "Delete Node \n\nSignature: void TreeView::DeleteNode()\nMethod: DeleteNode\nReturns: void TreeView\n\nRemove the selected node (D by default), then select its next sibling, the parent, or\nnothing, whichever is available.",
                 "children": [],
                 "expanded": false
               },
@@ -5174,14 +5179,14 @@
               {
                 "id": "b24f4669",
                 "title": "Expand All",
-                "content": "Expand All \n\nSignature: void TreeView::ExpandAll()\nMethod: ExpandAll\nReturns: void TreeView\n\nExpand every folder in the tree (E).",
+                "content": "Expand All \n\nSignature: void TreeView::ExpandAll()\nMethod: ExpandAll\nReturns: void TreeView\n\nExpand every folder in the tree (E by default).",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "22759ce4",
                 "title": "Expand Selected Branch",
-                "content": "Expand Selected Branch \n\nSignature: void TreeView::ExpandSelectedBranch()\nMethod: ExpandSelectedBranch\nReturns: void TreeView\n\nExpand the selected node and its entire subtree of children (e).",
+                "content": "Expand Selected Branch \n\nSignature: void TreeView::ExpandSelectedBranch()\nMethod: ExpandSelectedBranch\nReturns: void TreeView\n\nExpand the selected node and its entire subtree of children (e by default).",
                 "children": [],
                 "expanded": false
               },
@@ -5265,14 +5270,14 @@
               {
                 "id": "6207214e",
                 "title": "Insert Child Node",
-                "content": "Insert Child Node \n\nSignature: void TreeView::InsertChild(const std::string& name)\nMethod: InsertChild\nReturns: void TreeView\nParameters:\n    name const std::string&\n\nAdd `name` as the first child of the selected node (A), expanding it; with\nno selection the new node becomes a root.",
+                "content": "Insert Child Node \n\nSignature: void TreeView::InsertChild(const std::string& name)\nMethod: InsertChild\nReturns: void TreeView\nParameters:\n    name const std::string&\n\nAdd `name` as the first child of the selected node (A by default), expanding it; with\nno selection the new node becomes a root.",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "005f0d8d",
                 "title": "Insert Node",
-                "content": "Insert Node \n\nSignature: void TreeView::InsertNode(const std::string& name)\nMethod: InsertNode\nReturns: void TreeView\nParameters:\n    name const std::string&\n\n\nAdd `name` as the sibling just below the selected node (a); with no\nselection the new node becomes a root.",
+                "content": "Insert Node \n\nSignature: void TreeView::InsertNode(const std::string& name)\nMethod: InsertNode\nReturns: void TreeView\nParameters:\n    name const std::string&\n\n\nAdd `name` as the sibling just below the selected node (a by default); with no\nselection the new node becomes a root.",
                 "children": [],
                 "expanded": false
               },
@@ -5321,7 +5326,7 @@
               {
                 "id": "4e5772b0",
                 "title": "Move Selection to Start",
-                "content": "Move Selection to Start\n\nSignature: void TreeView::MoveToStart()\nMethod: MoveToStart\nReturns: void TreeView\n\nSelect the first visible node (gg).",
+                "content": "Move Selection to Start\n\nSignature: void TreeView::MoveToStart()\nMethod: MoveToStart\nReturns: void TreeView\n\nSelect the first visible node (gg by default).",
                 "children": [],
                 "expanded": false
               },
@@ -5757,7 +5762,13 @@
     "expanded": false
   }
 ];
-            let bookmarks = [ ];
+            let bookmarks = [
+    {
+        "id": "ae61229c",
+        "caption": "Render the Bookmarks Dialog",
+        "path": "/…/BookmarksDialog Class/Public Members"
+    }
+];
             let historyStack = [ ];
 
             // !@!
@@ -5770,6 +5781,55 @@
                 "];": "^^^array^^^",
                 "\\);": "^^^func^^^"
             };
+
+            // Locate a `let <keyword> = <value>;` declaration.  The value is
+            // scanned with bracket depth and string literals respected, so a
+            // '];' inside note text (e.g. `alphabet[dist(gen)];`) cannot end
+            // the array early the way a non-greedy regex would.
+            function findJsStatement(text, keyword) {
+                const re = new RegExp('^([ \\t]*)let\\s+' + keyword + '\\s*=', 'm');
+                const m = re.exec(text);
+                if (!m) return null;
+                const start = m.index + m[1].length;
+                let i = m.index + m[0].length;
+                while (i < text.length && /\s/.test(text[i])) i++;
+                const valueStart = i;
+                let valueEnd;
+                if (text[i] === '[' || text[i] === '{') {
+                    let depth = 0, inString = false, escaped = false;
+                    for (let j = i; j < text.length; j++) {
+                        const ch = text[j];
+                        if (inString) {
+                            if (escaped) { escaped = false; continue; }
+                            if (ch === '\\') { escaped = true; continue; }
+                            if (ch === '"') inString = false;
+                            continue;
+                        }
+                        if (ch === '"') { inString = true; continue; }
+                        if (ch === '[' || ch === '{') depth++;
+                        else if (ch === ']' || ch === '}') {
+                            depth--;
+                            if (depth === 0) { valueEnd = j + 1; break; }
+                        }
+                    }
+                    if (valueEnd === undefined) return null;
+                } else {
+                    const semi = text.indexOf(';', i);
+                    if (semi === -1) return null;
+                    valueEnd = semi;
+                }
+                let end = valueEnd;
+                while (end < text.length && /\s/.test(text[end])) end++;
+                if (text[end] === ';') end++;
+                return { start: start, end: end, value: text.slice(valueStart, valueEnd) };
+            }
+
+            function replaceJsStatement(text, keyword, value) {
+                const found = findJsStatement(text, keyword);
+                if (!found) return text;
+                return text.slice(0, found.start) + 'let ' + keyword + ' = '
+                     + value + ';' + text.slice(found.end);
+            }
 
             let nodePort = 0;
 
@@ -5797,109 +5857,128 @@
             let tagsList = [];
             let tagsIndex = 0;
             let showingHelp = false;
-            let currentTheme = null;
+            let currentTheme = {
+    "name": "blued",
+    "bg": "#000000",
+    "fg": "#d5e5ff",
+    "muted": "#555555",
+    "accent": "#00d1b2",
+    "danger": "#ff5577",
+    "sel-bg": "#111827",
+    "btn-border": "#555555",
+    "border": "#222222",
+    "input-bg": "#111827",
+    "input-fg": "#d5e5ff",
+    "btn-bg": "#111827",
+    "btn-fg": "#d5e5ff",
+    "dim": "#555555",
+    "border-radius": "4px",
+    "pill-radius": "0px",
+    "vim-cursor": "#1f4676",
+    "insert-cursor": "#b8e3ff"
+};
             let themes = [
-                { name: "default-theme", bg: "#000000", fg: "#f5f5f5", muted: "#555555", accent: "#00d1b2", danger: "#ff5577", "sel-bg": "#111827", "btn-border": "#555555", border: "#222222", "input-bg": "#111827", "input-fg": "#f5f5f5", "btn-bg": "#111827", "btn-fg": "#f5f5f5", dim: "#555555", "border-radius": "8px", "pill-radius": "999px", "vim-cursor": "#00b894", "insert-cursor": "#00d1b2" },
-                { name: "default-with-grid", bg: "#000000", fg: "#c0c0c0", muted: "#404040", accent: "#00d1b2", danger: "#ff5577", "sel-bg": "#1a1a1a", "btn-border": "#333333", border: "#222222", "input-bg": "#111111", "input-fg": "#c0c0c0", "btn-bg": "#111111", "btn-fg": "#c0c0c0", dim: "#404040", "border-radius": "8px", "pill-radius": "999px", "vim-cursor": "#00b894", "insert-cursor": "#00d1b2", grid: true, "grid-color": "#111111" },
-                { name: "blued", bg: "#000000", fg: "#d5e5ff", muted: "#555555", accent: "#00d1b2", danger: "#ff5577", "sel-bg": "#111827", "btn-border": "#555555", border: "#222222", "input-bg": "#111827", "input-fg": "#d5e5ff", "btn-bg": "#111827", "btn-fg": "#d5e5ff", dim: "#555555", "border-radius": "4px", "pill-radius": "0px", "vim-cursor": "#1f4676", "insert-cursor": "#b8e3ff" },
-                { name: "dim-console", bg: "#000000", fg: "#888888", muted: "#444444", accent: "#888888", danger: "#888888", "sel-bg": "#000000", "btn-border": "#333333", border: "#111111", "input-bg": "#000000", "input-fg": "#888888", "btn-bg": "#111111", "btn-fg": "#888888", dim: "#444444", "border-radius": "0px", "pill-radius": "0px", "vim-cursor": "#333333", "insert-cursor": "#888888" },
-                { name: "monokai-theme", bg: "#0f0f0f", fg: "#f0f0f0", muted: "#888888", accent: "#00bfff", danger: "#ff4444", "sel-bg": "#1a1a1a", "btn-border": "#666666", border: "#2a2a2a", "input-bg": "#1a1a1a", "input-fg": "#f0f0f0", "btn-bg": "#1a1a1a", "btn-fg": "#f0f0f0", dim: "#888888", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#d0d0d0", "insert-cursor": "#00bfff" },
-                { name: "monokai-pro-theme", bg: "#2d2d2d", fg: "#f2f2e0", muted: "#727272", accent: "#ffa044", danger: "#ff6b6b", "sel-bg": "#3d3d3d", "btn-border": "#555555", border: "#494949", "input-bg": "#3d3d3d", "input-fg": "#f2f2e0", "btn-bg": "#3d3d3d", "btn-fg": "#f2f2e0", dim: "#727272", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#f2f2e0", "insert-cursor": "#ffa044" },
-                { name: "dracula-theme", bg: "#282a36", fg: "#f8f8f2", muted: "#6272a4", accent: "#bd93f9", danger: "#ff5555", "sel-bg": "#44475a", "btn-border": "#6272a4", border: "#44475a", "input-bg": "#44475a", "input-fg": "#f8f8f2", "btn-bg": "#44475a", "btn-fg": "#f8f8f2", dim: "#6272a4", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#f8f8f2", "insert-cursor": "#bd93f9" },
-                { name: "nord-theme", bg: "#2e3440", fg: "#eceff4", muted: "#616e88", accent: "#88c0d0", danger: "#bf616a", "sel-bg": "#3b4252", "btn-border": "#4c566a", border: "#434c5e", "input-bg": "#3b4252", "input-fg": "#eceff4", "btn-bg": "#3b4252", "btn-fg": "#eceff4", dim: "#616e88", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#d8dee9", "insert-cursor": "#88c0d0" },
-                { name: "nord-light-theme", bg: "#eceff4", fg: "#2e3440", muted: "#4c566a", accent: "#5e81ac", danger: "#bf616a", "sel-bg": "#e5e9f0", "btn-border": "#d8dee9", border: "#d8dee9", "input-bg": "#e5e9f0", "input-fg": "#2e3440", "btn-bg": "#e5e9f0", "btn-fg": "#2e3440", dim: "#4c566a", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#2e3440", "insert-cursor": "#5e81ac" },
-                { name: "solarized-dark-theme", bg: "#002b36", fg: "#839496", muted: "#586e75", accent: "#268bd2", danger: "#dc322f", "sel-bg": "#073642", "btn-border": "#586e75", border: "#073642", "input-bg": "#073642", "input-fg": "#839496", "btn-bg": "#073642", "btn-fg": "#839496", dim: "#586e75", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#93a1a1", "insert-cursor": "#268bd2" },
-                { name: "solarized-light-theme", bg: "#fdf6e3", fg: "#657b83", muted: "#93a1a1", accent: "#268bd2", danger: "#dc322f", "sel-bg": "#eee8d5", "btn-border": "#93a1a1", border: "#eee8d5", "input-bg": "#eee8d5", "input-fg": "#657b83", "btn-bg": "#eee8d5", "btn-fg": "#657b83", dim: "#93a1a1", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#586e75", "insert-cursor": "#268bd2" },
-                { name: "one-dark-theme", bg: "#282c34", fg: "#abb2bf", muted: "#5c6370", accent: "#61afef", danger: "#e06c75", "sel-bg": "#2c313c", "btn-border": "#5c6370", border: "#3e4451", "input-bg": "#2c313c", "input-fg": "#abb2bf", "btn-bg": "#2c313c", "btn-fg": "#abb2bf", dim: "#5c6370", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#abb2bf", "insert-cursor": "#61afef" },
-                { name: "vscode-dark-theme", bg: "#1e1e1e", fg: "#d4d4d4", muted: "#858585", accent: "#0e7490", danger: "#f14c4c", "sel-bg": "#2d2d2d", "btn-border": "#3e3e3e", border: "#3c3c3c", "input-bg": "#2d2d2d", "input-fg": "#d4d4d4", "btn-bg": "#2d2d2d", "btn-fg": "#d4d4d4", dim: "#858585", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#d4d4d4", "insert-cursor": "#0e7490" },
-                { name: "github-dark-theme", bg: "#0d1117", fg: "#c9d1d9", muted: "#8b949e", accent: "#58a6ff", danger: "#f85149", "sel-bg": "#161b22", "btn-border": "#30363d", border: "#21262d", "input-bg": "#161b22", "input-fg": "#c9d1d9", "btn-bg": "#161b22", "btn-fg": "#c9d1d9", dim: "#8b949e", "border-radius": "6px", "pill-radius": "6px", "vim-cursor": "#c9d1d9", "insert-cursor": "#58a6ff" },
-                { name: "github-light-theme", bg: "#ffffff", fg: "#24292f", muted: "#57606a", accent: "#0969da", danger: "#cf222e", "sel-bg": "#f6f8fa", "btn-border": "#d0d7de", border: "#d8dee8", "input-bg": "#f6f8fa", "input-fg": "#24292f", "btn-bg": "#f6f8fa", "btn-fg": "#24292f", dim: "#57606a", "border-radius": "6px", "pill-radius": "6px", "vim-cursor": "#24292f", "insert-cursor": "#0969da" },
-                { name: "gruvbox-theme", bg: "#282828", fg: "#ebdbb2", muted: "#928374", accent: "#fabd2f", danger: "#fb4934", "sel-bg": "#3c3836", "btn-border": "#504945", border: "#3c3836", "input-bg": "#3c3836", "input-fg": "#ebdbb2", "btn-bg": "#3c3836", "btn-fg": "#ebdbb2", dim: "#928374", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#ebdbb2", "insert-cursor": "#fabd2f" },
-                { name: "gruvbox-dark-hard-theme", bg: "#1d2021", fg: "#ebdbb2", muted: "#928374", accent: "#fabd2f", danger: "#fb4934", "sel-bg": "#282828", "btn-border": "#504945", border: "#32302f", "input-bg": "#282828", "input-fg": "#ebdbb2", "btn-bg": "#282828", "btn-fg": "#ebdbb2", dim: "#928374", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#ebdbb2", "insert-cursor": "#fabd2f" },
-                { name: "synthwave-theme", bg: "#1a102e", fg: "#fceee7", muted: "#7c7191", accent: "#ff7edb", danger: "#f7477f", "sel-bg": "#2a1f4e", "btn-border": "#4e4968", border: "#3d2e5e", "input-bg": "#2a1f4e", "input-fg": "#fceee7", "btn-bg": "#2a1f4e", "btn-fg": "#fceee7", dim: "#7c7191", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#fceee7", "insert-cursor": "#ff7edb" },
-                { name: "synthwave-with-grid", bg: "#0a0018", fg: "#f0d8f8", muted: "#5050a0", accent: "#ff68d8", danger: "#f04080", "sel-bg": "#1a0a28", "btn-border": "#302848", border: "#201838", "input-bg": "#180828", "input-fg": "#f0d8f8", "btn-bg": "#180828", "btn-fg": "#f0d8f8", dim: "#5050a0", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#f0d8f8", "insert-cursor": "#ff68d8", grid: true, "grid-color": "#230f3a" },
-                { name: "cyberpunk-theme", bg: "#0b0b0b", fg: "#c5c8c6", muted: "#7f8f8d", accent: "#ff0080", danger: "#ff0039", "sel-bg": "#1f1f1f", "btn-border": "#4d4d4d", border: "#303030", "input-bg": "#1f1f1f", "input-fg": "#c5c8c6", "btn-bg": "#1f1f1f", "btn-fg": "#c5c8c6", dim: "#7f8f8d", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#ff0080", "insert-cursor": "#ff0080" },
-                { name: "neon-theme", bg: "#0a0a0a", fg: "#ffffff", muted: "#888888", accent: "#ff00ff", danger: "#00ff00", "sel-bg": "#1a1a1a", "btn-border": "#444444", border: "#333333", "input-bg": "#1a1a1a", "input-fg": "#ffffff", "btn-bg": "#1a1a1a", "btn-fg": "#ffffff", dim: "#888888", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#ff00ff", "insert-cursor": "#00ffff" },
-                { name: "neon-nights-theme", bg: "#0d0d0d", fg: "#eeeeee", muted: "#6e6e6e", accent: "#00ffff", danger: "#ff0055", "sel-bg": "#1a1a1a", "btn-border": "#4d4d4d", border: "#333333", "input-bg": "#1a1a1a", "input-fg": "#eeeeee", "btn-bg": "#1a1a1a", "btn-fg": "#eeeeee", dim: "#6e6e6e", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#eeeeee", "insert-cursor": "#00ffff" },
-                { name: "matrix-theme", bg: "#000000", fg: "#00ff00", muted: "#008800", accent: "#00ff00", danger: "#ff0000", "sel-bg": "#001100", "btn-border": "#003300", border: "#003300", "input-bg": "#001100", "input-fg": "#00ff00", "btn-bg": "#001100", "btn-fg": "#00ff00", dim: "#008800", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#00ff00", "insert-cursor": "#00ff00" },
-                { name: "matrix-code-theme", bg: "#000000", fg: "#00ff41", muted: "#003b00", accent: "#00ff41", danger: "#ff003c", "sel-bg": "#0d0208", "btn-border": "#0d0208", border: "#0d0208", "input-bg": "#0d0208", "input-fg": "#00ff41", "btn-bg": "#0d0208", "btn-fg": "#00ff41", dim: "#003b00", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#00ff41", "insert-cursor": "#00ff41" },
-                { name: "terminal-green-theme", bg: "#0c0c0c", fg: "#00ff00", muted: "#008000", accent: "#00ff00", danger: "#ff0000", "sel-bg": "#1a1a1a", "btn-border": "#004400", border: "#003300", "input-bg": "#1a1a1a", "input-fg": "#00ff00", "btn-bg": "#1a1a1a", "btn-fg": "#00ff00", dim: "#008000", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#00ff00", "insert-cursor": "#00ff00" },
-                { name: "hacker-theme", bg: "#000000", fg: "#00ff00", muted: "#008800", accent: "#00ff00", danger: "#ff0000", "sel-bg": "#111111", "btn-border": "#003300", border: "#002200", "input-bg": "#111111", "input-fg": "#00ff00", "btn-bg": "#111111", "btn-fg": "#00ff00", dim: "#008800", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#00ff00", "insert-cursor": "#00ff00" },
-                { name: "hacker-terminal-theme", bg: "#001100", fg: "#33ff33", muted: "#006600", accent: "#33ff33", danger: "#ff3333", "sel-bg": "#002200", "btn-border": "#004400", border: "#003300", "input-bg": "#002200", "input-fg": "#33ff33", "btn-bg": "#002200", "btn-fg": "#33ff33", dim: "#006600", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#33ff33", "insert-cursor": "#33ff33" },
-                { name: "retro-arcade-theme", bg: "#1a1a2e", fg: "#eaeaea", muted: "#6b6b8c", accent: "#ffcc00", danger: "#ff3366", "sel-bg": "#2a2a4e", "btn-border": "#4b4b8c", border: "#3a3a5e", "input-bg": "#2a2a4e", "input-fg": "#eaeaea", "btn-bg": "#2a2a4e", "btn-fg": "#eaeaea", dim: "#6b6b8c", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#ffcc00", "insert-cursor": "#ffcc00" },
-                { name: "8-bit-theme", bg: "#000000", fg: "#ffffff", muted: "#888888", accent: "#ff55ff", danger: "#ff5555", "sel-bg": "#222222", "btn-border": "#555555", border: "#444444", "input-bg": "#222222", "input-fg": "#ffffff", "btn-bg": "#222222", "btn-fg": "#ffffff", dim: "#888888", "border-radius": "0px", "pill-radius": "0px", "vim-cursor": "#ffffff", "insert-cursor": "#ff55ff" },
-                { name: "hard-square-theme", bg: "#111111", fg: "#ffffff", muted: "#666666", accent: "#ff00ff", danger: "#ff0000", "sel-bg": "#222222", "btn-border": "#444444", border: "#444444", "input-bg": "#222222", "input-fg": "#ffffff", "btn-bg": "#222222", "btn-fg": "#ffffff", dim: "#666666", "border-radius": "0px", "pill-radius": "0px", "vim-cursor": "#ffffff", "insert-cursor": "#ff00ff" },
-                { name: "light-theme", bg: "#ffffff", fg: "#333333", muted: "#888888", accent: "#0066cc", danger: "#cc0000", "sel-bg": "#f0f0f0", "btn-border": "#cccccc", border: "#dddddd", "input-bg": "#f0f0f0", "input-fg": "#333333", "btn-bg": "#f0f0f0", "btn-fg": "#333333", dim: "#888888", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#333333", "insert-cursor": "#0066cc" },
-                { name: "minimalist-theme", bg: "#ffffff", fg: "#222222", muted: "#999999", accent: "#0066cc", danger: "#cc0000", "sel-bg": "#f5f5f5", "btn-border": "#dddddd", border: "#eeeeee", "input-bg": "#f5f5f5", "input-fg": "#222222", "btn-bg": "#f5f5f5", "btn-fg": "#222222", dim: "#999999", "border-radius": "0px", "pill-radius": "0px", "vim-cursor": "#222222", "insert-cursor": "#0066cc" },
-                { name: "deep-purple-theme", bg: "#1a1a2e", fg: "#e0e0ff", muted: "#6e6ea8", accent: "#9966ff", danger: "#ff3366", "sel-bg": "#2a2a4e", "btn-border": "#4e4e8c", border: "#3e3e5e", "input-bg": "#2a2a4e", "input-fg": "#e0e0ff", "btn-bg": "#2a2a4e", "btn-fg": "#e0e0ff", dim: "#6e6ea8", "border-radius": "6px", "pill-radius": "6px", "vim-cursor": "#e0e0ff", "insert-cursor": "#9966ff" },
-                { name: "deep-blue-report-theme", bg: "#0f172a", fg: "#e2e8f0", muted: "#64748b", accent: "#3b82f6", danger: "#ef4444", "sel-bg": "#1e293b", "btn-border": "#334155", border: "#1e293b", "input-bg": "#1e293b", "input-fg": "#e2e8f0", "btn-bg": "#1e293b", "btn-fg": "#e2e8f0", dim: "#64748b", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#e2e8f0", "insert-cursor": "#3b82f6" },
-                { name: "deep-space-theme", bg: "#0b0e14", fg: "#b0b0b0", muted: "#4a4a5a", accent: "#4fc3f7", danger: "#ff5252", "sel-bg": "#151b25", "btn-border": "#2a303a", border: "#202830", "input-bg": "#151b25", "input-fg": "#b0b0b0", "btn-bg": "#151b25", "btn-fg": "#b0b0b0", dim: "#4a4a5a", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#b0b0b0", "insert-cursor": "#4fc3f7" },
-                { name: "deep-water-theme", bg: "#0a1929", fg: "#b0d0e0", muted: "#4a7080", accent: "#00bcd4", danger: "#ff5252", "sel-bg": "#132f4c", "btn-border": "#2b4556", border: "#1e3a50", "input-bg": "#132f4c", "input-fg": "#b0d0e0", "btn-bg": "#132f4c", "btn-fg": "#b0d0e0", dim: "#4a7080", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#b0d0e0", "insert-cursor": "#00bcd4" },
-                { name: "deep-red-velvet-theme", bg: "#1f0808", fg: "#f0d0d0", muted: "#804040", accent: "#ff4040", danger: "#ff0000", "sel-bg": "#2f1010", "btn-border": "#4f2020", border: "#3f1818", "input-bg": "#2f1010", "input-fg": "#f0d0d0", "btn-bg": "#2f1010", "btn-fg": "#f0d0d0", dim: "#804040", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#f0d0d0", "insert-cursor": "#ff4040" },
-                { name: "charcoal-grey-theme", bg: "#212121", fg: "#e0e0e0", muted: "#757575", accent: "#4fc3f7", danger: "#ef5350", "sel-bg": "#303030", "btn-border": "#616161", border: "#424242", "input-bg": "#303030", "input-fg": "#e0e0e0", "btn-bg": "#303030", "btn-fg": "#e0e0e0", dim: "#757575", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#e0e0e0", "insert-cursor": "#4fc3f7" },
-                { name: "cool-grey-theme", bg: "#263238", fg: "#eceff1", muted: "#78909c", accent: "#26c6da", danger: "#ff5252", "sel-bg": "#37474f", "btn-border": "#546e7a", border: "#455a64", "input-bg": "#37474f", "input-fg": "#eceff1", "btn-bg": "#37474f", "btn-fg": "#eceff1", dim: "#78909c", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#eceff1", "insert-cursor": "#26c6da" },
-                { name: "dark-cyan-theme", bg: "#0d1117", fg: "#c9d1d9", muted: "#58a6ff", accent: "#39d353", danger: "#f85149", "sel-bg": "#161b22", "btn-border": "#30363d", border: "#21262d", "input-bg": "#161b22", "input-fg": "#c9d1d9", "btn-bg": "#161b22", "btn-fg": "#c9d1d9", dim: "#58a6ff", "border-radius": "6px", "pill-radius": "6px", "vim-cursor": "#c9d1d9", "insert-cursor": "#39d353" },
-                { name: "dark-office-theme", bg: "#1e1e1e", fg: "#d4d4d4", muted: "#6e6e6e", accent: "#569cd6", danger: "#ce9178", "sel-bg": "#252526", "btn-border": "#3e3e3e", border: "#3c3c3c", "input-bg": "#252526", "input-fg": "#d4d4d4", "btn-bg": "#252526", "btn-fg": "#d4d4d4", dim: "#6e6e6e", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#d4d4d0", "insert-cursor": "#569cd6" },
-                { name: "dark-notepad-theme", bg: "#ffffe1", fg: "#000000", muted: "#666666", accent: "#0000ff", danger: "#ff0000", "sel-bg": "#ffffcc", "btn-border": "#999999", border: "#cccccc", "input-bg": "#ffffcc", "input-fg": "#000000", "btn-bg": "#ffffcc", "btn-fg": "#000000", dim: "#666666", "border-radius": "0px", "pill-radius": "0px", "vim-cursor": "#000000", "insert-cursor": "#0000ff" },
-                { name: "dark-mode-simple-theme", bg: "#1a1a1a", fg: "#e0e0e0", muted: "#888888", accent: "#4da6ff", danger: "#ff4d4d", "sel-bg": "#2d2d2d", "btn-border": "#444444", border: "#333333", "input-bg": "#2d2d2d", "input-fg": "#e0e0e0", "btn-bg": "#2d2d2d", "btn-fg": "#e0e0e0", dim: "#888888", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#e0e0e0", "insert-cursor": "#4da6ff" },
-                { name: "digital-theme", bg: "#000a0a", fg: "#00ffaa", muted: "#006644", accent: "#00ffcc", danger: "#ff3300", "sel-bg": "#001414", "btn-border": "#004433", border: "#002211", "input-bg": "#001414", "input-fg": "#00ffaa", "btn-bg": "#001414", "btn-fg": "#00ffaa", dim: "#006644", "border-radius": "2px", "pill-radius": "2px", "vim-cursor": "#00ffaa", "insert-cursor": "#00ffcc" },
-                { name: "desert-night-theme", bg: "#1f1715", fg: "#e8d5c4", muted: "#8a716a", accent: "#d4a574", danger: "#c45c4c", "sel-bg": "#2f2722", "btn-border": "#5a4a42", border: "#3f322a", "input-bg": "#2f2722", "input-fg": "#e8d5c4", "btn-bg": "#2f2722", "btn-fg": "#e8d5c4", dim: "#8a716a", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#d4a574", "insert-cursor": "#d4a574" },
-                { name: "cosmic-night-theme", bg: "#0b0c15", fg: "#c5c6e0", muted: "#5f6188", accent: "#b185db", danger: "#e06478", "sel-bg": "#181a2e", "btn-border": "#363762", border: "#242642", "input-bg": "#181a2e", "input-fg": "#c5c6e0", "btn-bg": "#181a2e", "btn-fg": "#c5c6e0", dim: "#5f6188", "border-radius": "6px", "pill-radius": "6px", "vim-cursor": "#c5c6e0", "insert-cursor": "#b185db" },
-                { name: "cybernetic-stream-theme", bg: "#0a0a0f", fg: "#a0c0c0", muted: "#505080", accent: "#00ffff", danger: "#ff0066", "sel-bg": "#151525", "btn-border": "#303060", border: "#202040", "input-bg": "#151525", "input-fg": "#a0c0c0", "btn-bg": "#151525", "btn-fg": "#a0c0c0", dim: "#505080", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#00ffff", "insert-cursor": "#00ffff" },
-                { name: "quantum-realm-theme", bg: "#0d0d1a", fg: "#b8b8d0", muted: "#585880", accent: "#9080ff", danger: "#ff4080", "sel-bg": "#1a1a30", "btn-border": "#404070", border: "#2a2a48", "input-bg": "#1a1a30", "input-fg": "#b8b8d0", "btn-bg": "#1a1a30", "btn-fg": "#b8b8d0", dim: "#585880", "border-radius": "6px", "pill-radius": "6px", "vim-cursor": "#b8b8d0", "insert-cursor": "#9080ff" },
-                { name: "stardust-dream-theme", bg: "#12121f", fg: "#dcdcfc", muted: "#6e6e8c", accent: "#c8a8ff", danger: "#ff68a8", "sel-bg": "#222233", "btn-border": "#4a4a68", border: "#323246", "input-bg": "#222233", "input-fg": "#dcdcfc", "btn-bg": "#222233", "btn-fg": "#dcdcfc", dim: "#6e6e8c", "border-radius": "6px", "pill-radius": "6px", "vim-cursor": "#e8e8ff", "insert-cursor": "#c8a8ff" },
-                { name: "stellar-void-theme", bg: "#080810", fg: "#b0b0c8", muted: "#484868", accent: "#7070c0", danger: "#c04060", "sel-bg": "#141420", "btn-border": "#303048", border: "#202030", "input-bg": "#141420", "input-fg": "#b0b0c8", "btn-bg": "#141420", "btn-fg": "#b0b0c8", dim: "#484868", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#b0b0c8", "insert-cursor": "#7070c0" },
-                { name: "void-main-void", bg: "#000000", fg: "#888888", muted: "#444444", accent: "#888888", danger: "#888888", "sel-bg": "#111111", "btn-border": "#333333", border: "#222222", "input-bg": "#111111", "input-fg": "#888888", "btn-bg": "#111111", "btn-fg": "#888888", dim: "#444444", "border-radius": "0px", "pill-radius": "0px", "vim-cursor": "#888888", "insert-cursor": "#888888" },
-                { name: "oceanic-next-theme", bg: "#1b2838", fg: "#c2c8d4", muted: "#5c6773", accent: "#5f8dd8", danger: "#e02e48", "sel-bg": "#233140", "btn-border": "#3e4d5c", border: "#2b3b4c", "input-bg": "#233140", "input-fg": "#c2c8d4", "btn-bg": "#233140", "btn-fg": "#c2c8d4", dim: "#5c6773", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#c2c8d4", "insert-cursor": "#5f8dd8" },
-                { name: "ocean-sunset-theme", bg: "#1f1f2e", fg: "#e8e8f0", muted: "#707088", accent: "#ff7070", danger: "#ff4080", "sel-bg": "#2e2e44", "btn-border": "#505068", border: "#404058", "input-bg": "#2e2e44", "input-fg": "#e8e8f0", "btn-bg": "#2e2e44", "btn-fg": "#e8e8f0", dim: "#707088", "border-radius": "6px", "pill-radius": "6px", "vim-cursor": "#e8e8f0", "insert-cursor": "#ff7070" },
-                { name: "blueprint-theme", bg: "#002050", fg: "#ffffff", muted: "#6080a0", accent: "#ffff00", danger: "#ff0000", "sel-bg": "#003080", "btn-border": "#306090", border: "#205080", "input-bg": "#003080", "input-fg": "#ffffff", "btn-bg": "#003080", "btn-fg": "#ffffff", dim: "#6080a0", "border-radius": "2px", "pill-radius": "2px", "vim-cursor": "#ffffff", "insert-cursor": "#ffff00" },
-                { name: "forest-theme", bg: "#1a261a", fg: "#c8e8c8", muted: "#688878", accent: "#48c848", danger: "#e84848", "sel-bg": "#283828", "btn-border": "#485848", border: "#384838", "input-bg": "#283828", "input-fg": "#c8e8c8", "btn-bg": "#283828", "btn-fg": "#c8e8c8", dim: "#688878", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#c8e8c8", "insert-cursor": "#48c848" },
-                { name: "forest-nymph-theme", bg: "#1a261e", fg: "#d0e8d8", muted: "#688878", accent: "#68c878", danger: "#e84858", "sel-bg": "#283830", "btn-border": "#486858", border: "#384840", "input-bg": "#283830", "input-fg": "#d0e8d8", "btn-bg": "#283830", "btn-fg": "#d0e8d8", dim: "#688878", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#d0e8d8", "insert-cursor": "#68c878" },
-                { name: "evergreen-theme", bg: "#0e1a0e", fg: "#c8e8c8", muted: "#487048", accent: "#68c868", danger: "#e85848", "sel-bg": "#182820", "btn-border": "#385038", border: "#284028", "input-bg": "#182820", "input-fg": "#c8e8c8", "btn-bg": "#182820", "btn-fg": "#c8e8c8", dim: "#487048", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#c8e8c8", "insert-cursor": "#68c868" },
-                { name: "steampunk-theme", bg: "#2a1a10", fg: "#d8c8a8", muted: "#786858", accent: "#d89850", danger: "#c84030", "sel-bg": "#3a2a1a", "btn-border": "#584830", border: "#483820", "input-bg": "#3a2a1a", "input-fg": "#d8c8a8", "btn-bg": "#3a2a1a", "btn-fg": "#d8c8a8", dim: "#786858", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#d8c8a8", "insert-cursor": "#d89850" },
-                { name: "indigo-ink-theme", bg: "#1a1a2e", fg: "#e0e0f0", muted: "#6e6ea0", accent: "#8080ff", danger: "#ff4060", "sel-bg": "#2a2a44", "btn-border": "#4a4a70", border: "#3a3a58", "input-bg": "#2a2a44", "input-fg": "#e0e0f0", "btn-bg": "#2a2a44", "btn-fg": "#e0e0f0", dim: "#6e6ea0", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#e0e0f0", "insert-cursor": "#8080ff" },
-                { name: "inkwell-shadow-theme", bg: "#1a1a1a", fg: "#d0d0d0", muted: "#606070", accent: "#607080", danger: "#803040", "sel-bg": "#2a2a2a", "btn-border": "#404050", border: "#303038", "input-bg": "#2a2a2a", "input-fg": "#d0d0d0", "btn-bg": "#2a2a2a", "btn-fg": "#d0d0d0", dim: "#606070", "border-radius": "2px", "pill-radius": "2px", "vim-cursor": "#d0d0d0", "insert-cursor": "#607080" },
-                { name: "inferno-theme", bg: "#1a0a0a", fg: "#f8d8d0", muted: "#804040", accent: "#ff6000", danger: "#ff3000", "sel-bg": "#2a1410", "btn-border": "#502820", border: "#3a1c14", "input-bg": "#2a1410", "input-fg": "#f8d8d0", "btn-bg": "#2a1410", "btn-fg": "#f8d8d0", dim: "#804040", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#ff6020", "insert-cursor": "#ff6000" },
-                { name: "magic-midnight-theme", bg: "#0a0a18", fg: "#c8c8f0", muted: "#585878", accent: "#9080f0", danger: "#f05080", "sel-bg": "#151528", "btn-border": "#383850", border: "#252038", "input-bg": "#151528", "input-fg": "#c8c8f0", "btn-bg": "#151528", "btn-fg": "#c8c8f0", dim: "#585878", "border-radius": "6px", "pill-radius": "6px", "vim-cursor": "#c8c8f0", "insert-cursor": "#9080f0" },
-                { name: "midnight-elegance-theme", bg: "#0d0d15", fg: "#c8c8e0", muted: "#606080", accent: "#a080f0", danger: "#e05080", "sel-bg": "#1a1a28", "btn-border": "#404060", border: "#2a2a38", "input-bg": "#1a1a28", "input-fg": "#c8c8e0", "btn-bg": "#1a1a28", "btn-fg": "#c8c8e0", dim: "#606080", "border-radius": "6px", "pill-radius": "6px", "vim-cursor": "#c8c8e0", "insert-cursor": "#a080f0" },
-                { name: "haunted-manor-theme", bg: "#1a1410", fg: "#d8cfc8", muted: "#686050", accent: "#908060", danger: "#c85040", "sel-bg": "#2a2018", "btn-border": "#483830", border: "#382820", "input-bg": "#2a2018", "input-fg": "#d8cfc8", "btn-bg": "#2a2018", "btn-fg": "#d8cfc8", dim: "#686050", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#c8b090", "insert-cursor": "#908060" },
-                { name: "misty-rose-theme", bg: "#e8e0e8", fg: "#403038", muted: "#908088", accent: "#c080a0", danger: "#c04060", "sel-bg": "#d8d0d8", "btn-border": "#b8a0a8", border: "#c8b0b8", "input-bg": "#d8d0d8", "input-fg": "#403038", "btn-bg": "#d8d0d8", "btn-fg": "#403038", dim: "#908088", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#403038", "insert-cursor": "#c080a0" },
-                { name: "rose-pine-theme", bg: "#191718", fg: "#e0dfe0", muted: "#6e6e70", accent: "#c480a0", danger: "#e05070", "sel-bg": "#2a2a2c", "btn-border": "#48484c", border: "#38383c", "input-bg": "#2a2a2c", "input-fg": "#e0dfe0", "btn-bg": "#2a2a2c", "btn-fg": "#e0dfe0", dim: "#6e6e70", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#e0dfe0", "insert-cursor": "#c480a0" },
-                { name: "abyss-notes-theme", bg: "#0f1218", fg: "#c8d0d8", muted: "#586070", accent: "#60a0e0", danger: "#c04050", "sel-bg": "#182028", "btn-border": "#384050", border: "#283038", "input-bg": "#182028", "input-fg": "#c8d0d8", "btn-bg": "#182028", "btn-fg": "#c8d0d8", dim: "#586070", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#c8d0d8", "insert-cursor": "#60a0e0" },
-                { name: "amber-glow-theme", bg: "#1a1408", fg: "#e8d8b8", muted: "#786848", accent: "#e8a840", danger: "#c84838", "sel-bg": "#2a2012", "btn-border": "#584830", border: "#3a2818", "input-bg": "#2a2012", "input-fg": "#e8d8b8", "btn-bg": "#2a2012", "btn-fg": "#e8d8b8", dim: "#786848", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#e8c898", "insert-cursor": "#e8a840" },
-                { name: "golden-hour-theme", bg: "#1a1610", fg: "#f0e8d0", muted: "#807860", accent: "#d8a060", danger: "#c86040", "sel-bg": "#2a2218", "btn-border": "#584830", border: "#3c3020", "input-bg": "#2a2218", "input-fg": "#f0e8d0", "btn-bg": "#2a2218", "btn-fg": "#f0e8d0", dim: "#807860", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#d8b880", "insert-cursor": "#d8a060" },
-                { name: "sunset-ember-theme", bg: "#1a1008", fg: "#f0d0a0", muted: "#785830", accent: "#e08040", danger: "#d04020", "sel-bg": "#2a1a10", "btn-border": "#502810", border: "#3a1c10", "input-bg": "#2a1a10", "input-fg": "#f0d0a0", "btn-bg": "#2a1a10", "btn-fg": "#f0d0a0", dim: "#785830", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#f0c090", "insert-cursor": "#e08040" },
-                { name: "vintage-theme", bg: "#f4e8d0", fg: "#403028", muted: "#807060", accent: "#806040", danger: "#a04030", "sel-bg": "#e8dcc0", "btn-border": "#b8a080", border: "#c8b090", "input-bg": "#e8dcc0", "input-fg": "#403028", "btn-bg": "#e8dcc0", "btn-fg": "#403028", dim: "#807060", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#504838", "insert-cursor": "#806040" },
-                { name: "aged-paper-theme", bg: "#f0e8d0", fg: "#383020", muted: "#706050", accent: "#705030", danger: "#903020", "sel-bg": "#e0d8c0", "btn-border": "#a09070", border: "#b0a080", "input-bg": "#e0d8c0", "input-fg": "#383020", "btn-bg": "#e0d8c0", "btn-fg": "#383020", dim: "#706050", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#403830", "insert-cursor": "#705030" },
-                { name: "coffee-stain-theme", bg: "#3a2820", fg: "#d8c8b0", muted: "#786858", accent: "#a08060", danger: "#c05040", "sel-bg": "#4a3830", "btn-border": "#605048", border: "#504038", "input-bg": "#4a3830", "input-fg": "#d8c8b0", "btn-bg": "#4a3830", "btn-fg": "#d8c8b0", dim: "#786858", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#d8b898", "insert-cursor": "#a08060" },
-                { name: "kraft-paper-theme", bg: "#c8a060", fg: "#403020", muted: "#706040", accent: "#604820", danger: "#a03020", "sel-bg": "#b89050", "btn-border": "#907030", border: "#a08030", "input-bg": "#b89050", "input-fg": "#403020", "btn-bg": "#b89050", "btn-fg": "#403020", dim: "#706040", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#403020", "insert-cursor": "#604820" },
-                { name: "legal-pad-theme", bg: "#f8f8a0", fg: "#202020", muted: "#707070", accent: "#000000", danger: "#cc0000", "sel-bg": "#ececa0", "btn-border": "#909090", border: "#a0a0a0", "input-bg": "#ececa0", "input-fg": "#202020", "btn-bg": "#ececa0", "btn-fg": "#202020", dim: "#707070", "border-radius": "0px", "pill-radius": "0px", "vim-cursor": "#202020", "insert-cursor": "#000000" },
-                { name: "parchment-noir-theme", bg: "#282018", fg: "#d8d0c0", muted: "#786850", accent: "#a89060", danger: "#c05040", "sel-bg": "#383028", "btn-border": "#585040", border: "#484038", "input-bg": "#383028", "input-fg": "#d8d0c0", "btn-bg": "#383028", "btn-fg": "#d8d0c0", dim: "#786850", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#c8b090", "insert-cursor": "#a89060" },
-                { name: "pink-bliss-theme", bg: "#f8e8f0", fg: "#403038", muted: "#907080", accent: "#e080c0", danger: "#c04070", "sel-bg": "#e8d8e0", "btn-border": "#c0a0b0", border: "#d0b0c0", "input-bg": "#e8d8e0", "input-fg": "#403038", "btn-bg": "#e8d8e0", "btn-fg": "#403038", dim: "#907080", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#403038", "insert-cursor": "#e080c0" },
-                { name: "sakura-theme", bg: "#f8e8e8", fg: "#403038", muted: "#907080", accent: "#e080a0", danger: "#c04060", "sel-bg": "#e8d8e0", "btn-border": "#c0a0b0", border: "#d0b0c0", "input-bg": "#e8d8e0", "input-fg": "#403038", "btn-bg": "#e8d8e0", "btn-fg": "#403038", dim: "#907080", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#403038", "insert-cursor": "#e080a0" },
-                { name: "sharp-theme", bg: "#000000", fg: "#ffffff", muted: "#555555", accent: "#ff0000", danger: "#ff0000", "sel-bg": "#111111", "btn-border": "#333333", border: "#444444", "input-bg": "#111111", "input-fg": "#ffffff", "btn-bg": "#111111", "btn-fg": "#ffffff", dim: "#555555", "border-radius": "0px", "pill-radius": "0px", "vim-cursor": "#ffffff", "insert-cursor": "#ff0000" },
-                { name: "sharp-b&w---barely-visible-borders-theme", bg: "#000000", fg: "#ffffff", muted: "#444444", accent: "#ffffff", danger: "#ff0000", "sel-bg": "#111111", "btn-border": "#222222", border: "#222222", "input-bg": "#111111", "input-fg": "#ffffff", "btn-bg": "#111111", "btn-fg": "#ffffff", dim: "#444444", "border-radius": "0px", "pill-radius": "0px", "vim-cursor": "#ffffff", "insert-cursor": "#ffffff" },
-                { name: "sharp-b&w---no-borders-theme", bg: "#000000", fg: "#ffffff", muted: "#444444", accent: "#ffffff", danger: "#ff0000", "sel-bg": "#111111", "btn-border": "#000000", border: "#000000", "input-bg": "#111111", "input-fg": "#ffffff", "btn-bg": "#111111", "btn-fg": "#ffffff", dim: "#444444", "border-radius": "0px", "pill-radius": "0px", "vim-cursor": "#ffffff", "insert-cursor": "#ffffff" },
-                { name: "sharp-b&w---normal-borders-theme", bg: "#000000", fg: "#ffffff", muted: "#444444", accent: "#ffffff", danger: "#ff0000", "sel-bg": "#111111", "btn-border": "#555555", border: "#555555", "input-bg": "#111111", "input-fg": "#ffffff", "btn-bg": "#111111", "btn-fg": "#ffffff", dim: "#444444", "border-radius": "0px", "pill-radius": "0px", "vim-cursor": "#ffffff", "insert-cursor": "#ffffff" },
-                { name: "sophisticated-obsidian-theme", bg: "#151518", fg: "#e0e0e8", muted: "#606070", accent: "#9080d0", danger: "#c05070", "sel-bg": "#252028", "btn-border": "#404050", border: "#303038", "input-bg": "#252028", "input-fg": "#e0e0e8", "btn-bg": "#252028", "btn-fg": "#e0e0e8", dim: "#606070", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#e0e0e8", "insert-cursor": "#9080d0" },
-                { name: "teal-dusk-theme", bg: "#102020", fg: "#b8d8d8", muted: "#487878", accent: "#40a0a0", danger: "#c85050", "sel-bg": "#182828", "btn-border": "#385858", border: "#284040", "input-bg": "#182828", "input-fg": "#b8d8d8", "btn-bg": "#182828", "btn-fg": "#b8d8d8", dim: "#487878", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#b8d8d8", "insert-cursor": "#40a0a0" },
-                { name: "tomorrow-night-theme", bg: "#1d1f21", fg: "#c5c8c6", muted: "#969896", accent: "#81a2be", danger: "#cc6666", "sel-bg": "#282a2e", "btn-border": "#5c5f66", border: "#3e4149", "input-bg": "#282a2e", "input-fg": "#c5c8c6", "btn-bg": "#282a2e", "btn-fg": "#c5c8c6", dim: "#969896", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#c5c8c6", "insert-cursor": "#81a2be" },
-                { name: "typewriter-night-theme", bg: "#f4f4f0", fg: "#282820", muted: "#686058", accent: "#504830", danger: "#903030", "sel-bg": "#e8e4d8", "btn-border": "#a09080", border: "#b0a090", "input-bg": "#e8e4d8", "input-fg": "#282820", "btn-bg": "#e8e4d8", "btn-fg": "#282820", dim: "#686058", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#282820", "insert-cursor": "#504830" },
-                { name: "vaporwave-theme", bg: "#1a0a28", fg: "#f8e8f8", muted: "#8868a0", accent: "#ff68d8", danger: "#ff3888", "sel-bg": "#2a1428", "btn-border": "#684878", border: "#483858", "input-bg": "#2a1428", "input-fg": "#f8e8f8", "btn-bg": "#2a1428", "btn-fg": "#f8e8f8", dim: "#8868a0", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#f8e8f8", "insert-cursor": "#ff68d8" },
-                { name: "volcanic-ash-theme", bg: "#181010", fg: "#d8c8b8", muted: "#685850", accent: "#a87860", danger: "#c05040", "sel-bg": "#282018", "btn-border": "#484038", border: "#383028", "input-bg": "#282018", "input-fg": "#d8c8b8", "btn-bg": "#282018", "btn-fg": "#d8c8b8", dim: "#685850", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#c8a890", "insert-cursor": "#a87860" },
-                { name: "warm-grey-theme", bg: "#1a1815", fg: "#d8d0c8", muted: "#686058", accent: "#908060", danger: "#c05040", "sel-bg": "#2a2520", "btn-border": "#504840", border: "#3a3530", "input-bg": "#2a2520", "input-fg": "#d8d0c8", "btn-bg": "#2a2520", "btn-fg": "#d8d0c8", dim: "#686058", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#c8b898", "insert-cursor": "#908060" },
-                { name: "zombie-flesh-theme", bg: "#383830", fg: "#d0d8d0", muted: "#686868", accent: "#80a080", danger: "#c04040", "sel-bg": "#484840", "btn-border": "#606058", border: "#505048", "input-bg": "#484840", "input-fg": "#d0d8d0", "btn-bg": "#484840", "btn-fg": "#d0d8d0", dim: "#686868", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#d0d8d0", "insert-cursor": "#80a080" },
-                { name: "the_darkness", bg: "#000000", fg: "#000000", muted: "#111111", accent: "#000000", danger: "#000000", "sel-bg": "#111111", "btn-border": "#000000", border: "#000000", "input-bg": "#111111", "input-fg": "#000000", "btn-bg": "#111111", "btn-fg": "#000000", dim: "#111111", "border-radius": "0px", "pill-radius": "0px", "vim-cursor": "#000000", "insert-cursor": "#000000" },
-                { name: "corporate-slate-theme", bg: "#242e38", fg: "#e8ecec", muted: "#6e7880", accent: "#5aa0d8", danger: "#c87070", "sel-bg": "#344248", "btn-border": "#4c5860", border: "#3e4a54", "input-bg": "#344248", "input-fg": "#e8ecec", "btn-bg": "#344248", "btn-fg": "#e8ecec", dim: "#6e7880", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#e8ecec", "insert-cursor": "#5aa0d8" },
-                { name: "lime-zest-theme", bg: "#0a140a", fg: "#c8f8b8", muted: "#487850", accent: "#80e880", danger: "#e85040", "sel-bg": "#142814", "btn-border": "#385040", border: "#284028", "input-bg": "#142814", "input-fg": "#c8f8b8", "btn-bg": "#142814", "btn-fg": "#c8f8b8", dim: "#487850", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#c8f8b8", "insert-cursor": "#80e880" },
-                { name: "macchiato-theme", bg: "#2d2a2e", fg: "#d4d0d4", muted: "#6e6a70", accent: "#dc7aab", danger: "#ed7b82", "sel-bg": "#3d3a40", "btn-border": "#5e5a62", border: "#4d4a52", "input-bg": "#3d3a40", "input-fg": "#d4d0d4", "btn-bg": "#3d3a40", "btn-fg": "#d4d0d4", dim: "#6e6a70", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#d4d0d4", "insert-cursor": "#dc7aab" },
-                { name: "purple-haze-theme", bg: "#181028", fg: "#d8d0e8", muted: "#6858a0", accent: "#9070d0", danger: "#c05080", "sel-bg": "#282038", "btn-border": "#504870", border: "#403060", "input-bg": "#282038", "input-fg": "#d8d0e8", "btn-bg": "#282038", "btn-fg": "#d8d0e8", dim: "#6858a0", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#d8d0e8", "insert-cursor": "#9070d0" },
-                { name: "visual-studio-theme", bg: "#1e1e1e", fg: "#d4d4d4", muted: "#858585", accent: "#007acc", danger: "#f44747", "sel-bg": "#2d2d2d", "btn-border": "#3e3e3e", border: "#3c3c3c", "input-bg": "#2d2d2d", "input-fg": "#d4d4d4", "btn-bg": "#2d2d2d", "btn-fg": "#d4d4d4", dim: "#858585", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#d4d4d4", "insert-cursor": "#007acc" },
-                { name: "dragon's-breath-theme", bg: "#1a0800", fg: "#f8d8b8", muted: "#785030", accent: "#e87040", danger: "#e84020", "sel-bg": "#2a1008", "btn-border": "#503010", border: "#3a1c10", "input-bg": "#2a1008", "input-fg": "#f8d8b8", "btn-bg": "#2a1008", "btn-fg": "#f8d8b8", dim: "#785030", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#f8c090", "insert-cursor": "#e87040" },
-                { name: "enchanted-forest-theme", bg: "#141810", fg: "#d0e8c0", muted: "#487030", accent: "#70a040", danger: "#c04030", "sel-bg": "#202818", "btn-border": "#384020", border: "#283010", "input-bg": "#202818", "input-fg": "#d0e8c0", "btn-bg": "#202818", "btn-fg": "#d0e8c0", dim: "#487030", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#b0d090", "insert-cursor": "#70a040" },
-                { name: "vampire's-kiss-theme", bg: "#1a0808", fg: "#f0d0d0", muted: "#783040", accent: "#d04060", danger: "#ff2030", "sel-bg": "#281212", "btn-border": "#502030", border: "#3a1818", "input-bg": "#281212", "input-fg": "#f0d0d0", "btn-bg": "#281212", "btn-fg": "#f0d0d0", dim: "#783040", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#e05070", "insert-cursor": "#d04060" },
-                { name: "github-copilot-theme", bg: "#0d1117", fg: "#c9d1d9", muted: "#8b949e", accent: "#79c0ff", danger: "#f85149", "sel-bg": "#161b22", "btn-border": "#30363d", border: "#21262d", "input-bg": "#161b22", "input-fg": "#c9d1d9", "btn-bg": "#161b22", "btn-fg": "#c9d1d9", dim: "#8b949e", "border-radius": "6px", "pill-radius": "6px", "vim-cursor": "#c9d1d9", "insert-cursor": "#79c0ff" },
-                { name: "hacker-theme", bg: "#003300", fg: "#00ff00", muted: "#006600", accent: "#00ff00", danger: "#ff0000", "sel-bg": "#004400", "btn-border": "#005500", border: "#004400", "input-bg": "#004400", "input-fg": "#00ff00", "btn-bg": "#004400", "btn-fg": "#00ff00", dim: "#006600", "border-radius": "4px", "pill-radius": "4px", "vim-cursor": "#00ff00", "insert-cursor": "#00ff00" }
+                {"name":"default-theme","bg":"#000000","fg":"#f5f5f5","muted":"#555555","accent":"#00d1b2","danger":"#ff5577","sel-bg":"#111827","btn-border":"#555555","border":"#222222","input-bg":"#111827","input-fg":"#f5f5f5","btn-bg":"#111827","btn-fg":"#f5f5f5","dim":"#555555","border-radius":"8px","pill-radius":"999px","vim-cursor":"#00b894","insert-cursor":"#00d1b2"},
+                {"name":"default-with-grid","bg":"#000000","fg":"#c0c0c0","muted":"#404040","accent":"#00d1b2","danger":"#ff5577","sel-bg":"#1a1a1a","btn-border":"#333333","border":"#222222","input-bg":"#111111","input-fg":"#c0c0c0","btn-bg":"#111111","btn-fg":"#c0c0c0","dim":"#404040","border-radius":"8px","pill-radius":"999px","vim-cursor":"#00b894","insert-cursor":"#00d1b2","grid":true,"grid-color":"#111111"},
+                {"name":"blued","bg":"#000000","fg":"#d5e5ff","muted":"#555555","accent":"#00d1b2","danger":"#ff5577","sel-bg":"#111827","btn-border":"#555555","border":"#222222","input-bg":"#111827","input-fg":"#d5e5ff","btn-bg":"#111827","btn-fg":"#d5e5ff","dim":"#555555","border-radius":"4px","pill-radius":"0px","vim-cursor":"#1f4676","insert-cursor":"#b8e3ff"},
+                {"name":"dim-console","bg":"#000000","fg":"#888888","muted":"#444444","accent":"#888888","danger":"#888888","sel-bg":"#000000","btn-border":"#333333","border":"#111111","input-bg":"#000000","input-fg":"#888888","btn-bg":"#111111","btn-fg":"#888888","dim":"#444444","border-radius":"0px","pill-radius":"0px","vim-cursor":"#333333","insert-cursor":"#888888"},
+                {"name":"monokai-theme","bg":"#0f0f0f","fg":"#f0f0f0","muted":"#888888","accent":"#00bfff","danger":"#ff4444","sel-bg":"#1a1a1a","btn-border":"#666666","border":"#2a2a2a","input-bg":"#1a1a1a","input-fg":"#f0f0f0","btn-bg":"#1a1a1a","btn-fg":"#f0f0f0","dim":"#888888","border-radius":"4px","pill-radius":"4px","vim-cursor":"#d0d0d0","insert-cursor":"#00bfff"},
+                {"name":"monokai-pro-theme","bg":"#2d2d2d","fg":"#f2f2e0","muted":"#727272","accent":"#ffa044","danger":"#ff6b6b","sel-bg":"#3d3d3d","btn-border":"#555555","border":"#494949","input-bg":"#3d3d3d","input-fg":"#f2f2e0","btn-bg":"#3d3d3d","btn-fg":"#f2f2e0","dim":"#727272","border-radius":"4px","pill-radius":"4px","vim-cursor":"#f2f2e0","insert-cursor":"#ffa044"},
+                {"name":"dracula-theme","bg":"#282a36","fg":"#f8f8f2","muted":"#6272a4","accent":"#bd93f9","danger":"#ff5555","sel-bg":"#44475a","btn-border":"#6272a4","border":"#44475a","input-bg":"#44475a","input-fg":"#f8f8f2","btn-bg":"#44475a","btn-fg":"#f8f8f2","dim":"#6272a4","border-radius":"4px","pill-radius":"4px","vim-cursor":"#f8f8f2","insert-cursor":"#bd93f9"},
+                {"name":"nord-theme","bg":"#2e3440","fg":"#eceff4","muted":"#616e88","accent":"#88c0d0","danger":"#bf616a","sel-bg":"#3b4252","btn-border":"#4c566a","border":"#434c5e","input-bg":"#3b4252","input-fg":"#eceff4","btn-bg":"#3b4252","btn-fg":"#eceff4","dim":"#616e88","border-radius":"4px","pill-radius":"4px","vim-cursor":"#d8dee9","insert-cursor":"#88c0d0"},
+                {"name":"nord-light-theme","bg":"#eceff4","fg":"#2e3440","muted":"#4c566a","accent":"#5e81ac","danger":"#bf616a","sel-bg":"#e5e9f0","btn-border":"#d8dee9","border":"#d8dee9","input-bg":"#e5e9f0","input-fg":"#2e3440","btn-bg":"#e5e9f0","btn-fg":"#2e3440","dim":"#4c566a","border-radius":"4px","pill-radius":"4px","vim-cursor":"#2e3440","insert-cursor":"#5e81ac"},
+                {"name":"solarized-dark-theme","bg":"#002b36","fg":"#839496","muted":"#586e75","accent":"#268bd2","danger":"#dc322f","sel-bg":"#073642","btn-border":"#586e75","border":"#073642","input-bg":"#073642","input-fg":"#839496","btn-bg":"#073642","btn-fg":"#839496","dim":"#586e75","border-radius":"4px","pill-radius":"4px","vim-cursor":"#93a1a1","insert-cursor":"#268bd2"},
+                {"name":"solarized-light-theme","bg":"#fdf6e3","fg":"#657b83","muted":"#93a1a1","accent":"#268bd2","danger":"#dc322f","sel-bg":"#eee8d5","btn-border":"#93a1a1","border":"#eee8d5","input-bg":"#eee8d5","input-fg":"#657b83","btn-bg":"#eee8d5","btn-fg":"#657b83","dim":"#93a1a1","border-radius":"4px","pill-radius":"4px","vim-cursor":"#586e75","insert-cursor":"#268bd2"},
+                {"name":"one-dark-theme","bg":"#282c34","fg":"#abb2bf","muted":"#5c6370","accent":"#61afef","danger":"#e06c75","sel-bg":"#2c313c","btn-border":"#5c6370","border":"#3e4451","input-bg":"#2c313c","input-fg":"#abb2bf","btn-bg":"#2c313c","btn-fg":"#abb2bf","dim":"#5c6370","border-radius":"4px","pill-radius":"4px","vim-cursor":"#abb2bf","insert-cursor":"#61afef"},
+                {"name":"vscode-dark-theme","bg":"#1e1e1e","fg":"#d4d4d4","muted":"#858585","accent":"#0e7490","danger":"#f14c4c","sel-bg":"#2d2d2d","btn-border":"#3e3e3e","border":"#3c3c3c","input-bg":"#2d2d2d","input-fg":"#d4d4d4","btn-bg":"#2d2d2d","btn-fg":"#d4d4d4","dim":"#858585","border-radius":"4px","pill-radius":"4px","vim-cursor":"#d4d4d4","insert-cursor":"#0e7490"},
+                {"name":"github-dark-theme","bg":"#0d1117","fg":"#c9d1d9","muted":"#8b949e","accent":"#58a6ff","danger":"#f85149","sel-bg":"#161b22","btn-border":"#30363d","border":"#21262d","input-bg":"#161b22","input-fg":"#c9d1d9","btn-bg":"#161b22","btn-fg":"#c9d1d9","dim":"#8b949e","border-radius":"6px","pill-radius":"6px","vim-cursor":"#c9d1d9","insert-cursor":"#58a6ff"},
+                {"name":"github-light-theme","bg":"#ffffff","fg":"#24292f","muted":"#57606a","accent":"#0969da","danger":"#cf222e","sel-bg":"#f6f8fa","btn-border":"#d0d7de","border":"#d8dee8","input-bg":"#f6f8fa","input-fg":"#24292f","btn-bg":"#f6f8fa","btn-fg":"#24292f","dim":"#57606a","border-radius":"6px","pill-radius":"6px","vim-cursor":"#24292f","insert-cursor":"#0969da"},
+                {"name":"gruvbox-theme","bg":"#282828","fg":"#ebdbb2","muted":"#928374","accent":"#fabd2f","danger":"#fb4934","sel-bg":"#3c3836","btn-border":"#504945","border":"#3c3836","input-bg":"#3c3836","input-fg":"#ebdbb2","btn-bg":"#3c3836","btn-fg":"#ebdbb2","dim":"#928374","border-radius":"4px","pill-radius":"4px","vim-cursor":"#ebdbb2","insert-cursor":"#fabd2f"},
+                {"name":"gruvbox-dark-hard-theme","bg":"#1d2021","fg":"#ebdbb2","muted":"#928374","accent":"#fabd2f","danger":"#fb4934","sel-bg":"#282828","btn-border":"#504945","border":"#32302f","input-bg":"#282828","input-fg":"#ebdbb2","btn-bg":"#282828","btn-fg":"#ebdbb2","dim":"#928374","border-radius":"4px","pill-radius":"4px","vim-cursor":"#ebdbb2","insert-cursor":"#fabd2f"},
+                {"name":"synthwave-theme","bg":"#1a102e","fg":"#fceee7","muted":"#7c7191","accent":"#ff7edb","danger":"#f7477f","sel-bg":"#2a1f4e","btn-border":"#4e4968","border":"#3d2e5e","input-bg":"#2a1f4e","input-fg":"#fceee7","btn-bg":"#2a1f4e","btn-fg":"#fceee7","dim":"#7c7191","border-radius":"4px","pill-radius":"4px","vim-cursor":"#fceee7","insert-cursor":"#ff7edb"},
+                {"name":"synthwave-with-grid","bg":"#0a0018","fg":"#f0d8f8","muted":"#5050a0","accent":"#ff68d8","danger":"#f04080","sel-bg":"#1a0a28","btn-border":"#302848","border":"#201838","input-bg":"#180828","input-fg":"#f0d8f8","btn-bg":"#180828","btn-fg":"#f0d8f8","dim":"#5050a0","border-radius":"4px","pill-radius":"4px","vim-cursor":"#f0d8f8","insert-cursor":"#ff68d8","grid":true,"grid-color":"#230f3a"},
+                {"name":"cyberpunk-theme","bg":"#0b0b0b","fg":"#c5c8c6","muted":"#7f8f8d","accent":"#ff0080","danger":"#ff0039","sel-bg":"#1f1f1f","btn-border":"#4d4d4d","border":"#303030","input-bg":"#1f1f1f","input-fg":"#c5c8c6","btn-bg":"#1f1f1f","btn-fg":"#c5c8c6","dim":"#7f8f8d","border-radius":"4px","pill-radius":"4px","vim-cursor":"#ff0080","insert-cursor":"#ff0080"},
+                {"name":"neon-theme","bg":"#0a0a0a","fg":"#ffffff","muted":"#888888","accent":"#ff00ff","danger":"#00ff00","sel-bg":"#1a1a1a","btn-border":"#444444","border":"#333333","input-bg":"#1a1a1a","input-fg":"#ffffff","btn-bg":"#1a1a1a","btn-fg":"#ffffff","dim":"#888888","border-radius":"4px","pill-radius":"4px","vim-cursor":"#ff00ff","insert-cursor":"#00ffff"},
+                {"name":"neon-nights-theme","bg":"#0d0d0d","fg":"#eeeeee","muted":"#6e6e6e","accent":"#00ffff","danger":"#ff0055","sel-bg":"#1a1a1a","btn-border":"#4d4d4d","border":"#333333","input-bg":"#1a1a1a","input-fg":"#eeeeee","btn-bg":"#1a1a1a","btn-fg":"#eeeeee","dim":"#6e6e6e","border-radius":"4px","pill-radius":"4px","vim-cursor":"#eeeeee","insert-cursor":"#00ffff"},
+                {"name":"matrix-theme","bg":"#000000","fg":"#00ff00","muted":"#008800","accent":"#00ff00","danger":"#ff0000","sel-bg":"#001100","btn-border":"#003300","border":"#003300","input-bg":"#001100","input-fg":"#00ff00","btn-bg":"#001100","btn-fg":"#00ff00","dim":"#008800","border-radius":"4px","pill-radius":"4px","vim-cursor":"#00ff00","insert-cursor":"#00ff00"},
+                {"name":"matrix-code-theme","bg":"#000000","fg":"#00ff41","muted":"#003b00","accent":"#00ff41","danger":"#ff003c","sel-bg":"#0d0208","btn-border":"#0d0208","border":"#0d0208","input-bg":"#0d0208","input-fg":"#00ff41","btn-bg":"#0d0208","btn-fg":"#00ff41","dim":"#003b00","border-radius":"4px","pill-radius":"4px","vim-cursor":"#00ff41","insert-cursor":"#00ff41"},
+                {"name":"terminal-green-theme","bg":"#0c0c0c","fg":"#00ff00","muted":"#008000","accent":"#00ff00","danger":"#ff0000","sel-bg":"#1a1a1a","btn-border":"#004400","border":"#003300","input-bg":"#1a1a1a","input-fg":"#00ff00","btn-bg":"#1a1a1a","btn-fg":"#00ff00","dim":"#008000","border-radius":"4px","pill-radius":"4px","vim-cursor":"#00ff00","insert-cursor":"#00ff00"},
+                {"name":"hacker-theme","bg":"#000000","fg":"#00ff00","muted":"#008800","accent":"#00ff00","danger":"#ff0000","sel-bg":"#111111","btn-border":"#003300","border":"#002200","input-bg":"#111111","input-fg":"#00ff00","btn-bg":"#111111","btn-fg":"#00ff00","dim":"#008800","border-radius":"4px","pill-radius":"4px","vim-cursor":"#00ff00","insert-cursor":"#00ff00"},
+                {"name":"hacker-terminal-theme","bg":"#001100","fg":"#33ff33","muted":"#006600","accent":"#33ff33","danger":"#ff3333","sel-bg":"#002200","btn-border":"#004400","border":"#003300","input-bg":"#002200","input-fg":"#33ff33","btn-bg":"#002200","btn-fg":"#33ff33","dim":"#006600","border-radius":"4px","pill-radius":"4px","vim-cursor":"#33ff33","insert-cursor":"#33ff33"},
+                {"name":"retro-arcade-theme","bg":"#1a1a2e","fg":"#eaeaea","muted":"#6b6b8c","accent":"#ffcc00","danger":"#ff3366","sel-bg":"#2a2a4e","btn-border":"#4b4b8c","border":"#3a3a5e","input-bg":"#2a2a4e","input-fg":"#eaeaea","btn-bg":"#2a2a4e","btn-fg":"#eaeaea","dim":"#6b6b8c","border-radius":"4px","pill-radius":"4px","vim-cursor":"#ffcc00","insert-cursor":"#ffcc00"},
+                {"name":"8-bit-theme","bg":"#000000","fg":"#ffffff","muted":"#888888","accent":"#ff55ff","danger":"#ff5555","sel-bg":"#222222","btn-border":"#555555","border":"#444444","input-bg":"#222222","input-fg":"#ffffff","btn-bg":"#222222","btn-fg":"#ffffff","dim":"#888888","border-radius":"0px","pill-radius":"0px","vim-cursor":"#ffffff","insert-cursor":"#ff55ff"},
+                {"name":"hard-square-theme","bg":"#111111","fg":"#ffffff","muted":"#666666","accent":"#ff00ff","danger":"#ff0000","sel-bg":"#222222","btn-border":"#444444","border":"#444444","input-bg":"#222222","input-fg":"#ffffff","btn-bg":"#222222","btn-fg":"#ffffff","dim":"#666666","border-radius":"0px","pill-radius":"0px","vim-cursor":"#ffffff","insert-cursor":"#ff00ff"},
+                {"name":"light-theme","bg":"#ffffff","fg":"#333333","muted":"#888888","accent":"#0066cc","danger":"#cc0000","sel-bg":"#f0f0f0","btn-border":"#cccccc","border":"#dddddd","input-bg":"#f0f0f0","input-fg":"#333333","btn-bg":"#f0f0f0","btn-fg":"#333333","dim":"#888888","border-radius":"4px","pill-radius":"4px","vim-cursor":"#333333","insert-cursor":"#0066cc"},
+                {"name":"minimalist-theme","bg":"#ffffff","fg":"#222222","muted":"#999999","accent":"#0066cc","danger":"#cc0000","sel-bg":"#f5f5f5","btn-border":"#dddddd","border":"#eeeeee","input-bg":"#f5f5f5","input-fg":"#222222","btn-bg":"#f5f5f5","btn-fg":"#222222","dim":"#999999","border-radius":"0px","pill-radius":"0px","vim-cursor":"#222222","insert-cursor":"#0066cc"},
+                {"name":"deep-purple-theme","bg":"#1a1a2e","fg":"#e0e0ff","muted":"#6e6ea8","accent":"#9966ff","danger":"#ff3366","sel-bg":"#2a2a4e","btn-border":"#4e4e8c","border":"#3e3e5e","input-bg":"#2a2a4e","input-fg":"#e0e0ff","btn-bg":"#2a2a4e","btn-fg":"#e0e0ff","dim":"#6e6ea8","border-radius":"6px","pill-radius":"6px","vim-cursor":"#e0e0ff","insert-cursor":"#9966ff"},
+                {"name":"deep-blue-report-theme","bg":"#0f172a","fg":"#e2e8f0","muted":"#64748b","accent":"#3b82f6","danger":"#ef4444","sel-bg":"#1e293b","btn-border":"#334155","border":"#1e293b","input-bg":"#1e293b","input-fg":"#e2e8f0","btn-bg":"#1e293b","btn-fg":"#e2e8f0","dim":"#64748b","border-radius":"4px","pill-radius":"4px","vim-cursor":"#e2e8f0","insert-cursor":"#3b82f6"},
+                {"name":"deep-space-theme","bg":"#0b0e14","fg":"#b0b0b0","muted":"#4a4a5a","accent":"#4fc3f7","danger":"#ff5252","sel-bg":"#151b25","btn-border":"#2a303a","border":"#202830","input-bg":"#151b25","input-fg":"#b0b0b0","btn-bg":"#151b25","btn-fg":"#b0b0b0","dim":"#4a4a5a","border-radius":"4px","pill-radius":"4px","vim-cursor":"#b0b0b0","insert-cursor":"#4fc3f7"},
+                {"name":"deep-water-theme","bg":"#0a1929","fg":"#b0d0e0","muted":"#4a7080","accent":"#00bcd4","danger":"#ff5252","sel-bg":"#132f4c","btn-border":"#2b4556","border":"#1e3a50","input-bg":"#132f4c","input-fg":"#b0d0e0","btn-bg":"#132f4c","btn-fg":"#b0d0e0","dim":"#4a7080","border-radius":"4px","pill-radius":"4px","vim-cursor":"#b0d0e0","insert-cursor":"#00bcd4"},
+                {"name":"deep-red-velvet-theme","bg":"#1f0808","fg":"#f0d0d0","muted":"#804040","accent":"#ff4040","danger":"#ff0000","sel-bg":"#2f1010","btn-border":"#4f2020","border":"#3f1818","input-bg":"#2f1010","input-fg":"#f0d0d0","btn-bg":"#2f1010","btn-fg":"#f0d0d0","dim":"#804040","border-radius":"4px","pill-radius":"4px","vim-cursor":"#f0d0d0","insert-cursor":"#ff4040"},
+                {"name":"charcoal-grey-theme","bg":"#212121","fg":"#e0e0e0","muted":"#757575","accent":"#4fc3f7","danger":"#ef5350","sel-bg":"#303030","btn-border":"#616161","border":"#424242","input-bg":"#303030","input-fg":"#e0e0e0","btn-bg":"#303030","btn-fg":"#e0e0e0","dim":"#757575","border-radius":"4px","pill-radius":"4px","vim-cursor":"#e0e0e0","insert-cursor":"#4fc3f7"},
+                {"name":"cool-grey-theme","bg":"#263238","fg":"#eceff1","muted":"#78909c","accent":"#26c6da","danger":"#ff5252","sel-bg":"#37474f","btn-border":"#546e7a","border":"#455a64","input-bg":"#37474f","input-fg":"#eceff1","btn-bg":"#37474f","btn-fg":"#eceff1","dim":"#78909c","border-radius":"4px","pill-radius":"4px","vim-cursor":"#eceff1","insert-cursor":"#26c6da"},
+                {"name":"dark-cyan-theme","bg":"#0d1117","fg":"#c9d1d9","muted":"#58a6ff","accent":"#39d353","danger":"#f85149","sel-bg":"#161b22","btn-border":"#30363d","border":"#21262d","input-bg":"#161b22","input-fg":"#c9d1d9","btn-bg":"#161b22","btn-fg":"#c9d1d9","dim":"#58a6ff","border-radius":"6px","pill-radius":"6px","vim-cursor":"#c9d1d9","insert-cursor":"#39d353"},
+                {"name":"dark-office-theme","bg":"#1e1e1e","fg":"#d4d4d4","muted":"#6e6e6e","accent":"#569cd6","danger":"#ce9178","sel-bg":"#252526","btn-border":"#3e3e3e","border":"#3c3c3c","input-bg":"#252526","input-fg":"#d4d4d4","btn-bg":"#252526","btn-fg":"#d4d4d4","dim":"#6e6e6e","border-radius":"4px","pill-radius":"4px","vim-cursor":"#d4d4d0","insert-cursor":"#569cd6"},
+                {"name":"dark-notepad-theme","bg":"#ffffe1","fg":"#000000","muted":"#666666","accent":"#0000ff","danger":"#ff0000","sel-bg":"#ffffcc","btn-border":"#999999","border":"#cccccc","input-bg":"#ffffcc","input-fg":"#000000","btn-bg":"#ffffcc","btn-fg":"#000000","dim":"#666666","border-radius":"0px","pill-radius":"0px","vim-cursor":"#000000","insert-cursor":"#0000ff"},
+                {"name":"dark-mode-simple-theme","bg":"#1a1a1a","fg":"#e0e0e0","muted":"#888888","accent":"#4da6ff","danger":"#ff4d4d","sel-bg":"#2d2d2d","btn-border":"#444444","border":"#333333","input-bg":"#2d2d2d","input-fg":"#e0e0e0","btn-bg":"#2d2d2d","btn-fg":"#e0e0e0","dim":"#888888","border-radius":"4px","pill-radius":"4px","vim-cursor":"#e0e0e0","insert-cursor":"#4da6ff"},
+                {"name":"digital-theme","bg":"#000a0a","fg":"#00ffaa","muted":"#006644","accent":"#00ffcc","danger":"#ff3300","sel-bg":"#001414","btn-border":"#004433","border":"#002211","input-bg":"#001414","input-fg":"#00ffaa","btn-bg":"#001414","btn-fg":"#00ffaa","dim":"#006644","border-radius":"2px","pill-radius":"2px","vim-cursor":"#00ffaa","insert-cursor":"#00ffcc"},
+                {"name":"desert-night-theme","bg":"#1f1715","fg":"#e8d5c4","muted":"#8a716a","accent":"#d4a574","danger":"#c45c4c","sel-bg":"#2f2722","btn-border":"#5a4a42","border":"#3f322a","input-bg":"#2f2722","input-fg":"#e8d5c4","btn-bg":"#2f2722","btn-fg":"#e8d5c4","dim":"#8a716a","border-radius":"4px","pill-radius":"4px","vim-cursor":"#d4a574","insert-cursor":"#d4a574"},
+                {"name":"cosmic-night-theme","bg":"#0b0c15","fg":"#c5c6e0","muted":"#5f6188","accent":"#b185db","danger":"#e06478","sel-bg":"#181a2e","btn-border":"#363762","border":"#242642","input-bg":"#181a2e","input-fg":"#c5c6e0","btn-bg":"#181a2e","btn-fg":"#c5c6e0","dim":"#5f6188","border-radius":"6px","pill-radius":"6px","vim-cursor":"#c5c6e0","insert-cursor":"#b185db"},
+                {"name":"cybernetic-stream-theme","bg":"#0a0a0f","fg":"#a0c0c0","muted":"#505080","accent":"#00ffff","danger":"#ff0066","sel-bg":"#151525","btn-border":"#303060","border":"#202040","input-bg":"#151525","input-fg":"#a0c0c0","btn-bg":"#151525","btn-fg":"#a0c0c0","dim":"#505080","border-radius":"4px","pill-radius":"4px","vim-cursor":"#00ffff","insert-cursor":"#00ffff"},
+                {"name":"quantum-realm-theme","bg":"#0d0d1a","fg":"#b8b8d0","muted":"#585880","accent":"#9080ff","danger":"#ff4080","sel-bg":"#1a1a30","btn-border":"#404070","border":"#2a2a48","input-bg":"#1a1a30","input-fg":"#b8b8d0","btn-bg":"#1a1a30","btn-fg":"#b8b8d0","dim":"#585880","border-radius":"6px","pill-radius":"6px","vim-cursor":"#b8b8d0","insert-cursor":"#9080ff"},
+                {"name":"stardust-dream-theme","bg":"#12121f","fg":"#dcdcfc","muted":"#6e6e8c","accent":"#c8a8ff","danger":"#ff68a8","sel-bg":"#222233","btn-border":"#4a4a68","border":"#323246","input-bg":"#222233","input-fg":"#dcdcfc","btn-bg":"#222233","btn-fg":"#dcdcfc","dim":"#6e6e8c","border-radius":"6px","pill-radius":"6px","vim-cursor":"#e8e8ff","insert-cursor":"#c8a8ff"},
+                {"name":"stellar-void-theme","bg":"#080810","fg":"#b0b0c8","muted":"#484868","accent":"#7070c0","danger":"#c04060","sel-bg":"#141420","btn-border":"#303048","border":"#202030","input-bg":"#141420","input-fg":"#b0b0c8","btn-bg":"#141420","btn-fg":"#b0b0c8","dim":"#484868","border-radius":"4px","pill-radius":"4px","vim-cursor":"#b0b0c8","insert-cursor":"#7070c0"},
+                {"name":"void-main-void","bg":"#000000","fg":"#888888","muted":"#444444","accent":"#888888","danger":"#888888","sel-bg":"#111111","btn-border":"#333333","border":"#222222","input-bg":"#111111","input-fg":"#888888","btn-bg":"#111111","btn-fg":"#888888","dim":"#444444","border-radius":"0px","pill-radius":"0px","vim-cursor":"#888888","insert-cursor":"#888888"},
+                {"name":"oceanic-next-theme","bg":"#1b2838","fg":"#c2c8d4","muted":"#5c6773","accent":"#5f8dd8","danger":"#e02e48","sel-bg":"#233140","btn-border":"#3e4d5c","border":"#2b3b4c","input-bg":"#233140","input-fg":"#c2c8d4","btn-bg":"#233140","btn-fg":"#c2c8d4","dim":"#5c6773","border-radius":"4px","pill-radius":"4px","vim-cursor":"#c2c8d4","insert-cursor":"#5f8dd8"},
+                {"name":"ocean-sunset-theme","bg":"#1f1f2e","fg":"#e8e8f0","muted":"#707088","accent":"#ff7070","danger":"#ff4080","sel-bg":"#2e2e44","btn-border":"#505068","border":"#404058","input-bg":"#2e2e44","input-fg":"#e8e8f0","btn-bg":"#2e2e44","btn-fg":"#e8e8f0","dim":"#707088","border-radius":"6px","pill-radius":"6px","vim-cursor":"#e8e8f0","insert-cursor":"#ff7070"},
+                {"name":"blueprint-theme","bg":"#002050","fg":"#ffffff","muted":"#6080a0","accent":"#ffff00","danger":"#ff0000","sel-bg":"#003080","btn-border":"#306090","border":"#205080","input-bg":"#003080","input-fg":"#ffffff","btn-bg":"#003080","btn-fg":"#ffffff","dim":"#6080a0","border-radius":"2px","pill-radius":"2px","vim-cursor":"#ffffff","insert-cursor":"#ffff00"},
+                {"name":"forest-theme","bg":"#1a261a","fg":"#c8e8c8","muted":"#688878","accent":"#48c848","danger":"#e84848","sel-bg":"#283828","btn-border":"#485848","border":"#384838","input-bg":"#283828","input-fg":"#c8e8c8","btn-bg":"#283828","btn-fg":"#c8e8c8","dim":"#688878","border-radius":"4px","pill-radius":"4px","vim-cursor":"#c8e8c8","insert-cursor":"#48c848"},
+                {"name":"forest-nymph-theme","bg":"#1a261e","fg":"#d0e8d8","muted":"#688878","accent":"#68c878","danger":"#e84858","sel-bg":"#283830","btn-border":"#486858","border":"#384840","input-bg":"#283830","input-fg":"#d0e8d8","btn-bg":"#283830","btn-fg":"#d0e8d8","dim":"#688878","border-radius":"4px","pill-radius":"4px","vim-cursor":"#d0e8d8","insert-cursor":"#68c878"},
+                {"name":"evergreen-theme","bg":"#0e1a0e","fg":"#c8e8c8","muted":"#487048","accent":"#68c868","danger":"#e85848","sel-bg":"#182820","btn-border":"#385038","border":"#284028","input-bg":"#182820","input-fg":"#c8e8c8","btn-bg":"#182820","btn-fg":"#c8e8c8","dim":"#487048","border-radius":"4px","pill-radius":"4px","vim-cursor":"#c8e8c8","insert-cursor":"#68c868"},
+                {"name":"steampunk-theme","bg":"#2a1a10","fg":"#d8c8a8","muted":"#786858","accent":"#d89850","danger":"#c84030","sel-bg":"#3a2a1a","btn-border":"#584830","border":"#483820","input-bg":"#3a2a1a","input-fg":"#d8c8a8","btn-bg":"#3a2a1a","btn-fg":"#d8c8a8","dim":"#786858","border-radius":"4px","pill-radius":"4px","vim-cursor":"#d8c8a8","insert-cursor":"#d89850"},
+                {"name":"indigo-ink-theme","bg":"#1a1a2e","fg":"#e0e0f0","muted":"#6e6ea0","accent":"#8080ff","danger":"#ff4060","sel-bg":"#2a2a44","btn-border":"#4a4a70","border":"#3a3a58","input-bg":"#2a2a44","input-fg":"#e0e0f0","btn-bg":"#2a2a44","btn-fg":"#e0e0f0","dim":"#6e6ea0","border-radius":"4px","pill-radius":"4px","vim-cursor":"#e0e0f0","insert-cursor":"#8080ff"},
+                {"name":"inkwell-shadow-theme","bg":"#1a1a1a","fg":"#d0d0d0","muted":"#606070","accent":"#607080","danger":"#803040","sel-bg":"#2a2a2a","btn-border":"#404050","border":"#303038","input-bg":"#2a2a2a","input-fg":"#d0d0d0","btn-bg":"#2a2a2a","btn-fg":"#d0d0d0","dim":"#606070","border-radius":"2px","pill-radius":"2px","vim-cursor":"#d0d0d0","insert-cursor":"#607080"},
+                {"name":"inferno-theme","bg":"#1a0a0a","fg":"#f8d8d0","muted":"#804040","accent":"#ff6000","danger":"#ff3000","sel-bg":"#2a1410","btn-border":"#502820","border":"#3a1c14","input-bg":"#2a1410","input-fg":"#f8d8d0","btn-bg":"#2a1410","btn-fg":"#f8d8d0","dim":"#804040","border-radius":"4px","pill-radius":"4px","vim-cursor":"#ff6020","insert-cursor":"#ff6000"},
+                {"name":"magic-midnight-theme","bg":"#0a0a18","fg":"#c8c8f0","muted":"#585878","accent":"#9080f0","danger":"#f05080","sel-bg":"#151528","btn-border":"#383850","border":"#252038","input-bg":"#151528","input-fg":"#c8c8f0","btn-bg":"#151528","btn-fg":"#c8c8f0","dim":"#585878","border-radius":"6px","pill-radius":"6px","vim-cursor":"#c8c8f0","insert-cursor":"#9080f0"},
+                {"name":"midnight-elegance-theme","bg":"#0d0d15","fg":"#c8c8e0","muted":"#606080","accent":"#a080f0","danger":"#e05080","sel-bg":"#1a1a28","btn-border":"#404060","border":"#2a2a38","input-bg":"#1a1a28","input-fg":"#c8c8e0","btn-bg":"#1a1a28","btn-fg":"#c8c8e0","dim":"#606080","border-radius":"6px","pill-radius":"6px","vim-cursor":"#c8c8e0","insert-cursor":"#a080f0"},
+                {"name":"haunted-manor-theme","bg":"#1a1410","fg":"#d8cfc8","muted":"#686050","accent":"#908060","danger":"#c85040","sel-bg":"#2a2018","btn-border":"#483830","border":"#382820","input-bg":"#2a2018","input-fg":"#d8cfc8","btn-bg":"#2a2018","btn-fg":"#d8cfc8","dim":"#686050","border-radius":"4px","pill-radius":"4px","vim-cursor":"#c8b090","insert-cursor":"#908060"},
+                {"name":"misty-rose-theme","bg":"#e8e0e8","fg":"#403038","muted":"#908088","accent":"#c080a0","danger":"#c04060","sel-bg":"#d8d0d8","btn-border":"#b8a0a8","border":"#c8b0b8","input-bg":"#d8d0d8","input-fg":"#403038","btn-bg":"#d8d0d8","btn-fg":"#403038","dim":"#908088","border-radius":"4px","pill-radius":"4px","vim-cursor":"#403038","insert-cursor":"#c080a0"},
+                {"name":"rose-pine-theme","bg":"#191718","fg":"#e0dfe0","muted":"#6e6e70","accent":"#c480a0","danger":"#e05070","sel-bg":"#2a2a2c","btn-border":"#48484c","border":"#38383c","input-bg":"#2a2a2c","input-fg":"#e0dfe0","btn-bg":"#2a2a2c","btn-fg":"#e0dfe0","dim":"#6e6e70","border-radius":"4px","pill-radius":"4px","vim-cursor":"#e0dfe0","insert-cursor":"#c480a0"},
+                {"name":"abyss-notes-theme","bg":"#0f1218","fg":"#c8d0d8","muted":"#586070","accent":"#60a0e0","danger":"#c04050","sel-bg":"#182028","btn-border":"#384050","border":"#283038","input-bg":"#182028","input-fg":"#c8d0d8","btn-bg":"#182028","btn-fg":"#c8d0d8","dim":"#586070","border-radius":"4px","pill-radius":"4px","vim-cursor":"#c8d0d8","insert-cursor":"#60a0e0"},
+                {"name":"amber-glow-theme","bg":"#1a1408","fg":"#e8d8b8","muted":"#786848","accent":"#e8a840","danger":"#c84838","sel-bg":"#2a2012","btn-border":"#584830","border":"#3a2818","input-bg":"#2a2012","input-fg":"#e8d8b8","btn-bg":"#2a2012","btn-fg":"#e8d8b8","dim":"#786848","border-radius":"4px","pill-radius":"4px","vim-cursor":"#e8c898","insert-cursor":"#e8a840"},
+                {"name":"golden-hour-theme","bg":"#1a1610","fg":"#f0e8d0","muted":"#807860","accent":"#d8a060","danger":"#c86040","sel-bg":"#2a2218","btn-border":"#584830","border":"#3c3020","input-bg":"#2a2218","input-fg":"#f0e8d0","btn-bg":"#2a2218","btn-fg":"#f0e8d0","dim":"#807860","border-radius":"4px","pill-radius":"4px","vim-cursor":"#d8b880","insert-cursor":"#d8a060"},
+                {"name":"sunset-ember-theme","bg":"#1a1008","fg":"#f0d0a0","muted":"#785830","accent":"#e08040","danger":"#d04020","sel-bg":"#2a1a10","btn-border":"#502810","border":"#3a1c10","input-bg":"#2a1a10","input-fg":"#f0d0a0","btn-bg":"#2a1a10","btn-fg":"#f0d0a0","dim":"#785830","border-radius":"4px","pill-radius":"4px","vim-cursor":"#f0c090","insert-cursor":"#e08040"},
+                {"name":"vintage-theme","bg":"#f4e8d0","fg":"#403028","muted":"#807060","accent":"#806040","danger":"#a04030","sel-bg":"#e8dcc0","btn-border":"#b8a080","border":"#c8b090","input-bg":"#e8dcc0","input-fg":"#403028","btn-bg":"#e8dcc0","btn-fg":"#403028","dim":"#807060","border-radius":"4px","pill-radius":"4px","vim-cursor":"#504838","insert-cursor":"#806040"},
+                {"name":"aged-paper-theme","bg":"#f0e8d0","fg":"#383020","muted":"#706050","accent":"#705030","danger":"#903020","sel-bg":"#e0d8c0","btn-border":"#a09070","border":"#b0a080","input-bg":"#e0d8c0","input-fg":"#383020","btn-bg":"#e0d8c0","btn-fg":"#383020","dim":"#706050","border-radius":"4px","pill-radius":"4px","vim-cursor":"#403830","insert-cursor":"#705030"},
+                {"name":"coffee-stain-theme","bg":"#3a2820","fg":"#d8c8b0","muted":"#786858","accent":"#a08060","danger":"#c05040","sel-bg":"#4a3830","btn-border":"#605048","border":"#504038","input-bg":"#4a3830","input-fg":"#d8c8b0","btn-bg":"#4a3830","btn-fg":"#d8c8b0","dim":"#786858","border-radius":"4px","pill-radius":"4px","vim-cursor":"#d8b898","insert-cursor":"#a08060"},
+                {"name":"kraft-paper-theme","bg":"#c8a060","fg":"#403020","muted":"#706040","accent":"#604820","danger":"#a03020","sel-bg":"#b89050","btn-border":"#907030","border":"#a08030","input-bg":"#b89050","input-fg":"#403020","btn-bg":"#b89050","btn-fg":"#403020","dim":"#706040","border-radius":"4px","pill-radius":"4px","vim-cursor":"#403020","insert-cursor":"#604820"},
+                {"name":"legal-pad-theme","bg":"#f8f8a0","fg":"#202020","muted":"#707070","accent":"#000000","danger":"#cc0000","sel-bg":"#ececa0","btn-border":"#909090","border":"#a0a0a0","input-bg":"#ececa0","input-fg":"#202020","btn-bg":"#ececa0","btn-fg":"#202020","dim":"#707070","border-radius":"0px","pill-radius":"0px","vim-cursor":"#202020","insert-cursor":"#000000"},
+                {"name":"parchment-noir-theme","bg":"#282018","fg":"#d8d0c0","muted":"#786850","accent":"#a89060","danger":"#c05040","sel-bg":"#383028","btn-border":"#585040","border":"#484038","input-bg":"#383028","input-fg":"#d8d0c0","btn-bg":"#383028","btn-fg":"#d8d0c0","dim":"#786850","border-radius":"4px","pill-radius":"4px","vim-cursor":"#c8b090","insert-cursor":"#a89060"},
+                {"name":"pink-bliss-theme","bg":"#f8e8f0","fg":"#403038","muted":"#907080","accent":"#e080c0","danger":"#c04070","sel-bg":"#e8d8e0","btn-border":"#c0a0b0","border":"#d0b0c0","input-bg":"#e8d8e0","input-fg":"#403038","btn-bg":"#e8d8e0","btn-fg":"#403038","dim":"#907080","border-radius":"4px","pill-radius":"4px","vim-cursor":"#403038","insert-cursor":"#e080c0"},
+                {"name":"sakura-theme","bg":"#f8e8e8","fg":"#403038","muted":"#907080","accent":"#e080a0","danger":"#c04060","sel-bg":"#e8d8e0","btn-border":"#c0a0b0","border":"#d0b0c0","input-bg":"#e8d8e0","input-fg":"#403038","btn-bg":"#e8d8e0","btn-fg":"#403038","dim":"#907080","border-radius":"4px","pill-radius":"4px","vim-cursor":"#403038","insert-cursor":"#e080a0"},
+                {"name":"sharp-theme","bg":"#000000","fg":"#ffffff","muted":"#555555","accent":"#ff0000","danger":"#ff0000","sel-bg":"#111111","btn-border":"#333333","border":"#444444","input-bg":"#111111","input-fg":"#ffffff","btn-bg":"#111111","btn-fg":"#ffffff","dim":"#555555","border-radius":"0px","pill-radius":"0px","vim-cursor":"#ffffff","insert-cursor":"#ff0000"},
+                {"name":"sharp-b&w---barely-visible-borders-theme","bg":"#000000","fg":"#ffffff","muted":"#444444","accent":"#ffffff","danger":"#ff0000","sel-bg":"#111111","btn-border":"#222222","border":"#222222","input-bg":"#111111","input-fg":"#ffffff","btn-bg":"#111111","btn-fg":"#ffffff","dim":"#444444","border-radius":"0px","pill-radius":"0px","vim-cursor":"#ffffff","insert-cursor":"#ffffff"},
+                {"name":"sharp-b&w---no-borders-theme","bg":"#000000","fg":"#ffffff","muted":"#444444","accent":"#ffffff","danger":"#ff0000","sel-bg":"#111111","btn-border":"#000000","border":"#000000","input-bg":"#111111","input-fg":"#ffffff","btn-bg":"#111111","btn-fg":"#ffffff","dim":"#444444","border-radius":"0px","pill-radius":"0px","vim-cursor":"#ffffff","insert-cursor":"#ffffff"},
+                {"name":"sharp-b&w---normal-borders-theme","bg":"#000000","fg":"#ffffff","muted":"#444444","accent":"#ffffff","danger":"#ff0000","sel-bg":"#111111","btn-border":"#555555","border":"#555555","input-bg":"#111111","input-fg":"#ffffff","btn-bg":"#111111","btn-fg":"#ffffff","dim":"#444444","border-radius":"0px","pill-radius":"0px","vim-cursor":"#ffffff","insert-cursor":"#ffffff"},
+                {"name":"sophisticated-obsidian-theme","bg":"#151518","fg":"#e0e0e8","muted":"#606070","accent":"#9080d0","danger":"#c05070","sel-bg":"#252028","btn-border":"#404050","border":"#303038","input-bg":"#252028","input-fg":"#e0e0e8","btn-bg":"#252028","btn-fg":"#e0e0e8","dim":"#606070","border-radius":"4px","pill-radius":"4px","vim-cursor":"#e0e0e8","insert-cursor":"#9080d0"},
+                {"name":"teal-dusk-theme","bg":"#102020","fg":"#b8d8d8","muted":"#487878","accent":"#40a0a0","danger":"#c85050","sel-bg":"#182828","btn-border":"#385858","border":"#284040","input-bg":"#182828","input-fg":"#b8d8d8","btn-bg":"#182828","btn-fg":"#b8d8d8","dim":"#487878","border-radius":"4px","pill-radius":"4px","vim-cursor":"#b8d8d8","insert-cursor":"#40a0a0"},
+                {"name":"tomorrow-night-theme","bg":"#1d1f21","fg":"#c5c8c6","muted":"#969896","accent":"#81a2be","danger":"#cc6666","sel-bg":"#282a2e","btn-border":"#5c5f66","border":"#3e4149","input-bg":"#282a2e","input-fg":"#c5c8c6","btn-bg":"#282a2e","btn-fg":"#c5c8c6","dim":"#969896","border-radius":"4px","pill-radius":"4px","vim-cursor":"#c5c8c6","insert-cursor":"#81a2be"},
+                {"name":"typewriter-night-theme","bg":"#f4f4f0","fg":"#282820","muted":"#686058","accent":"#504830","danger":"#903030","sel-bg":"#e8e4d8","btn-border":"#a09080","border":"#b0a090","input-bg":"#e8e4d8","input-fg":"#282820","btn-bg":"#e8e4d8","btn-fg":"#282820","dim":"#686058","border-radius":"4px","pill-radius":"4px","vim-cursor":"#282820","insert-cursor":"#504830"},
+                {"name":"vaporwave-theme","bg":"#1a0a28","fg":"#f8e8f8","muted":"#8868a0","accent":"#ff68d8","danger":"#ff3888","sel-bg":"#2a1428","btn-border":"#684878","border":"#483858","input-bg":"#2a1428","input-fg":"#f8e8f8","btn-bg":"#2a1428","btn-fg":"#f8e8f8","dim":"#8868a0","border-radius":"4px","pill-radius":"4px","vim-cursor":"#f8e8f8","insert-cursor":"#ff68d8"},
+                {"name":"volcanic-ash-theme","bg":"#181010","fg":"#d8c8b8","muted":"#685850","accent":"#a87860","danger":"#c05040","sel-bg":"#282018","btn-border":"#484038","border":"#383028","input-bg":"#282018","input-fg":"#d8c8b8","btn-bg":"#282018","btn-fg":"#d8c8b8","dim":"#685850","border-radius":"4px","pill-radius":"4px","vim-cursor":"#c8a890","insert-cursor":"#a87860"},
+                {"name":"warm-grey-theme","bg":"#1a1815","fg":"#d8d0c8","muted":"#686058","accent":"#908060","danger":"#c05040","sel-bg":"#2a2520","btn-border":"#504840","border":"#3a3530","input-bg":"#2a2520","input-fg":"#d8d0c8","btn-bg":"#2a2520","btn-fg":"#d8d0c8","dim":"#686058","border-radius":"4px","pill-radius":"4px","vim-cursor":"#c8b898","insert-cursor":"#908060"},
+                {"name":"zombie-flesh-theme","bg":"#383830","fg":"#d0d8d0","muted":"#686868","accent":"#80a080","danger":"#c04040","sel-bg":"#484840","btn-border":"#606058","border":"#505048","input-bg":"#484840","input-fg":"#d0d8d0","btn-bg":"#484840","btn-fg":"#d0d8d0","dim":"#686868","border-radius":"4px","pill-radius":"4px","vim-cursor":"#d0d8d0","insert-cursor":"#80a080"},
+                {"name":"the_darkness","bg":"#000000","fg":"#000000","muted":"#111111","accent":"#000000","danger":"#000000","sel-bg":"#111111","btn-border":"#000000","border":"#000000","input-bg":"#111111","input-fg":"#000000","btn-bg":"#111111","btn-fg":"#000000","dim":"#111111","border-radius":"0px","pill-radius":"0px","vim-cursor":"#000000","insert-cursor":"#000000"},
+                {"name":"corporate-slate-theme","bg":"#242e38","fg":"#e8ecec","muted":"#6e7880","accent":"#5aa0d8","danger":"#c87070","sel-bg":"#344248","btn-border":"#4c5860","border":"#3e4a54","input-bg":"#344248","input-fg":"#e8ecec","btn-bg":"#344248","btn-fg":"#e8ecec","dim":"#6e7880","border-radius":"4px","pill-radius":"4px","vim-cursor":"#e8ecec","insert-cursor":"#5aa0d8"},
+                {"name":"lime-zest-theme","bg":"#0a140a","fg":"#c8f8b8","muted":"#487850","accent":"#80e880","danger":"#e85040","sel-bg":"#142814","btn-border":"#385040","border":"#284028","input-bg":"#142814","input-fg":"#c8f8b8","btn-bg":"#142814","btn-fg":"#c8f8b8","dim":"#487850","border-radius":"4px","pill-radius":"4px","vim-cursor":"#c8f8b8","insert-cursor":"#80e880"},
+                {"name":"macchiato-theme","bg":"#2d2a2e","fg":"#d4d0d4","muted":"#6e6a70","accent":"#dc7aab","danger":"#ed7b82","sel-bg":"#3d3a40","btn-border":"#5e5a62","border":"#4d4a52","input-bg":"#3d3a40","input-fg":"#d4d0d4","btn-bg":"#3d3a40","btn-fg":"#d4d0d4","dim":"#6e6a70","border-radius":"4px","pill-radius":"4px","vim-cursor":"#d4d0d4","insert-cursor":"#dc7aab"},
+                {"name":"purple-haze-theme","bg":"#181028","fg":"#d8d0e8","muted":"#6858a0","accent":"#9070d0","danger":"#c05080","sel-bg":"#282038","btn-border":"#504870","border":"#403060","input-bg":"#282038","input-fg":"#d8d0e8","btn-bg":"#282038","btn-fg":"#d8d0e8","dim":"#6858a0","border-radius":"4px","pill-radius":"4px","vim-cursor":"#d8d0e8","insert-cursor":"#9070d0"},
+                {"name":"visual-studio-theme","bg":"#1e1e1e","fg":"#d4d4d4","muted":"#858585","accent":"#007acc","danger":"#f44747","sel-bg":"#2d2d2d","btn-border":"#3e3e3e","border":"#3c3c3c","input-bg":"#2d2d2d","input-fg":"#d4d4d4","btn-bg":"#2d2d2d","btn-fg":"#d4d4d4","dim":"#858585","border-radius":"4px","pill-radius":"4px","vim-cursor":"#d4d4d4","insert-cursor":"#007acc"},
+                {"name":"dragon's-breath-theme","bg":"#1a0800","fg":"#f8d8b8","muted":"#785030","accent":"#e87040","danger":"#e84020","sel-bg":"#2a1008","btn-border":"#503010","border":"#3a1c10","input-bg":"#2a1008","input-fg":"#f8d8b8","btn-bg":"#2a1008","btn-fg":"#f8d8b8","dim":"#785030","border-radius":"4px","pill-radius":"4px","vim-cursor":"#f8c090","insert-cursor":"#e87040"},
+                {"name":"enchanted-forest-theme","bg":"#141810","fg":"#d0e8c0","muted":"#487030","accent":"#70a040","danger":"#c04030","sel-bg":"#202818","btn-border":"#384020","border":"#283010","input-bg":"#202818","input-fg":"#d0e8c0","btn-bg":"#202818","btn-fg":"#d0e8c0","dim":"#487030","border-radius":"4px","pill-radius":"4px","vim-cursor":"#b0d090","insert-cursor":"#70a040"},
+                {"name":"vampire's-kiss-theme","bg":"#1a0808","fg":"#f0d0d0","muted":"#783040","accent":"#d04060","danger":"#ff2030","sel-bg":"#281212","btn-border":"#502030","border":"#3a1818","input-bg":"#281212","input-fg":"#f0d0d0","btn-bg":"#281212","btn-fg":"#f0d0d0","dim":"#783040","border-radius":"4px","pill-radius":"4px","vim-cursor":"#e05070","insert-cursor":"#d04060"},
+                {"name":"github-copilot-theme","bg":"#0d1117","fg":"#c9d1d9","muted":"#8b949e","accent":"#79c0ff","danger":"#f85149","sel-bg":"#161b22","btn-border":"#30363d","border":"#21262d","input-bg":"#161b22","input-fg":"#c9d1d9","btn-bg":"#161b22","btn-fg":"#c9d1d9","dim":"#8b949e","border-radius":"6px","pill-radius":"6px","vim-cursor":"#c9d1d9","insert-cursor":"#79c0ff"},
+                {"name":"hacker-theme","bg":"#003300","fg":"#00ff00","muted":"#006600","accent":"#00ff00","danger":"#ff0000","sel-bg":"#004400","btn-border":"#005500","border":"#004400","input-bg":"#004400","input-fg":"#00ff00","btn-bg":"#004400","btn-fg":"#00ff00","dim":"#006600","border-radius":"4px","pill-radius":"4px","vim-cursor":"#00ff00","insert-cursor":"#00ff00"}
             ];
             let marksIndex = 0;
             let finding = false;
@@ -11062,34 +11141,26 @@
                         `let headerTemplate = "${headerTemplate}";`
                     );
 
-                    htmlContent = htmlContent.replace(/let\s+treeData\s*=\s*\[[\s\S]*?\];/, `let treeData = ${JSON.stringify(treeData, null, 2)};`);
+                    htmlContent = replaceJsStatement(htmlContent, 'treeData',
+                        JSON.stringify(treeData, null, 2));
 
                     // Make sure the latest bookmarks and historyStack are stored
                     const latestBookmarks = JSON.parse(JSON.stringify(bookmarks));
                     const latestHistoryStack = JSON.parse(JSON.stringify(historyStack));
 
-                    htmlContent = htmlContent.replace(
-                        /let\s+bookmarks\s*=\s*\[[\s\S]*?\];/,
-                        "let bookmarks = " + JSON.stringify(latestBookmarks, null, 4) + ";"
-                    );
-                    htmlContent = htmlContent.replace(
-                        /let\s+historyStack\s*=\s*\[[\s\S]*?\];/,
-                        "let historyStack = " + JSON.stringify(latestHistoryStack, null, 4) + ";"
-                    );
+                    htmlContent = replaceJsStatement(htmlContent, 'bookmarks',
+                        JSON.stringify(latestBookmarks, null, 4));
+                    htmlContent = replaceJsStatement(htmlContent, 'historyStack',
+                        JSON.stringify(latestHistoryStack, null, 4));
 
                     // Save current theme
                     const latestTheme = currentTheme ? JSON.stringify(currentTheme, null, 4) : "null";
-                    htmlContent = htmlContent.replace(
-                        /let\s+currentTheme\s*=\s*(null|\{[\s\S]*?\});/,
-                        "let currentTheme = " + latestTheme + ";"
-                    );
+                    htmlContent = replaceJsStatement(htmlContent, 'currentTheme', latestTheme);
 
                     // Save themes list
                     const themesJson = themes.map(t => "                " + JSON.stringify(t)).join(",\n");
-                    htmlContent = htmlContent.replace(
-                        /let\s+themes\s*=\s*\[[\s\S]*?\];/,
-                        "let themes = [\n" + themesJson + "\n            ];"
-                    );
+                    htmlContent = replaceJsStatement(htmlContent, 'themes',
+                        "[\n" + themesJson + "\n            ]");
 
                     // Update CSS variables with current theme
                     const root = document.documentElement;
@@ -11555,23 +11626,23 @@
                 if (file) {
                     importedFileName = file.name.replace(/\.html$/, '');
                     file.text().then(content => {
-                        const match = content.match(/let\s+treeData\s*=\s*(\[[\s\S]*?\]);/);
-                        if (!match) {
+                        const treeStmt = findJsStatement(content, 'treeData');
+                        if (!treeStmt) {
                             alert("No treeData found in selected file.");
                             return;
                         }
 
                         try {
-                            const importedTreeData = JSON.parse(match[1]);
+                            const importedTreeData = JSON.parse(treeStmt.value);
 
                             // Replace current in-memory treeData
                             treeData = importedTreeData;
 
                             // Restore historyStack from imported file
-                            const historyMatch = content.match(/let\s+historyStack\s*=\s*(\[[\s\S]*?\]);/s);
-                            if (historyMatch) {
+                            const historyStmt = findJsStatement(content, 'historyStack');
+                            if (historyStmt) {
                                 try {
-                                    historyStack = JSON.parse(historyMatch[1]);
+                                    historyStack = JSON.parse(historyStmt.value);
                                 } catch (e) {
                                     console.warn('Failed to parse historyStack from import, using empty array');
                                     historyStack = [];
@@ -11579,10 +11650,10 @@
                             }
                             
                             // Restore bookmarks from imported file
-                            const bookmarksMatch = content.match(/let\s+bookmarks\s*=\s*(\[[\s\S]*?\]);/s);
-                            if (bookmarksMatch) {
+                            const bookmarksStmt = findJsStatement(content, 'bookmarks');
+                            if (bookmarksStmt) {
                                 try {
-                                    bookmarks = JSON.parse(bookmarksMatch[1]);
+                                    bookmarks = JSON.parse(bookmarksStmt.value);
                                 } catch (e) {
                                     console.warn('Failed to parse bookmarks from import, using empty array');
                                     bookmarks = [];
@@ -11590,10 +11661,10 @@
                             }
 
                             // Restore theme from imported file
-                            const themeMatch = content.match(/let\s+currentTheme\s*=\s*(\{[\s\S]*?\});/s);
-                            if (themeMatch) {
+                            const themeStmt = findJsStatement(content, 'currentTheme');
+                            if (themeStmt) {
                                 try {
-                                    currentTheme = JSON.parse(themeMatch[1]);
+                                    currentTheme = JSON.parse(themeStmt.value);
                                     applyThemeColors(currentTheme);
                                 } catch (e) {
                                     console.warn('Failed to parse theme from import, using default');
@@ -11802,10 +11873,10 @@
                     const htmlContent = document.documentElement.outerHTML;
                     
                     // Extract and restore historyStack
-                    const historyMatch = htmlContent.match(/let\s+historyStack\s*=\s*(\[[\s\S]*?\]);/s);
-                    if (historyMatch) {
+                    const historyStmt = findJsStatement(htmlContent, 'historyStack');
+                    if (historyStmt) {
                         try {
-                            historyStack = JSON.parse(historyMatch[1]);
+                            historyStack = JSON.parse(historyStmt.value);
                         } catch (e) {
                             console.warn('Failed to parse historyStack, using empty array');
                             historyStack = [];
@@ -11813,10 +11884,10 @@
                     }
                     
                     // Extract and restore bookmarks
-                    const bookmarksMatch = htmlContent.match(/let\s+bookmarks\s*=\s*(\[[\s\S]*?\]);/s);
-                    if (bookmarksMatch) {
+                    const bookmarksStmt = findJsStatement(htmlContent, 'bookmarks');
+                    if (bookmarksStmt) {
                         try {
-                            bookmarks = JSON.parse(bookmarksMatch[1]);
+                            bookmarks = JSON.parse(bookmarksStmt.value);
                         } catch (e) {
                             console.warn('Failed to parse bookmarks, using empty array');
                             bookmarks = [];
@@ -11835,10 +11906,10 @@
                     }
                     
                     // Extract and restore current theme
-                    const themeMatch = htmlContent.match(/let\s+currentTheme\s*=\s*(null|\{[\s\S]*?\});/);
-                    if (themeMatch) {
+                    const themeStmt = findJsStatement(htmlContent, 'currentTheme');
+                    if (themeStmt) {
                         try {
-                            currentTheme = JSON.parse(themeMatch[1]);
+                            currentTheme = JSON.parse(themeStmt.value);
                             if (currentTheme) {
                                 applyThemeColors(currentTheme);
                             }
@@ -11849,10 +11920,10 @@
                     }
 
                     // Extract and restore themes list
-                    const themesMatch = htmlContent.match(/let\s+themes\s*=\s*(\[[\s\S]*?\]);/s);
-                    if (themesMatch) {
+                    const themesStmt = findJsStatement(htmlContent, 'themes');
+                    if (themesStmt) {
                         try {
-                            const parsed = JSON.parse(themesMatch[1]);
+                            const parsed = JSON.parse(themesStmt.value);
                             if (Array.isArray(parsed) && parsed.length > 0) {
                                 themes = parsed;
                             }
