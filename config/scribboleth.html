@@ -954,6 +954,55 @@
                 "\\);": "^^^func^^^"
             };
 
+            // Locate a `let <keyword> = <value>;` declaration.  The value is
+            // scanned with bracket depth and string literals respected, so a
+            // '];' inside note text (e.g. `alphabet[dist(gen)];`) cannot end
+            // the array early the way a non-greedy regex would.
+            function findJsStatement(text, keyword) {
+                const re = new RegExp('^([ \\t]*)let\\s+' + keyword + '\\s*=', 'm');
+                const m = re.exec(text);
+                if (!m) return null;
+                const start = m.index + m[1].length;
+                let i = m.index + m[0].length;
+                while (i < text.length && /\s/.test(text[i])) i++;
+                const valueStart = i;
+                let valueEnd;
+                if (text[i] === '[' || text[i] === '{') {
+                    let depth = 0, inString = false, escaped = false;
+                    for (let j = i; j < text.length; j++) {
+                        const ch = text[j];
+                        if (inString) {
+                            if (escaped) { escaped = false; continue; }
+                            if (ch === '\\') { escaped = true; continue; }
+                            if (ch === '"') inString = false;
+                            continue;
+                        }
+                        if (ch === '"') { inString = true; continue; }
+                        if (ch === '[' || ch === '{') depth++;
+                        else if (ch === ']' || ch === '}') {
+                            depth--;
+                            if (depth === 0) { valueEnd = j + 1; break; }
+                        }
+                    }
+                    if (valueEnd === undefined) return null;
+                } else {
+                    const semi = text.indexOf(';', i);
+                    if (semi === -1) return null;
+                    valueEnd = semi;
+                }
+                let end = valueEnd;
+                while (end < text.length && /\s/.test(text[end])) end++;
+                if (text[end] === ';') end++;
+                return { start: start, end: end, value: text.slice(valueStart, valueEnd) };
+            }
+
+            function replaceJsStatement(text, keyword, value) {
+                const found = findJsStatement(text, keyword);
+                if (!found) return text;
+                return text.slice(0, found.start) + 'let ' + keyword + ' = '
+                     + value + ';' + text.slice(found.end);
+            }
+
             let nodePort = 0;
 
             let currentEditorNodeId = null;
@@ -6245,34 +6294,26 @@
                         `let headerTemplate = "${headerTemplate}";`
                     );
 
-                    htmlContent = htmlContent.replace(/let\s+treeData\s*=\s*\[[\s\S]*?\];/, `let treeData = ${JSON.stringify(treeData, null, 2)};`);
+                    htmlContent = replaceJsStatement(htmlContent, 'treeData',
+                        JSON.stringify(treeData, null, 2));
 
                     // Make sure the latest bookmarks and historyStack are stored
                     const latestBookmarks = JSON.parse(JSON.stringify(bookmarks));
                     const latestHistoryStack = JSON.parse(JSON.stringify(historyStack));
 
-                    htmlContent = htmlContent.replace(
-                        /let\s+bookmarks\s*=\s*\[[\s\S]*?\];/,
-                        "let bookmarks = " + JSON.stringify(latestBookmarks, null, 4) + ";"
-                    );
-                    htmlContent = htmlContent.replace(
-                        /let\s+historyStack\s*=\s*\[[\s\S]*?\];/,
-                        "let historyStack = " + JSON.stringify(latestHistoryStack, null, 4) + ";"
-                    );
+                    htmlContent = replaceJsStatement(htmlContent, 'bookmarks',
+                        JSON.stringify(latestBookmarks, null, 4));
+                    htmlContent = replaceJsStatement(htmlContent, 'historyStack',
+                        JSON.stringify(latestHistoryStack, null, 4));
 
                     // Save current theme
                     const latestTheme = currentTheme ? JSON.stringify(currentTheme, null, 4) : "null";
-                    htmlContent = htmlContent.replace(
-                        /let\s+currentTheme\s*=\s*(null|\{[\s\S]*?\});/,
-                        "let currentTheme = " + latestTheme + ";"
-                    );
+                    htmlContent = replaceJsStatement(htmlContent, 'currentTheme', latestTheme);
 
                     // Save themes list
                     const themesJson = themes.map(t => "                " + JSON.stringify(t)).join(",\n");
-                    htmlContent = htmlContent.replace(
-                        /let\s+themes\s*=\s*\[[\s\S]*?\];/,
-                        "let themes = [\n" + themesJson + "\n            ];"
-                    );
+                    htmlContent = replaceJsStatement(htmlContent, 'themes',
+                        "[\n" + themesJson + "\n            ]");
 
                     // Update CSS variables with current theme
                     const root = document.documentElement;
@@ -6738,23 +6779,23 @@
                 if (file) {
                     importedFileName = file.name.replace(/\.html$/, '');
                     file.text().then(content => {
-                        const match = content.match(/let\s+treeData\s*=\s*(\[[\s\S]*?\]);/);
-                        if (!match) {
+                        const treeStmt = findJsStatement(content, 'treeData');
+                        if (!treeStmt) {
                             alert("No treeData found in selected file.");
                             return;
                         }
 
                         try {
-                            const importedTreeData = JSON.parse(match[1]);
+                            const importedTreeData = JSON.parse(treeStmt.value);
 
                             // Replace current in-memory treeData
                             treeData = importedTreeData;
 
                             // Restore historyStack from imported file
-                            const historyMatch = content.match(/let\s+historyStack\s*=\s*(\[[\s\S]*?\]);/s);
-                            if (historyMatch) {
+                            const historyStmt = findJsStatement(content, 'historyStack');
+                            if (historyStmt) {
                                 try {
-                                    historyStack = JSON.parse(historyMatch[1]);
+                                    historyStack = JSON.parse(historyStmt.value);
                                 } catch (e) {
                                     console.warn('Failed to parse historyStack from import, using empty array');
                                     historyStack = [];
@@ -6762,10 +6803,10 @@
                             }
                             
                             // Restore bookmarks from imported file
-                            const bookmarksMatch = content.match(/let\s+bookmarks\s*=\s*(\[[\s\S]*?\]);/s);
-                            if (bookmarksMatch) {
+                            const bookmarksStmt = findJsStatement(content, 'bookmarks');
+                            if (bookmarksStmt) {
                                 try {
-                                    bookmarks = JSON.parse(bookmarksMatch[1]);
+                                    bookmarks = JSON.parse(bookmarksStmt.value);
                                 } catch (e) {
                                     console.warn('Failed to parse bookmarks from import, using empty array');
                                     bookmarks = [];
@@ -6773,10 +6814,10 @@
                             }
 
                             // Restore theme from imported file
-                            const themeMatch = content.match(/let\s+currentTheme\s*=\s*(\{[\s\S]*?\});/s);
-                            if (themeMatch) {
+                            const themeStmt = findJsStatement(content, 'currentTheme');
+                            if (themeStmt) {
                                 try {
-                                    currentTheme = JSON.parse(themeMatch[1]);
+                                    currentTheme = JSON.parse(themeStmt.value);
                                     applyThemeColors(currentTheme);
                                 } catch (e) {
                                     console.warn('Failed to parse theme from import, using default');
@@ -6985,10 +7026,10 @@
                     const htmlContent = document.documentElement.outerHTML;
                     
                     // Extract and restore historyStack
-                    const historyMatch = htmlContent.match(/let\s+historyStack\s*=\s*(\[[\s\S]*?\]);/s);
-                    if (historyMatch) {
+                    const historyStmt = findJsStatement(htmlContent, 'historyStack');
+                    if (historyStmt) {
                         try {
-                            historyStack = JSON.parse(historyMatch[1]);
+                            historyStack = JSON.parse(historyStmt.value);
                         } catch (e) {
                             console.warn('Failed to parse historyStack, using empty array');
                             historyStack = [];
@@ -6996,10 +7037,10 @@
                     }
                     
                     // Extract and restore bookmarks
-                    const bookmarksMatch = htmlContent.match(/let\s+bookmarks\s*=\s*(\[[\s\S]*?\]);/s);
-                    if (bookmarksMatch) {
+                    const bookmarksStmt = findJsStatement(htmlContent, 'bookmarks');
+                    if (bookmarksStmt) {
                         try {
-                            bookmarks = JSON.parse(bookmarksMatch[1]);
+                            bookmarks = JSON.parse(bookmarksStmt.value);
                         } catch (e) {
                             console.warn('Failed to parse bookmarks, using empty array');
                             bookmarks = [];
@@ -7018,10 +7059,10 @@
                     }
                     
                     // Extract and restore current theme
-                    const themeMatch = htmlContent.match(/let\s+currentTheme\s*=\s*(null|\{[\s\S]*?\});/);
-                    if (themeMatch) {
+                    const themeStmt = findJsStatement(htmlContent, 'currentTheme');
+                    if (themeStmt) {
                         try {
-                            currentTheme = JSON.parse(themeMatch[1]);
+                            currentTheme = JSON.parse(themeStmt.value);
                             if (currentTheme) {
                                 applyThemeColors(currentTheme);
                             }
@@ -7032,10 +7073,10 @@
                     }
 
                     // Extract and restore themes list
-                    const themesMatch = htmlContent.match(/let\s+themes\s*=\s*(\[[\s\S]*?\]);/s);
-                    if (themesMatch) {
+                    const themesStmt = findJsStatement(htmlContent, 'themes');
+                    if (themesStmt) {
                         try {
-                            const parsed = JSON.parse(themesMatch[1]);
+                            const parsed = JSON.parse(themesStmt.value);
                             if (Array.isArray(parsed) && parsed.length > 0) {
                                 themes = parsed;
                             }

@@ -69,6 +69,10 @@ the coderoot node.
 
 The output HTML is a full rebuild: config/scribboleth.html is copied fresh,
 its <title> rewritten, and the harvested tree injected into `let treeData`.
+Bookmarks and the theme set (the `bookmarks`, `currentTheme` and `themes`
+declarations plus the `<style id="theme_styles">` block) are carried over
+from the previously generated document, when one exists, so a rebuild does
+not discard them.
 """
 
 import argparse
@@ -970,6 +974,72 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None,
 
 
 # ----------------------------------------------------------------------
+# Preserving user state across rebuilds
+# ----------------------------------------------------------------------
+
+THEME_STYLE_RE = re.compile(
+    r'(<style id="theme_styles">)([\s\S]*?)(</style>)')
+PRESERVED_VARS = ("bookmarks", "currentTheme", "themes")
+
+
+def find_js_declaration(text, name):
+    """Return (start, end) spanning `let <name> = <value>;` or None.
+
+    The value is scanned with bracket depth and string literals respected, so
+    multi-line objects/arrays (including nested braces) are handled.
+    """
+    m = re.search(r"^[ \t]*let\s+" + re.escape(name) + r"\s*=", text, re.M)
+    if not m:
+        return None
+    i, n = m.end(), len(text)
+    depth = 0
+    while i < n:
+        c = text[i]
+        if c in "\"'`":
+            quote = c
+            i += 1
+            while i < n:
+                if text[i] == "\\":
+                    i += 2
+                    continue
+                if text[i] == quote:
+                    i += 1
+                    break
+                i += 1
+            continue
+        if c in "[{(":
+            depth += 1
+        elif c in "]})":
+            depth = max(0, depth - 1)
+        elif c == ";" and depth == 0:
+            return m.start(), i + 1
+        i += 1
+    return None
+
+
+def preserve_user_state(html, previous):
+    """Copy bookmarks and theme state from the previous output into `html`.
+
+    The app stores these directly in the saved document, so a full rebuild
+    from the template would otherwise reset them.
+    """
+    if not previous:
+        return html
+    for name in PRESERVED_VARS:
+        old = find_js_declaration(previous, name)
+        new = find_js_declaration(html, name)
+        if old is None or new is None:
+            continue
+        html = html[:new[0]] + previous[old[0]:old[1]] + html[new[1]:]
+    old_style = THEME_STYLE_RE.search(previous)
+    new_style = THEME_STYLE_RE.search(html)
+    if old_style and new_style:
+        html = (html[:new_style.start(2)] + old_style.group(2)
+                + html[new_style.end(2):])
+    return html
+
+
+# ----------------------------------------------------------------------
 # Main
 # ----------------------------------------------------------------------
 
@@ -1072,6 +1142,11 @@ def main():
     _strip(nodes)
     payload = json.dumps(nodes, indent=2)
 
+    previous = None
+    if os.path.isfile(OUTPUT):
+        with open(OUTPUT, "r", encoding="utf-8", errors="replace") as f:
+            previous = f.read()
+
     with open(TEMPLATE, "r", encoding="utf-8") as f:
         html = f.read()
 
@@ -1080,6 +1155,7 @@ def main():
     html = re.sub(r"let\s+treeData\s*=\s*\[[\s\S]*?\];",
                   lambda m: "let treeData = " + payload + ";",
                   html, count=1)
+    html = preserve_user_state(html, previous)
 
     os.makedirs(os.path.dirname(OUTPUT), exist_ok=True)
     with open(OUTPUT, "w", encoding="utf-8") as f:
