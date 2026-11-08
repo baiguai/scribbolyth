@@ -127,7 +127,7 @@ int main(int, char** argv) {
         ----
     */
     //>>
-    auto version = "1.0.5";
+    auto version = "1.1.0";
 
     auto state = std::make_shared<EditorState>();
 
