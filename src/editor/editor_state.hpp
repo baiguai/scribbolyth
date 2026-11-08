@@ -97,6 +97,8 @@ struct EditorState {
     */
     //>>
     int treeview_width = kDefaultTreeviewWidth;
+    // Toggled by 'N' in TREE mode to hide/show the tree pane.
+    bool treeview_visible = true;
 
     scribbolyth::treeview::TreeNode* active_node = nullptr;
     int active_descendants = 0;
