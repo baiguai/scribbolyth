@@ -92,7 +92,7 @@ namespace scribbolyth::io
                 */
 
                 /*!
-                    Constructor
+                    Parser Constructor
 
                     !_ctor
                 */

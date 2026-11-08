@@ -39,12 +39,43 @@ using namespace ftxui;
     /*[/Introduction]
     Introduction
     Developer documentation for Scribbolyth.
+
+    See: _Using This Help System_
+    */
+
+    /*[/Introduction/Using This Help System]
+        This help system is built in the .html version of Scribbolyth (called Scribboleth).
+
+        Use: ?
+            For the key bindings help.
+
+        Saving this File:
+            You will want to use 'S' in TREE mode, and save it with the file name: devnotes
+            Then replace the original file with the downloaded copy.
+
+        Notes:
+            It has most of the features that Scribbolyth has.
+            If you change the theme of this file, and add bookmarks in it - and save that, replacing this file
+            if you re-generate it, those are preserved.
     */
 
     /*[/Introduction/Key Codes]
     Key Codes
 
     Key codes are defined within the ./config/commands.conf file.
+    */
+
+    /*[/How To Guides/Edit a Specific Method]
+        If you need to work on a specific method, you can use this help system
+        to do so...
+
+        * If you have an idea what the method does, search for related words here.
+        * Or search for part of its name, this help system will show the file name.
+        * You can use the search features of the help system, like REGEX search etc.
+        * In the code file, search for the node title in the help system - or the actual method name as called out here.
+
+        For example, if you need to modify the treeview's expand all feature, search for
+        expand all. You will see the treeview.cpp has a method called: ExpandAll - search for that in treeview.cpp.
     */
 
     /*[/How To Guides/Add a Key Binding]
@@ -96,7 +127,7 @@ int main(int, char** argv) {
         ----
     */
     //>>
-    auto version = "1.0.4";
+    auto version = "1.0.5";
 
     auto state = std::make_shared<EditorState>();
 

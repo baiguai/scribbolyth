@@ -16,6 +16,7 @@
 
 #include "../clipboard/clipboard.hpp"
 #include "../editor/editor_state.hpp"
+#include "../text/text.hpp"
 #include "../treeview/tree_node.hpp"
 
 namespace scribbolyth::links
@@ -29,17 +30,8 @@ namespace scribbolyth::links
     */
 
 
-    /*!
-        Pad Right
-
-        !_method
-    */
-    std::string PadRight(const std::string& s, std::size_t width)
-    {
-        if (s.size() >= width) return s;
-        return s + std::string(width - s.size(), ' ');
-    }
-    //!
+    // Pad Right - shared helper from ../text/text.hpp.
+    using scribbolyth::text::PadRight;
 
     /*!
         Trim
@@ -350,7 +342,7 @@ namespace scribbolyth::links
         */
 
         /*!
-            Constructor
+            LinksDialog Constructor
 
             !_ctor
         */

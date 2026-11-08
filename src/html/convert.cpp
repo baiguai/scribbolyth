@@ -31,7 +31,7 @@ namespace scribbolyth::html
                 */
 
                 /*!
-                    Constructor
+                    Parser Constructor
 
                     !_ctor
                 */
