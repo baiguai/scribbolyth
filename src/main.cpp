@@ -29,6 +29,7 @@
 #include "recent/recent.hpp"
 #include "links/links.hpp"
 #include "links/brokelinks.hpp"
+#include "linktree/linktree.hpp"
 #include "op/op.hpp"
 #include "search/search.hpp"
 #include "undo/undo.hpp"
@@ -254,6 +255,10 @@ int main(int, char** argv) {
     bool show_dead_links = false;
     state->operations["show_broke_links"] = [&show_dead_links](const std::string&, int) { show_dead_links = true; };
     state->commands["show_broke_links"] = "show_broke_links";
+
+    bool show_link_tree = false;
+    state->operations["show_link_tree"] = [&show_link_tree](const std::string&, int) { show_link_tree = true; };
+    state->commands["linktree"] = "show_link_tree";
 
     bool show_history = false;
     state->operations["history"] = [&show_history](const std::string&, int) { show_history = true; };
@@ -562,6 +567,7 @@ int main(int, char** argv) {
     auto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);
     auto links_comp = scribbolyth::links::MakeLinksDialog(state, &show_links);
     auto dead_links_comp = scribbolyth::brokenlinks::MakeDeadLinksDialog(state, &show_dead_links);
+    auto link_tree_comp = scribbolyth::linktree::MakeLinkTreeDialog(state, &show_link_tree);
     auto history_comp = scribbolyth::history::MakeHistoryDialog(state, &show_history);
     auto recent_comp = scribbolyth::recent::MakeRecentDialog(state, &show_recent, recent_force);
     auto undo_comp = scribbolyth::undo::MakeUndoDialog(state, &show_undo);
@@ -575,6 +581,7 @@ int main(int, char** argv) {
         std::tuple(bookmarks_comp,   &show_bookmarks),
         std::tuple(links_comp,       &show_links),
         std::tuple(dead_links_comp,  &show_dead_links),
+        std::tuple(link_tree_comp,   &show_link_tree),
         std::tuple(history_comp,     &show_history),
         std::tuple(recent_comp,      &show_recent),
         std::tuple(undo_comp,        &show_undo),
