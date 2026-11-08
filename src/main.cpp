@@ -142,6 +142,17 @@ int main(int, char** argv) {
 
     auto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);
 
+    // 'N' in TREE mode hides the tree pane; render the editor on its own in
+    // that case instead of the split, so the editor gets the full width.
+    auto main_view = Renderer(main_split, [state, main_split, editor_wrap]
+    {
+        if (state->treeview_visible)
+        {
+            return main_split->Render();
+        }
+        return editor_wrap->Render();
+    });
+
     auto screen = ScreenInteractive::Fullscreen();
     auto quit = screen.ExitLoopClosure();
     //<<
@@ -533,7 +544,7 @@ int main(int, char** argv) {
 
     //>>
     auto container = Container::Vertical({
-        main_split | flex,
+        main_view | flex,
         command_handler,
         status_bar,
     }, &active_child);

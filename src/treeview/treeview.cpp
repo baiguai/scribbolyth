@@ -456,6 +456,20 @@ namespace scribbolyth::treeview
                     state_->treeview_width = std::max(kMinTreeviewWidth,
                         state_->treeview_width - std::max(1, count));
                 };
+                state_->operations["toggle_treeview"] = [this](const std::string&, int)
+                {
+                    state_->treeview_visible = !state_->treeview_visible;
+                    if (state_->treeview_visible)
+                    {
+                        state_->status = "Tree pane shown";
+                        if (state_->focus_treeview) state_->focus_treeview();
+                    }
+                    else
+                    {
+                        state_->status = "Tree pane hidden - press N to show";
+                        if (state_->focus_editor) state_->focus_editor();
+                    }
+                };
 
                 // Callbacks the rest of the app uses to inspect or drive the tree.
 
