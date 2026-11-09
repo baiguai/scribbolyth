@@ -92,6 +92,19 @@ using namespace ftxui;
           those. A good recursive file contents search tool is helpful!
 
     */
+
+    /*[/General Notes/Noteworthy Features/Scroll Past]
+        Scroll past is an interesting feature.
+        See:
+
+        _Scroll Past Helper_
+        _Render the Editor_
+
+        It will calculate the height of the view port and insert enough blank
+        spaces to allow for scrolling so that the cursor remains in the middle
+        of the screen. Without this the scrolling would stop as soon as the last
+        line of text is scrolled into view.
+    */
 ////////////////////////////////////////////////////////////////////////////////
 
 //!_coderoot=/Source Code
