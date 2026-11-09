@@ -983,6 +983,29 @@
     "expanded": false
   },
   {
+    "id": "f2ea98ee",
+    "title": "General Notes",
+    "content": "",
+    "children": [
+      {
+        "id": "07cf10b5",
+        "title": "Noteworthy Features",
+        "content": "",
+        "children": [
+          {
+            "id": "1faf6a6d",
+            "title": "Scroll Past",
+            "content": "Scroll Past\n\nScroll past is an interesting feature.\nSee:\n\n_Scroll Past Helper_\n_Render the Editor_\n\nIt will calculate the height of the view port and insert enough blank\nspaces to allow for scrolling so that the cursor remains in the middle\nof the screen. Without this the scrolling would stop as soon as the last\nline of text is scrolled into view.",
+            "children": [],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      }
+    ],
+    "expanded": false
+  },
+  {
     "id": "b116676c",
     "title": "Source Code",
     "content": "",
@@ -2305,7 +2328,7 @@
                       {
                         "id": "adcb0629",
                         "title": "Render the Editor",
-                        "content": "Render the Editor\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
+                        "content": "Render the Editor\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\n\n--------------------------------------------------------------------------------\n\nScroll Past\n\nVim-like scroll-past-bottom: append blank lines after the\ncontent so the last line can scroll up to approximately the\nvertical center of the viewport instead of hugging the bottom\nedge. The viewport height is measured each frame by the\nBoxRecorder overlay below.\n\nconst int padding = std::max(0, viewport_height_ / 2);\nfor (int i = 0; i < padding; ++i)\n{\n    rows.push_back(ftxui::text(\"\"));\n}\nftxui::Element content =\n    ftxui::vbox(std::move(rows)) | ftxui::frame | ftxui::flex;\nftxui::Element tracker =\n    std::make_shared<BoxRecorder>(viewport_height_);\nreturn ftxui::dbox({content, tracker});",
                         "children": [],
                         "expanded": false
                       }
@@ -4143,6 +4166,199 @@
         "expanded": false
       },
       {
+        "id": "6173a5f0",
+        "title": "linktree",
+        "content": "",
+        "children": [
+          {
+            "id": "1a23dc33",
+            "title": "linktree.cpp",
+            "content": "",
+            "children": [
+              {
+                "id": "c0ba1d8e",
+                "title": "Introduction to Linktree.cpp",
+                "content": "Introduction to Linktree.cpp\n\nThe link tree dialog shows the document as a graph of inter-note\nlinks: every note that links to other notes is a branch, and the\nnotes it links to are its children (recursively). It is a read-only\nnavigator: Enter reveals the selected note in the treeview and closes\nthe dialog.\n\nRoots are the notes that have outgoing links but are not themselves\nlinked from another note. Any notes left over (for example a cycle of\nnotes that all link to each other) are added as additional roots so\nevery linked note is reachable. A note already on the current path is\nshown once more as a \"(cycle)\" leaf and is not expanded further.\n\n\n\n#intro",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "2c5d51d5",
+                "title": "Link Node Struct",
+                "content": "Link Node Struct\n\nOne entry of the link forest before it is flattened for display.\n`self_matches` says whether this node's own title matches the\ncurrent filter; `matches` says whether this node or any descendant\nmatches. Caching both lets filtering show a matching node's whole\nsubtree without rescanning for every row.\n\nstruct LinkNode\n{\n    treeview::TreeNode* node = nullptr;\n    std::vector<std::unique_ptr<LinkNode>> children;\n    bool cycle = false;\n    bool self_matches = true;\n    bool matches = true;\n};",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "6ab7f73e",
+                "title": "Link Tree Dialog Class",
+                "content": "Link Tree Dialog Class\n\n#class",
+                "children": [
+                  {
+                    "id": "18337af6",
+                    "title": "Activate",
+                    "content": "Activate\n\nSignature: void Activate()\nMethod: Activate\nReturns: void\n\nReveal the selected note in the treeview and close the dialog.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "fb45454d",
+                    "title": "Build Subtree",
+                    "content": "Build Subtree\n\nSignature: std::unique_ptr<LinkNode> BuildSubtree( treeview::TreeNode* node, std::map<treeview::TreeNode*, std::vector<treeview::TreeNode*>>& children_of, std::set<treeview::TreeNode*>& path, std::set<treeview::TreeNode*>& reached, int& budget, int depth)\nMethod: BuildSubtree\nReturns: std::unique_ptr<LinkNode>\nParameters:\n    node        treeview::TreeNode*\n    children_of std::map<treeview::TreeNode*, std::vector<treeview::TreeNode*>>&\n    path        std::set<treeview::TreeNode*>&\n    reached     std::set<treeview::TreeNode*>&\n    budget      int&\n    depth       int\n\nBuild one branch of the link forest. `path` holds the notes on the\ncurrent branch so a link back to an ancestor becomes a \"(cycle)\"\nleaf instead of recursing forever. `reached` records every note\nplaced somewhere in the forest so later roots can skip it.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "e90aebd4",
+                    "title": "Close",
+                    "content": "Close\n\nSignature: void Close()\nMethod: Close\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "f0d4ed9e",
+                    "title": "Ensure Rows",
+                    "content": "Ensure Rows\n\nSignature: void EnsureRows()\nMethod: EnsureRows\nReturns: void\n\nRebuild the rows after any change that affects the forest (filter,\nfold state, first open).",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "d0117b16",
+                    "title": "Flatten",
+                    "content": "Flatten\n\nSignature: void Flatten(const LinkNode* node, int depth, bool include_all)\nMethod: Flatten\nReturns: void\nParameters:\n    node        const LinkNode*\n    depth       int\n    include_all bool\n\nAppend the visible rows of `node` to rows_. A filtered tree hides\nbranches with no matching note. Once a note itself matches, its\nwhole subtree is shown (`include_all`), so filtering by a parent\nstill lists all of its children. Every remaining branch is forced\nopen; otherwise a branch is open unless the user folded it with h.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "1100f0ac",
+                    "title": "Ftxui Event Call",
+                    "content": "Ftxui Event Call\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "4bf5e83a",
+                    "title": "Ftxui Render Call",
+                    "content": "Ftxui Render Call\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "bf2153c8",
+                    "title": "Invalidate",
+                    "content": "Invalidate\n\nSignature: void Invalidate()\nMethod: Invalidate\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "be0b26b6",
+                    "title": "Link Tree Dialog Constructor",
+                    "content": "Link Tree Dialog Constructor\n\nSignature: LinkTreeDialog(std::shared_ptr<EditorState> state, bool* show) : state_(std::move(state)), show_(show)\nConstructor: LinkTreeDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "51c6df72",
+                    "title": "Move Selection Up/Down",
+                    "content": "Move Selection Up/Down\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "9e70f047",
+                    "title": "Move To End",
+                    "content": "Move To End\n\nSignature: void MoveToEnd()\nMethod: MoveToEnd\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "4ffaa29c",
+                    "title": "Move To Start",
+                    "content": "Move To Start\n\nSignature: void MoveToStart()\nMethod: MoveToStart\nReturns: void",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "31ca3a7c",
+                    "title": "Name Matches",
+                    "content": "Name Matches\n\nSignature: bool NameMatches(const treeview::TreeNode* node) const\nMethod: NameMatches\nReturns: bool\nQualifiers: const\nParameters:\n    node const treeview::TreeNode*\n\nCase-insensitive substring match of a note title against the\ncurrent filter. An empty filter matches everything.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "c21f4635",
+                    "title": "Private Members",
+                    "content": "Private Members\n\nstatic constexpr int kVisibleRows = 18;\nstatic constexpr int kMaxDepth = 64;\nstatic constexpr int kMaxNodes = 2000;\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nbool was_shown_ = false;\nbool dirty_ = true;\nbool filtering_ = false;\nbool pending_g_ = false;\nstd::string filter_;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 20;\nstd::set<treeview::TreeNode*> collapsed_;\nstd::vector<Row> rows_;",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "f25864b4",
+                    "title": "Rebuild",
+                    "content": "Rebuild\n\nSignature: void Rebuild()\nMethod: Rebuild\nReturns: void\n\nRecompute the link forest from the document and flatten it into\nthe visible rows.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "94a3fb6a",
+                    "title": "Reset",
+                    "content": "Reset\n\nSignature: void Reset()\nMethod: Reset\nReturns: void\n\nStart a fresh dialog each time it is opened.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "6d31e4e2",
+                    "title": "Set Expanded",
+                    "content": "Set Expanded\n\nSignature: void SetExpanded(bool expanded)\nMethod: SetExpanded\nReturns: void\nParameters:\n    expanded bool\n\nFold or unfold the selected branch. Only branches (rows with\nchildren) are affected.",
+                    "children": [],
+                    "expanded": false
+                  },
+                  {
+                    "id": "f36c06be",
+                    "title": "Variables",
+                    "content": "Variables\n\n--------------------------------------------------------------------------------\n\nbool Focusable() const override { return true; }",
+                    "children": [],
+                    "expanded": false
+                  }
+                ],
+                "expanded": false
+              },
+              {
+                "id": "419a5168",
+                "title": "Row Struct",
+                "content": "Row Struct\n\nOne visible line of the flattened tree.\n\nstruct Row\n{\n    treeview::TreeNode* node = nullptr;\n    int depth = 0;\n    bool has_children = false;\n    bool expanded = false;\n    bool cycle = false;\n};",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "ab425e3e",
+                "title": "Make Link Tree Dialog",
+                "content": "Make Link Tree Dialog\n\nSignature: ftxui::Component MakeLinkTreeDialog(std::shared_ptr<EditorState> state, bool* show)\nMethod: MakeLinkTreeDialog\nReturns: ftxui::Component\nParameters:\nstate std::shared_ptr<EditorState>\nshow  bool*",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          },
+          {
+            "id": "45c2ff8c",
+            "title": "linktree.hpp",
+            "content": "",
+            "children": [
+              {
+                "id": "94b303dd",
+                "title": "Forward Declaration of the MakeLinkTreeDialog Method.",
+                "content": "Forward Declaration of the MakeLinkTreeDialog Method.\n\nftxui::Component MakeLinkTreeDialog(std::shared_ptr<EditorState> state, bool* show);\n\nBuild the link-tree dialog. While *show is true it consumes every\nevent, so no app key bindings fire. The tree is built from inter-note\nlinks: a note's linked notes become its children, recursively.\n\nj/k (and ArrowUp/ArrowDown) move the selection, h/l fold and unfold a\nbranch, gg/G jump to the top/bottom, Enter reveals the selected node\nand closes the dialog, '/' starts filtering (Escape cancels the\nfilter), and Escape outside filtering closes the dialog.",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
         "id": "ae2c4610",
         "title": "main.cpp",
         "content": "",
@@ -4176,7 +4392,7 @@
               {
                 "id": "35a17595",
                 "title": "Ftxui Status Bar Renderer",
-                "content": "Ftxui Status Bar Renderer\n\nHandles the active child in the state.\nCreates the containers to build the TUI.\nCreates the various dialogs and adds them to a modals list:\nHandles the showing of modal dialogs and the Screen loop.\n\nShows the current mode, the open file path (when the document is\nbacked by a file) and the descendant count of the selected node.\n\n* Path of the open file, kept on the state by the treeview. Hidden\nwhen the document is new or was imported from HTML (empty path).\n\n* Descendant count of the selected node, or of the whole document when\nnothing is selected (right after a load/import). Hidden on an empty\ndocument so a blank start shows only the mode.\n\n* Handles the disappearing status bar messages.\n\nauto container = Container::Vertical({\n    main_view | flex,\n    command_handler,\n    status_bar,\n}, &active_child);\n\nauto help_comp = scribbolyth::help::MakeHelpDialog(state, config_path.string(), &show_help);\nauto regex_comp = scribbolyth::regex::MakeRegexDialog(state, regex_path.string(), &show_regex);\nauto search_comp = scribbolyth::search::MakeSearchDialog(state, &show_search);\nauto link_picker_comp = scribbolyth::search::MakeSearchDialog(state, &show_link_picker, scribbolyth::search::DialogMode::InsertLink);\nauto search_results_comp = scribbolyth::search::MakeSearchDialog(state, &show_search_results, scribbolyth::search::DialogMode::CreateResults);\nauto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);\nauto links_comp = scribbolyth::links::MakeLinksDialog(state, &show_links);\nauto dead_links_comp = scribbolyth::brokenlinks::MakeDeadLinksDialog(state, &show_dead_links);\nauto history_comp = scribbolyth::history::MakeHistoryDialog(state, &show_history);\nauto recent_comp = scribbolyth::recent::MakeRecentDialog(state, &show_recent, recent_force);\nauto undo_comp = scribbolyth::undo::MakeUndoDialog(state, &show_undo);\nauto browser_comp = scribbolyth::browser::MakeFileBrowserDialog(state, &show_file_browser);\nauto modals = {\n    std::tuple(help_comp,        &show_help),\n    std::tuple(regex_comp,       &show_regex),\n    std::tuple(search_comp,      &show_search),\n    std::tuple(search_results_comp, &show_search_results),\n    std::tuple(link_picker_comp, &show_link_picker),\n    std::tuple(bookmarks_comp,   &show_bookmarks),\n    std::tuple(links_comp,       &show_links),\n    std::tuple(dead_links_comp,  &show_dead_links),\n    std::tuple(history_comp,     &show_history),\n    std::tuple(recent_comp,      &show_recent),\n    std::tuple(undo_comp,        &show_undo),\n    std::tuple(browser_comp,     &show_file_browser),\n};\n\nauto root = container;\nfor (auto& [comp, show] : modals)\n{\n    root = Modal(root, comp, show);\n}",
+                "content": "Ftxui Status Bar Renderer\n\nHandles the active child in the state.\nCreates the containers to build the TUI.\nCreates the various dialogs and adds them to a modals list:\nHandles the showing of modal dialogs and the Screen loop.\n\nShows the current mode, the open file path (when the document is\nbacked by a file) and the descendant count of the selected node.\n\n* Path of the open file, kept on the state by the treeview. Hidden\nwhen the document is new or was imported from HTML (empty path).\n\n* Descendant count of the selected node, or of the whole document when\nnothing is selected (right after a load/import). Hidden on an empty\ndocument so a blank start shows only the mode.\n\n* Handles the disappearing status bar messages.\n\nauto container = Container::Vertical({\n    main_view | flex,\n    command_handler,\n    status_bar,\n}, &active_child);\n\nauto help_comp = scribbolyth::help::MakeHelpDialog(state, config_path.string(), &show_help);\nauto regex_comp = scribbolyth::regex::MakeRegexDialog(state, regex_path.string(), &show_regex);\nauto search_comp = scribbolyth::search::MakeSearchDialog(state, &show_search);\nauto link_picker_comp = scribbolyth::search::MakeSearchDialog(state, &show_link_picker, scribbolyth::search::DialogMode::InsertLink);\nauto search_results_comp = scribbolyth::search::MakeSearchDialog(state, &show_search_results, scribbolyth::search::DialogMode::CreateResults);\nauto bookmarks_comp = scribbolyth::bookmarks::MakeBookmarksDialog(state, &show_bookmarks);\nauto links_comp = scribbolyth::links::MakeLinksDialog(state, &show_links);\nauto dead_links_comp = scribbolyth::brokenlinks::MakeDeadLinksDialog(state, &show_dead_links);\nauto link_tree_comp = scribbolyth::linktree::MakeLinkTreeDialog(state, &show_link_tree);\nauto history_comp = scribbolyth::history::MakeHistoryDialog(state, &show_history);\nauto recent_comp = scribbolyth::recent::MakeRecentDialog(state, &show_recent, recent_force);\nauto undo_comp = scribbolyth::undo::MakeUndoDialog(state, &show_undo);\nauto browser_comp = scribbolyth::browser::MakeFileBrowserDialog(state, &show_file_browser);\nauto modals = {\n    std::tuple(help_comp,        &show_help),\n    std::tuple(regex_comp,       &show_regex),\n    std::tuple(search_comp,      &show_search),\n    std::tuple(search_results_comp, &show_search_results),\n    std::tuple(link_picker_comp, &show_link_picker),\n    std::tuple(bookmarks_comp,   &show_bookmarks),\n    std::tuple(links_comp,       &show_links),\n    std::tuple(dead_links_comp,  &show_dead_links),\n    std::tuple(link_tree_comp,   &show_link_tree),\n    std::tuple(history_comp,     &show_history),\n    std::tuple(recent_comp,      &show_recent),\n    std::tuple(undo_comp,        &show_undo),\n    std::tuple(browser_comp,     &show_file_browser),\n};\n\nauto root = container;\nfor (auto& [comp, show] : modals)\n{\n    root = Modal(root, comp, show);\n}",
                 "children": [],
                 "expanded": false
               },
@@ -5684,35 +5900,35 @@
               {
                 "id": "d63c4f3e",
                 "title": "Erase",
-                "content": "Erase \n\nSignature: void Erase(std::vector<std::string>& lines, const Block& b)\nMethod: Erase\nReturns: void\nParameters:\n    lines std::vector<std::string>&\n    b     const Block&",
+                "content": "Erase \n\nSignature: void Erase(std::vector<std::string>& lines, const Block& b)\nMethod: Erase\nReturns: void\nParameters:\n    lines std::vector<std::string>&\n    b     const Block&\n\nRemove the block's contents from the document in place. For each row in\nthe block it uses LineSpan to locate the horizontal slice and erases\nthat range, leaving the characters to the left and right intact. Rows\noutside the block, or with an empty slice, are skipped.",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "6f546d6e",
                 "title": "Extract",
-                "content": "Extract \n\nSignature: std::string Extract(const std::vector<std::string>& lines, const Block& b)\nMethod: Extract\nReturns: std::string\nParameters:\n    lines const std::vector<std::string>&\n    b     const Block&",
+                "content": "Extract \n\nSignature: std::string Extract(const std::vector<std::string>& lines, const Block& b)\nMethod: Extract\nReturns: std::string\nParameters:\n    lines const std::vector<std::string>&\n    b     const Block&\n\nReturn the text contained inside the block. It walks every row of the\nblock, uses LineSpan to get that row's horizontal slice, and appends it\nto the result. Rows whose slice is empty are skipped, and the pieces are\njoined with newlines, so the result is the block's contents as a\nmulti-line string.",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "839265ed",
                 "title": "Insert",
-                "content": "Insert \n\nSignature: void Insert(std::vector<std::string>& lines, const Block& b, const std::string& text, bool at_end)\nMethod: Insert\nReturns: void\nParameters:\n    lines  std::vector<std::string>&\n    b      const Block&\n    text   const std::string&\n    at_end bool",
+                "content": "Insert \n\nSignature: void Insert(std::vector<std::string>& lines, const Block& b, const std::string& text, bool at_end)\nMethod: Insert\nReturns: void\nParameters:\n    lines  std::vector<std::string>&\n    b      const Block&\n    text   const std::string&\n    at_end bool\n\nInsert text into every row of the block. When at_end is true the text\ngoes just after the block's right edge (col_hi + 1, clamped to the line\nend); otherwise it goes at the block's left edge (col_lo), first padding\nthe row with spaces if it is shorter than col_lo. Does nothing when text\nis empty. This mirrors Vim's block insert (I) and block append (A).",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "ad56de36",
                 "title": "Line Span",
-                "content": "Line Span \n\nSignature: bool LineSpan(const std::vector<std::string>& lines, const Block& b, int row, int& lo, int& hi)\nMethod: LineSpan\nReturns: bool\nParameters:\n    lines const std::vector<std::string>&\n    b     const Block&\n    row   int\n    lo    int&\n    hi    int&",
+                "content": "Line Span \n\nSignature: bool LineSpan(const std::vector<std::string>& lines, const Block& b, int row, int& lo, int& hi)\nMethod: LineSpan\nReturns: bool\nParameters:\n    lines const std::vector<std::string>&\n    b     const Block&\n    row   int\n    lo    int&\n    hi    int&\n\nDetermine the horizontal slice of the block that applies to a single\nrow. Returns false when the row lies outside the block's row range, or\nwhen the resulting slice would be empty. Otherwise it writes the start\ncolumn to lo and the exclusive end column (col_hi + 1) to hi, clamping\nboth to the line length so short lines never read past their end.",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "2d171d3e",
                 "title": "Transform",
-                "content": "Transform\n\nSignature: void Transform(std::vector<std::string>& lines, const Block& b, char (*fold)(char))\nMethod: Transform\nReturns: void\nParameters:\n    lines std::vector<std::string>&\n    b     const Block&",
+                "content": "Transform\n\nSignature: void Transform(std::vector<std::string>& lines, const Block& b, char (*fold)(char))\nMethod: Transform\nReturns: void\nParameters:\n    lines std::vector<std::string>&\n    b     const Block&\n\nApply a character transformation to the block in place. For each row it\nuses LineSpan to find the slice and then replaces every character in\nthat range with fold(character), where fold is a passed-in function\nsuch as tolower or toupper. Characters outside the block are untouched.",
                 "children": [],
                 "expanded": false
               }
