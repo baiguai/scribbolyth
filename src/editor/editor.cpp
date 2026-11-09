@@ -233,10 +233,7 @@ namespace scribbolyth::editor
         //!
 
         /*!
-            Scroll Past Helper
-
-            !_method
-
+            Scroll Past Helper Class
 
             A transparent leaf node that records the height of the box it is
             assigned each frame. Rendered as an overlay share of the editor view,
@@ -246,6 +243,9 @@ namespace scribbolyth::editor
         class BoxRecorder : public ftxui::Node
         {
             public:
+                /*|
+                    !_ctor
+                */
                 explicit BoxRecorder(int& out_height) : out_height_(out_height) {}
 
                 void ComputeRequirement() override
