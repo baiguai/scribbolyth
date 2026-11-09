@@ -76,6 +76,7 @@ not discard them.
 """
 
 import argparse
+import bisect
 import hashlib
 import json
 import os
@@ -104,6 +105,11 @@ TITLE = "Scribbolyth Developer Notes"
 # /*[...] */) are never moved - they keep the order they were encountered
 # in.  Toggle with --no-sort on the command line.
 ALPHABETICAL = True
+
+# Header files are mostly declarations; skipping them when looking for call
+# sites keeps a declaration from being mistaken for a call.  Inline method
+# bodies in headers are still parsed when they carry !_method/!_ctor.
+HEADER_EXTS = {".h", ".hh", ".hpp", ".hxx", ".ipp", ".inl"}
 
 
 # ----------------------------------------------------------------------
@@ -472,25 +478,135 @@ def _content_base(body):
     return 0
 
 
+CALLER_PLACEHOLDER = "\x01__scribbolyth_callers__\x01"
+
+
+def matching_brace(src, open_pos, lang):
+    """Return the index of the '}' matching the '{' at open_pos, skipping
+    strings and comments.  Falls back to the last character in the file."""
+    n = len(src)
+    depth = 0
+    i = open_pos
+    while i < n:
+        if lang.line_comment and src.startswith(lang.line_comment, i):
+            j = src.find("\n", i)
+            i = n if j == -1 else j
+            continue
+        if lang.block_open and src.startswith(lang.block_open, i):
+            j = src.find(lang.block_close, i + len(lang.block_open))
+            i = n if j == -1 else j + len(lang.block_close)
+            continue
+        c = src[i]
+        if c in lang.string_delimiters:
+            q = c
+            i += 1
+            while i < n:
+                if src[i] == "\\":
+                    i += 2
+                    continue
+                if src[i] == q:
+                    i += 1
+                    break
+                i += 1
+            continue
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+            if depth == 0:
+                return i
+        i += 1
+    return n - 1
+
+
+def extract_definition(src, pos, lang):
+    """Like extract_signature, but also reports where the definition lives.
+
+    Returns a dict with signature/is_definition plus start (first signature
+    character), body_open/body_end (the braces of a definition body) and
+    end (the terminator position), or None when no signature is found."""
+    if lang.callable_parser == "python":
+        found = extract_signature_python(src, pos, lang)
+        if not found:
+            return None
+        return {"signature": found[0], "is_definition": found[1],
+                "start": pos, "body_open": None, "body_end": None, "end": None}
+    n = len(src)
+    i = pos
+    depth = 0
+    buf = []
+    start = None
+    open_ch, close_ch = lang.param_open, lang.param_close
+    while i < n:
+        if lang.line_comment and src.startswith(lang.line_comment, i):
+            j = src.find("\n", i)
+            i = n if j == -1 else j
+            buf.append(" ")
+            continue
+        if lang.block_open and src.startswith(lang.block_open, i):
+            j = src.find(lang.block_close, i + len(lang.block_open))
+            i = n if j == -1 else j + len(lang.block_close)
+            buf.append(" ")
+            continue
+        c = src[i]
+        if c in lang.string_delimiters:
+            q = c
+            i += 1
+            while i < n:
+                if src[i] == "\\":
+                    i += 2
+                    continue
+                if src[i] == q:
+                    i += 1
+                    break
+                i += 1
+            buf.append(" ")
+            continue
+        if start is None and not c.isspace():
+            start = i
+        if c == open_ch:
+            depth += 1
+        elif c == close_ch:
+            depth = max(0, depth - 1)
+        elif c in lang.terminators and depth == 0:
+            is_def = c in lang.definition_terminators
+            body_open = i if is_def and c == "{" else None
+            return {
+                "signature": " ".join("".join(buf).split()),
+                "is_definition": is_def,
+                "start": pos if start is None else start,
+                "body_open": body_open,
+                "body_end": (matching_brace(src, body_open, lang)
+                             if body_open is not None else None),
+                "end": i,
+            }
+        buf.append(c)
+        i += 1
+    return None
+
+
 def callable_description(src, code_pos, body, lang):
     """Replace a method/constructor marker line (see lang.method_mark_re /
     ctor_mark_re) in a comment body with a description of the
     function/constructor definition immediately following the comment.
-    Leaves the marker untouched when no definition follows."""
+    Leaves the marker untouched when no definition follows.
+
+    Returns (new_body, info); info describes the definition (for the caller
+    pass) or is None when nothing was inserted."""
     kinds = [("ctor", lang.ctor_mark_re) if rx is lang.ctor_mark_re
              else ("method", rx)
              for rx in (lang.ctor_mark_re, lang.method_mark_re) if rx.search(body)]
     if not kinds:
-        return body
-    found = extract_signature(src, code_pos, lang)
-    if not found or not found[1]:
-        return body
+        return body, None
+    found = extract_definition(src, code_pos, lang)
+    if not found or not found["is_definition"]:
+        return body, None
     kind, rx = kinds[0]
-    described = describe_signature(found[0], lang, ctor=kind == "ctor")
+    described = describe_signature(found["signature"], lang, ctor=kind == "ctor")
     if described is None:
-        return body
+        return body, None
     name, returns, params, tail = described
-    lines = ["Signature: " + found[0]]
+    lines = ["Signature: " + found["signature"]]
     if kind == "ctor":
         members, quals = member_inits(tail, lang)
         specs = [returns] if returns in ("explicit", "inline") else []
@@ -515,22 +631,36 @@ def callable_description(src, code_pos, body, lang):
     if kind == "ctor" and members:
         lines.append("Initializers:")
         lines.extend(render_members(members))
+    lines.append(CALLER_PLACEHOLDER)
     base = _content_base(body)
     ind = " " * base
     # The body is de-indented later by base, so pad every inserted line by
     # base: the inner indents then survive in the final content.
-    return kinds[0][1].sub(
+    body = kinds[0][1].sub(
         lambda m: "\n".join(ind + ln if ln else "" for ln in lines), body)
+    info = {
+        "kind": kind,
+        "name": name,
+        "signature": found["signature"],
+        "is_definition": found["is_definition"],
+        "start": found["start"],
+        "body_open": found["body_open"],
+        "body_end": found["body_end"],
+    }
+    return body, info
 
 
 def scan_file(path, lang):
-    """Return source comments/segments as (kind, body, line) in source order.
+    """Return source comments/segments as (kind, body, line, meta) in source
+    order.
 
     kind is "line" for a single line comment, "block" for a delimited block
     comment, or "code" for raw source captured between the configured raw
     markers (e.g. `//>>` ... `//<<`).  Body excludes the comment delimiters.
     String literals are skipped so comment text inside them is not mistaken
-    for a comment.  Delimiters and markers come from `lang`.
+    for a comment.  Delimiters and markers come from `lang`.  meta is the
+    method/constructor description for a block that carried !_method/!_ctor,
+    else None.
     """
     with open(path, "r", encoding="utf-8", errors="replace") as f:
         src = f.read()
@@ -570,13 +700,14 @@ def scan_file(path, lang):
                 # sit on their own lines); the captured text lands in the
                 # current documentation node as a code snippet.
                 j = end + 1
+                line += 1
                 seg = []
                 while j < n:
                     lf = src.find("\n", j)
                     if lf == -1:
                         lf = n
                     if raw_close and src[j:lf].strip().startswith(raw_close):
-                        items.append(("code", "\n".join(seg), line))
+                        items.append(("code", "\n".join(seg), line, None))
                         line += 1
                         i = n if lf == n else lf + 1
                         break
@@ -584,23 +715,23 @@ def scan_file(path, lang):
                     line += 1
                     j = n if lf == n else lf + 1
                 else:
-                    items.append(("code", "\n".join(seg), line))
+                    items.append(("code", "\n".join(seg), line, None))
                     i = n
                 continue
-            items.append(("line", body, line))
+            items.append(("line", body, line, None))
             i = end
             continue
         if bo and src.startswith(bo, i):
             start_line = line
             end = src.find(bc, i + len(bo))
             if end == -1:
-                items.append(("block", src[i + len(bo):], start_line))
+                items.append(("block", src[i + len(bo):], start_line, None))
                 line += src.count("\n", i, n)
                 i = n
             else:
-                body = callable_description(
+                body, meta = callable_description(
                     src, end + len(bc), src[i + len(bo):end], lang)
-                items.append(("block", body, start_line))
+                items.append(("block", body, start_line, meta))
                 line += src.count("\n", i, end + len(bc))
                 i = end + len(bc)
             continue
@@ -611,7 +742,7 @@ def scan_file(path, lang):
 
 
 def _emit_marked(actions, action, marker, text, line,
-                 close_marker=None, empty_closes=False):
+                 close_marker=None, empty_closes=False, meta=None):
     """If `text` starts with `marker`, record the matching action and return
     True.  `close_marker + marker` (e.g. `/*!`) is stripped as an explicit
     "stop harvesting here" token.  A doc/docseq marker with an empty body
@@ -626,7 +757,10 @@ def _emit_marked(actions, action, marker, text, line,
         if empty_closes and action in ("doc", "docseq"):
             actions.append({"kind": "docclose", "line": line})
         return True
-    actions.append({"kind": action, "body": rest, "line": line})
+    act = {"kind": action, "body": rest, "line": line}
+    if meta is not None:
+        act["callable"] = meta
+    actions.append(act)
     return True
 
 
@@ -650,7 +784,7 @@ def classify(items, lang):
     actions = []
     lm = lang.line_markers
     bm = lang.block_markers
-    for kind, body, line in items:
+    for kind, body, line, meta in items:
         if kind == "code":
             actions.append({"kind": "code", "body": body, "line": line})
             continue
@@ -686,15 +820,16 @@ def classify(items, lang):
 
         # block comment
         if _emit_marked(actions, "doc", bm.get("doc"), body, line,
-                        lang.block_open, empty_closes=True):
+                        lang.block_open, empty_closes=True, meta=meta):
             continue
         if _emit_marked(actions, "docseq", bm.get("pinned"), body, line,
-                        lang.block_open, empty_closes=True):
+                        lang.block_open, empty_closes=True, meta=meta):
             continue
         if _emit_marked(actions, "sub", bm.get("sub"), body, line,
-                        lang.block_open):
+                        lang.block_open, meta=meta):
             continue
-        if _emit_marked(actions, "append", bm.get("append"), body, line):
+        if _emit_marked(actions, "append", bm.get("append"), body, line,
+                        meta=meta):
             continue
         manual = bm.get("manual")
         if manual and body.startswith(manual):
@@ -1040,6 +1175,319 @@ def preserve_user_state(html, previous):
 
 
 # ----------------------------------------------------------------------
+# Caller links
+# ----------------------------------------------------------------------
+
+def _mask_code(src, lang):
+    """Return `src` with comments and string literals blanked out, keeping
+    line breaks and character positions intact, so call sites can be found
+    with plain regular expressions."""
+    out = list(src)
+    n = len(src)
+    i = 0
+
+    def blank(a, b):
+        for k in range(a, min(b, n)):
+            if out[k] != "\n":
+                out[k] = " "
+
+    while i < n:
+        c = src[i]
+        if c in lang.string_delimiters:
+            quote = c
+            start = i
+            i += 1
+            while i < n:
+                if src[i] == "\\":
+                    i += 2
+                    continue
+                if src[i] == quote:
+                    i += 1
+                    break
+                i += 1
+            blank(start, i)
+            continue
+        if lang.line_comment and src.startswith(lang.line_comment, i):
+            j = src.find("\n", i)
+            j = n if j == -1 else j
+            blank(i, j)
+            i = j
+            continue
+        if lang.block_open and src.startswith(lang.block_open, i):
+            j = src.find(lang.block_close, i + len(lang.block_open))
+            j = n if j == -1 else j + len(lang.block_close)
+            blank(i, j)
+            i = j
+            continue
+        i += 1
+    return "".join(out)
+
+
+def _caller_link(title, method):
+    """Render one caller as a help-system note link when possible.
+
+    The help system resolves `_Title_` links by node title, so the link
+    target is the caller node's title; the method name is used as the
+    visible label.  Titles containing underscores cannot be expressed as a
+    note link, so those fall back to plain text."""
+    title = title or ""
+    method = method or title
+    if title and "_" not in title and "\n" not in title:
+        label = method.replace("[", "(").replace("]", ")")
+        return "[%s](_%s_)" % (label, title)
+    if title and method and method != title:
+        return "%s (%s)" % (title, method)
+    return title or method or "(untitled)"
+
+
+def _insert_callers(body, callers):
+    """Replace CALLER_PLACEHOLDER with the 'Called By' block (or append one
+    when the placeholder is missing)."""
+    base = _content_base(body)
+    ind = " " * base
+    out = []
+    found = False
+    for ln in body.split("\n"):
+        if CALLER_PLACEHOLDER in ln:
+            found = True
+            if callers:
+                out.append(ind + "Called By:")
+                for title, method in callers:
+                    out.append(ind + "    " + _caller_link(title, method))
+            else:
+                out.append(ind + "Called By: (none found)")
+        else:
+            out.append(ln)
+    if not found:
+        if callers:
+            out.append("")
+            out.append("Called By:")
+            for title, method in callers:
+                out.append("    " + _caller_link(title, method))
+        else:
+            out.append("")
+            out.append("Called By: (none found)")
+    return "\n".join(out)
+
+
+def _file_regions(actions):
+    """Return (start_line, end_line, action) for every doc region in a file.
+
+    A doc/docseq action opens a region that stays open until its closing
+    docclose, so calls anywhere between those lines belong to that node."""
+    stack = []
+    regions = []
+    for action in actions:
+        kind = action["kind"]
+        if kind in ("doc", "docseq"):
+            stack.append(action)
+        elif kind == "docclose" and stack:
+            opened = stack.pop()
+            regions.append((opened.get("line", 1),
+                            action.get("line", opened.get("line", 1)),
+                            opened))
+    for opened in stack:
+        regions.append((opened.get("line", 1), float("inf"), opened))
+    return regions
+
+
+def _namespace_qualifiers(code):
+    """Namespace names declared in a source file (aliases excluded)."""
+    quals = set()
+    pattern = re.compile(r"(?m)^[ \t]*namespace\s+([A-Za-z_][A-Za-z0-9_:]*)\s*(.*)$")
+    for match in pattern.finditer(code):
+        if match.group(2).lstrip().startswith("="):
+            continue
+        for part in match.group(1).split("::"):
+            if part:
+                quals.add(part)
+    return quals
+
+
+def _definition_qualifiers(rel, info):
+    """Names a definition can be qualified by: its class (from a
+    Class::Name signature) plus its source module/file stem."""
+    quals = set()
+    signature = info.get("signature") or ""
+    name = info.get("name") or ""
+    open_ = signature.find("(")
+    decl = signature[:open_] if open_ != -1 else signature
+    if name:
+        match = re.search(
+            r"((?:[A-Za-z_][A-Za-z0-9_]*\s*::\s*)+)"
+            + re.escape(name) + r"\s*$", decl)
+        if match:
+            for part in match.group(1).split("::"):
+                part = part.strip()
+                if part:
+                    quals.add(part)
+    parts = rel.split("/")
+    if len(parts) > 1:
+        quals.add(parts[0])
+    quals.add(os.path.splitext(parts[-1])[0])
+    return quals
+
+
+def _call_qualifiers(code, pos):
+    """Qualifier segments directly before a call (links::Lower -> links)."""
+    prefix = code[max(0, pos - 200):pos]
+    match = re.search(r"((?:[A-Za-z_][A-Za-z0-9_]*\s*::\s*)+)$", prefix)
+    if not match:
+        return set()
+    return {part.strip() for part in match.group(1).split("::") if part.strip()}
+
+
+def annotate_callers(file_actions, rel_langs):
+    """Add a 'Called By' link list to every documented method/constructor.
+
+    A call is attributed to the innermost help node (documented method, or a
+    containing class/file note) whose source region encloses it.  Calls are
+    matched by method name; when the same name is defined more than once,
+    definitions in the caller's own file are preferred."""
+    actions_by_rel = dict(file_actions)
+    sources = {}
+    masks = {}
+    file_quals = {}
+    for rel, (path, lang) in rel_langs.items():
+        try:
+            with open(path, "r", encoding="utf-8", errors="replace") as f:
+                source = f.read()
+        except OSError:
+            continue
+        sources[rel] = source
+        masks[rel] = _mask_code(source, lang)
+        file_quals[rel] = _namespace_qualifiers(masks[rel])
+
+    targets = []
+    for rel, actions in file_actions:
+        for action in actions:
+            info = action.get("callable")
+            if not info or not info.get("is_definition"):
+                continue
+            title = first_line(doc_text(action["body"])) or "(untitled)"
+            quals = _definition_qualifiers(rel, info)
+            quals |= file_quals.get(rel, set())
+            targets.append({"rel": rel, "action": action, "info": info,
+                            "title": title, "qualifiers": quals})
+    if not targets:
+        return
+
+    by_name = {}
+    for target in targets:
+        name = target["info"].get("name") or ""
+        if re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", name):
+            by_name.setdefault(name, []).append(target)
+    patterns = {}
+    for name, definitions in by_name.items():
+        escaped = re.escape(name)
+        found = [
+            re.compile(r"(?<![A-Za-z0-9_])" + escaped
+                       + r"(?![A-Za-z0-9_])\s*\("),
+            # A bare function name used as a callback argument (e.g. sort
+            # comparator) is a use even though it is not followed by '('.
+            re.compile(r"(?<![A-Za-z0-9_])" + escaped
+                       + r"(?![A-Za-z0-9_])\s*(?=[,;)])"),
+        ]
+        if any(d["info"].get("kind") == "ctor" for d in definitions):
+            found.append(re.compile(
+                r"(?<![A-Za-z0-9_])make_(?:shared|unique)\s*<\s*"
+                + escaped + r"\s*>"))
+            found.append(re.compile(
+                r"(?<![A-Za-z0-9_])Make\s*<\s*"
+                + escaped + r"\s*>"))
+            found.append(re.compile(
+                r"(?<![A-Za-z0-9_])" + escaped
+                + r"\s+[A-Za-z_][A-Za-z0-9_]*\s*\("))
+        patterns[name] = found
+
+    titles = {}
+
+    def title_of(action):
+        key = id(action)
+        if key not in titles:
+            titles[key] = first_line(doc_text(action["body"])) or "(untitled)"
+        return titles[key]
+
+    callers = {}
+    for rel, (path, lang) in rel_langs.items():
+        actions = actions_by_rel.get(rel, [])
+        regions = _file_regions(actions)
+        if not regions:
+            continue
+        if os.path.splitext(path)[1].lower() in HEADER_EXTS:
+            continue
+        src = sources.get(rel)
+        code = masks.get(rel)
+        if src is None or code is None:
+            continue
+        line_starts = [0]
+        line_starts.extend(i + 1 for i, c in enumerate(src) if c == "\n")
+        for name, name_patterns in patterns.items():
+            definitions = by_name[name]
+            local_defs = [d for d in definitions if d["rel"] == rel]
+            for pattern in name_patterns:
+                for match in pattern.finditer(code):
+                    pos = match.start()
+                    if any(d["info"].get("start") is not None
+                           and d["info"].get("body_open") is not None
+                           and d["info"]["start"] <= pos <= d["info"]["body_open"]
+                           for d in local_defs):
+                        continue
+                    qualifiers = set()
+                    if match.group(0).startswith(name):
+                        qualifiers = _call_qualifiers(code, pos)
+                    if qualifiers:
+                        matching = []
+                        best = 0
+                        for d in definitions:
+                            score = len(qualifiers & d["qualifiers"])
+                            if score > best:
+                                best = score
+                                matching = [d]
+                            elif score == best and score > 0:
+                                matching.append(d)
+                        if not matching:
+                            continue
+                        local_matching = [d for d in matching
+                                          if d["rel"] == rel]
+                        candidates = local_matching if local_matching else matching
+                    else:
+                        candidates = local_defs if local_defs else definitions
+                    line = bisect.bisect_right(line_starts, pos)
+                    caller_action = None
+                    best_start = -1
+                    for start, end, action in regions:
+                        if start <= line <= end and start > best_start:
+                            best_start = start
+                            caller_action = action
+                    if caller_action is not None:
+                        caller_method = ((caller_action.get("callable") or {})
+                                         .get("name", ""))
+                        caller_title = title_of(caller_action)
+                        caller_key = (caller_title, caller_method)
+                    else:
+                        # The call sits outside every documented region (e.g.
+                        # an undocumented helper); link to the file node so
+                        # the method still shows up as used.
+                        base = os.path.basename(rel)
+                        caller_key = ("file", rel, line)
+                        caller_title = base
+                        caller_method = "%s:%d" % (base, line)
+                    for target in candidates:
+                        bucket = callers.setdefault(id(target["action"]), {})
+                        bucket[caller_key] = (caller_title, caller_method)
+
+    for target in targets:
+        bucket = callers.get(id(target["action"]), {})
+        entries = sorted(bucket.values(),
+                         key=lambda e: ((e[0] or "").lower(),
+                                        (e[1] or "").lower()))
+        target["action"]["body"] = _insert_callers(target["action"]["body"],
+                                                   entries)
+        target["action"].pop("callable", None)
+
+
+# ----------------------------------------------------------------------
 # Main
 # ----------------------------------------------------------------------
 
@@ -1104,6 +1552,7 @@ def main():
     ext_map = extension_map(languages)
 
     file_actions = []
+    rel_langs = {}
     coderoot = None
     coderoot_rel = None
     coderoot_line = None
@@ -1120,6 +1569,7 @@ def main():
 
     for path, lang in src_files:
         rel = os.path.relpath(path, SRC_ROOT).replace(os.sep, "/")
+        rel_langs[rel] = (path, lang)
         actions = classify(scan_file(path, lang), lang)
         file_actions.append((rel, actions))
         for a in actions:
@@ -1127,6 +1577,8 @@ def main():
                 coderoot = a["value"]
                 coderoot_rel = rel
                 coderoot_line = a.get("line")
+
+    annotate_callers(file_actions, rel_langs)
 
     if coderoot is None:
         coderoot = "/src"
