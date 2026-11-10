@@ -105,6 +105,67 @@ using namespace ftxui;
         of the screen. Without this the scrolling would stop as soon as the last
         line of text is scrolled into view.
     */
+
+    /*[/General Notes/Noteworthy Features/Documentation Generation]
+        This help system was created using the 'documentation from comments'
+        tool packaged with Scribbolyth.
+
+        This tool is located here:
+        ./docsgen/
+
+        To regenerate it run:
+        ./docsgen/gendocs.sh
+
+        There currently isn't a Windows .bat script - one will be provided in
+        the future. It uses the following:
+        ./config/scribboleth.html
+
+        As a template. So when there are updates to Scribboleth (the stand alone
+        .html version of Scribbolyth, you will want to replace this file with
+        the updated version.
+
+        There is also a help file that describes how to format your comments to
+        be used by the gendocs script located here:
+        ./docsgen/help.html
+    */
+
+    /*[/General Notes/Compiling/config.sh]
+        The CMakeLists.txt is compiled using the ./config.sh in conjunction with
+        the ./CMakeLists.txt.in file.
+
+        This allows you to list your project's files in one single location
+        and they are utilized in both the Make file and the various build
+        scripts.
+
+
+        The current structure of the config.sh is:
+
+
+
+        #!/bin/bash
+        
+        # Central configuration - edit values here, all scripts pick them up
+        
+        APP_NAME="scribbolyth"
+        
+        SOURCES=(
+            "src/main.cpp"
+            ...
+        )
+        
+        LIBS=(
+            "ftxui::screen"
+            "ftxui::dom"
+            "ftxui::component"
+            ...
+        )
+    */
+
+    /*[/General Notes/Compiling/CMakeLists.txt.in]
+        This file is the template that is copied and populated via the
+        _config.sh_. A new CMakeLists.txt is created and loaded with the
+        populated version of the content of the CMakeLists.txt.in.
+    */
 ////////////////////////////////////////////////////////////////////////////////
 
 //!_coderoot=/Source Code

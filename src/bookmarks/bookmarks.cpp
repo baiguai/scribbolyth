@@ -21,7 +21,7 @@ namespace scribbolyth::bookmarks
         its logic and its key handling.
 
         Helper Methods
-        * PadRight - Shared text::PadRight helper (../text/text.hpp).
+        * PadRight - Shared text::PadRight helper _Pad Right_.
         * The Entry struct is defined here.
 
         Public Members
