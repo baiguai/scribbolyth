@@ -19,7 +19,7 @@ namespace scribbolyth::text
     //!
 
     /*!
-        Pad Right
+        Pad Right Declaration
 
         !_method
 

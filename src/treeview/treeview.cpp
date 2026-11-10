@@ -1003,7 +1003,7 @@ namespace scribbolyth::treeview
     //!
 
     /*!
-        Open File
+        Load From
 
         !_method
 

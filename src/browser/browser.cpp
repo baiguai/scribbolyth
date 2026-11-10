@@ -23,7 +23,7 @@ namespace scribbolyth::browser
         This file handles the file browsing dialog, as well as its key bindings.
 
         Helper Methods
-        * PadRight - shared text::PadRight helper (../text/text.hpp).
+        * PadRight - shared text::PadRight helper _Pad Right_.
         * Tail - this also will likely be consolidated.
 
         Public Members
@@ -40,6 +40,15 @@ namespace scribbolyth::browser
 
 
         #intro
+    */
+
+    /*[./Related Browser Methods]
+        * open _Open File_
+        * saveas _Save As_
+        * import_html _Import Html File_
+        * export_html _Export Html File_
+        * export_note_txt _Export Node to Text_
+        * export_tree_txt _Export Subtree to Text File_
     */
 
     namespace

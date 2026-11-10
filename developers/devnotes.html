@@ -998,6 +998,35 @@
             "content": "Scroll Past\n\nScroll past is an interesting feature.\nSee:\n\n_Scroll Past Helper_\n_Render the Editor_\n\nIt will calculate the height of the view port and insert enough blank\nspaces to allow for scrolling so that the cursor remains in the middle\nof the screen. Without this the scrolling would stop as soon as the last\nline of text is scrolled into view.",
             "children": [],
             "expanded": false
+          },
+          {
+            "id": "d1045473",
+            "title": "Documentation Generation",
+            "content": "Documentation Generation\n\nThis help system was created using the 'documentation from comments'\ntool packaged with Scribbolyth.\n\nThis tool is located here:\n./docsgen/\n\nTo regenerate it run:\n./docsgen/gendocs.sh\n\nThere currently isn't a Windows .bat script - one will be provided in\nthe future. It uses the following:\n./config/scribboleth.html\n\nAs a template. So when there are updates to Scribboleth (the stand alone\n.html version of Scribbolyth, you will want to replace this file with\nthe updated version.\n\nThere is also a help file that describes how to format your comments to\nbe used by the gendocs script located here:\n./docsgen/help.html",
+            "children": [],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
+        "id": "075b4a30",
+        "title": "Compiling",
+        "content": "",
+        "children": [
+          {
+            "id": "4960d606",
+            "title": "config.sh",
+            "content": "config.sh\n\nThe CMakeLists.txt is compiled using the ./config.sh in conjunction with\nthe ./CMakeLists.txt.in file.\n\nThis allows you to list your project's files in one single location\nand they are utilized in both the Make file and the various build\nscripts.\n\n\nThe current structure of the config.sh is:\n\n\n\n#!/bin/bash\n\n# Central configuration - edit values here, all scripts pick them up\n\nAPP_NAME=\"scribbolyth\"\n\nSOURCES=(\n    \"src/main.cpp\"\n    ...\n)\n\nLIBS=(\n    \"ftxui::screen\"\n    \"ftxui::dom\"\n    \"ftxui::component\"\n    ...\n)",
+            "children": [],
+            "expanded": false
+          },
+          {
+            "id": "85f52819",
+            "title": "CMakeLists.txt.in",
+            "content": "CMakeLists.txt.in\n\nThis file is the template that is copied and populated via the\n_config.sh_. A new CMakeLists.txt is created and loaded with the\npopulated version of the content of the CMakeLists.txt.in.",
+            "children": [],
+            "expanded": false
           }
         ],
         "expanded": false
@@ -1075,7 +1104,7 @@
               {
                 "id": "88d76adc",
                 "title": "Introduction to Bookmarks.cpp",
-                "content": "Introduction to Bookmarks.cpp\n\nThis file handles the rendering of the Bookmarks dialog as well as\nits logic and its key handling.\n\nHelper Methods\n* PadRight - Shared text::PadRight helper (../text/text.hpp).\n* The Entry struct is defined here.\n\nPublic Members\n* The pending_g_ variable is used with navigating to the top.\n* The Ftxui OnEvent handles the key bindings\n\n* Navigation and removing bookmarks are private members of the class.\n\n\n\n#intro",
+                "content": "Introduction to Bookmarks.cpp\n\nThis file handles the rendering of the Bookmarks dialog as well as\nits logic and its key handling.\n\nHelper Methods\n* PadRight - Shared text::PadRight helper _Pad Right_.\n* The Entry struct is defined here.\n\nPublic Members\n* The pending_g_ variable is used with navigating to the top.\n* The Ftxui OnEvent handles the key bindings\n\n* Navigation and removing bookmarks are private members of the class.\n\n\n\n#intro",
                 "children": [],
                 "expanded": false
               },
@@ -1228,7 +1257,14 @@
               {
                 "id": "a7113d25",
                 "title": "Introduction to Browser.cpp",
-                "content": "Introduction to Browser.cpp\n\nThis file handles the file browsing dialog, as well as its key bindings.\n\nHelper Methods\n* PadRight - shared text::PadRight helper (../text/text.hpp).\n* Tail - this also will likely be consolidated.\n\nPublic Members\n* The Ftxui OnEvent handles the key inputs.\n* The Ftxui Render handles the properties of the dialog itself. You can explicitly set its size etc.\n\nPrivate Members\n* The navigation and filtering is handled by these.\n* The initial directory is determined via: state_->browser_start_dir\n* Another state helper is: state_->browser_pick\n* `m` bookmarks the shown directory; ` shows the bookmark list.\n    * _Render Browser Dialog_ was updated to accomodate the bookmarks footer information.\n\n\n\n#intro",
+                "content": "Introduction to Browser.cpp\n\nThis file handles the file browsing dialog, as well as its key bindings.\n\nHelper Methods\n* PadRight - shared text::PadRight helper _Pad Right_.\n* Tail - this also will likely be consolidated.\n\nPublic Members\n* The Ftxui OnEvent handles the key inputs.\n* The Ftxui Render handles the properties of the dialog itself. You can explicitly set its size etc.\n\nPrivate Members\n* The navigation and filtering is handled by these.\n* The initial directory is determined via: state_->browser_start_dir\n* Another state helper is: state_->browser_pick\n* `m` bookmarks the shown directory; ` shows the bookmark list.\n    * _Render Browser Dialog_ was updated to accomodate the bookmarks footer information.\n\n\n\n#intro",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "296c5470",
+                "title": "Related Browser Methods",
+                "content": "Related Browser Methods\n\n* open _Open File_\n* saveas _Save As_\n* import_html _Import Html File_\n* export_html _Export Html File_\n* export_note_txt _Export Node to Text_\n* export_tree_txt _Export Subtree to Text File_",
                 "children": [],
                 "expanded": false
               },
@@ -3450,7 +3486,7 @@
               {
                 "id": "67ff9ab9",
                 "title": "Deserialize",
-                "content": "Deserialize\n\nSignature: bool Deserialize(const std::string& json, std::vector<TreeNode>& roots, int* tree_width, std::vector<bookmark::Bookmark>* bookmarks, std::vector<std::string>* history)\nMethod: Deserialize\nReturns: bool\nParameters:\n    json       const std::string&\n    roots      std::vector<TreeNode>&\n    tree_width int*\n    bookmarks  std::vector<bookmark::Bookmark>*\n    history    std::vector<std::string>*\nCalled By:\n    [ApplyUndo](_Apply Undo_)\n    [Deserialize](_Deserialize_)\n    [NodeTextDoc](_Node Text Doc_)\n    [LoadFrom](_Open File_)",
+                "content": "Deserialize\n\nSignature: bool Deserialize(const std::string& json, std::vector<TreeNode>& roots, int* tree_width, std::vector<bookmark::Bookmark>* bookmarks, std::vector<std::string>* history)\nMethod: Deserialize\nReturns: bool\nParameters:\n    json       const std::string&\n    roots      std::vector<TreeNode>&\n    tree_width int*\n    bookmarks  std::vector<bookmark::Bookmark>*\n    history    std::vector<std::string>*\nCalled By:\n    [ApplyUndo](_Apply Undo_)\n    [Deserialize](_Deserialize_)\n    [LoadFrom](_Load From_)\n    [NodeTextDoc](_Node Text Doc_)",
                 "children": [],
                 "expanded": false
               },
@@ -3464,7 +3500,7 @@
               {
                 "id": "4ef10986",
                 "title": "Has File Signature",
-                "content": "Has File Signature\n\nSignature: bool HasFileSignature(const std::string& content)\nMethod: HasFileSignature\nReturns: bool\nParameters:\n    content const std::string&\nCalled By:\n    [Deserialize](_Deserialize_)\n    [LoadFrom](_Open File_)",
+                "content": "Has File Signature\n\nSignature: bool HasFileSignature(const std::string& content)\nMethod: HasFileSignature\nReturns: bool\nParameters:\n    content const std::string&\nCalled By:\n    [Deserialize](_Deserialize_)\n    [LoadFrom](_Load From_)",
                 "children": [],
                 "expanded": false
               },
@@ -3580,7 +3616,7 @@
                       {
                         "id": "fc63461b",
                         "title": "Deserialize",
-                        "content": "Deserialize\n\nSignature: bool Deserialize(std::vector<TreeNode>& roots, int* tree_width, std::vector<bookmark::Bookmark>* bookmarks, std::vector<std::string>* history)\nMethod: Deserialize\nReturns: bool\nParameters:\n    roots      std::vector<TreeNode>&\n    tree_width int*\n    bookmarks  std::vector<bookmark::Bookmark>*\n    history    std::vector<std::string>*\nCalled By:\n    [ApplyUndo](_Apply Undo_)\n    [Deserialize](_Deserialize_)\n    [NodeTextDoc](_Node Text Doc_)\n    [LoadFrom](_Open File_)",
+                        "content": "Deserialize\n\nSignature: bool Deserialize(std::vector<TreeNode>& roots, int* tree_width, std::vector<bookmark::Bookmark>* bookmarks, std::vector<std::string>* history)\nMethod: Deserialize\nReturns: bool\nParameters:\n    roots      std::vector<TreeNode>&\n    tree_width int*\n    bookmarks  std::vector<bookmark::Bookmark>*\n    history    std::vector<std::string>*\nCalled By:\n    [ApplyUndo](_Apply Undo_)\n    [Deserialize](_Deserialize_)\n    [LoadFrom](_Load From_)\n    [NodeTextDoc](_Node Text Doc_)",
                         "children": [],
                         "expanded": false
                       },
@@ -3600,7 +3636,7 @@
               {
                 "id": "0d6f387a",
                 "title": "Read from File",
-                "content": "Read from File\n\nSignature: bool ReadFile(const std::string& path, std::string& content)\nMethod: ReadFile\nReturns: bool\nParameters:\n    path    const std::string&\n    content std::string&\nCalled By:\n    [ExportHtmlFile](_Export Html File_)\n    [ImportHtmlFile](_Import Html File_)\n    [LoadFrom](_Open File_)",
+                "content": "Read from File\n\nSignature: bool ReadFile(const std::string& path, std::string& content)\nMethod: ReadFile\nReturns: bool\nParameters:\n    path    const std::string&\n    content std::string&\nCalled By:\n    [ExportHtmlFile](_Export Html File_)\n    [ImportHtmlFile](_Import Html File_)\n    [LoadFrom](_Load From_)",
                 "children": [],
                 "expanded": false
               },
@@ -5244,7 +5280,7 @@
               {
                 "id": "7f201a0f",
                 "title": "Pad Right",
-                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t\nCalled By:\n    [bookmarks.cpp:41](_bookmarks.cpp_)\n    [brokelinks.cpp:34](_brokelinks.cpp_)\n    [browser.cpp:48](_browser.cpp_)\n    [Render](_Ftxui Render_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [Render](_Ftxui Render Call_)\n    [Render](_Ftxui Render Method_)\n    [help.cpp:216](_help.cpp_)\n    [history.cpp:49](_history.cpp_)\n    [links.cpp:34](_links.cpp_)\n    [linktree.cpp:42](_linktree.cpp_)\n    [ParseEntries](_Parse Entries_)\n    [recent.cpp:30](_recent.cpp_)\n    [regex.cpp:61](_regex.cpp_)\n    [Render](_Render Browser Dialog_)\n    [Render](_Render the Bookmarks Dialog_)\n    [Render](_Render the Help Dialog_)\n    [Render](_Render the History Dialog_)\n    [RenderTopic](_Render Topic_)\n    [search.cpp:45](_search.cpp_)\n\nThis is a shared helper method\n\n#helper",
+                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t\nCalled By:\n    [bookmarks.cpp:41](_bookmarks.cpp_)\n    [brokelinks.cpp:34](_brokelinks.cpp_)\n    [browser.cpp:57](_browser.cpp_)\n    [Render](_Ftxui Render_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [Render](_Ftxui Render Call_)\n    [Render](_Ftxui Render Method_)\n    [help.cpp:216](_help.cpp_)\n    [history.cpp:49](_history.cpp_)\n    [links.cpp:34](_links.cpp_)\n    [linktree.cpp:42](_linktree.cpp_)\n    [ParseEntries](_Parse Entries_)\n    [recent.cpp:30](_recent.cpp_)\n    [regex.cpp:61](_regex.cpp_)\n    [Render](_Render Browser Dialog_)\n    [Render](_Render the Bookmarks Dialog_)\n    [Render](_Render the Help Dialog_)\n    [Render](_Render the History Dialog_)\n    [RenderTopic](_Render Topic_)\n    [search.cpp:45](_search.cpp_)\n\nThis is a shared helper method\n\n#helper",
                 "children": [],
                 "expanded": false
               },
@@ -5279,8 +5315,8 @@
               },
               {
                 "id": "75e38a46",
-                "title": "Pad Right",
-                "content": "Pad Right\n\n!_method\n\nPad `s` on the right with spaces until it is `width` columns long.\nStrings that are already at least `width` long are returned unchanged.\nShared by the dialog modules that align their table columns.",
+                "title": "Pad Right Declaration",
+                "content": "Pad Right Declaration\n\n!_method\n\nPad `s` on the right with spaces until it is `width` columns long.\nStrings that are already at least `width` long are returned unchanged.\nShared by the dialog modules that align their table columns.",
                 "children": [],
                 "expanded": false
               }
@@ -5339,7 +5375,7 @@
               {
                 "id": "fd04b2dd",
                 "title": "Clear Undo",
-                "content": "Clear Undo\n\nSignature: void TreeView::ClearUndo()\nMethod: ClearUndo\nReturns: void TreeView\nCalled By:\n    [ImportFrom](_Import Scribboleth File_)\n    [NewDocument](_New Document_)\n    [LoadFrom](_Open File_)\n    [RefreshActiveNode](_Refresh Current Node_)\n    [TreeView Component Class](_TreeView Component Class_)\n\nDrop both the undo and redo stacks.",
+                "content": "Clear Undo\n\nSignature: void TreeView::ClearUndo()\nMethod: ClearUndo\nReturns: void TreeView\nCalled By:\n    [ImportFrom](_Import Scribboleth File_)\n    [LoadFrom](_Load From_)\n    [NewDocument](_New Document_)\n    [RefreshActiveNode](_Refresh Current Node_)\n    [TreeView Component Class](_TreeView Component Class_)\n\nDrop both the undo and redo stacks.",
                 "children": [],
                 "expanded": false
               },
@@ -5388,7 +5424,7 @@
               {
                 "id": "5c4a605b",
                 "title": "Ensure All Nodes Have IDs",
-                "content": "Ensure All Nodes Have IDs \n\nSignature: void EnsureIds(std::vector<TreeNode>& nodes)\nMethod: EnsureIds\nReturns: void\nParameters:\n    nodes std::vector<TreeNode>&\nCalled By:\n    [EnsureIds](_Ensure All Nodes Have IDs_)\n    [ImportFrom](_Import Scribboleth File_)\n    [LoadFrom](_Open File_)\n    [Variables](_Variables_)\n\nGive every node that lacks one a fresh id (after import or load).",
+                "content": "Ensure All Nodes Have IDs \n\nSignature: void EnsureIds(std::vector<TreeNode>& nodes)\nMethod: EnsureIds\nReturns: void\nParameters:\n    nodes std::vector<TreeNode>&\nCalled By:\n    [EnsureIds](_Ensure All Nodes Have IDs_)\n    [ImportFrom](_Import Scribboleth File_)\n    [LoadFrom](_Load From_)\n    [Variables](_Variables_)\n\nGive every node that lacks one a fresh id (after import or load).",
                 "children": [],
                 "expanded": false
               },
@@ -5512,6 +5548,13 @@
                 "expanded": false
               },
               {
+                "id": "123ec801",
+                "title": "Load From",
+                "content": "Load From\n\nSignature: void TreeView::LoadFrom(const std::string& path)\nMethod: LoadFrom\nReturns: void TreeView\nParameters:\n    path const std::string&\nCalled By:\n    [OpenFile](_Open File_)\n    [TreeView Component Class](_TreeView Component Class_)\n\nRead and deserialize a document (tree, pane width, bookmarks and history)\nfrom `path`, making it the currently edited file.",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "cfeae9f2",
                 "title": "Make TreeView",
                 "content": "Make TreeView\n\nSignature: ftxui::Component MakeTreeView(std::shared_ptr<EditorState> state)\nMethod: MakeTreeView\nReturns: ftxui::Component\nParameters:\n    state std::shared_ptr<EditorState>\nCalled By:\n    [Variables](_Variables_)\n\nComponent factory: give EditorState a ready-to-render TreeView.",
@@ -5568,13 +5611,6 @@
                 "expanded": false
               },
               {
-                "id": "123ec801",
-                "title": "Open File",
-                "content": "Open File\n\nSignature: void TreeView::LoadFrom(const std::string& path)\nMethod: LoadFrom\nReturns: void TreeView\nParameters:\n    path const std::string&\nCalled By:\n    [OpenFile](_Open File_)\n    [TreeView Component Class](_TreeView Component Class_)\n\nRead and deserialize a document (tree, pane width, bookmarks and history)\nfrom `path`, making it the currently edited file.",
-                "children": [],
-                "expanded": false
-              },
-              {
                 "id": "a7b38192",
                 "title": "Open File",
                 "content": "Open File\n\nSignature: void TreeView::OpenFile(const std::string& path)\nMethod: OpenFile\nReturns: void TreeView\nParameters:\n    path const std::string&\nCalled By:\n    [TreeView Component Class](_TreeView Component Class_)\n\nOpen `path` directly, or launch the file browser when it is a folder.",
@@ -5598,21 +5634,21 @@
               {
                 "id": "f0fce55c",
                 "title": "Persist Last File",
-                "content": "Persist Last File\n\nSignature: void TreeView::PersistLastFile()\nMethod: PersistLastFile\nReturns: void TreeView\nCalled By:\n    [ImportFrom](_Import Scribboleth File_)\n    [NewDocument](_New Document_)\n    [LoadFrom](_Open File_)\n    [SaveTo](_Save As_)\n    [TreeView Component Class](_TreeView Component Class_)\n\nStore the last-edited file path (and recent list) into init.conf so the\ntree is reopened on the next launch.",
+                "content": "Persist Last File\n\nSignature: void TreeView::PersistLastFile()\nMethod: PersistLastFile\nReturns: void TreeView\nCalled By:\n    [ImportFrom](_Import Scribboleth File_)\n    [LoadFrom](_Load From_)\n    [NewDocument](_New Document_)\n    [SaveTo](_Save As_)\n    [TreeView Component Class](_TreeView Component Class_)\n\nStore the last-edited file path (and recent list) into init.conf so the\ntree is reopened on the next launch.",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "8a8e8780",
                 "title": "Push Recent File",
-                "content": "Push Recent File\n\nSignature: void TreeView::PushRecentFile(const std::string path)\nMethod: PushRecentFile\nReturns: void TreeView\nParameters:\n    path const std::string\nCalled By:\n    [LoadFrom](_Open File_)\n    [SaveTo](_Save As_)\n    [TreeView Component Class](_TreeView Component Class_)\n\nMove `path` to the front of the recent-files list, capping its size.",
+                "content": "Push Recent File\n\nSignature: void TreeView::PushRecentFile(const std::string path)\nMethod: PushRecentFile\nReturns: void TreeView\nParameters:\n    path const std::string\nCalled By:\n    [LoadFrom](_Load From_)\n    [SaveTo](_Save As_)\n    [TreeView Component Class](_TreeView Component Class_)\n\nMove `path` to the front of the recent-files list, capping its size.",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "23deb7f7",
                 "title": "Refresh Current Node",
-                "content": "Refresh Current Node\n\nSignature: void TreeView::RefreshActiveNode()\nMethod: RefreshActiveNode\nReturns: void TreeView\nCalled By:\n    [ApplyUndo](_Apply Undo_)\n    [DeleteNode](_Delete Node_)\n    [ImportFrom](_Import Scribboleth File_)\n    [NewDocument](_New Document_)\n    [LoadFrom](_Open File_)\n    [TreeView Component Class](_TreeView Component Class_)\n\nSync state_->active_node with the selection, reset the undo history when\nthe selection changes, and record the viewed node into the history list.",
+                "content": "Refresh Current Node\n\nSignature: void TreeView::RefreshActiveNode()\nMethod: RefreshActiveNode\nReturns: void TreeView\nCalled By:\n    [ApplyUndo](_Apply Undo_)\n    [DeleteNode](_Delete Node_)\n    [ImportFrom](_Import Scribboleth File_)\n    [LoadFrom](_Load From_)\n    [NewDocument](_New Document_)\n    [TreeView Component Class](_TreeView Component Class_)\n\nSync state_->active_node with the selection, reset the undo history when\nthe selection changes, and record the viewed node into the history list.",
                 "children": [],
                 "expanded": false
               },
@@ -5988,7 +6024,7 @@
             let historyStack = [ ];
 
             // !@!
-            const readOnly = false;
+            const readOnly = true;
 
             const SAFE_MAP = {
                 "</script": "^^^script^^^",
