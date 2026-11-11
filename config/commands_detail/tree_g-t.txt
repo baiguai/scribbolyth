@@ -1,0 +1,1 @@
+This key binding toggles between the two most recently opened or saved as files (in the recent files list)

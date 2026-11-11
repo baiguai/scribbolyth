@@ -1,0 +1,2 @@
+Deletes the word the cursor is currently positioned within, but does NOT include the spaces that follow the word.
+[count] [key binding] - repeats the action.

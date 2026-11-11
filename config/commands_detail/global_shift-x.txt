@@ -1,0 +1,5 @@
+The current file can be exported as a stand alone Scribboleth .html file using the command input using :X (note that it is capitalized).
+
+Note:
+Directories can be bookmarked using: m
+To access bookmarked directories use: `

@@ -233,10 +233,7 @@ namespace scribbolyth::editor
         //!
 
         /*!
-            Scroll Past Helper
-
-            !_method
-
+            Scroll Past Helper Class
 
             A transparent leaf node that records the height of the box it is
             assigned each frame. Rendered as an overlay share of the editor view,
@@ -246,6 +243,9 @@ namespace scribbolyth::editor
         class BoxRecorder : public ftxui::Node
         {
             public:
+                /*|
+                    !_ctor
+                */
                 explicit BoxRecorder(int& out_height) : out_height_(out_height) {}
 
                 void ComputeRequirement() override
@@ -877,11 +877,18 @@ namespace scribbolyth::editor
                     }
                     rows.push_back(ftxui::hbox(std::move(parts)));
                 }
-                // Vim-like scroll-past-bottom: append blank lines after the
-                // content so the last line can scroll up to approximately the
-                // vertical center of the viewport instead of hugging the bottom
-                // edge. The viewport height is measured each frame by the
-                // BoxRecorder overlay below.
+                /*|
+                    ----
+
+                    Scroll Past
+
+                    Vim-like scroll-past-bottom: append blank lines after the
+                    content so the last line can scroll up to approximately the
+                    vertical center of the viewport instead of hugging the bottom
+                    edge. The viewport height is measured each frame by the
+                    BoxRecorder overlay below.
+                */
+                //>>
                 const int padding = std::max(0, viewport_height_ / 2);
                 for (int i = 0; i < padding; ++i)
                 {
@@ -892,6 +899,7 @@ namespace scribbolyth::editor
                 ftxui::Element tracker =
                     std::make_shared<BoxRecorder>(viewport_height_);
                 return ftxui::dbox({content, tracker});
+                //<<
             }
             //!
 
@@ -2261,25 +2269,11 @@ namespace scribbolyth::editor
                     for (const int r : block_insert_.rows)
                     {
                         if (r == row_) continue; // already edited live while typing
-                        if (block_insert_.at_end)
-                        {
-                            std::string& line = lines_[r];
-                            line.insert(std::min(block_insert_.col,
-                                                 static_cast<int>(line.size())),
-                                        block_insert_.pending);
-                        }
-                        else
-                        {
-                            std::string& line = lines_[r];
-                            if (static_cast<int>(line.size()) < block_insert_.col)
-                            {
-                                line.append(static_cast<std::size_t>(block_insert_.col) -
-                                                static_cast<std::size_t>(line.size()),
-                                            ' ');
-                            }
-                            line.insert(static_cast<std::size_t>(block_insert_.col),
-                                        block_insert_.pending);
-                        }
+                        const int col = block_insert_.col;
+                        const int hi = block_insert_.at_end ? col - 1 : col;
+                        const visual_block::Block block{r, r, col, hi};
+                        visual_block::Insert(lines_, block, block_insert_.pending,
+                                             block_insert_.at_end);
                     }
                     Save();
                     state_->status = "Block inserted";

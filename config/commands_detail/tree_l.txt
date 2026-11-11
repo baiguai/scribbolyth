@@ -1,0 +1,4 @@
+Expand if the current node has child nodes and is not expanded. If the current node is expanded and has child nodes, the node selection moves into that node selecting its first child node.
+It moves 'right' within the tree - down into the current node.
+
+[count] [key binding] - repeats the action.

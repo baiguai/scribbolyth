@@ -1,0 +1,2 @@
+Displays the recently opened / saved as files. Scribbolyth does not have a 'tabs' feature, however this dialog is designed to behave in a somewhat similar manner
+See also the 'g t' key binding.

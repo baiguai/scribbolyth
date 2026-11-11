@@ -1,0 +1,2 @@
+This key binding displays the undo dialog, allowing you to navigate through the various changes you have made since selecting the current node. To apply the historical entry you are on hit Enter.
+Escape closes this dialog.

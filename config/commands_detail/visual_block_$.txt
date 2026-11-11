@@ -1,0 +1,1 @@
+Extends the block selection to the last position in the row the cursor is currently on.

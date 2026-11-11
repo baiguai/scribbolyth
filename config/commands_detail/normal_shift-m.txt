@@ -1,0 +1,2 @@
+Bookmarks the currently selected node AND the line that the cursor is currently positioned on.
+This will select the node and move the cursor to the stored line value.

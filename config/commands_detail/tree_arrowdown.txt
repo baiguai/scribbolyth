@@ -1,0 +1,6 @@
+This is an alternative to the:
+
+    j
+    k
+
+navigation key bindings.

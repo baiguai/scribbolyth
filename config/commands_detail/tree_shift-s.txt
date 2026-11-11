@@ -1,0 +1,6 @@
+Save as is done within the command input.
+This allows you to save the current file in a different location or with a different name.
+
+Note:
+Directories can be bookmarked using: m
+To access bookmarked directories use: `

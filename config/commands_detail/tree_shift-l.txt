@@ -1,0 +1,3 @@
+Moves the current node down one level 'right' (if possible) within the tree.
+Note that this is upper case.
+[count] [key binding] - repeats the action.

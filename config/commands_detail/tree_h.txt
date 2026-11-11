@@ -1,0 +1,4 @@
+Collapse the current node if it is expanded. If the current node is not expanded or does not have child nodes, the node selection moves to the next outer node.
+It moves 'left' within the tree - up into the parent node.
+
+[count] [key binding] - repeats the action.

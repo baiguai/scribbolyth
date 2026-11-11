@@ -1,0 +1,1 @@
+Extends the selection to the last position in the last row of the current node's contents.

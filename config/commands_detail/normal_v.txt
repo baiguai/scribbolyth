@@ -1,0 +1,1 @@
+Enters VISUAL mode, allowing you to select text within the current node's contents.

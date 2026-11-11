@@ -1,0 +1,1 @@
+Displays the bookmarks dialog and the list of stored node and line-level bookmarks.

@@ -1,0 +1,2 @@
+If Scribbolyth is already in TREE mode and the user hits Escape, the current node is deselected.
+This allows the user to create root nodes using the new node key binding.

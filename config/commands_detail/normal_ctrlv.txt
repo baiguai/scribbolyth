@@ -1,0 +1,1 @@
+Enters VISUAL BLOCK mode, allowing you to make 'block' selections within the current node's contents.

@@ -1,0 +1,1 @@
+A new document can be created using the n key binding, or from within the command input using :n

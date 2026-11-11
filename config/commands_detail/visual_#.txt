@@ -1,0 +1,1 @@
+Adds numbers (#. ) (or updates any existing #. at the beginning of the lines of text) to the beginning of all of the selected lines of text.

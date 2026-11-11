@@ -1,0 +1,3 @@
+Switches to NORMAL mode for navigation and modification of the currently selected node's contents.
+Regular typing is not done in this mode.
+If no node is selected this has no effect.

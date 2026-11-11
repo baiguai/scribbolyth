@@ -1,0 +1,2 @@
+This key combination inserts a horizontal line.
+Note that some terminals utilize Ctrl+- for zooming. If your terminal does this - use Ctrl+Shift+- to create the horizontal line.

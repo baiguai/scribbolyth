@@ -1,0 +1,1 @@
+Displays the command input pre-populated with the :replace command. To replace text within the current node's contents enter the existing text, followed by '/' then the text to replace it with.

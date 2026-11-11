@@ -1,0 +1,1 @@
+Pastes the clipboard contents where the cursor is currently located within the current node's contents.

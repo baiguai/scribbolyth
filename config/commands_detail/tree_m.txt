@@ -1,0 +1,2 @@
+Adds the currently selected node to the bookmarks list.
+These are node-level bookmarks, they simply select the node.
