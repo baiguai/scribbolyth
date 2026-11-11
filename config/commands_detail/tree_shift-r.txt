@@ -1,0 +1,1 @@
+Renames the currently selected node, utilizing the command input. If no node is selected this has no effect.

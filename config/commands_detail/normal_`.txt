@@ -1,0 +1,1 @@
+Displays the bookmarks dialog. You can navigate among the bookmarks and Enter will select the bookmark you have highlighted. Escape will simply hide this dialog.

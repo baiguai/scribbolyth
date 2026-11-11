@@ -1,0 +1,1 @@
+Moves the cursor to the first position in the first line of text within the currently selected node's contents.

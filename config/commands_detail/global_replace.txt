@@ -1,0 +1,1 @@
+In the command input use :replace to replace text within the current node's contents. Enter the existing text, followed by '/' then the text to replace it with.

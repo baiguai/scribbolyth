@@ -1,0 +1,1 @@
+Collapse all of the nodes within the tree that contain child nodes, recursively.

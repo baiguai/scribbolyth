@@ -1,0 +1,2 @@
+Bookmarks the currently selected node.
+This is a node bookmark, so it will simply select the node when invoked.

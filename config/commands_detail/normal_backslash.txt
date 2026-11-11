@@ -1,0 +1,2 @@
+This search dialog functions exactly like the standard search, however upon hitting Enter it creates a 'search results' node.
+If no node is currently selected this is created as a root node. Otherwise it is created as a child of the currently selected node.

@@ -1,0 +1,5 @@
+Export the currently selected node's contents and all of its child nodes' contents recursively, to a .txt file. If no node is selected nothing is saved.
+
+Note:
+Directories can be bookmarked using: m
+To access bookmarked directories use: `

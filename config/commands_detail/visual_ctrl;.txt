@@ -1,0 +1,10 @@
+If the cursor is positioned within text that is part of an ASCII table or the current selection contains only an ASCII table (if the entire table isn't selected, the results may not be as expected), this will update that table.
+Table dividers are defined by four dashes '----'
+Table columns are defined by pipes '|'
+
+Example:
+
+----
+|Caption 1|Caption 2|
+|Data Item 1|Data Item 2|
+----

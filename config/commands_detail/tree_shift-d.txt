@@ -1,0 +1,1 @@
+Deletes the currently selected node, as well as any child nodes that it contains, recursively. If no node is selected this has no effect.

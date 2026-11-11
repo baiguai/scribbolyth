@@ -1010,6 +1010,36 @@
         "expanded": false
       },
       {
+        "id": "eae66072",
+        "title": "Configuration",
+        "content": "",
+        "children": [
+          {
+            "id": "9d955cbb",
+            "title": "commands.conf",
+            "content": "commands.conf\n\nThe ./config/commands.conf file defines the key bindings that are available\nin Scribbolyth. Any existing Op can have a customized key binding that\nwill call it - simply by defining it within this configuration file.\n\nHowever, detailed information on each key binding can also be defined.\nSo that when the user selects a particular key binding - you can provide\nthem with much more comprehensive information on it.\n\nSee _Command Details_",
+            "children": [],
+            "expanded": false
+          },
+          {
+            "id": "6398ec48",
+            "title": "Command Details",
+            "content": "Command Details\n\nDetailed information about your defined key bindings can be created within\nthe ./config/commands_detail/ directory. These are identified by:\n* MODE\n* Underscore '_'\n* Key Binding\n\nFor example - a TREE mode 'j' key binding detail would be stored in:\n./config/commands_detail/tree_j.txt\n\nSince these details need to reference the key binding you have defined, they\naren't Op specific. So if you change a key binding - you will want to rename\nand change the contents of any corresponding details file you might have for\nit.\n\nSince details are tied to their bindings using file names, some characters\nneed to be translated so that we can have a valid file name.\n\nSee: _Key Binding Translation_\n\nYou can refer to the details that ship with Scribbolyth as examples of\nhow to do this.\n\n\nNote:\nYou don't have to define any detailed information, and it simply won't\nshow when you user hits Enter.",
+            "children": [
+              {
+                "id": "fecb34a0",
+                "title": "Key Binding Translation",
+                "content": "Key Binding Translation\n\n+--------------------+----------------------------------------+\n| Key                | File name piece                        |\n+--------------------+----------------------------------------+\n| A-Z                | shift-a ... shift-z (so J \u2192 shift-j)   |\n| a-z, 0-9           | as-is                                  |\n| space (joins keys) | - (\"g g\" \u2192 g-g, \"d i w\" \u2192 d-i-w)       |\n| :                  | colon                                  |\n| /                  | slash                                  |\n| \\                  | backslash                              |\n| <                  | lt                                     |\n| >                  | gt                                     |\n| *                  | star                                   |\n| ?                  | question                               |\n| \"                  | quote                                  |\n| |                  | pipe                                   |\n| anything else      | literally (#, $, `, [, ], ;, !, ...)   |\n+--------------------+----------------------------------------+\n\nGLOBAL rows \u2014 named by command, using the per-character rules: :open\u2192global_open.txt,\n:o!\u2192global_o!.txt, :O!\u2192global_shift-o!.txt, :U\u2192global_shift-u.txt.\nEntries sharing an op inherit via the same-op fallback (e.g. :o uses global_open.txt).\n\nExamples\n- TREE ArrowUp \u2192 tree_arrowup.txt\n- TREE \"g g\" \u2192 tree_g-g.txt\n- TREE J \u2192 tree_shift-j.txt\n- TREE / \u2192 tree_slash.txt\n- NORMAL D \u2192 normal_shift-d.txt\n- NORMAL Ctrl; \u2192 normal_ctrl;.txt\n- GLOBAL :open \u2192 global_open.txt",
+                "children": [],
+                "expanded": false
+              }
+            ],
+            "expanded": false
+          }
+        ],
+        "expanded": false
+      },
+      {
         "id": "075b4a30",
         "title": "Compiling",
         "content": "",
@@ -1025,6 +1055,13 @@
             "id": "85f52819",
             "title": "CMakeLists.txt.in",
             "content": "CMakeLists.txt.in\n\nThis file is the template that is copied and populated via the\n_config.sh_. A new CMakeLists.txt is created and loaded with the\npopulated version of the content of the CMakeLists.txt.in.",
+            "children": [],
+            "expanded": false
+          },
+          {
+            "id": "1a10f791",
+            "title": "Updating an Existing Instance",
+            "content": "Updating an Existing Instance\n\nIf you already have Scribbolyth 'installed' and you've just done a\nrebuild...\nYou will want to copy everything in the output directory EXCEPT the:\ninit.conf\n\nto the directory where you have the scribbolyth executable.",
             "children": [],
             "expanded": false
           }
@@ -2709,6 +2746,13 @@
                 "expanded": false
               },
               {
+                "id": "b863889f",
+                "title": "Detail Stem",
+                "content": "Detail Stem\n\nThe file name (without directory or .txt) of the detailed help\ntopic of a binding: the mode, an underscore, then the key made\nfile-name safe:\n\n  - a special token (Esc, Return, ArrowUp, Ctrl;...) is simply\n    lowercased:            tree_arrowup.txt  (TREE ArrowUp)\n  - an upper case letter is written shift-<letter>, so j and J\n    stay apart on case-insensitive file systems:\n                           tree_shift-j.txt  (TREE J)\n  - a multi-key sequence joins its keys with dashes:\n                           tree_g-g.txt      (TREE \"g g\")\n  - characters that cannot appear in a file name are spelled\n    out:                  : colon  / slash  \\ backslash\n                           < lt  > gt  * star  ? question\n                           \" quote  | pipe\n                           tree_slash.txt   (TREE /)\n\nGLOBAL rows have no key, so their file is named after the\ncommand, using the same per-character rules (so :o! and :O!\nstay apart):              global_open.txt   (:open)\n                          global_shift-o!.txt (:O!)\n\nSignature: std::string DetailStem(const std::string& mode, const std::string& key, const std::string& command)\nMethod: DetailStem\nReturns: std::string\nParameters:\n    mode    const std::string&\n    key     const std::string&\n    command const std::string&\nCalled By:\n    [ParseEntries](_Parse Entries_)",
+                "children": [],
+                "expanded": false
+              },
+              {
                 "id": "2556314b",
                 "title": "Expand Topic",
                 "content": "Expand Topic\n\nTurn the escape sequences of a help topic into their literal\nmeaning: '\\n' becomes a line break, '\\t' four spaces and '\\\\' a\nsingle backslash. The result is returned as the lines to show.\n\nSignature: std::vector<std::string> ExpandTopic(const std::string& text)\nMethod: ExpandTopic\nReturns: std::vector<std::string>\nParameters:\n    text const std::string&\nCalled By:\n    [OpenTopic](_Open Topic_)",
@@ -2716,52 +2760,52 @@
                 "expanded": false
               },
               {
-                "id": "70ea2660",
+                "id": "135dbc4d",
                 "title": "Help Dialog Class",
                 "content": "Help Dialog Class\n\n\n\n#class",
                 "children": [
                   {
-                    "id": "0a92b15e",
+                    "id": "3bddf10a",
                     "title": "Private Members",
                     "content": "Private Members",
                     "children": [
                       {
-                        "id": "efecc692",
+                        "id": "658eca4a",
                         "title": "Filtered Vector",
                         "content": "Filtered Vector\n\nstd::vector<int> Filtered() const\n{\n    std::vector<int> result;\n\n    std::string needle = Lower(filter_);\n    bool key_only = false;\n    if (!needle.empty() && needle[0] == ':')\n    {\n        key_only = true;\n        needle = needle.substr(1);\n    }\n\n    for (std::size_t i = 0; i < entries_.size(); ++i)\n    {\n        const std::string& hay = key_only ? entries_[i].key : entries_[i].line;\n        if (needle.empty() || Lower(hay).find(needle) != std::string::npos)\n        {\n            result.push_back(static_cast<int>(i));\n        }\n    }\n    return result;\n}",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "f5cd805c",
+                        "id": "efecc692",
                         "title": "Inner Width Const",
                         "content": "Inner Width Const\n\nThe width of the dialog content: as wide as the widest binding\nline, but never wider than the dialog itself.\n\nSignature: int InnerWidth() const\nMethod: InnerWidth\nReturns: int\nQualifiers: const\nCalled By:\n    [OpenTopic](_Open Topic_)\n    [RenderTopic](_Render Topic_)",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "272c69f5",
+                        "id": "53c098f4",
                         "title": "Max Topic Top Const",
                         "content": "Max Topic Top Const\n\nSignature: int MaxTopicTop() const\nMethod: MaxTopicTop\nReturns: int\nQualifiers: const\nCalled By:\n    [RenderTopic](_Render Topic_)\n    [OnTopicEvent](_Topic Event Handler_)",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "a7b47c30",
+                        "id": "f5cd805c",
                         "title": "Move Selection Up / Down",
                         "content": "Move Selection Up / Down\n\nSignature: void MoveSelection(int dir)\nMethod: MoveSelection\nReturns: void\nParameters:\n    dir int\nCalled By:\n    [Arrow Down](_Arrow Down_)\n    [Arrow Up](_Arrow Up_)\n    [End](_End_)\n    [Home](_Home_)\n    [Page Down](_Page Down_)\n    [Page Up](_Page Up_)",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "eb83e4dc",
+                        "id": "272c69f5",
                         "title": "Refilter",
                         "content": "Refilter\n\nAfter the filter changes, select the first binding that matches.\n\nSignature: void Refilter()\nMethod: Refilter\nReturns: void\nCalled By:\n    [Backspace](_Backspace_)\n    [Normal Character](_Normal Character_)",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "53c098f4",
+                        "id": "73353597",
                         "title": "Variables",
                         "content": "Variables\n\n--------------------------------------------------------------------------------\n\nstd::shared_ptr<EditorState> state_;\nbool* show_;\nstd::vector<HelpEntry> entries_;\nstd::string filter_;\nint selection_ = 0;\nint scroll_ = 0;\nint content_width_ = 72;\nbool topic_open_ = false;\nstd::string topic_title_;\nstd::string topic_summary_;\nstd::vector<std::string> topic_lines_;\nint topic_scroll_ = 0;\nstatic constexpr int kVisibleRows = 18;\nstatic constexpr int kMaxInnerWidth = 90;",
                         "children": [],
@@ -2771,80 +2815,80 @@
                     "expanded": false
                   },
                   {
-                    "id": "987867eb",
+                    "id": "a5fd3663",
                     "title": "Public Members",
                     "content": "Public Members",
                     "children": [
                       {
-                        "id": "7c8feb87",
+                        "id": "69501ccf",
                         "title": "Event Handler",
                         "content": "Event Handler\n\nSignature: bool OnEvent(ftxui::Event event) override\nMethod: OnEvent\nReturns: bool\nQualifiers: override\nParameters:\n    event ftxui::Event\nCalled By:\n    [Ftxui Event Call](_Ftxui Event Call_)",
                         "children": [
                           {
-                            "id": "5b044af6",
+                            "id": "ea4a59d3",
                             "title": "Escape",
                             "content": "Escape\n\nHide the help dialog.\n\n*show_ = false;\nfilter_.clear();\nselection_ = 0;\nscroll_ = 0;\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "f376bd73",
+                            "id": "bb3627e0",
                             "title": "Return",
                             "content": "Return\n\nOpen detailed help on the selected topic.\n\nOpenTopic();\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "ea4a59d3",
+                            "id": "0f19bde3",
                             "title": "Arrow Down",
                             "content": "Arrow Down\n\nMove selection down.\n\nMoveSelection(+1);\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "bb3627e0",
+                            "id": "7658d3ed",
                             "title": "Arrow Up",
                             "content": "Arrow Up\n\nMove selection up.\n\nMoveSelection(-1);\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "0f19bde3",
+                            "id": "25211aa4",
                             "title": "Page Down",
                             "content": "Page Down\n\nMoves one page down (page being the count of visible rows).\n\nMoveSelection(+kVisibleRows);\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "7658d3ed",
+                            "id": "74b29524",
                             "title": "Page Up",
                             "content": "Page Up\n\nMoves one page up (page being the count of visible rows).\n\nMoveSelection(-kVisibleRows);\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "25211aa4",
+                            "id": "e2e23b6e",
                             "title": "Home",
                             "content": "Home\n\nMove to the top of the help topics.\n\nMoveSelection(-std::max(0, static_cast<int>(Filtered().size())));\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "74b29524",
+                            "id": "98e884b8",
                             "title": "End",
                             "content": "End\n\nMove to the bottom of the help topics.\n\nMoveSelection(std::max(0, static_cast<int>(Filtered().size())));\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "e2e23b6e",
+                            "id": "81dbab8d",
                             "title": "Backspace",
                             "content": "Backspace\n\nWhen filtering, deletes the character before the cursor.\n\nif (!filter_.empty())\n{\n    filter_.pop_back();\n    Refilter();\n}\nreturn true;",
                             "children": [],
                             "expanded": false
                           },
                           {
-                            "id": "98e884b8",
+                            "id": "1bbd7bcd",
                             "title": "Normal Character",
                             "content": "Normal Character\n\nWhen filtering enters the specified character.\n\nfilter_ += event.character();\nRefilter();\nreturn true;",
                             "children": [],
@@ -2854,42 +2898,42 @@
                         "expanded": false
                       },
                       {
-                        "id": "135dbc4d",
+                        "id": "49aa3b3a",
                         "title": "Focusable Const",
                         "content": "Focusable Const\n\nbool Focusable() const override { return true; }",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "d15f3fb0",
+                        "id": "7c8feb87",
                         "title": "Help Constructor",
                         "content": "Help Constructor\n\nSignature: HelpDialog(std::shared_ptr<EditorState> state, const std::string& path, bool* show) : state_(std::move(state)), show_(show)\nConstructor: HelpDialog\nParameters:\n    state std::shared_ptr<EditorState>\n    path  const std::string&\n    show  bool*\nInitializers:\n    state_ std::move(state)\n    show_  show\nCalled By:\n    [MakeHelpDialog](_Make Help Dialog_)",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "e48be0ca",
+                        "id": "197d61e6",
                         "title": "Open Topic",
-                        "content": "Open Topic\n\nShow the full help topic of the highlighted key binding. Bindings\nwithout a topic of their own fall back to their description, so\nEnter always opens the help view.\n\nSignature: void OpenTopic()\nMethod: OpenTopic\nReturns: void\nCalled By:\n    [Return](_Return_)",
+                        "content": "Open Topic\n\nShow the detailed help topic of the highlighted key binding. The\ntopic comes from that binding's file in commands_detail/; when\nthere is no matching file Enter does nothing.\n\nSignature: void OpenTopic()\nMethod: OpenTopic\nReturns: void\nCalled By:\n    [Return](_Return_)",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "b4baf93e",
+                        "id": "eef19775",
                         "title": "Render the Help Dialog",
                         "content": "Render the Help Dialog\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Command](_Command_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [Variables](_Variables_)",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "197d61e6",
+                        "id": "a7b47c30",
                         "title": "Render Topic",
                         "content": "Render Topic\n\nFill the help dialog with the full help topic.\n\nSignature: ftxui::Element RenderTopic()\nMethod: RenderTopic\nReturns: ftxui::Element\nCalled By:\n    [Render](_Render the Help Dialog_)",
                         "children": [],
                         "expanded": false
                       },
                       {
-                        "id": "95eacb2e",
+                        "id": "b4baf93e",
                         "title": "Topic Event Handler",
                         "content": "Topic Event Handler\n\nWhile the full help topic is shown every key is consumed, except\nfor the keys that scroll it and the ones that close it again.\n\nSignature: bool OnTopicEvent(ftxui::Event event)\nMethod: OnTopicEvent\nReturns: bool\nParameters:\n    event ftxui::Event\nCalled By:\n    [OnEvent](_Event Handler_)",
                         "children": [],
@@ -2902,16 +2946,23 @@
                 "expanded": false
               },
               {
-                "id": "b863889f",
+                "id": "d15f3fb0",
                 "title": "Parse Entries",
-                "content": "Parse Entries\n\nSignature: void ParseEntries(const std::string& path, std::vector<HelpEntry>& out)\nMethod: ParseEntries\nReturns: void\nParameters:\n    path const std::string&\n    out  std::vector<HelpEntry>&\nCalled By:\n    [HelpDialog](_Help Constructor_)",
+                "content": "Parse Entries\n\n`detail_dir` is the commands_detail folder that sits next to\ncommands.conf; a matching file in it overrides the '|' topic\nof a binding.\n\nSignature: void ParseEntries(const std::string& path, const std::string& detail_dir, std::vector<HelpEntry>& out)\nMethod: ParseEntries\nReturns: void\nParameters:\n    path       const std::string&\n    detail_dir const std::string&\n    out        std::vector<HelpEntry>&\nCalled By:\n    [HelpDialog](_Help Constructor_)",
+                "children": [],
+                "expanded": false
+              },
+              {
+                "id": "70ea2660",
+                "title": "Read Detail Topic",
+                "content": "Read Detail Topic\n\nRead the detailed help topic of a binding from its file in the\ncommands_detail directory. Line breaks are the file's own;\nWindows carriage returns are dropped and tabs become four\nspaces, matching the '\\t' escape of a '|' topic. An unreadable\nor empty file returns \"\" so the caller can fall back to the\n'|' topic.\n\nSignature: std::string ReadDetailTopic(const std::string& path)\nMethod: ReadDetailTopic\nReturns: std::string\nParameters:\n    path const std::string&\nCalled By:\n    [ParseEntries](_Parse Entries_)",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "481e7a85",
                 "title": "Split Description",
-                "content": "Split Description\n\nThe description field may hold two parts separated by a pipe: a\nshort one shown in the list of key bindings, and the full help\ntopic shown when the entry is opened. Split on the pipe when it\nis not inside quotes, and drop the quotes of every part.\n\nSignature: std::vector<std::string> SplitDescription(const std::string& text)\nMethod: SplitDescription\nReturns: std::vector<std::string>\nParameters:\n    text const std::string&\nCalled By:\n    [ParseEntries](_Parse Entries_)",
+                "content": "Split Description\n\nThe description field is the short text shown in the list of key\nbindings. Split on a pipe that is not inside quotes and drop the\nquotes, so a legacy '|' topic (now ignored) does not leak into\nthe short text.\n\nSignature: std::vector<std::string> SplitDescription(const std::string& text)\nMethod: SplitDescription\nReturns: std::vector<std::string>\nParameters:\n    text const std::string&\nCalled By:\n    [ParseEntries](_Parse Entries_)",
                 "children": [],
                 "expanded": false
               },
@@ -2925,7 +2976,7 @@
               {
                 "id": "01a36305",
                 "title": "To Lower",
-                "content": "To Lower\n\nSignature: std::string Lower(std::string s)\nMethod: Lower\nReturns: std::string\nParameters:\n    s std::string\nCalled By:\n    [Filtered Vector](_Filtered Vector_)",
+                "content": "To Lower\n\nSignature: std::string Lower(std::string s)\nMethod: Lower\nReturns: std::string\nParameters:\n    s std::string\nCalled By:\n    [DetailStem](_Detail Stem_)\n    [Filtered Vector](_Filtered Vector_)",
                 "children": [],
                 "expanded": false
               },
@@ -2944,7 +2995,7 @@
                 "expanded": false
               },
               {
-                "id": "73353597",
+                "id": "0fd2efe8",
                 "title": "Make Help Dialog",
                 "content": "Make Help Dialog\n\nSignature: ftxui::Component MakeHelpDialog(std::shared_ptr<EditorState> state, const std::string& config_path, bool* show)\nMethod: MakeHelpDialog\nReturns: ftxui::Component\nParameters:\nstate       std::shared_ptr<EditorState>\nconfig_path const std::string&\nshow        bool*\nCalled By:\n    [Ftxui Status Bar Renderer](_Ftxui Status Bar Renderer_)\n\n#config",
                 "children": [],
@@ -2961,7 +3012,7 @@
               {
                 "id": "9d8d1b00",
                 "title": "Help Entry Struct",
-                "content": "Help Entry Struct\n\nstruct HelpEntry\n{\n    std::string mode;\n    std::string key;\n    std::string command;\n    std::string op;\n    std::string description;\n    std::string topic;    // the full help topic, when the description has one\n    std::string line;   // the diagram line shown in the dialog\n};",
+                "content": "Help Entry Struct\n\nstruct HelpEntry\n{\n    std::string mode;\n    std::string key;\n    std::string command;\n    std::string op;\n    std::string description;\n    std::string topic;    // the detailed help topic from commands_detail/\n    bool has_detail = false;  // true when a detail file matched this binding\n    std::string line;   // the diagram line shown in the dialog\n};",
                 "children": [],
                 "expanded": false
               },
@@ -5280,7 +5331,7 @@
               {
                 "id": "7f201a0f",
                 "title": "Pad Right",
-                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t\nCalled By:\n    [bookmarks.cpp:41](_bookmarks.cpp_)\n    [brokelinks.cpp:34](_brokelinks.cpp_)\n    [browser.cpp:57](_browser.cpp_)\n    [Render](_Ftxui Render_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [Render](_Ftxui Render Call_)\n    [Render](_Ftxui Render Method_)\n    [help.cpp:216](_help.cpp_)\n    [history.cpp:49](_history.cpp_)\n    [links.cpp:34](_links.cpp_)\n    [linktree.cpp:42](_linktree.cpp_)\n    [ParseEntries](_Parse Entries_)\n    [recent.cpp:30](_recent.cpp_)\n    [regex.cpp:61](_regex.cpp_)\n    [Render](_Render Browser Dialog_)\n    [Render](_Render the Bookmarks Dialog_)\n    [Render](_Render the Help Dialog_)\n    [Render](_Render the History Dialog_)\n    [RenderTopic](_Render Topic_)\n    [search.cpp:45](_search.cpp_)\n\nThis is a shared helper method\n\n#helper",
+                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t\nCalled By:\n    [bookmarks.cpp:41](_bookmarks.cpp_)\n    [brokelinks.cpp:34](_brokelinks.cpp_)\n    [browser.cpp:57](_browser.cpp_)\n    [Render](_Ftxui Render_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [Render](_Ftxui Render Call_)\n    [Render](_Ftxui Render Method_)\n    [help.cpp:219](_help.cpp_)\n    [history.cpp:49](_history.cpp_)\n    [links.cpp:34](_links.cpp_)\n    [linktree.cpp:42](_linktree.cpp_)\n    [ParseEntries](_Parse Entries_)\n    [recent.cpp:30](_recent.cpp_)\n    [regex.cpp:61](_regex.cpp_)\n    [Render](_Render Browser Dialog_)\n    [Render](_Render the Bookmarks Dialog_)\n    [Render](_Render the Help Dialog_)\n    [Render](_Render the History Dialog_)\n    [RenderTopic](_Render Topic_)\n    [search.cpp:45](_search.cpp_)\n\nThis is a shared helper method\n\n#helper",
                 "children": [],
                 "expanded": false
               },

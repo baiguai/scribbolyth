@@ -1,0 +1,2 @@
+Saves the current document, or if it hasn't been saved yet, does a save as.
+This can be done using a key binding or from within the command input.

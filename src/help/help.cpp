@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -14,6 +15,8 @@
 
 namespace scribbolyth::help
 {
+    namespace fs = std::filesystem;
+
     /*[./Introduction to Help.cpp]
         This file handles the help dialog, and its key bindings.
 
@@ -81,10 +84,10 @@ namespace scribbolyth::help
         /*!
             Split Description
 
-            The description field may hold two parts separated by a pipe: a
-            short one shown in the list of key bindings, and the full help
-            topic shown when the entry is opened. Split on the pipe when it
-            is not inside quotes, and drop the quotes of every part.
+            The description field is the short text shown in the list of key
+            bindings. Split on a pipe that is not inside quotes and drop the
+            quotes, so a legacy '|' topic (now ignored) does not leak into
+            the short text.
 
             !_method
         */
@@ -230,11 +233,134 @@ namespace scribbolyth::help
         //!
 
         /*!
-            Parse Entries
+            Detail Stem
+
+            The file name (without directory or .txt) of the detailed help
+            topic of a binding: the mode, an underscore, then the key made
+            file-name safe:
+
+              - a special token (Esc, Return, ArrowUp, Ctrl;...) is simply
+                lowercased:            tree_arrowup.txt  (TREE ArrowUp)
+              - an upper case letter is written shift-<letter>, so j and J
+                stay apart on case-insensitive file systems:
+                                       tree_shift-j.txt  (TREE J)
+              - a multi-key sequence joins its keys with dashes:
+                                       tree_g-g.txt      (TREE "g g")
+              - characters that cannot appear in a file name are spelled
+                out:                  : colon  / slash  \ backslash
+                                       < lt  > gt  * star  ? question
+                                       " quote  | pipe
+                                       tree_slash.txt   (TREE /)
+
+            GLOBAL rows have no key, so their file is named after the
+            command, using the same per-character rules (so :o! and :O!
+            stay apart):              global_open.txt   (:open)
+                                      global_shift-o!.txt (:O!)
 
             !_method
         */
-        void ParseEntries(const std::string& path, std::vector<HelpEntry>& out)
+        std::string DetailStem(const std::string& mode,
+                               const std::string& key,
+                               const std::string& command)
+        {
+            const bool is_command = (key == "-");
+            const std::string& k = is_command ? command : key;
+
+            std::string stem = Lower(mode);
+            stem += '_';
+
+            // A whole key token (Esc, ArrowUp, Ctrl;...) is lowercased as-is;
+            // only single characters need the per-character rules. Command
+            // names are case sensitive (o! vs O!), so they always take the
+            // per-character rules.
+            if (!is_command && k.size() > 1 && k.find(' ') == std::string::npos)
+            {
+                return stem + Lower(k);
+            }
+
+            for (const char c : k)
+            {
+                switch (c)
+                {
+                    case ' ':  stem += '-';         continue;
+                    case ':':  stem += "colon";     continue;
+                    case '/':  stem += "slash";     continue;
+                    case '\\': stem += "backslash"; continue;
+                    case '<':  stem += "lt";        continue;
+                    case '>':  stem += "gt";        continue;
+                    case '*':  stem += "star";      continue;
+                    case '?':  stem += "question"; continue;
+                    case '"':  stem += "quote";     continue;
+                    case '|':  stem += "pipe";     continue;
+                    default: break;
+                }
+                if (c >= 'A' && c <= 'Z')
+                {
+                    stem += "shift-";
+                    stem += static_cast<char>(c - 'A' + 'a');
+                    continue;
+                }
+                stem += c;
+            }
+            return stem;
+        }
+        //!
+
+        /*!
+            Read Detail Topic
+
+            Read the detailed help topic of a binding from its file in the
+            commands_detail directory. Line breaks are the file's own;
+            Windows carriage returns are dropped and tabs become four
+            spaces, matching the '\t' escape of a '|' topic. An unreadable
+            or empty file returns "" so the caller can fall back to the
+            '|' topic.
+
+            !_method
+        */
+        std::string ReadDetailTopic(const std::string& path)
+        {
+            std::ifstream file(path);
+            if (!file.is_open()) return "";
+
+            std::string content;
+            std::string line;
+            bool first = true;
+            while (std::getline(file, line))
+            {
+                if (!line.empty() && line.back() == '\r') line.pop_back();
+                if (!first) content += '\n';
+                first = false;
+                for (const char c : line)
+                {
+                    if (c == '\t') content += "    ";
+                    else content += c;
+                }
+            }
+
+            // Drop the trailing line break / blank padding of the file.
+            while (!content.empty()
+                   && (content.back() == '\n' || content.back() == ' '
+                       || content.back() == '\t' || content.back() == '\r'))
+            {
+                content.pop_back();
+            }
+            return content;
+        }
+        //!
+
+        /*!
+            Parse Entries
+
+            `detail_dir` is the commands_detail folder that sits next to
+            commands.conf; a matching file in it overrides the '|' topic
+            of a binding.
+
+            !_method
+        */
+        void ParseEntries(const std::string& path,
+                           const std::string& detail_dir,
+                           std::vector<HelpEntry>& out)
         {
             std::ifstream file(path);
             if (!file.is_open()) return;
@@ -255,15 +381,28 @@ namespace scribbolyth::help
                 entry.command     = fields[3];
                 entry.op          = fields[5];
 
-                // The rest of the line is the description: a short text for
-                // the list of key bindings, optionally followed by the full
-                // help topic separated with a pipe.
+                // The rest of the line is the short description shown in
+                // the list of key bindings. Anything after an unquoted pipe
+                // is ignored: detailed help now comes only from files in
+                // commands_detail/.
                 const auto parts = SplitDescription(line.substr(end));
                 entry.description = parts.empty() ? "" : parts[0];
                 entry.topic.clear();
-                for (std::size_t i = 1; i < parts.size(); ++i)
+                entry.has_detail = false;
+
+                // A file in commands_detail/ holds the detailed topic. A
+                // binding without one has no detailed help: Enter on it
+                // does nothing.
+                if (!detail_dir.empty())
                 {
-                    if (!parts[i].empty()) entry.topic += parts[i] + "\n";
+                    const std::string detail = ReadDetailTopic(
+                        (fs::path(detail_dir) /
+                         (DetailStem(entry.mode, entry.key, entry.command) + ".txt")).string());
+                    if (!detail.empty())
+                    {
+                        entry.topic = detail;
+                        entry.has_detail = true;
+                    }
                 }
 
                 // Entries without a key binding (GLOBAL) show their command
@@ -280,22 +419,6 @@ namespace scribbolyth::help
                              PadRight(entry.key, 12) + " " +
                              entry.description;
                 out.push_back(std::move(entry));
-            }
-
-            // A binding without a topic of its own (most GLOBAL entries, for
-            // example) reuses the topic of another binding that runs the
-            // same operation, so Enter still shows the detailed help.
-            for (auto& entry : out)
-            {
-                if (!entry.topic.empty() || entry.op.empty() || entry.op == "-") continue;
-                for (const auto& other : out)
-                {
-                    if (other.op == entry.op && !other.topic.empty())
-                    {
-                        entry.topic = other.topic;
-                        break;
-                    }
-                }
             }
         }
         //!
@@ -323,7 +446,11 @@ namespace scribbolyth::help
         HelpDialog(std::shared_ptr<EditorState> state, const std::string& path, bool* show)
             : state_(std::move(state)), show_(show)
         {
-            ParseEntries(path, entries_);
+            // The detailed topic files live in commands_detail/, next to
+            // the commands.conf the dialog reads.
+            const fs::path detail_dir =
+                fs::path(path).parent_path() / "commands_detail";
+            ParseEntries(path, detail_dir.string(), entries_);
             for (const auto& e : entries_)
             {
                 content_width_ = std::max(content_width_, static_cast<int>(e.line.size()));
@@ -545,9 +672,9 @@ namespace scribbolyth::help
         /*!
             Open Topic
 
-            Show the full help topic of the highlighted key binding. Bindings
-            without a topic of their own fall back to their description, so
-            Enter always opens the help view.
+            Show the detailed help topic of the highlighted key binding. The
+            topic comes from that binding's file in commands_detail/; when
+            there is no matching file Enter does nothing.
 
             !_method
         */
@@ -558,10 +685,9 @@ namespace scribbolyth::help
 
             const int sel = std::min(selection_, static_cast<int>(filtered.size()) - 1);
             const HelpEntry& entry = entries_[filtered[sel]];
-            if (entry.topic.empty() && entry.description.empty()) return;
+            if (!entry.has_detail) return;
 
-            const std::string& topic =
-                entry.topic.empty() ? entry.description : entry.topic;
+            const std::string& topic = entry.topic;
 
             topic_lines_ = WrapLines(ExpandTopic(topic),
                                       static_cast<std::size_t>(std::max(8, InnerWidth() - 2)));

@@ -1,0 +1,1 @@
+Moves the node selection to the top-most node within the tree.

@@ -1,0 +1,2 @@
+Extends the current selection down to the next row of text.
+[count] [key binding] - repeats the action.

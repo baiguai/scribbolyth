@@ -1,0 +1,1 @@
+Basic calculations can be performed using the command input using :calc

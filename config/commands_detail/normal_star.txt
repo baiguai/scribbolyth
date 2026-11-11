@@ -1,0 +1,1 @@
+Searches within the current node's contents, for the word that the cursor is currently positioned within.

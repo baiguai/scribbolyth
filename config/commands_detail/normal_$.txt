@@ -1,0 +1,1 @@
+Moves the cursor to the end of the currently selected line within the current node's contents.

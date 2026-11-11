@@ -1,0 +1,1 @@
+Enters INSERT mode with the cursor placed after the current location in the node's contents.

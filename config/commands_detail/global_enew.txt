@@ -1,0 +1,1 @@
+A new document can be created the command input :enew

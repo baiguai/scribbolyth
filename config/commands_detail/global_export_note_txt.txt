@@ -1,0 +1,5 @@
+The currently selected node can be exported as a .txt file using the command input using :export_note_txt
+
+Note:
+Directories can be bookmarked using: m
+To access bookmarked directories use: `

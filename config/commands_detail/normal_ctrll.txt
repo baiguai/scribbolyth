@@ -1,0 +1,1 @@
+Place the cursor within a link in the current node's contents. Then press this key combination to navigate to that link.

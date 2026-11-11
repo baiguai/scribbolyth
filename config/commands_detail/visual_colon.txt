@@ -1,0 +1,1 @@
+Display the command input and give it focus.

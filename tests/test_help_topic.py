@@ -55,8 +55,8 @@ try:
     s.send(b'\x1b')
     s.forbid('? Help', 'the help dialog should be closed')
 
-    # A GLOBAL binding without a topic of its own still opens help: it reuses
-    # the topic of the binding that runs the same operation (TREE '?').
+    # A GLOBAL binding with no detail file has no detailed help: Enter does
+    # nothing and the filtered list stays on screen.
     s.send(b'?')
     s.send(b'help')
     first = highlighted(s)
@@ -67,8 +67,8 @@ try:
         s.dump()
         raise SystemExit(1)
     s.send(b'\r')
-    s.require('? Help - GLOBAL', 'Enter should open help for a topic-less binding too')
-    s.require('Enter/Esc back', 'the fallback topic view should open')
+    s.require('Filter: help', 'Enter without a detail file should keep the list')
+    s.forbid('? Help - GLOBAL', 'Enter without a detail file should do nothing')
 finally:
     s.quit()
 

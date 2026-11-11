@@ -1,0 +1,2 @@
+In INSERT mode text isn't selectable, but using this allows you to cut the line of text the cursor is currently on.
+To copy individual characters, words, or selections of text, enter VISUAL mode.

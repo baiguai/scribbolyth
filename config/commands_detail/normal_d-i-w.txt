@@ -1,0 +1,1 @@
+Deletes the word that the cursor is currently sittin within.

@@ -1,0 +1,2 @@
+Displays the history dialog. These are the historical list of recently viewed nodes.
+Note that empty nodes are not added to this list.

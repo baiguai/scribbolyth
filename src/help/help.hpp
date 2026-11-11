@@ -21,7 +21,8 @@ namespace scribbolyth::help
         std::string command;
         std::string op;
         std::string description;
-        std::string topic;    // the full help topic, when the description has one
+        std::string topic;    // the detailed help topic from commands_detail/
+        bool has_detail = false;  // true when a detail file matched this binding
         std::string line;   // the diagram line shown in the dialog
     };
     //<<
