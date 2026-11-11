@@ -71,6 +71,13 @@ if [ -f "bin/$APP_NAME" ]; then
     else
         echo "Warning: config/commands.conf not found - config not copied"
     fi
+    if [ -d "../config/commands_detail" ]; then
+        rm -rf "bin/commands_detail"
+        cp -r "../config/commands_detail" "bin/"
+        echo "Detailed help copied to: $(pwd)/bin/commands_detail"
+    else
+        echo "Warning: config/commands_detail not found - detailed help not copied"
+    fi
     if [ -f "../config/scribboleth.html" ]; then
         cp "../config/scribboleth.html" "bin/"
         echo "Template .html copied to: $(pwd)/bin/scribboleth.html"
@@ -92,6 +99,11 @@ if [ -f "bin/$APP_NAME" ]; then
     if [ -d "../build-windows/bin" ]; then
         cp "../config/commands.conf" "../build-windows/bin/" 2>/dev/null || \
             echo "Warning: could not copy config to build-windows/bin/"
+        if [ -d "../config/commands_detail" ]; then
+            rm -rf "../build-windows/bin/commands_detail"
+            cp -r "../config/commands_detail" "../build-windows/bin/" 2>/dev/null || \
+                echo "Warning: could not copy detailed help to build-windows/bin/"
+        fi
         cp "../config/scribboleth.html" "../build-windows/bin/" 2>/dev/null || \
             echo "Warning: could not copy template to build-windows/bin/"
         cp "../config/init.conf" "../build-windows/bin/" 2>/dev/null || \

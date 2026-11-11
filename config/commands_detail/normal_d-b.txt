@@ -1,0 +1,2 @@
+Deletes all the text from where the cursor is back to the start of the word it is positioned within, as identified by the spaces that surround the word.
+[count] [key binding] - repeats the action.

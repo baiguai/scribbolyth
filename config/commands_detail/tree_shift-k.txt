@@ -1,0 +1,3 @@
+Moves the current node toward the top of the tree.
+Note that this is upper case.
+[count] [key binding] - repeats the action.

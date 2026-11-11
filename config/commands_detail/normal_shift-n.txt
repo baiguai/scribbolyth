@@ -1,0 +1,1 @@
+Once you have searched the current node's contents, this will move the cursor to the previous matching text if any.

@@ -1,0 +1,2 @@
+Deletes the entire line of text that is under the cursor.
+[count] [key binding] - repeats the action.

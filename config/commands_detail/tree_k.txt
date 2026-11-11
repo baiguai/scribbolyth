@@ -1,0 +1,3 @@
+Moves the cursor up within the current node's contents.
+
+[count] [key binding] - repeats the action.

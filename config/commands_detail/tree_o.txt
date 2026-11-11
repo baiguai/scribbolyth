@@ -1,0 +1,5 @@
+Opening files is done within the Open File dialog or from the command input.
+
+Note:
+Directories can be bookmarked using: m
+To access bookmarked directories use: `

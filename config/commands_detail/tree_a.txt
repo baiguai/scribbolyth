@@ -1,0 +1,1 @@
+Create a new node as a sibling node of the currently selected node. If no node is selected (accomplished by hitting Escape when in TREE mode), it is created as a root level node.

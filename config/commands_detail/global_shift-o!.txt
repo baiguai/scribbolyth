@@ -1,0 +1,1 @@
+Entering :O! in the command input, displaying it using the : key binding will display the recent files dialog and will open a recent file even if there are unsaved changes.

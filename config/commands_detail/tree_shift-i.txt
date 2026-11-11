@@ -1,0 +1,1 @@
+Switches to the INSERT mode, this is where standard typing content into a node is done.

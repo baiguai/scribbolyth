@@ -1,0 +1,1 @@
+Displays the links dialog. Links can either be opened, using Enter, or copied to the clipboard, using 'y'.

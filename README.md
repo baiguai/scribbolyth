@@ -42,7 +42,7 @@ Windows `.exe` needs anything installed — no libraries, no runtimes,
 no packages. What matters is that the **config files travel with the
 binary**.
 
-## Required: the three config files in the app`s directory
+## Required: the config files in the app`s directory
 
 The app looks for `commands.conf`, `init.conf` and `scribboleth.html` in the
 same folder as the executable (`build.sh` copies them there automatically). If
@@ -51,6 +51,10 @@ you hand someone just the binary, the app still runs, but with only the built-in
 
 - **commands.conf** — defines the key bindings and commands. Without it the app
   starts with nothing mapped except `:qa`.
+- **commands_detail/** — optional per-binding detailed help files shown when
+  pressing Enter on a binding in the `?` dialog (see the comments at the top of
+  commands.conf for the file naming). A binding with no matching file has no
+  detailed help; Enter does nothing for it.
 - **init.conf** — holds your recent-files list and the last-opened document. It
   is written to (to persist those), so its folder must be **writable**. Missing
   or unwritable, it degrades gracefully: the app just won't remember anything.

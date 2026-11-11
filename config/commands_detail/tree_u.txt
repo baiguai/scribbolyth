@@ -1,0 +1,2 @@
+The undo dialog can be accessed from TREE mode, but be aware, if you navigate to a different node, the undo history is forgotten.
+It only persists while the node remains the currently selected node.

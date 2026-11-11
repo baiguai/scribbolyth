@@ -1,0 +1,1 @@
+Hides the tree panel to give the editor the full width, or shows it again. The selected node and the tree width are kept.

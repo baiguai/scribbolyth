@@ -1,0 +1,1 @@
+Enters VISUAL LINE mode, allowing you to select entire lines of text within the current node's contents.

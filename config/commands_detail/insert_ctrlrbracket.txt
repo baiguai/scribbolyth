@@ -1,0 +1,1 @@
+This key binding allows you to insert an inter-document link using a search dialog.

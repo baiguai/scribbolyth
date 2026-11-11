@@ -1,0 +1,1 @@
+This key binding will display the command input and set the focus on it.

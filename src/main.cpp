@@ -129,6 +129,80 @@ using namespace ftxui;
         ./docsgen/help.html
     */
 
+    /*[/General Notes/Configuration/commands.conf]
+        The ./config/commands.conf file defines the key bindings that are available
+        in Scribbolyth. Any existing Op can have a customized key binding that
+        will call it - simply by defining it within this configuration file.
+
+        However, detailed information on each key binding can also be defined.
+        So that when the user selects a particular key binding - you can provide
+        them with much more comprehensive information on it.
+
+        See _Command Details_
+    */
+
+    /*[/General Notes/Configuration/Command Details]
+        Detailed information about your defined key bindings can be created within
+        the ./config/commands_detail/ directory. These are identified by:
+        * MODE
+        * Underscore '_'
+        * Key Binding
+
+        For example - a TREE mode 'j' key binding detail would be stored in:
+        ./config/commands_detail/tree_j.txt
+
+        Since these details need to reference the key binding you have defined, they
+        aren't Op specific. So if you change a key binding - you will want to rename
+        and change the contents of any corresponding details file you might have for
+        it.
+
+        Since details are tied to their bindings using file names, some characters
+        need to be translated so that we can have a valid file name.
+
+        See: _Key Binding Translation_
+
+        You can refer to the details that ship with Scribbolyth as examples of
+        how to do this.
+
+
+        Note:
+        You don't have to define any detailed information, and it simply won't
+        show when you user hits Enter.
+    */
+
+    /*[/General Notes/Configuration/Command Details/Key Binding Translation]
++--------------------+----------------------------------------+
+| Key                | File name piece                        |
++--------------------+----------------------------------------+
+| A-Z                | shift-a ... shift-z (so J → shift-j)   |
+| a-z, 0-9           | as-is                                  |
+| space (joins keys) | - ("g g" → g-g, "d i w" → d-i-w)       |
+| :                  | colon                                  |
+| /                  | slash                                  |
+| \                  | backslash                              |
+| <                  | lt                                     |
+| >                  | gt                                     |
+| *                  | star                                   |
+| ?                  | question                               |
+| "                  | quote                                  |
+| |                  | pipe                                   |
+| anything else      | literally (#, $, `, [, ], ;, !, ...)   |
++--------------------+----------------------------------------+
+
+GLOBAL rows — named by command, using the per-character rules: :open→global_open.txt,
+:o!→global_o!.txt, :O!→global_shift-o!.txt, :U→global_shift-u.txt.
+Entries sharing an op inherit via the same-op fallback (e.g. :o uses global_open.txt).
+
+Examples
+- TREE ArrowUp → tree_arrowup.txt
+- TREE "g g" → tree_g-g.txt
+- TREE J → tree_shift-j.txt
+- TREE / → tree_slash.txt
+- NORMAL D → normal_shift-d.txt
+- NORMAL Ctrl; → normal_ctrl;.txt
+- GLOBAL :open → global_open.txt
+    */
+
     /*[/General Notes/Compiling/config.sh]
         The CMakeLists.txt is compiled using the ./config.sh in conjunction with
         the ./CMakeLists.txt.in file.
@@ -165,6 +239,15 @@ using namespace ftxui;
         This file is the template that is copied and populated via the
         _config.sh_. A new CMakeLists.txt is created and loaded with the
         populated version of the content of the CMakeLists.txt.in.
+    */
+
+    /*[/General Notes/Compiling/Updating an Existing Instance]
+      If you already have Scribbolyth 'installed' and you've just done a
+      rebuild...
+      You will want to copy everything in the output directory EXCEPT the:
+      init.conf
+
+      to the directory where you have the scribbolyth executable.
     */
 ////////////////////////////////////////////////////////////////////////////////
 

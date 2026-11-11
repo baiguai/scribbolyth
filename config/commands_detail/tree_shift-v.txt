@@ -1,0 +1,2 @@
+Displays a tree built from inter-note links: a note's linked notes become its children, recursively.
+Use j/k to move, h/l to fold or unfold, gg/G to jump to the top/bottom, / to filter, Enter to open the selected note, and Escape to close the dialog. While filtering, Escape cancels the filter.

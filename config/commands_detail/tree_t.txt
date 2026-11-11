@@ -1,0 +1,5 @@
+Export the currently selected node's contents to a .txt file. If no node selected nothing is saved.
+
+Note:
+Directories can be bookmarked using: m
+To access bookmarked directories use: `

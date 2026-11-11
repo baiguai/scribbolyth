@@ -1,0 +1,1 @@
+Enters INSERT mode on the block selection, at the start of the lines, entered text is applied to the block selection upon hitting Escape.

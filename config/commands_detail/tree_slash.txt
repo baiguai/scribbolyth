@@ -1,0 +1,1 @@
+Displays the search dialog. This searches across all of the nodes in the document.

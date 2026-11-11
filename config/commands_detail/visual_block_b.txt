@@ -1,0 +1,2 @@
+Extends the block selection to the previous word, words are identified by the spaces that surround them.
+[count] [key binding] - repeats the action.
