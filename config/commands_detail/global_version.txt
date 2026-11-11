@@ -1,1 +1,3 @@
-The Scribbolyth version can be viewed using the command input :version
+The Scribbolyth version can be viewed using the command input
+
+:version

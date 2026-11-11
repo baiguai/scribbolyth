@@ -1,1 +1,5 @@
-Renaming a node can be done using the command input :rename or using the key binding R (which will display the command input and populate it with :rename).
+Renaming a node can be done using the command input
+
+:rename
+
+or using the key binding R (which will display the command input and populate it with :rename).

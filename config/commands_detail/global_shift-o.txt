@@ -1,1 +1,5 @@
-Displaying the recent files dialog can be done using the O key binding (note that it is capitalized), or by manually using :O within the command input and hitting Enter or tab to populate the path, then hitting Enter.
+Displaying the recent files dialog can be done using the O key binding (note that it is capitalized), or by manually using
+
+:O
+
+within the command input and hitting Enter or tab to populate the path, then hitting Enter.

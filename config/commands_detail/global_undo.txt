@@ -1,1 +1,5 @@
-The undo dialog can be displayed using the u key binding or by entering :u in the command input.
+The undo dialog can be displayed using the u key binding or by entering
+
+:u
+
+in the command input.
