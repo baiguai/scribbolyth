@@ -1,2 +1,3 @@
 Moves the current line of text up within the node's contents.
+
 [count] [key binding] - repeats the action.

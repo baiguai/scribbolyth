@@ -1,3 +1,7 @@
-A new document can be created the command input
+A new document can be created the command input:
 
 :enew
+
+Note: If there are unsaved changes, you will need to either save those or use:
+
+:enew!

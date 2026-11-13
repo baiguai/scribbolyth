@@ -1,2 +1,3 @@
 Extends the block selection up to previous row(s) of text
+
 [count] [key binding] - repeats the action.

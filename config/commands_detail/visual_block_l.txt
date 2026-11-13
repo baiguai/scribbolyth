@@ -1,2 +1,3 @@
 Extends the block selection to the right.
+
 [count] [key binding] - repeats the action.

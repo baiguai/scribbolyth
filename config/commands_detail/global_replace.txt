@@ -1,4 +1,4 @@
-In the command input use
+In the command input use:
 
 :replace
 

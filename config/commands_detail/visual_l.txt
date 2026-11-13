@@ -1,2 +1,3 @@
 Extends the current selection to the right.
+
 [count] [key binding] - repeats the action.

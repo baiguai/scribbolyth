@@ -425,6 +425,53 @@
                     display: block;
                 }
 
+                /* Link Tree Dialog */
+                #linkTreeList .lt-row {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    white-space: nowrap;
+                }
+                #linkTreeList .lt-twisty {
+                    width: 12px;
+                    flex-shrink: 0;
+                    color: var(--muted);
+                    text-align: center;
+                }
+                #linkTreeList .lt-title {
+                    flex: 1;
+                    min-width: 0;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                #linkTreeDialog .lt-hint {
+                    color: var(--muted);
+                    font-size: 0.9em;
+                    margin: 8px 0 0;
+                }
+
+                /* Dead Links Dialog */
+                #missingLinksList .ml-row {
+                    display: flex;
+                    align-items: baseline;
+                    gap: 8px;
+                    white-space: nowrap;
+                }
+                #missingLinksList .ml-title {
+                    color: var(--danger);
+                    flex-shrink: 0;
+                }
+                #missingLinksList .ml-source {
+                    color: var(--muted);
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                #missingLinksDialog .ml-hint {
+                    color: var(--muted);
+                    font-size: 0.9em;
+                    margin: 8px 0 0;
+                }
+
                 /* Options Dialog */
                 #optionsDialog {
                     position: fixed;
@@ -816,6 +863,19 @@
                 <div id="linksList"><a href="#" data-node-id="kqr4o4g3" class="selected">The Options Dialog</a></div>
             </div>
 
+            <div id="linkTreeDialog" class="search-dialog" style="display: none;">
+                <h3 style="margin: 0 0 8px;">Link Tree</h3>
+                <input id="linkTreeFilter" type="text" placeholder="Filter link tree..." style="display: none;">
+                <div id="linkTreeList" class="search-results"></div>
+                <p class="lt-hint">↑↓ Navigate • / Filter • Enter Open • Esc Close</p>
+            </div>
+
+            <div id="missingLinksDialog" class="search-dialog" style="display: none;">
+                <h3 style="margin: 0 0 8px;">Dead Intra-Document Links</h3>
+                <div id="missingLinksList" class="search-results"></div>
+                <p class="ml-hint">j/k Navigate • gg/G First/Last • Enter Open • Esc Close</p>
+            </div>
+
             <div id="marksDialog" style="display: none;">
                 <h3>Bookmarks</h3>
                 <div id="marksList"></div>
@@ -944,7 +1004,7 @@
             let historyStack = [ ];
 
             // !@!
-            const readOnly = true;
+            const readOnly = false;
 
             const SAFE_MAP = {
                 "</script": "^^^script^^^",
@@ -953,55 +1013,6 @@
                 "];": "^^^array^^^",
                 "\\);": "^^^func^^^"
             };
-
-            // Locate a `let <keyword> = <value>;` declaration.  The value is
-            // scanned with bracket depth and string literals respected, so a
-            // '];' inside note text (e.g. `alphabet[dist(gen)];`) cannot end
-            // the array early the way a non-greedy regex would.
-            function findJsStatement(text, keyword) {
-                const re = new RegExp('^([ \\t]*)let\\s+' + keyword + '\\s*=', 'm');
-                const m = re.exec(text);
-                if (!m) return null;
-                const start = m.index + m[1].length;
-                let i = m.index + m[0].length;
-                while (i < text.length && /\s/.test(text[i])) i++;
-                const valueStart = i;
-                let valueEnd;
-                if (text[i] === '[' || text[i] === '{') {
-                    let depth = 0, inString = false, escaped = false;
-                    for (let j = i; j < text.length; j++) {
-                        const ch = text[j];
-                        if (inString) {
-                            if (escaped) { escaped = false; continue; }
-                            if (ch === '\\') { escaped = true; continue; }
-                            if (ch === '"') inString = false;
-                            continue;
-                        }
-                        if (ch === '"') { inString = true; continue; }
-                        if (ch === '[' || ch === '{') depth++;
-                        else if (ch === ']' || ch === '}') {
-                            depth--;
-                            if (depth === 0) { valueEnd = j + 1; break; }
-                        }
-                    }
-                    if (valueEnd === undefined) return null;
-                } else {
-                    const semi = text.indexOf(';', i);
-                    if (semi === -1) return null;
-                    valueEnd = semi;
-                }
-                let end = valueEnd;
-                while (end < text.length && /\s/.test(text[end])) end++;
-                if (text[end] === ';') end++;
-                return { start: start, end: end, value: text.slice(valueStart, valueEnd) };
-            }
-
-            function replaceJsStatement(text, keyword, value) {
-                const found = findJsStatement(text, keyword);
-                if (!found) return text;
-                return text.slice(0, found.start) + 'let ' + keyword + ' = '
-                     + value + ';' + text.slice(found.end);
-            }
 
             let nodePort = 0;
 
@@ -1024,6 +1035,16 @@
             let selectedId = null;
             let editing = false;
             let showingLinks = false;
+            let showingLinkTree = false;
+            let linkTreeRoots = [];
+            let linkTreeVisible = [];
+            let linkTreeIndex = 0;
+            let linkTreeFilterActive = false;
+            let showingMissingLinks = false;
+            let missingLinkEntries = [];
+            let missingLinksIndex = 0;
+            let missingLinksPendingG = false;
+            let missingLinksGTimer = null;
             let showingMarks = false;
             let showingTags = false;
             let tagsList = [];
@@ -1182,6 +1203,11 @@
             const searchDialog = document.getElementById('searchDialog');
             const replaceDialog = document.getElementById('replaceDialog');
             const linksDialog = document.getElementById('linksDialog');
+            const linkTreeDialog = document.getElementById('linkTreeDialog');
+            const linkTreeFilterInput = document.getElementById('linkTreeFilter');
+            const linkTreeList = document.getElementById('linkTreeList');
+            const missingLinksDialog = document.getElementById('missingLinksDialog');
+            const missingLinksList = document.getElementById('missingLinksList');
             const marksDialog = document.getElementById('marksDialog');
             const historyDialog = document.getElementById('historyDialog');
             const undoDialog = document.getElementById('undoDialog');
@@ -1239,6 +1265,8 @@
                     { key: "\\", mode: "TREE", description: "Search, then create a root node with links to all results" },
                     { key: "f", mode: "TREE", description: "Find text in the current note " },
                     { key: "#", mode: "TREE", description: "Show note links dialog" },
+                    { key: "V", mode: "TREE", description: "Show the link tree dialog" },
+                    { key: "X", mode: "TREE", description: "Show dead intra-document links" },
                     { key: "<", mode: "TREE", description: "Show the history dialog" },
                     { key: "gg", mode: "TREE", description: "Select first root tree node" },
                     { key: "G", mode: "TREE", description: "Select last root tree node" },
@@ -1309,8 +1337,9 @@
                     { key: "\\", mode: "TREE", description: "Search, then create a root node with links to all results" },
                     { key: "f", mode: "TREE", description: "Find/Replace text in the current note " },
                     { key: "#", mode: "TREE", description: "Show note links dialog" },
+                    { key: "V", mode: "TREE", description: "Show the link tree dialog" },
                     { key: "<", mode: "TREE", description: "Show the history dialog" },
-                    { key: "X", mode: "TREE", description: "Show broken note links" },
+                    { key: "X", mode: "TREE", description: "Show dead intra-document links" },
                     { key: "s", mode: "TREE", description: "Save the current file" },
                     { key: "S", mode: "TREE", description: "Save as" },
                     { key: "n", mode: "TREE", description: "Save via NodeJs saver server" },
@@ -1334,6 +1363,7 @@
                 
                 let helpVimEnabled = [
                     { key: "?", mode: "TREE", description: "Show this help" },
+                    { key: "V", mode: "TREE", description: "Show the link tree dialog" },
                     { key: "Escape", mode: "NORMAL", description: "Return to TREE mode" },
                     { key: "h", mode: "NORMAL", description: "Move cursor left" },
                     { key: "H", mode: "NORMAL", description: "Insert Header, See Options ^*^ is the row's text" },
@@ -1910,10 +1940,8 @@
                 renderMarksList(); // Call the global renderMarksList
             }
 
-            function openMissingLinksDialog() {
-                if (readOnly) return;
-                showingLinks = true;
-                const nodeLinkRegex = /(?:^|\s)_([^_]|[^_].*?[^_])_(?=\s|[.,!?;:)]|$)/g;
+            function collectMissingLinks() {
+                const nodeLinkRegex = /(?:^|\s|\()_([^_]|[^_].*?[^_])_(?=\s|[.,!?;:)]|$)/g;
 
                 // Gather all node titles (case-insensitive)
                 const allTitles = new Set();
@@ -1926,67 +1954,230 @@
                     }
                 })(treeData);
 
-                // Map of missingLink → set of nodes that reference it
-                const missingMap = new Map();
+                const entries = [];
 
                 (function walk(nodes) {
                     for (const n of nodes) {
                         if (n.content) {
-                            let seenInThisNode = new Set(); // avoid dupes within the same note
                             let match;
+                            nodeLinkRegex.lastIndex = 0;
                             while ((match = nodeLinkRegex.exec(n.content)) !== null) {
                                 const linkTitle = match[1].trim();
-                                if (!allTitles.has(linkTitle.toLowerCase())) {
-                                    if (!seenInThisNode.has(linkTitle.toLowerCase())) {
-                                        if (!missingMap.has(linkTitle)) {
-                                            missingMap.set(linkTitle, []);
-                                        }
-                                        missingMap.get(linkTitle).push({
-                                            nodeId: n.id,
-                                            nodeTitle: n.title || '(untitled)'
-                                        });
-                                        seenInThisNode.add(linkTitle.toLowerCase());
-                                    }
-                                }
+                                if (!linkTitle || allTitles.has(linkTitle.toLowerCase())) continue;
+
+                                const innerStart = match[0].indexOf('_');
+                                const innerEnd = match[0].lastIndexOf('_');
+                                const linkStart = match.index + innerStart;
+                                const linkLength = innerEnd - innerStart + 1;
+                                const line = n.content.slice(0, linkStart).split('\n').length - 1;
+
+                                entries.push({
+                                    missingTitle: linkTitle,
+                                    token: match[0].slice(innerStart, innerEnd + 1),
+                                    nodeId: n.id,
+                                    nodeTitle: n.title || '(untitled)',
+                                    line,
+                                    linkStart,
+                                    linkLength
+                                });
                             }
                         }
                         if (n.children && n.children.length) walk(n.children);
                     }
                 })(treeData);
 
-                const listEl = document.getElementById('linksList');
-                listEl.innerHTML = '';
+                return entries;
+            }
 
-                if (missingMap.size === 0) {
-                    listEl.innerHTML = '<p>No missing links found</p>';
-                } else {
-                    listEl.innerHTML = '<p>Missing Links:</p>';
-                    for (const [missingTitle, refs] of missingMap.entries()) {
-                        refs.forEach(ref => {
-                            const container = document.createElement('div');
+            function renderMissingLinks() {
+                missingLinksList.innerHTML = '';
 
-                            const link = document.createElement('a');
-                            link.href = '#';
-                            link.textContent = `"${missingTitle}" — linked from: ${ref.nodeTitle}`;
-                            link.style.color = 'var(--dim)';
-                            link.title = 'Missing link — click to go to note';
-
-                            // Clicking takes you to the referencing note
-                            link.addEventListener('click', (e) => {
-                                e.preventDefault();
-                                expandToNode(ref.nodeId);
-                                selectedId = ref.nodeId;
-                                closeLinksDialog();
-                                render();
-                            });
-
-                            container.appendChild(link);
-                            listEl.appendChild(container);
-                        });
-                    }
+                if (missingLinkEntries.length === 0) {
+                    const empty = document.createElement('div');
+                    empty.textContent = '(no dead intra-document links found)';
+                    empty.style.color = 'var(--muted)';
+                    missingLinksList.appendChild(empty);
+                    missingLinksIndex = 0;
+                    return;
                 }
 
-                linksDialog.style.display = 'block';
+                if (missingLinksIndex >= missingLinkEntries.length) {
+                    missingLinksIndex = missingLinkEntries.length - 1;
+                }
+                if (missingLinksIndex < 0) missingLinksIndex = 0;
+
+                const frag = document.createDocumentFragment();
+                missingLinkEntries.forEach((entry, i) => {
+                    const row = document.createElement('div');
+                    row.className = 'ml-row' + (i === missingLinksIndex ? ' selected' : '');
+
+                    const title = document.createElement('span');
+                    title.className = 'ml-title';
+                    title.textContent = `"${entry.missingTitle}"`;
+
+                    const source = document.createElement('span');
+                    source.className = 'ml-source';
+                    source.textContent = `in ${entry.nodeTitle} (line ${entry.line + 1})`;
+
+                    row.appendChild(title);
+                    row.appendChild(source);
+                    row.addEventListener('click', () => {
+                        missingLinksIndex = i;
+                        showSelectedMissingLink();
+                    });
+                    frag.appendChild(row);
+                });
+
+                missingLinksList.appendChild(frag);
+                const selected = missingLinksList.querySelector('.ml-row.selected');
+                if (selected) {
+                    requestAnimationFrame(() => selected.scrollIntoView({ block: 'nearest' }));
+                }
+            }
+
+            function openMissingLinksDialog() {
+                missingLinkEntries = collectMissingLinks();
+                missingLinksIndex = 0;
+                missingLinksPendingG = false;
+                showingMissingLinks = true;
+                missingLinksDialog.style.display = 'flex';
+                renderMissingLinks();
+            }
+
+            function closeMissingLinksDialog() {
+                showingMissingLinks = false;
+                missingLinksDialog.style.display = 'none';
+                missingLinksIndex = 0;
+                missingLinksPendingG = false;
+                if (missingLinksGTimer) {
+                    clearTimeout(missingLinksGTimer);
+                    missingLinksGTimer = null;
+                }
+            }
+
+            function moveMissingLinksSelection(delta) {
+                if (!missingLinkEntries.length) return;
+                missingLinksIndex = (missingLinksIndex + delta + missingLinkEntries.length) % missingLinkEntries.length;
+                renderMissingLinks();
+            }
+
+            function showSelectedMissingLink() {
+                const entry = missingLinkEntries[missingLinksIndex];
+                if (!entry) return;
+
+                closeMissingLinksDialog();
+                expandToNode(entry.nodeId);
+                selectedId = entry.nodeId;
+                editing = false;
+                mode_insert = false;
+                mode_visual = false;
+                mode_visual_block = false;
+                render();
+
+                const info = findNodeAndParentById(entry.nodeId);
+                if (!info) return;
+
+                const lines = safeRestoreText(info.node.content || '').split('\n');
+                const lineIndex = Math.max(0, Math.min(entry.line, lines.length - 1));
+                let position = 0;
+                for (let i = 0; i < lineIndex; i++) {
+                    position += lines[i].length + 1;
+                }
+
+                const needle = entry.token || `_${entry.missingTitle}_`;
+                const lineText = lines[lineIndex] || '';
+                let col = lineText.indexOf(needle);
+                if (col < 0) col = lineText.toLowerCase().indexOf(needle.toLowerCase());
+                const targetPos = position + (col >= 0 ? col : 0);
+
+                if (!readOnly) {
+                    editing = true;
+                    render();
+                }
+
+                editorArea.focus();
+                editorArea.setSelectionRange(targetPos, targetPos);
+                scrollToCursor();
+                if (!readOnly) setVimMode(false);
+            }
+
+            function handleMissingLinksKey(e) {
+                if (!showingMissingLinks) return;
+
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeMissingLinksDialog();
+                    return;
+                }
+
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showSelectedMissingLink();
+                    return;
+                }
+
+                if (e.key === 'ArrowDown' || e.key === 'j') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    missingLinksPendingG = false;
+                    moveMissingLinksSelection(1);
+                    return;
+                }
+
+                if (e.key === 'ArrowUp' || e.key === 'k') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    missingLinksPendingG = false;
+                    moveMissingLinksSelection(-1);
+                    return;
+                }
+
+                if (e.key === 'G' || e.key === 'End') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    missingLinksPendingG = false;
+                    if (missingLinkEntries.length) {
+                        missingLinksIndex = missingLinkEntries.length - 1;
+                        renderMissingLinks();
+                    }
+                    return;
+                }
+
+                if (e.key === 'Home') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    missingLinksPendingG = false;
+                    if (missingLinkEntries.length) {
+                        missingLinksIndex = 0;
+                        renderMissingLinks();
+                    }
+                    return;
+                }
+
+                if (e.key === 'g') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (missingLinksPendingG) {
+                        missingLinksPendingG = false;
+                        if (missingLinksGTimer) {
+                            clearTimeout(missingLinksGTimer);
+                            missingLinksGTimer = null;
+                        }
+                        if (missingLinkEntries.length) {
+                            missingLinksIndex = 0;
+                            renderMissingLinks();
+                        }
+                    } else {
+                        missingLinksPendingG = true;
+                        if (missingLinksGTimer) clearTimeout(missingLinksGTimer);
+                        missingLinksGTimer = setTimeout(() => {
+                            missingLinksPendingG = false;
+                            missingLinksGTimer = null;
+                        }, 600);
+                    }
+                }
             }
 
             function dialogOpen() {
@@ -2005,6 +2196,12 @@
                     openDialog = true;
                 }
                 if (linksDialog.style.display === "block") {
+                    openDialog = true;
+                }
+                if (showingLinkTree || linkTreeDialog.style.display === "flex") {
+                    openDialog = true;
+                }
+                if (showingMissingLinks || missingLinksDialog.style.display === "flex") {
                     openDialog = true;
                 }
                 if (marksDialog.style.display === "block") {
@@ -4414,6 +4611,301 @@
                 linksDialog.style.display = 'none';
             }
 
+            function collectLinkTreeTargets(content, titleMap) {
+                const targets = [];
+                const seen = new Set();
+                const text = safeRestoreText(content || '');
+
+                const addTitle = (title) => {
+                    const key = title.trim().toLowerCase();
+                    if (!key) return;
+                    const node = titleMap.get(key);
+                    if (node && !seen.has(node.id)) {
+                        seen.add(node.id);
+                        targets.push(node);
+                    }
+                };
+
+                let match;
+                const markdownNodeLinkRegex = /\[[^\]]+\]\s*\(\s*_([^_]+)_\s*\)/g;
+                while ((match = markdownNodeLinkRegex.exec(text)) !== null) {
+                    addTitle(match[1]);
+                }
+
+                const nodeLinkRegex = /(?:^|\s|\()_([^_]|[^_].*?[^_])_(?=\s|[.,!?;:)]|$)/g;
+                while ((match = nodeLinkRegex.exec(text)) !== null) {
+                    addTitle(match[1].trim().replace(/^_+|_+$/g, ''));
+                }
+
+                return targets;
+            }
+
+            function buildLinkTree() {
+                const titleMap = new Map();
+                (function walk(nodes) {
+                    for (const n of nodes) {
+                        const key = (n.title || '').trim().toLowerCase();
+                        if (key && !titleMap.has(key)) titleMap.set(key, n);
+                        if (n.children && n.children.length) walk(n.children);
+                    }
+                })(treeData);
+
+                const outgoing = new Map();
+                const sources = [];
+                (function walk(nodes) {
+                    for (const n of nodes) {
+                        const targets = collectLinkTreeTargets(n.content, titleMap)
+                            .filter(t => t.id !== n.id);
+                        if (targets.length) {
+                            outgoing.set(n.id, targets);
+                            sources.push(n);
+                        }
+                        if (n.children && n.children.length) walk(n.children);
+                    }
+                })(treeData);
+
+                const referenced = new Set();
+                outgoing.forEach(targets => targets.forEach(t => referenced.add(t.id)));
+
+                const expanded = new Set();
+                const included = new Set();
+
+                function makeBranch(node, ancestors) {
+                    included.add(node.id);
+                    const branch = { node, children: [] };
+                    const targets = outgoing.get(node.id) || [];
+                    if (!targets.length || expanded.has(node.id)) return branch;
+
+                    expanded.add(node.id);
+                    const nextAncestors = new Set(ancestors);
+                    nextAncestors.add(node.id);
+                    for (const target of targets) {
+                        if (nextAncestors.has(target.id)) continue;
+                        branch.children.push(makeBranch(target, nextAncestors));
+                    }
+                    return branch;
+                }
+
+                const roots = [];
+                for (const n of sources) {
+                    if (referenced.has(n.id)) continue;
+                    roots.push(makeBranch(n, new Set()));
+                }
+                for (const n of sources) {
+                    if (included.has(n.id)) continue;
+                    roots.push(makeBranch(n, new Set()));
+                }
+                return roots;
+            }
+
+            function collectLinkTreeSubtree(branch, depth, out) {
+                out.push({
+                    node: branch.node,
+                    depth,
+                    hasChildren: branch.children.length > 0
+                });
+                for (const child of branch.children) {
+                    collectLinkTreeSubtree(child, depth + 1, out);
+                }
+            }
+
+            function collectFilteredLinkTree(branch, query, depth, out) {
+                if (!query || (branch.node.title || '').toLowerCase().includes(query)) {
+                    collectLinkTreeSubtree(branch, depth, out);
+                    return true;
+                }
+
+                const childOut = [];
+                let anyChildMatched = false;
+                for (const child of branch.children) {
+                    if (collectFilteredLinkTree(child, query, depth + 1, childOut)) {
+                        anyChildMatched = true;
+                    }
+                }
+
+                if (anyChildMatched) {
+                    out.push({
+                        node: branch.node,
+                        depth,
+                        hasChildren: true,
+                        context: true
+                    });
+                    for (const entry of childOut) out.push(entry);
+                    return true;
+                }
+                return false;
+            }
+
+            function renderLinkTree() {
+                const query = linkTreeFilterActive
+                    ? linkTreeFilterInput.value.trim().toLowerCase()
+                    : '';
+
+                linkTreeVisible = [];
+                for (const root of linkTreeRoots) {
+                    collectFilteredLinkTree(root, query, 0, linkTreeVisible);
+                }
+
+                linkTreeList.innerHTML = '';
+
+                if (!linkTreeVisible.length) {
+                    const empty = document.createElement('div');
+                    empty.textContent = query ? '(no matching nodes)' : '(no nodes with links)';
+                    empty.style.color = 'var(--dim)';
+                    empty.style.padding = '6px 8px';
+                    linkTreeList.appendChild(empty);
+                    linkTreeIndex = 0;
+                    return;
+                }
+
+                if (linkTreeIndex >= linkTreeVisible.length) {
+                    linkTreeIndex = linkTreeVisible.length - 1;
+                }
+                if (linkTreeIndex < 0) linkTreeIndex = 0;
+
+                const frag = document.createDocumentFragment();
+                linkTreeVisible.forEach((entry, i) => {
+                    const row = document.createElement('div');
+                    row.className = 'lt-row' + (i === linkTreeIndex ? ' selected' : '');
+                    row.style.paddingLeft = (8 + entry.depth * 16) + 'px';
+                    if (entry.context) row.style.opacity = '0.7';
+
+                    const marker = document.createElement('span');
+                    marker.className = 'lt-twisty';
+                    marker.textContent = entry.hasChildren ? '▾' : '•';
+
+                    const title = document.createElement('span');
+                    title.className = 'lt-title';
+                    title.textContent = entry.node.title || '(untitled)';
+
+                    row.appendChild(marker);
+                    row.appendChild(title);
+                    row.addEventListener('click', () => {
+                        linkTreeIndex = i;
+                        showSelectedLinkTreeNode();
+                    });
+                    frag.appendChild(row);
+                });
+
+                linkTreeList.appendChild(frag);
+                const selected = linkTreeList.querySelector('.lt-row.selected');
+                if (selected) {
+                    requestAnimationFrame(() => selected.scrollIntoView({ block: 'nearest' }));
+                }
+            }
+
+            function openLinkTreeDialog() {
+                linkTreeRoots = buildLinkTree();
+                linkTreeFilterActive = false;
+                linkTreeFilterInput.style.display = 'none';
+                linkTreeFilterInput.value = '';
+                linkTreeIndex = 0;
+                showingLinkTree = true;
+                linkTreeDialog.style.display = 'flex';
+                renderLinkTree();
+            }
+
+            function closeLinkTreeDialog() {
+                showingLinkTree = false;
+                linkTreeFilterActive = false;
+                linkTreeFilterInput.style.display = 'none';
+                linkTreeFilterInput.value = '';
+                linkTreeFilterInput.blur();
+                linkTreeDialog.style.display = 'none';
+                linkTreeIndex = 0;
+            }
+
+            function enterLinkTreeFilter() {
+                linkTreeFilterActive = true;
+                linkTreeFilterInput.style.display = 'block';
+                linkTreeFilterInput.value = '';
+                linkTreeIndex = 0;
+                renderLinkTree();
+                linkTreeFilterInput.focus();
+            }
+
+            function exitLinkTreeFilter() {
+                linkTreeFilterActive = false;
+                linkTreeFilterInput.style.display = 'none';
+                linkTreeFilterInput.value = '';
+                linkTreeFilterInput.blur();
+                linkTreeIndex = 0;
+                renderLinkTree();
+            }
+
+            function moveLinkTreeSelection(delta) {
+                if (!linkTreeVisible.length) return;
+                linkTreeIndex = (linkTreeIndex + delta + linkTreeVisible.length) % linkTreeVisible.length;
+                renderLinkTree();
+            }
+
+            function showSelectedLinkTreeNode() {
+                const entry = linkTreeVisible[linkTreeIndex];
+                if (!entry) return;
+                const id = entry.node.id;
+                closeLinkTreeDialog();
+                expandToNode(id);
+                selectedId = id;
+                editing = false;
+                mode_insert = false;
+                mode_visual = false;
+                mode_visual_block = false;
+                modeEl.textContent = 'TREE';
+                render();
+            }
+
+            function handleLinkTreeKey(e) {
+                if (!showingLinkTree) return;
+
+                if (linkTreeFilterActive) {
+                    if (e.key === 'Escape') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        exitLinkTreeFilter();
+                    } else if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        showSelectedLinkTreeNode();
+                    } else if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        moveLinkTreeSelection(1);
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        moveLinkTreeSelection(-1);
+                    }
+                    return;
+                }
+
+                if (e.key === '/') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    enterLinkTreeFilter();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeLinkTreeDialog();
+                } else if (e.key === 'ArrowDown' || e.key === 'j') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    moveLinkTreeSelection(1);
+                } else if (e.key === 'ArrowUp' || e.key === 'k') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    moveLinkTreeSelection(-1);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showSelectedLinkTreeNode();
+                }
+            }
+
+            linkTreeFilterInput.addEventListener('input', () => {
+                linkTreeIndex = 0;
+                renderLinkTree();
+            });
+
             function openHistoryDialog() {
                 showingHistory = true;
                 historyIndex = 0;
@@ -4970,6 +5462,8 @@
                 closeSaveAs();
                 closeReplace();
                 closeLinksDialog();
+                closeLinkTreeDialog();
+                closeMissingLinksDialog();
                 closeMarksDialog();
                 closeHistoryDialog();
                 closeUndoDialog();
@@ -6294,26 +6788,34 @@
                         `let headerTemplate = "${headerTemplate}";`
                     );
 
-                    htmlContent = replaceJsStatement(htmlContent, 'treeData',
-                        JSON.stringify(treeData, null, 2));
+                    htmlContent = htmlContent.replace(/let\s+treeData\s*=\s*\[[\s\S]*?\];/, `let treeData = ${JSON.stringify(treeData, null, 2)};`);
 
                     // Make sure the latest bookmarks and historyStack are stored
                     const latestBookmarks = JSON.parse(JSON.stringify(bookmarks));
                     const latestHistoryStack = JSON.parse(JSON.stringify(historyStack));
 
-                    htmlContent = replaceJsStatement(htmlContent, 'bookmarks',
-                        JSON.stringify(latestBookmarks, null, 4));
-                    htmlContent = replaceJsStatement(htmlContent, 'historyStack',
-                        JSON.stringify(latestHistoryStack, null, 4));
+                    htmlContent = htmlContent.replace(
+                        /let\s+bookmarks\s*=\s*\[[\s\S]*?\];/,
+                        "let bookmarks = " + JSON.stringify(latestBookmarks, null, 4) + ";"
+                    );
+                    htmlContent = htmlContent.replace(
+                        /let\s+historyStack\s*=\s*\[[\s\S]*?\];/,
+                        "let historyStack = " + JSON.stringify(latestHistoryStack, null, 4) + ";"
+                    );
 
                     // Save current theme
                     const latestTheme = currentTheme ? JSON.stringify(currentTheme, null, 4) : "null";
-                    htmlContent = replaceJsStatement(htmlContent, 'currentTheme', latestTheme);
+                    htmlContent = htmlContent.replace(
+                        /let\s+currentTheme\s*=\s*(null|\{[\s\S]*?\});/,
+                        "let currentTheme = " + latestTheme + ";"
+                    );
 
                     // Save themes list
                     const themesJson = themes.map(t => "                " + JSON.stringify(t)).join(",\n");
-                    htmlContent = replaceJsStatement(htmlContent, 'themes',
-                        "[\n" + themesJson + "\n            ]");
+                    htmlContent = htmlContent.replace(
+                        /let\s+themes\s*=\s*\[[\s\S]*?\];/,
+                        "let themes = [\n" + themesJson + "\n            ];"
+                    );
 
                     // Update CSS variables with current theme
                     const root = document.documentElement;
@@ -6523,6 +7025,11 @@
 
                 if (e.ctrlKey || e.metaKey || e.altKey) return;
 
+                if (showingLinkTree) {
+                    handleLinkTreeKey(e);
+                    return;
+                }
+
                 if (finding) {
                     switch (e.key) {
                         case 'Escape':
@@ -6647,6 +7154,7 @@
                     case ']': resizeTree(30); break;
                     case '[': resizeTree(-30); break;
                     case '#': openLinksDialog(); break;
+                    case 'V': openLinkTreeDialog(); break;
                     case 'm': setMark(e); break;
                     case '`': openMarksDialog(); break;
                     case 'X': openMissingLinksDialog(); break;
@@ -6779,23 +7287,23 @@
                 if (file) {
                     importedFileName = file.name.replace(/\.html$/, '');
                     file.text().then(content => {
-                        const treeStmt = findJsStatement(content, 'treeData');
-                        if (!treeStmt) {
+                        const match = content.match(/let\s+treeData\s*=\s*(\[[\s\S]*?\]);/);
+                        if (!match) {
                             alert("No treeData found in selected file.");
                             return;
                         }
 
                         try {
-                            const importedTreeData = JSON.parse(treeStmt.value);
+                            const importedTreeData = JSON.parse(match[1]);
 
                             // Replace current in-memory treeData
                             treeData = importedTreeData;
 
                             // Restore historyStack from imported file
-                            const historyStmt = findJsStatement(content, 'historyStack');
-                            if (historyStmt) {
+                            const historyMatch = content.match(/let\s+historyStack\s*=\s*(\[[\s\S]*?\]);/s);
+                            if (historyMatch) {
                                 try {
-                                    historyStack = JSON.parse(historyStmt.value);
+                                    historyStack = JSON.parse(historyMatch[1]);
                                 } catch (e) {
                                     console.warn('Failed to parse historyStack from import, using empty array');
                                     historyStack = [];
@@ -6803,10 +7311,10 @@
                             }
                             
                             // Restore bookmarks from imported file
-                            const bookmarksStmt = findJsStatement(content, 'bookmarks');
-                            if (bookmarksStmt) {
+                            const bookmarksMatch = content.match(/let\s+bookmarks\s*=\s*(\[[\s\S]*?\]);/s);
+                            if (bookmarksMatch) {
                                 try {
-                                    bookmarks = JSON.parse(bookmarksStmt.value);
+                                    bookmarks = JSON.parse(bookmarksMatch[1]);
                                 } catch (e) {
                                     console.warn('Failed to parse bookmarks from import, using empty array');
                                     bookmarks = [];
@@ -6814,10 +7322,10 @@
                             }
 
                             // Restore theme from imported file
-                            const themeStmt = findJsStatement(content, 'currentTheme');
-                            if (themeStmt) {
+                            const themeMatch = content.match(/let\s+currentTheme\s*=\s*(\{[\s\S]*?\});/s);
+                            if (themeMatch) {
                                 try {
-                                    currentTheme = JSON.parse(themeStmt.value);
+                                    currentTheme = JSON.parse(themeMatch[1]);
                                     applyThemeColors(currentTheme);
                                 } catch (e) {
                                     console.warn('Failed to parse theme from import, using default');
@@ -7008,6 +7516,7 @@
 
             window.addEventListener('keydown', handleHistoryKey, { capture: true });
             window.addEventListener('keydown', handleLinksKey, { capture: true });
+            window.addEventListener('keydown', handleMissingLinksKey, { capture: true });
             window.addEventListener('keydown', handleMarksKey, { capture: true });
             window.addEventListener('keydown', handleTagsKey, { capture: true });
             window.addEventListener('keydown', handleUndoKey, { capture: true });
@@ -7026,10 +7535,10 @@
                     const htmlContent = document.documentElement.outerHTML;
                     
                     // Extract and restore historyStack
-                    const historyStmt = findJsStatement(htmlContent, 'historyStack');
-                    if (historyStmt) {
+                    const historyMatch = htmlContent.match(/let\s+historyStack\s*=\s*(\[[\s\S]*?\]);/s);
+                    if (historyMatch) {
                         try {
-                            historyStack = JSON.parse(historyStmt.value);
+                            historyStack = JSON.parse(historyMatch[1]);
                         } catch (e) {
                             console.warn('Failed to parse historyStack, using empty array');
                             historyStack = [];
@@ -7037,10 +7546,10 @@
                     }
                     
                     // Extract and restore bookmarks
-                    const bookmarksStmt = findJsStatement(htmlContent, 'bookmarks');
-                    if (bookmarksStmt) {
+                    const bookmarksMatch = htmlContent.match(/let\s+bookmarks\s*=\s*(\[[\s\S]*?\]);/s);
+                    if (bookmarksMatch) {
                         try {
-                            bookmarks = JSON.parse(bookmarksStmt.value);
+                            bookmarks = JSON.parse(bookmarksMatch[1]);
                         } catch (e) {
                             console.warn('Failed to parse bookmarks, using empty array');
                             bookmarks = [];
@@ -7059,10 +7568,10 @@
                     }
                     
                     // Extract and restore current theme
-                    const themeStmt = findJsStatement(htmlContent, 'currentTheme');
-                    if (themeStmt) {
+                    const themeMatch = htmlContent.match(/let\s+currentTheme\s*=\s*(null|\{[\s\S]*?\});/);
+                    if (themeMatch) {
                         try {
-                            currentTheme = JSON.parse(themeStmt.value);
+                            currentTheme = JSON.parse(themeMatch[1]);
                             if (currentTheme) {
                                 applyThemeColors(currentTheme);
                             }
@@ -7073,10 +7582,10 @@
                     }
 
                     // Extract and restore themes list
-                    const themesStmt = findJsStatement(htmlContent, 'themes');
-                    if (themesStmt) {
+                    const themesMatch = htmlContent.match(/let\s+themes\s*=\s*(\[[\s\S]*?\]);/s);
+                    if (themesMatch) {
                         try {
-                            const parsed = JSON.parse(themesStmt.value);
+                            const parsed = JSON.parse(themesMatch[1]);
                             if (Array.isArray(parsed) && parsed.length > 0) {
                                 themes = parsed;
                             }

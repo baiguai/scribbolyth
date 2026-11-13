@@ -1,4 +1,4 @@
-Renaming a node can be done using the command input
+Renaming a node can be done using the command input:
 
 :rename
 
