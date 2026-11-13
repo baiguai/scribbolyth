@@ -1,5 +1,5 @@
 A Scribboleth .html document can be imported using the command input using :U (note that it is capitalized).
 
 Note:
-Directories can be bookmarked using: m
+In the file browser, directories can be bookmarked using: m
 To access bookmarked directories use: `

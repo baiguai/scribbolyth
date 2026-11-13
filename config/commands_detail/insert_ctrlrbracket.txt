@@ -1,1 +1,11 @@
 This key binding allows you to insert an inter-document link using a search dialog.
+Links like these are specified by wrapping the title of the target node in underscores (_).
+
+For example:
+Some Topic
+
+Would be:
+_Some Topic_
+
+This particular key binding makes it easier to find the node you want to link to, by
+allowing you to do searches / filters on the topics.

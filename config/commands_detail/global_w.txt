@@ -1,1 +1,3 @@
-The current document can be saved using the w key binding, or from within the command input using :w
+The current document can be saved using the w key binding when in TREE mode, or from within the command input using:
+
+:w

@@ -1,5 +1,5 @@
 :open (or :o for short) in the command input can be done manually, using the : key binding.
 
 Note:
-Directories can be bookmarked using: m
+In the file browser, directories can be bookmarked using: m
 To access bookmarked directories use: `

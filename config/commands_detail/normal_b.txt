@@ -1,2 +1,3 @@
 Moves the cursor to the beginning of the previous word, as identified by the spaces that surround it.
+
 [count] [key binding] - repeats the action.

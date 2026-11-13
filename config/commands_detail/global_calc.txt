@@ -1,1 +1,11 @@
-Basic calculations can be performed using the command input using :calc
+Basic calculations can be performed using the command input using
+
+:calc
+
+These include simple arithmetic like:
+
+24/4
+
+or:
+
+18*3

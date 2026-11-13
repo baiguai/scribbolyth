@@ -1,1 +1,7 @@
-The undo dialog can be displayed using the u key binding or by entering :u in the command input.
+The undo dialog can be displayed using the u key binding or by entering:
+
+:u
+
+in the command input.
+
+The Undo dialog allows you to browse the list of undos that you can roll back to.
