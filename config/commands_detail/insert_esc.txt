@@ -1,1 +1,10 @@
 This key binding activates the NORMAL mode.
+
+Escape in general will:
+
+* Close a dialog if one is open.
+* Navigate 'up' through the MODES:
+
+INSERT
+VISUAL          > NORMAL > TREE
+VISUAL_LINE

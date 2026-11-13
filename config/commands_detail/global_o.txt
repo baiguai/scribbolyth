@@ -1,5 +1,8 @@
 File open is done via the command input. Using the 'o' keybinding displays the command input and auto-populates it with :o
 
+If you have unsaved changes you will either need to save them or use:
+:o!
+
 Note:
-Directories can be bookmarked using: m
+In the file browser, directories can be bookmarked using: m
 To access bookmarked directories use: `

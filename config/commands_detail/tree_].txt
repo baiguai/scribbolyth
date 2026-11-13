@@ -1,2 +1,3 @@
 Widens the tree panel. And this persists so when you open the file again, that width is restored.
+
 [count] [key binding] - repeats the action.

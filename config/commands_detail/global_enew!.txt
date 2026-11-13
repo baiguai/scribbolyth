@@ -1,1 +1,3 @@
-A new document can be created, even if there are unsaved changes to the current document using the command input :enew!
+A new document can be created, even if there are unsaved changes to the current document using the command input:
+
+:enew!

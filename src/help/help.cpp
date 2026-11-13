@@ -752,7 +752,7 @@ namespace scribbolyth::help
             const std::string footer =
                 "  " + std::to_string(total == 0 ? 0 : top + 1) + "-" +
                 std::to_string(top + count) + " of " + std::to_string(total) +
-                "    Up/Down Enter topic  Esc close  ':key' matches keys only  ";
+                "    Up/Down Enter detailed topic  Esc close  ':key' matches keys only  ";
 
             return ftxui::window(ftxui::text(" ? Help "),
                                 ftxui::vbox({

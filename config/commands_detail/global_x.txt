@@ -1,5 +1,9 @@
-The currently selected node (and all of its child nodes) can be exported as a stand alone Scribboleth .html file using the command input using :x (notice it is not capitalized).
+The currently selected node (and all of its child nodes) can be exported as a stand alone Scribboleth .html file using the command input using
+
+:X
+
+(notice it is not capitalized).
 
 Note:
-Directories can be bookmarked using: m
+In the file browser, directories can be bookmarked using: m
 To access bookmarked directories use: `

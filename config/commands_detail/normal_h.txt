@@ -1,2 +1,3 @@
 Moves the cursor left within the currently selected node's contents.
+
 [count] [key binding] - repeats the action.

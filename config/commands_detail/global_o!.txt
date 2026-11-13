@@ -1,5 +1,5 @@
 Using :o! will open another file even if the current one hasn't been saved.
 
 Note:
-Directories can be bookmarked using: m
+In the file browser, directories can be bookmarked using: m
 To access bookmarked directories use: `

@@ -1,2 +1,3 @@
 Selects the word that the cursor is within, as identified by the spaces that surround it.
+
 [count] [key binding] - repeats the action.

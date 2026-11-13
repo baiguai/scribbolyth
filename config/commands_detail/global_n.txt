@@ -1,1 +1,8 @@
-A new document can be created using the n key binding, or from within the command input using :n
+A new document can be created using the n key binding, or from within the command input using:
+
+:n
+
+Note:
+If you have unsaved changes you will need to either save them, or use:
+
+:n!
