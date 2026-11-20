@@ -1,1 +1,10 @@
 Display the command input and give it focus.
+
+Note:
+You can use the Tab key to auto complete commands. For example you can type:
+
+:ver
+
+And hit Tab. It will expand that to the full:
+
+:version
