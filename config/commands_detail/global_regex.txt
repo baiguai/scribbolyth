@@ -1,0 +1,6 @@
+Using :regex in the command input will display the REGEX cheat sheet.
+The contents of this dialog are driven by the:
+
+./config/regex.conf
+
+configuration file.
