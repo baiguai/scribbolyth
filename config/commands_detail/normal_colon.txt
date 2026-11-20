@@ -1,1 +1,10 @@
 This key binding will display the command input and set the focus on it.
+
+Note:
+You can use the Tab key to auto complete commands. For example you can type:
+
+:ver
+
+And hit Tab. It will expand that to the full:
+
+:version
