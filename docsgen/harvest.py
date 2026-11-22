@@ -6,6 +6,13 @@ Comment grammar (all harvested from files under src/):
     //!_key=value          config marker. Recognized keys:
                              coderoot=/path   where source-code nodes live
                                               (default: /src)
+                             structure=/path[=dir]  a single topic node at
+                                              /path whose content is an ASCII
+                                              tree of `dir` (default: the
+                                              source root).  Relative `dir`
+                                              paths resolve against docsgen/.
+                                              Entries in IGNORE_PATHS (build,
+                                              build-windows, ...) are omitted.
     //[/path]              folder-only node at the (absolute) note path.
                            A leading './' makes the path relative to the
                            current file's folder under the source-code root
@@ -110,6 +117,15 @@ ALPHABETICAL = True
 # sites keeps a declaration from being mistaken for a call.  Inline method
 # bodies in headers are still parsed when they carry !_method/!_ctor.
 HEADER_EXTS = {".h", ".hh", ".hpp", ".hxx", ".ipp", ".inl"}
+
+# Entries left out of a //!_structure tree.  A bare name matches at any depth;
+# an entry containing '/' matches a path relative to the walked root, and a
+# leading '/' matches an absolute path.  Hidden entries and __pycache__ are
+# always skipped as well.
+IGNORE_PATHS = ["build", "build-windows"]
+
+# Node-producing custom actions, placed in the tree by source-line position.
+CUSTOM_KINDS = ("manual", "folder", "structure")
 
 
 # ----------------------------------------------------------------------
@@ -956,6 +972,77 @@ def split_path(path):
     return tuple(s.strip() for s in path.split("/") if s.strip())
 
 
+def parse_structure_value(value):
+    """Split a `structure` marker value into (note_path, traverse_dir).
+
+    `'/Project Structure'` uses the source root; an optional `=dir` suffix
+    overrides the directory to walk (e.g. '/Project Structure=../')."""
+    if "=" in value:
+        note, directory = value.split("=", 1)
+        return note.strip(), directory.strip()
+    return value.strip(), None
+
+
+def directory_tree(root):
+    """Render `root` as a text tree, one node per line.
+
+    Directories sort ahead of files, each group case-insensitively.  Hidden
+    entries, __pycache__ and entries listed in IGNORE_PATHS are skipped.
+    Symlinked directories are not descended into.
+    """
+    root = os.path.normpath(root)
+    if not os.path.isdir(root):
+        return "(directory not found: %s)" % root
+    lines = [os.path.basename(root) + "/"]
+
+    def ignored(name, rel, full):
+        if name.startswith(".") or name == "__pycache__":
+            return True
+        rel_posix = rel.replace(os.sep, "/")
+        full_posix = full.replace(os.sep, "/")
+        for entry in IGNORE_PATHS:
+            pattern = entry.strip().replace("\\", "/")
+            if not pattern:
+                continue
+            if pattern.startswith("/"):
+                if full_posix == pattern.rstrip("/"):
+                    return True
+            elif name == pattern.strip("/") or rel_posix == pattern.strip("/"):
+                return True
+        return False
+
+    def children_of(directory, rel_dir):
+        try:
+            names = sorted(os.listdir(directory), key=str.lower)
+        except OSError:
+            return []
+        children = []
+        for name in names:
+            full = os.path.join(directory, name)
+            rel = rel_dir + "/" + name if rel_dir else name
+            if ignored(name, rel, full):
+                continue
+            if os.path.isdir(full) and not os.path.islink(full):
+                children.append((name, True))
+            elif os.path.isfile(full) or os.path.islink(full):
+                children.append((name, False))
+        return children
+
+    def walk(directory, rel_dir, prefix):
+        children = children_of(directory, rel_dir)
+        for index, (name, is_dir) in enumerate(children):
+            last = index == len(children) - 1
+            lines.append(prefix + ("`-- " if last else "|-- ")
+                         + name + ("/" if is_dir else ""))
+            if is_dir:
+                rel = rel_dir + "/" + name if rel_dir else name
+                walk(os.path.join(directory, name), rel,
+                     prefix + ("    " if last else "|   "))
+
+    walk(root, "", "")
+    return "\n".join(lines)
+
+
 def find_anchor(src_files):
     """Return (rel_path, line) of the entry-point file, or (None, None).
 
@@ -995,6 +1082,8 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None,
         node["pinned"] = True
         if a["kind"] == "manual":
             node["content"] = doc_text(a["body"])
+        elif a["kind"] == "structure":
+            node["content"] = a["body"]
         elif a["kind"] == "folder":
             pass
 
@@ -1008,7 +1097,7 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None,
                 continue
             file_parts = tuple(rel.split("/"))
             for a in actions:
-                if a["kind"] not in ("manual", "folder"):
+                if a["kind"] not in CUSTOM_KINDS:
                     continue
                 if a.get("line", 1) >= coderoot_line:
                     continue
@@ -1022,7 +1111,7 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None,
         led_anchor = rel == anchor_rel and anchor_line is not None
         led_coderoot = (rel == coderoot_rel and coderoot_line is not None)
         for a in actions:
-            if a["kind"] not in ("manual", "folder"):
+            if a["kind"] not in CUSTOM_KINDS:
                 continue
             if led_coderoot and a.get("line", 1) < coderoot_line:
                 continue
@@ -1082,7 +1171,7 @@ def build_tree(file_actions, coderoot, anchor_rel=None, anchor_line=None,
             if rel != anchor_rel:
                 continue
             for a in actions:
-                if a["kind"] not in ("manual", "folder"):
+                if a["kind"] not in CUSTOM_KINDS:
                     continue
                 if a.get("line", 1) < anchor_line:
                     continue
@@ -1556,6 +1645,9 @@ def main():
     coderoot = None
     coderoot_rel = None
     coderoot_line = None
+    structure = None
+    structure_rel = None
+    structure_line = None
 
     # walk src/ recursively, keeping the files a language config claims
     src_files = []
@@ -1573,15 +1665,45 @@ def main():
         actions = classify(scan_file(path, lang), lang)
         file_actions.append((rel, actions))
         for a in actions:
-            if a["kind"] == "config" and a["key"] == "coderoot":
+            if a["kind"] != "config":
+                continue
+            if a["key"] == "coderoot":
                 coderoot = a["value"]
                 coderoot_rel = rel
                 coderoot_line = a.get("line")
+            elif a["key"] == "structure":
+                structure = a["value"]
+                structure_rel = rel
+                structure_line = a.get("line", 1)
 
     annotate_callers(file_actions, rel_langs)
 
     if coderoot is None:
         coderoot = "/src"
+
+    structure_note = None
+    structure_walk = None
+    if structure is not None:
+        note_path, override = parse_structure_value(structure)
+        parts = split_path(note_path)
+        if parts:
+            structure_note = note_path
+            structure_walk = resolve_path(HERE, override) if override else SRC_ROOT
+            content = parts[-1] + "\n\n" + directory_tree(structure_walk)
+            action = {"kind": "structure", "path": note_path,
+                      "body": content, "line": structure_line}
+            for rel, actions in file_actions:
+                if rel != structure_rel:
+                    continue
+                position = len(actions)
+                for i, existing in enumerate(actions):
+                    if existing.get("line", 1) > structure_line:
+                        position = i
+                        break
+                actions.insert(position, action)
+                break
+        else:
+            print("! Warning: empty structure note path; ignoring", file=sys.stderr)
 
     anchor_rel, anchor_line = find_anchor(src_files)
     nodes = build_tree(file_actions, coderoot, anchor_rel, anchor_line,
@@ -1617,6 +1739,8 @@ def main():
     print("  title:      %s" % TITLE)
     print("  source:     %s" % SRC_ROOT)
     print("  coderoot:   %s" % coderoot)
+    if structure_note is not None:
+        print("  structure:  %s <- %s" % (structure_note, structure_walk))
     print("  files:      %d" % len(src_files))
     print("  doc nodes:  %d" % count_nodes(nodes))
     return 0

@@ -251,6 +251,7 @@ Examples
     */
 ////////////////////////////////////////////////////////////////////////////////
 
+//!_structure=/Project Structure=../
 //!_coderoot=/Source Code
 
 /*[./Introduction to Main.cpp]
