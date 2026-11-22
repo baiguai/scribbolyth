@@ -122,7 +122,7 @@ HEADER_EXTS = {".h", ".hh", ".hpp", ".hxx", ".ipp", ".inl"}
 # an entry containing '/' matches a path relative to the walked root, and a
 # leading '/' matches an absolute path.  Hidden entries and __pycache__ are
 # always skipped as well.
-IGNORE_PATHS = ["build", "build-windows"]
+IGNORE_PATHS = ["build", "build-windows", "backups"]
 
 # Node-producing custom actions, placed in the tree by source-line position.
 CUSTOM_KINDS = ("manual", "folder", "structure")
