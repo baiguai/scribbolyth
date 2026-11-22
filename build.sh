@@ -5,6 +5,9 @@
 set -e  # Exit on any error
 source ./config.sh
 
+# Generate the dev docs
+./docsgen/gendocs.sh
+
 # Determine build type
 BUILD_TYPE="Debug"
 if [ "$1" == "r" ]; then
