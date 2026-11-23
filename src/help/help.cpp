@@ -703,7 +703,7 @@ namespace scribbolyth::help
 
             !_method
         */
-        ftxui::Element Render() override
+        ftxui::Element OnRender() override
         {
             if (topic_open_) return RenderTopic();
 

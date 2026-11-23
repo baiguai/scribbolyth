@@ -197,7 +197,7 @@ namespace scribbolyth::regex
 
             !_method
         */
-        ftxui::Element Render() override
+        ftxui::Element OnRender() override
         {
             const std::vector<int> filtered = Filtered();
             const int total = static_cast<int>(filtered.size());

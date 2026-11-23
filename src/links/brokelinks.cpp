@@ -135,7 +135,7 @@ namespace scribbolyth::brokenlinks
         /*!
             Ftxui Render Call
         */
-        ftxui::Element Render() override
+        ftxui::Element OnRender() override
         {
             Recompute();
 

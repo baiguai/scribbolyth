@@ -3,28 +3,25 @@
 # upgrade.sh - bump the FTXUI dependency to a newer release.
 #
 #   ./upgrade.sh              upgrade to the latest FTXUI release on GitHub
-#   ./upgrade.sh <tag>        pin a specific tag, e.g. ./upgrade.sh v5.0.0
+#   ./upgrade.sh <tag>        pin a specific tag, e.g. ./upgrade.sh v7.0.3
 #
 # What it does:
 #   - reads the current pin from CMakeLists.txt.in (the template build.sh uses)
 #   - updates it to the chosen/latest tag
 #   - clears the cached FetchContent checkouts so the new tag is actually used
-#   - runs a configure pass to fetch the new tag and verify the local patch
-#     (patches/ftxui-c0-delivery.patch) still applies; on failure it rolls
-#     the template back to the previous pin
+#   - runs a configure pass to fetch the new tag; on failure it rolls the
+#     template back to the previous pin
 #
 # FTXUI upgrades can break the app compile if its API changed - configure
-# passing here only means the patch applied; then run ./build.sh.
+# passing here only means the new tag was fetched; then run ./build.sh.
 
 set -euo pipefail
 
 REPO="https://github.com/ArthurSonzogni/FTXUI.git"
 TEMPLATE="CMakeLists.txt.in"
-PATCH="patches/ftxui-c0-delivery.patch"
 
 command -v git >/dev/null 2>&1 || { echo "ERROR: git is required."; exit 1; }
 [ -f "$TEMPLATE" ] || { echo "ERROR: $TEMPLATE not found. Run from the repo root."; exit 1; }
-[ -f "$PATCH" ] || { echo "ERROR: $PATCH not found."; exit 1; }
 
 CURRENT=$(grep -oP '^  GIT_TAG\s+\K\S+' "$TEMPLATE")
 echo "FTXUI currently pinned at: $CURRENT"
@@ -63,9 +60,9 @@ for dep in build/_deps/ftxui-src build/_deps/ftxui-build \
 done
 
 # Regenerate CMakeLists.txt from the template (same as build.sh) and run a
-# configure pass to fetch the new tag and verify the patch still applies.
+# configure pass to fetch the new tag.
 echo ""
-echo "Verifying FTXUI $TARGET fetches and the patch applies..."
+echo "Verifying FTXUI $TARGET fetches and configures..."
 source ./config.sh
 cp "$TEMPLATE" CMakeLists.txt
 sed -i "s/<<TARGET_NAME>>/$APP_NAME/g" CMakeLists.txt
@@ -90,15 +87,8 @@ mkdir -p build
 if ! cmake -S . -B build; then
     echo ""
     echo "ERROR: configure failed for FTXUI $TARGET."
-    echo "  The local patch ($PATCH) no longer applies cleanly."
-    echo ""
-    echo "  For FTXUI >= v6.0.0 the CAN/SUB fix is already upstream:"
-    echo "  Parse() returns SPECIAL for every C0 byte (incl. Ctrl+X/Ctrl+Z),"
-    echo "  so the patch is obsolete - remove the 'PATCH_COMMAND ...' line"
-    echo "  from $TEMPLATE and run ./upgrade.sh again."
-    echo ""
-    echo "  For older versions, re-baseline the patch against the new source"
-    echo "  and run ./upgrade.sh again."
+    echo "  Check the CMake output above - the new release may require"
+    echo "  changes to $TEMPLATE or to the application source."
     echo ""
     echo "  Rolling back the pin to $CURRENT..."
     sed -i "s|^  GIT_TAG .*|  GIT_TAG $CURRENT|" "$TEMPLATE"

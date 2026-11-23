@@ -119,7 +119,7 @@ if [ "$real" -gt 0 ]; then
     echo "  >>> REAL MEMORY ERRORS - inspect the log."
 else
     echo "  The remaining uninitialised/termios records are known valgrind noise:"
-    echo "  FTXUI's ScreenInteractive passes partially-initialised structs to"
+    echo "  FTXUI's App passes partially-initialised structs to"
     echo "  tcsetattr(3) and leaves padding bytes in its screen buffers. They are"
     echo "  harmless and not bugs in scribbolyth."
 fi

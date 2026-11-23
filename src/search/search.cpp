@@ -602,7 +602,7 @@ namespace scribbolyth::search
 
             !_method
         */
-        ftxui::Element Render() override
+        ftxui::Element OnRender() override
         {
             if (!results_valid_) Recompute();
 
