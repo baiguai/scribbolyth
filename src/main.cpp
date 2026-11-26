@@ -2,7 +2,7 @@
 #include <filesystem>
 #include <iostream>
 #include <memory>
-#include <ftxui/component/screen_interactive.hpp>
+#include <ftxui/component/app.hpp>
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/task.hpp>
 #include <ftxui/dom/elements.hpp>
@@ -251,6 +251,7 @@ Examples
     */
 ////////////////////////////////////////////////////////////////////////////////
 
+//!_structure=/Project Structure=../
 //!_coderoot=/Source Code
 
 /*[./Introduction to Main.cpp]
@@ -311,7 +312,7 @@ int main(int, char** argv) {
         return editor_wrap->Render();
     });
 
-    auto screen = ScreenInteractive::Fullscreen();
+    auto screen = App::Fullscreen();
     auto quit = screen.ExitLoopClosure();
     //<<
     /*|

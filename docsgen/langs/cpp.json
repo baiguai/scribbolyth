@@ -39,9 +39,21 @@
     "definition_terminators": ["{"],
     "operator_regex": "\\boperator\\b",
     "name_regex": "[A-Za-z_~][A-Za-z0-9_]*\\s*$",
-    "param_name_regex": "[A-Za-z_][A-Za-z0-9_]*\\s*$",
+    "param_name_regex": "(?<=[ \\t*&])[A-Za-z_][A-Za-z0-9_]*\\s*$",
     "split_open": "<([",
-    "split_close": ">)]"
+    "split_close": ">)]",
+    "_call_regexes_comment": "Call-site templates; {name} is replaced with the escaped definition name.",
+    "call_regexes": {
+      "any": [
+        "(?<![A-Za-z0-9_]){name}(?![A-Za-z0-9_])\\s*\\(",
+        "(?<![A-Za-z0-9_]){name}(?![A-Za-z0-9_])\\s*(?=[,;)])"
+      ],
+      "ctor": [
+        "(?<![A-Za-z0-9_])make_(?:shared|unique)\\s*<\\s*{name}\\s*>",
+        "(?<![A-Za-z0-9_])Make\\s*<\\s*{name}\\s*>",
+        "(?<![A-Za-z0-9_]){name}\\s+[A-Za-z_][A-Za-z0-9_]*\\s*\\("
+      ]
+    }
   },
 
   "anchor": {

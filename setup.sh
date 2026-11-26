@@ -10,8 +10,7 @@
 # FTXUI requirements covered here:
 #   - cmake 3.16+            (FetchContent needs it; build.sh uses cmake+make)
 #   - a C++17 compiler        (g++ or clang++)
-#   - git                     (FetchContent clones FTXUI from GitHub; the
-#                              PATCH_COMMAND also runs 'git apply')
+#   - git                     (FetchContent clones FTXUI from GitHub)
 #   - make                    (build.sh compiles with 'make')
 #   - network to github.com   (to download FTXUI on first build)
 #   - mingw-w64               (optional, only for ./build-windows.sh)
@@ -46,8 +45,8 @@ else
     exit 1
 fi
 
-# --- git (FTXUI is fetched from GitHub and patched with 'git apply') -------
-command -v git >/dev/null 2>&1 || { echo "ERROR: git is required (FTXUI is fetched from GitHub and patched)."; exit 1; }
+# --- git (FTXUI is fetched from GitHub) -----------------------------------
+command -v git >/dev/null 2>&1 || { echo "ERROR: git is required (FTXUI is fetched from GitHub)."; exit 1; }
 echo "[OK] git $(git --version | cut -d' ' -f3)"
 
 # --- make (build.sh compiles with 'make') ----------------------------------

@@ -259,7 +259,7 @@ namespace scribbolyth::todos
             return true;   // consume everything else
         }
 
-        ftxui::Element Render() override
+        ftxui::Element OnRender() override
         {
             Recompute();
 

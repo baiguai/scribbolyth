@@ -229,7 +229,7 @@ namespace scribbolyth::undo
 
             !_method
         */
-        ftxui::Element Render() override
+        ftxui::Element OnRender() override
         {
             const auto& stack = state_->undo_stack;
             const int total = static_cast<int>(stack.size());

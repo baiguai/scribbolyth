@@ -702,7 +702,7 @@ namespace scribbolyth::editor
 
                 !_method
             */
-            ftxui::Element Render() override
+            ftxui::Element OnRender() override
             {
                 LoadIfChanged();
                 if (active_ == nullptr)

@@ -5,6 +5,12 @@
 set -e  # Exit on any error
 source ./config.sh
 
+FTXUI_TAG=$(grep -oP '^  GIT_TAG \K\S+' CMakeLists.txt.in)
+echo "Using FTXUI version: $FTXUI_TAG"
+
+# Generate the dev docs
+./docsgen/gendocs.sh
+
 # Determine build type
 BUILD_TYPE="Debug"
 if [ "$1" == "r" ]; then

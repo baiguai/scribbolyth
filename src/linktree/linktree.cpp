@@ -240,7 +240,7 @@ namespace scribbolyth::linktree
 
             !_method
         */
-        ftxui::Element Render() override
+        ftxui::Element OnRender() override
         {
             if (*show_ && !was_shown_)
             {

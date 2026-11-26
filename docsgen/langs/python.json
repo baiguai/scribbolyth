@@ -28,7 +28,11 @@
     "method_token": "@_method",
     "ctor_token": "@_ctor",
     "method_regex": "^[ \\t]*@_method[ \\t]*$",
-    "ctor_regex": "^[ \\t]*@_ctor[ \\t]*$"
+    "ctor_regex": "^[ \\t]*@_ctor[ \\t]*$",
+    "_call_regexes_comment": "Call-site templates; {name} is replaced with the escaped definition name.",
+    "call_regexes": {
+      "any": ["(?<![A-Za-z0-9_]){name}\\s*\\("]
+    }
   },
 
   "anchor": {

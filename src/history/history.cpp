@@ -166,7 +166,7 @@ namespace scribbolyth::history
 
             !_method
         */
-        ftxui::Element Render() override
+        ftxui::Element OnRender() override
         {
             Recompute();
 

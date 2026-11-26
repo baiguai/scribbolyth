@@ -211,7 +211,7 @@ namespace scribbolyth::recent
 
             !_method
         */
-        ftxui::Element Render() override
+        ftxui::Element OnRender() override
         {
             PickupForce();
             const auto matches = Matches();
