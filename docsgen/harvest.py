@@ -51,13 +51,18 @@ Comment grammar (all harvested from files under src/):
                            appended to the current documentation node's
                            content, exactly like a one-line /*| ... */.
     !_method               Marker inside a doc comment.  Replaced with the
-                           signature, method name, return type and
-                           parameters of the function definition that
-                           immediately follows the comment (left as-is when
-                           no definition follows).
+                           signature, method name, return type, parameters,
+                           Calls and Called By link lists of the function
+                           definition that immediately follows the comment
+                           (left as-is when no definition follows).
     !_ctor                 Marker inside a doc comment, like !_method but for
                            a constructor definition; also lists the initializer
                            members (and qualifiers such as explicit/noexcept).
+
+    Calls are matched against the other !_method/!_ctor definitions using the
+    per-language call_regexes in langs/*.json, and linked by the target node's
+    title (e.g. [printMessage]_Print Message_).  A call with no documented
+    definition is not listed.
 
 Within any comment body, a line containing just dashes (e.g. ----) is
 expanded to an 80-character horizontal rule.  Raw code captured by
@@ -122,7 +127,7 @@ HEADER_EXTS = {".h", ".hh", ".hpp", ".hxx", ".ipp", ".inl"}
 # an entry containing '/' matches a path relative to the walked root, and a
 # leading '/' matches an absolute path.  Hidden entries and __pycache__ are
 # always skipped as well.
-IGNORE_PATHS = ["build", "build-windows", "backups", "node_modules", "sessions"]
+IGNORE_PATHS = ["build", "build-windows"]
 
 # Node-producing custom actions, placed in the tree by source-line position.
 CUSTOM_KINDS = ("manual", "folder", "structure")
@@ -179,6 +184,18 @@ class Language:
             call.get("param_name_regex", r"[A-Za-z_][A-Za-z0-9_]*\s*$"))
         self.split_open = set(call.get("split_open", "<(["))
         self.split_close = set(call.get("split_close", ">)]"))
+        configured_calls = call.get("call_regexes", {})
+        self.call_regexes = {
+            "any": list(configured_calls.get("any", [
+                r"(?<![A-Za-z0-9_]){name}(?![A-Za-z0-9_])\s*\(",
+                r"(?<![A-Za-z0-9_]){name}(?![A-Za-z0-9_])\s*(?=[,;)])",
+            ])),
+            "ctor": list(configured_calls.get("ctor", [
+                r"(?<![A-Za-z0-9_])make_(?:shared|unique)\s*<\s*{name}\s*>",
+                r"(?<![A-Za-z0-9_])Make\s*<\s*{name}\s*>",
+                r"(?<![A-Za-z0-9_]){name}\s+[A-Za-z_][A-Za-z0-9_]*\s*\(",
+            ])),
+        }
 
         anchor = data.get("anchor", {})
         self.anchor_re = (re.compile(anchor["regex"])
@@ -495,6 +512,7 @@ def _content_base(body):
 
 
 CALLER_PLACEHOLDER = "\x01__scribbolyth_callers__\x01"
+CALLS_PLACEHOLDER = "\x01__scribbolyth_calls__\x01"
 
 
 def matching_brace(src, open_pos, lang):
@@ -639,7 +657,7 @@ def callable_description(src, code_pos, body, lang):
         if quals:
             lines.append("Qualifiers: " + quals)
     if params:
-        width = max(len(nm) for ty, nm in params if nm)
+        width = max([len(nm) for ty, nm in params if nm] or [0])
         lines.append("Parameters:")
         for ty, nm in params:
             pad = nm.ljust(width + 1) if nm else " " * (width + 1)
@@ -647,6 +665,7 @@ def callable_description(src, code_pos, body, lang):
     if kind == "ctor" and members:
         lines.append("Initializers:")
         lines.extend(render_members(members))
+    lines.append(CALLS_PLACEHOLDER)
     lines.append(CALLER_PLACEHOLDER)
     base = _content_base(body)
     ind = " " * base
@@ -1323,40 +1342,64 @@ def _caller_link(title, method):
     method = method or title
     if title and "_" not in title and "\n" not in title:
         label = method.replace("[", "(").replace("]", ")")
-        return "[%s](_%s_)" % (label, title)
+        return "[%s]_%s_" % (label, title)
     if title and method and method != title:
         return "%s (%s)" % (title, method)
     return title or method or "(untitled)"
 
 
-def _insert_callers(body, callers):
-    """Replace CALLER_PLACEHOLDER with the 'Called By' block (or append one
-    when the placeholder is missing)."""
+def _node_link(title):
+    """Render a node title as a help-system note link when possible."""
+    title = title or ""
+    if title and "_" not in title and "\n" not in title:
+        return "_%s_" % title
+    return title or "(untitled)"
+
+
+def _call_link(title, method):
+    """Render a call as [method]_Title_ when the title can be linked."""
+    link = _node_link(title)
+    label = (method or "").replace("[", "(").replace("]", ")")
+    if label and link.startswith("_") and link.endswith("_"):
+        return "[%s]%s" % (label, link)
+    return link
+
+
+def _insert_link_block(body, placeholder, heading, entries):
+    """Replace placeholder with a heading and one indented entry per line."""
+    lines = [heading]
+    if entries:
+        lines.extend("    " + entry for entry in entries)
+    else:
+        lines[0] = heading + " (none found)"
     base = _content_base(body)
     ind = " " * base
-    out = []
+    block = "\n".join(ind + ln for ln in lines)
     found = False
+    out = []
     for ln in body.split("\n"):
-        if CALLER_PLACEHOLDER in ln:
+        if placeholder in ln:
             found = True
-            if callers:
-                out.append(ind + "Called By:")
-                for title, method in callers:
-                    out.append(ind + "    " + _caller_link(title, method))
-            else:
-                out.append(ind + "Called By: (none found)")
+            out.append(block)
         else:
             out.append(ln)
     if not found:
-        if callers:
-            out.append("")
-            out.append("Called By:")
-            for title, method in callers:
-                out.append("    " + _caller_link(title, method))
-        else:
-            out.append("")
-            out.append("Called By: (none found)")
+        out.extend(["", block])
     return "\n".join(out)
+
+
+def _insert_callers(body, callers):
+    """Replace CALLER_PLACEHOLDER with the 'Called By' block (or append one
+    when the placeholder is missing)."""
+    entries = [_caller_link(title, method) for title, method in callers]
+    return _insert_link_block(body, CALLER_PLACEHOLDER, "Called By:", entries)
+
+
+def _insert_calls(body, calls):
+    """Replace CALLS_PLACEHOLDER with the 'Calls' block (or append one when
+    the placeholder is missing)."""
+    entries = [_call_link(title, method) for title, method in calls]
+    return _insert_link_block(body, CALLS_PLACEHOLDER, "Calls:", entries)
 
 
 def _file_regions(actions):
@@ -1427,12 +1470,14 @@ def _call_qualifiers(code, pos):
 
 
 def annotate_callers(file_actions, rel_langs):
-    """Add a 'Called By' link list to every documented method/constructor.
+    """Add 'Calls' and 'Called By' link lists to documented methods.
 
-    A call is attributed to the innermost help node (documented method, or a
-    containing class/file note) whose source region encloses it.  Calls are
-    matched by method name; when the same name is defined more than once,
-    definitions in the caller's own file are preferred."""
+    Call sites are matched with the per-language call_regexes from
+    langs/*.json and resolved to documented !_method/!_ctor definitions.
+    A call inside a definition's body is listed under Calls; the same call is
+    attributed to the innermost enclosing doc region for Called By.  When a
+    name has several definitions, definitions in the caller's own file are
+    preferred."""
     actions_by_rel = dict(file_actions)
     sources = {}
     masks = {}
@@ -1462,32 +1507,27 @@ def annotate_callers(file_actions, rel_langs):
         return
 
     by_name = {}
+    ctor_names = set()
     for target in targets:
         name = target["info"].get("name") or ""
-        if re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", name):
-            by_name.setdefault(name, []).append(target)
-    patterns = {}
-    for name, definitions in by_name.items():
-        escaped = re.escape(name)
-        found = [
-            re.compile(r"(?<![A-Za-z0-9_])" + escaped
-                       + r"(?![A-Za-z0-9_])\s*\("),
-            # A bare function name used as a callback argument (e.g. sort
-            # comparator) is a use even though it is not followed by '('.
-            re.compile(r"(?<![A-Za-z0-9_])" + escaped
-                       + r"(?![A-Za-z0-9_])\s*(?=[,;)])"),
-        ]
-        if any(d["info"].get("kind") == "ctor" for d in definitions):
-            found.append(re.compile(
-                r"(?<![A-Za-z0-9_])make_(?:shared|unique)\s*<\s*"
-                + escaped + r"\s*>"))
-            found.append(re.compile(
-                r"(?<![A-Za-z0-9_])Make\s*<\s*"
-                + escaped + r"\s*>"))
-            found.append(re.compile(
-                r"(?<![A-Za-z0-9_])" + escaped
-                + r"\s+[A-Za-z_][A-Za-z0-9_]*\s*\("))
-        patterns[name] = found
+        if not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", name):
+            continue
+        by_name.setdefault(name, []).append(target)
+        if target["info"].get("kind") == "ctor":
+            ctor_names.add(name)
+
+    pattern_cache = {}
+
+    def patterns_for(name, lang):
+        key = (name, id(lang))
+        if key not in pattern_cache:
+            templates = list(lang.call_regexes.get("any", []))
+            if name in ctor_names:
+                templates.extend(lang.call_regexes.get("ctor", []))
+            escaped = re.escape(name)
+            pattern_cache[key] = [re.compile(t.replace("{name}", escaped))
+                                  for t in templates]
+        return pattern_cache[key]
 
     titles = {}
 
@@ -1497,24 +1537,30 @@ def annotate_callers(file_actions, rel_langs):
             titles[key] = first_line(doc_text(action["body"])) or "(untitled)"
         return titles[key]
 
+    rel_defs = {}
+    for target in targets:
+        info = target["info"]
+        if info.get("body_open") is not None and info.get("body_end") is not None:
+            rel_defs.setdefault(target["rel"], []).append(target)
+
     callers = {}
+    calls = {}
     for rel, (path, lang) in rel_langs.items():
         actions = actions_by_rel.get(rel, [])
         regions = _file_regions(actions)
         if not regions:
             continue
-        if os.path.splitext(path)[1].lower() in HEADER_EXTS:
-            continue
+        is_header = os.path.splitext(path)[1].lower() in HEADER_EXTS
         src = sources.get(rel)
         code = masks.get(rel)
         if src is None or code is None:
             continue
         line_starts = [0]
         line_starts.extend(i + 1 for i, c in enumerate(src) if c == "\n")
-        for name, name_patterns in patterns.items():
-            definitions = by_name[name]
+        line = 0
+        for name, definitions in by_name.items():
             local_defs = [d for d in definitions if d["rel"] == rel]
-            for pattern in name_patterns:
+            for pattern in patterns_for(name, lang):
                 for match in pattern.finditer(code):
                     pos = match.start()
                     if any(d["info"].get("start") is not None
@@ -1542,6 +1588,7 @@ def annotate_callers(file_actions, rel_langs):
                         candidates = local_matching if local_matching else matching
                     else:
                         candidates = local_defs if local_defs else definitions
+
                     line = bisect.bisect_right(line_starts, pos)
                     caller_action = None
                     best_start = -1
@@ -1549,12 +1596,12 @@ def annotate_callers(file_actions, rel_langs):
                         if start <= line <= end and start > best_start:
                             best_start = start
                             caller_action = action
-                    if caller_action is not None:
+                    if not is_header and caller_action is not None:
                         caller_method = ((caller_action.get("callable") or {})
                                          .get("name", ""))
                         caller_title = title_of(caller_action)
                         caller_key = (caller_title, caller_method)
-                    else:
+                    elif not is_header:
                         # The call sits outside every documented region (e.g.
                         # an undocumented helper); link to the file node so
                         # the method still shows up as used.
@@ -1562,9 +1609,28 @@ def annotate_callers(file_actions, rel_langs):
                         caller_key = ("file", rel, line)
                         caller_title = base
                         caller_method = "%s:%d" % (base, line)
+                    else:
+                        caller_key = None
+
+                    enclosing = None
+                    best_open = -1
+                    for defined in rel_defs.get(rel, []):
+                        body_open = defined["info"].get("body_open")
+                        body_end = defined["info"].get("body_end")
+                        if (body_open is not None and body_end is not None
+                                and body_open < pos < body_end
+                                and body_open > best_open):
+                            enclosing = defined
+                            best_open = body_open
+
                     for target in candidates:
-                        bucket = callers.setdefault(id(target["action"]), {})
-                        bucket[caller_key] = (caller_title, caller_method)
+                        if caller_key is not None:
+                            bucket = callers.setdefault(id(target["action"]), {})
+                            bucket[caller_key] = (caller_title, caller_method)
+                        if enclosing is not None and target["action"] is not enclosing["action"]:
+                            bucket = calls.setdefault(
+                                id(enclosing["action"]), {})
+                            bucket[id(target["action"])] = target
 
     for target in targets:
         bucket = callers.get(id(target["action"]), {})
@@ -1573,6 +1639,13 @@ def annotate_callers(file_actions, rel_langs):
                                         (e[1] or "").lower()))
         target["action"]["body"] = _insert_callers(target["action"]["body"],
                                                    entries)
+        bucket = calls.get(id(target["action"]), {})
+        called = sorted(bucket.values(),
+                        key=lambda t: ((t["title"] or "").lower(),
+                                       (t["info"].get("name") or "").lower()))
+        entries = [(t["title"], t["info"].get("name") or "") for t in called]
+        target["action"]["body"] = _insert_calls(target["action"]["body"],
+                                                 entries)
         target["action"].pop("callable", None)
 
 
