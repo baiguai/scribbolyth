@@ -182,7 +182,7 @@ namespace scribbolyth::bookmarks
 
             ----
         */
-        ftxui::Element Render() override
+        ftxui::Element OnRender() override
         {
             //| * First do a _Recompute Bookmarks_.
             Recompute();

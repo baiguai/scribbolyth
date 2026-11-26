@@ -504,7 +504,7 @@ namespace scribbolyth::treeview
                 return true;
             }
             bool OnEvent(ftxui::Event event) override;
-            ftxui::Element Render() override;
+            ftxui::Element OnRender() override;
 
         private:
             std::vector<TreeNode*> VisibleNodes();
@@ -1788,7 +1788,7 @@ namespace scribbolyth::treeview
         Compose the full tree pane: all root rows in a scrollable, flexible
         vertical box.
     */
-    ftxui::Element TreeView::Render()
+    ftxui::Element TreeView::OnRender()
     {
         std::set<const TreeNode*> matches;
         if (state_->search_active)

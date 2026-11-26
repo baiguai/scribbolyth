@@ -1260,7 +1260,7 @@
                       {
                         "id": "ddc57cb4",
                         "title": "Recompute Bookmarks",
-                        "content": "Recompute Bookmarks\n\nSignature: void Recompute()\nMethod: Recompute\nReturns: void\nCalled By:\n    [Render](_Render the Bookmarks Dialog_)\n\nRebuilds the entries_ from the state_->bookmarks.\nGathers all the nodes for looking them up by id.\nSets the selection_.\nIt also displays the line number if the bookmark is to a specific line of text.",
+                        "content": "Recompute Bookmarks\n\nSignature: void Recompute()\nMethod: Recompute\nReturns: void\nCalled By:\n    [OnRender](_Render the Bookmarks Dialog_)\n\nRebuilds the entries_ from the state_->bookmarks.\nGathers all the nodes for looking them up by id.\nSets the selection_.\nIt also displays the line number if the bookmark is to a specific line of text.",
                         "children": [],
                         "expanded": false
                       },
@@ -1303,7 +1303,7 @@
                       {
                         "id": "ae61229c",
                         "title": "Render the Bookmarks Dialog",
-                        "content": "Render the Bookmarks Dialog\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Command](_Command_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [Variables](_Variables_)\n\nRenders the bookmarks dialog.\n\n--------------------------------------------------------------------------------\n\n* First do a _Recompute Bookmarks_.\n\n* Gather the Bookmarks.\n\n* PadRight.\n\n* Build the footer.\n\n--------------------------------------------------------------------------------\n\nCreate the dialog's window:\n\nreturn ftxui::window(ftxui::text(\" ` Bookmarks \"),\n                    ftxui::vbox({\n                        ftxui::separator(),\n                        ftxui::vbox(std::move(rows)),\n                        ftxui::separator(),\n                        ftxui::text(PadRight(footer, row_width)) | ftxui::dim,\n                    })) |\n       ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |\n       ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);",
+                        "content": "Render the Bookmarks Dialog\n\nSignature: ftxui::Element OnRender() override\nMethod: OnRender\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Ftxui Render Call](_Ftxui Render Call_)\n\nRenders the bookmarks dialog.\n\n--------------------------------------------------------------------------------\n\n* First do a _Recompute Bookmarks_.\n\n* Gather the Bookmarks.\n\n* PadRight.\n\n* Build the footer.\n\n--------------------------------------------------------------------------------\n\nCreate the dialog's window:\n\nreturn ftxui::window(ftxui::text(\" ` Bookmarks \"),\n                    ftxui::vbox({\n                        ftxui::separator(),\n                        ftxui::vbox(std::move(rows)),\n                        ftxui::separator(),\n                        ftxui::text(PadRight(footer, row_width)) | ftxui::dim,\n                    })) |\n       ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 92) |\n       ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);",
                         "children": [],
                         "expanded": false
                       },
@@ -1677,7 +1677,7 @@
                       {
                         "id": "5bf4a573",
                         "title": "Render Browser Dialog",
-                        "content": "Render Browser Dialog\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Command](_Command_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [Variables](_Variables_)\n\n--------------------------------------------------------------------------------\n\nTo explicitly set the file dialog size, locate the following:\n\nreturn ftxui::window(ftxui::text(title),\n                     ftxui::vbox({\n                         ftxui::vbox(std::move(rows)),\n                         ftxui::separator(),\n                         ftxui::text(PadRight(footer, dlg_width)) | ftxui::dim,\n                     })) |\n       ftxui::reflect(box_) |\n       ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 140) |\n       ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);",
+                        "content": "Render Browser Dialog\n\nSignature: ftxui::Element OnRender() override\nMethod: OnRender\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Ftxui Render Call](_Ftxui Render Call_)\n\n--------------------------------------------------------------------------------\n\nTo explicitly set the file dialog size, locate the following:\n\nreturn ftxui::window(ftxui::text(title),\n                     ftxui::vbox({\n                         ftxui::vbox(std::move(rows)),\n                         ftxui::separator(),\n                         ftxui::text(PadRight(footer, dlg_width)) | ftxui::dim,\n                     })) |\n       ftxui::reflect(box_) |\n       ftxui::size(ftxui::WIDTH, ftxui::LESS_THAN, 140) |\n       ftxui::size(ftxui::HEIGHT, ftxui::LESS_THAN, 24);",
                         "children": [
                           {
                             "id": "840ceee8",
@@ -1733,7 +1733,7 @@
               {
                 "id": "b2745d40",
                 "title": "Tailing",
-                "content": "Tailing\n\nSignature: std::string Tail(const std::string& s, std::size_t width)\nMethod: Tail\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t\nCalled By:\n    [Render](_Render Browser Dialog_)\n\n#todo : We should be able to make this a globally accessible method.",
+                "content": "Tailing\n\nSignature: std::string Tail(const std::string& s, std::size_t width)\nMethod: Tail\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t\nCalled By:\n    [OnRender](_Render Browser Dialog_)\n\n#todo : We should be able to make this a globally accessible method.",
                 "children": [],
                 "expanded": false
               },
@@ -2127,7 +2127,7 @@
               {
                 "id": "3e4b15ee",
                 "title": "Is Editor in Visual Mode",
-                "content": "Is Editor in Visual Mode\n\nSignature: bool IsVisualMode(Mode m)\nMethod: IsVisualMode\nReturns: bool\nParameters:\n    m Mode\nCalled By:\n    [Editor](_Editor Constructor_)\n    [OnEvent](_Ftxui Editor Event Handler_)\n    [Render](_Render the Editor_)\n    [ReplaceText](_Replace Text_)\n    [SelectionText](_Select Text_)",
+                "content": "Is Editor in Visual Mode\n\nSignature: bool IsVisualMode(Mode m)\nMethod: IsVisualMode\nReturns: bool\nParameters:\n    m Mode\nCalled By:\n    [Editor](_Editor Constructor_)\n    [OnEvent](_Ftxui Editor Event Handler_)\n    [OnRender](_Render the Editor_)\n    [ReplaceText](_Replace Text_)\n    [SelectionText](_Select Text_)",
                 "children": [],
                 "expanded": false
               },
@@ -2148,7 +2148,7 @@
               {
                 "id": "073e6359",
                 "title": "Scroll Past Helper Class",
-                "content": "Scroll Past Helper Class\n\nA transparent leaf node that records the height of the box it is\nassigned each frame. Rendered as an overlay share of the editor view,\nit reports the editor's viewport height so the trailing scroll-past-\nbottom padding can be sized to about half the viewport (Vim-like).\n\nSignature: explicit BoxRecorder(int& out_height) : out_height_(out_height)\nConstructor: BoxRecorder\nQualifiers: explicit\nParameters:\n    out_height int&\nInitializers:\n    out_height_ out_height\nCalled By:\n    [Render](_Render the Editor_)",
+                "content": "Scroll Past Helper Class\n\nA transparent leaf node that records the height of the box it is\nassigned each frame. Rendered as an overlay share of the editor view,\nit reports the editor's viewport height so the trailing scroll-past-\nbottom padding can be sized to about half the viewport (Vim-like).\n\nSignature: explicit BoxRecorder(int& out_height) : out_height_(out_height)\nConstructor: BoxRecorder\nQualifiers: explicit\nParameters:\n    out_height int&\nInitializers:\n    out_height_ out_height\nCalled By:\n    [OnRender](_Render the Editor_)",
                 "children": [],
                 "expanded": false
               },
@@ -2424,7 +2424,7 @@
                       {
                         "id": "39cf9c0d",
                         "title": "Load if Changed",
-                        "content": "Load if Changed\n\nSignature: void LoadIfChanged()\nMethod: LoadIfChanged\nReturns: void\nCalled By:\n    [Bullet](_Bullet_)\n    [DeleteSelection](_Delete Selection_)\n    [Editable](_Editable Flag_)\n    [Editor](_Editor Constructor_)\n    [FollowLinkUnderCursor](_Follow Link Under Cursor_)\n    [OnEvent](_Ftxui Editor Event Handler_)\n    [IndentText](_Indent Text_)\n    [Number](_Numbered List_)\n    [OutdentText](_Outdent Text_)\n    [FormatTable](_Rebuild Table_)\n    [Render](_Render the Editor_)\n    [ReplaceText](_Replace Text_)\n    [SearchWordUnderCursor](_Search Word Under Cursor_)\n    [TransformSelection](_Transform Selection_)\n\nHow Comparison is Done:\n\nCompare by id, not just pointer: nodes live in std::vectors,\nso erasing one (e.g. deleting a node) can leave a different\nnode at the same address as the previously loaded one.",
+                        "content": "Load if Changed\n\nSignature: void LoadIfChanged()\nMethod: LoadIfChanged\nReturns: void\nCalled By:\n    [Bullet](_Bullet_)\n    [DeleteSelection](_Delete Selection_)\n    [Editable](_Editable Flag_)\n    [Editor](_Editor Constructor_)\n    [FollowLinkUnderCursor](_Follow Link Under Cursor_)\n    [OnEvent](_Ftxui Editor Event Handler_)\n    [IndentText](_Indent Text_)\n    [Number](_Numbered List_)\n    [OutdentText](_Outdent Text_)\n    [FormatTable](_Rebuild Table_)\n    [OnRender](_Render the Editor_)\n    [ReplaceText](_Replace Text_)\n    [SearchWordUnderCursor](_Search Word Under Cursor_)\n    [TransformSelection](_Transform Selection_)\n\nHow Comparison is Done:\n\nCompare by id, not just pointer: nodes live in std::vectors,\nso erasing one (e.g. deleting a node) can leave a different\nnode at the same address as the previously loaded one.",
                         "children": [],
                         "expanded": false
                       }
@@ -2468,7 +2468,7 @@
                       {
                         "id": "adcb0629",
                         "title": "Render the Editor",
-                        "content": "Render the Editor\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Command](_Command_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [Variables](_Variables_)\n\n--------------------------------------------------------------------------------\n\nScroll Past\n\nVim-like scroll-past-bottom: append blank lines after the\ncontent so the last line can scroll up to approximately the\nvertical center of the viewport instead of hugging the bottom\nedge. The viewport height is measured each frame by the\nBoxRecorder overlay below.\n\nconst int padding = std::max(0, viewport_height_ / 2);\nfor (int i = 0; i < padding; ++i)\n{\n    rows.push_back(ftxui::text(\"\"));\n}\nftxui::Element content =\n    ftxui::vbox(std::move(rows)) | ftxui::frame | ftxui::flex;\nftxui::Element tracker =\n    std::make_shared<BoxRecorder>(viewport_height_);\nreturn ftxui::dbox({content, tracker});",
+                        "content": "Render the Editor\n\nSignature: ftxui::Element OnRender() override\nMethod: OnRender\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Ftxui Render Call](_Ftxui Render Call_)\n\n--------------------------------------------------------------------------------\n\nScroll Past\n\nVim-like scroll-past-bottom: append blank lines after the\ncontent so the last line can scroll up to approximately the\nvertical center of the viewport instead of hugging the bottom\nedge. The viewport height is measured each frame by the\nBoxRecorder overlay below.\n\nconst int padding = std::max(0, viewport_height_ / 2);\nfor (int i = 0; i < padding; ++i)\n{\n    rows.push_back(ftxui::text(\"\"));\n}\nftxui::Element content =\n    ftxui::vbox(std::move(rows)) | ftxui::frame | ftxui::flex;\nftxui::Element tracker =\n    std::make_shared<BoxRecorder>(viewport_height_);\nreturn ftxui::dbox({content, tracker});",
                         "children": [],
                         "expanded": false
                       }
@@ -2534,7 +2534,7 @@
                   {
                     "id": "28d34adf",
                     "title": "Select First Search Match",
-                    "content": "Select First Search Match\n\nSignature: void JumpToFirstSearchMatch()\nMethod: JumpToFirstSearchMatch\nReturns: void\nCalled By:\n    [Private Members](_Private Members_)\n    [Render](_Render the Editor_)\n\nMove the cursor to the first occurrence of the active search\nquery in the freshly loaded node, so the '/' find and n/N\nnavigation reveal the match in the editor (as in Vim).",
+                    "content": "Select First Search Match\n\nSignature: void JumpToFirstSearchMatch()\nMethod: JumpToFirstSearchMatch\nReturns: void\nCalled By:\n    [Private Members](_Private Members_)\n    [OnRender](_Render the Editor_)\n\nMove the cursor to the first occurrence of the active search\nquery in the freshly loaded node, so the '/' find and n/N\nnavigation reveal the match in the editor (as in Vim).",
                     "children": [],
                     "expanded": false
                   },
@@ -2988,14 +2988,14 @@
                       {
                         "id": "eef19775",
                         "title": "Render the Help Dialog",
-                        "content": "Render the Help Dialog\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Command](_Command_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [Variables](_Variables_)",
+                        "content": "Render the Help Dialog\n\nSignature: ftxui::Element OnRender() override\nMethod: OnRender\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Ftxui Render Call](_Ftxui Render Call_)",
                         "children": [],
                         "expanded": false
                       },
                       {
                         "id": "a7b47c30",
                         "title": "Render Topic",
-                        "content": "Render Topic\n\nFill the help dialog with the full help topic.\n\nSignature: ftxui::Element RenderTopic()\nMethod: RenderTopic\nReturns: ftxui::Element\nCalled By:\n    [Render](_Render the Help Dialog_)",
+                        "content": "Render Topic\n\nFill the help dialog with the full help topic.\n\nSignature: ftxui::Element RenderTopic()\nMethod: RenderTopic\nReturns: ftxui::Element\nCalled By:\n    [OnRender](_Render the Help Dialog_)",
                         "children": [],
                         "expanded": false
                       },
@@ -3161,7 +3161,7 @@
                       {
                         "id": "c58e1987",
                         "title": "Recompute",
-                        "content": "Recompute\n\nSignature: void Recompute()\nMethod: Recompute\nReturns: void\nCalled By:\n    [Render](_Render the History Dialog_)\n\nRecomputes values etc from the state_",
+                        "content": "Recompute\n\nSignature: void Recompute()\nMethod: Recompute\nReturns: void\nCalled By:\n    [OnRender](_Render the History Dialog_)\n\nRecomputes values etc from the state_",
                         "children": [],
                         "expanded": false
                       },
@@ -3197,7 +3197,7 @@
                       {
                         "id": "95e511e2",
                         "title": "Render the History Dialog",
-                        "content": "Render the History Dialog\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Command](_Command_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [Variables](_Variables_)",
+                        "content": "Render the History Dialog\n\nSignature: ftxui::Element OnRender() override\nMethod: OnRender\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Ftxui Render Call](_Ftxui Render Call_)",
                         "children": [],
                         "expanded": false
                       },
@@ -4133,7 +4133,7 @@
                       {
                         "id": "5132d756",
                         "title": "Compute Top",
-                        "content": "Compute Top\n\nSignature: int ComputeTop(int sel, int total) const\nMethod: ComputeTop\nReturns: int\nQualifiers: const\nParameters:\n    sel   int\n    total int\nCalled By:\n    [Render](_Ftxui Render Call_)\n    [OnMouse](_On Mouse_)",
+                        "content": "Compute Top\n\nSignature: int ComputeTop(int sel, int total) const\nMethod: ComputeTop\nReturns: int\nQualifiers: const\nParameters:\n    sel   int\n    total int\nCalled By:\n    [OnRender](_Ftxui Render Call_)\n    [OnMouse](_On Mouse_)",
                         "children": [],
                         "expanded": false
                       },
@@ -4175,7 +4175,7 @@
                       {
                         "id": "a11e8a65",
                         "title": "Recompute",
-                        "content": "Recompute\n\nSignature: void Recompute()\nMethod: Recompute\nReturns: void\nCalled By:\n    [Render](_Ftxui Render Call_)",
+                        "content": "Recompute\n\nSignature: void Recompute()\nMethod: Recompute\nReturns: void\nCalled By:\n    [OnRender](_Ftxui Render Call_)",
                         "children": [],
                         "expanded": false
                       },
@@ -4211,7 +4211,7 @@
                       {
                         "id": "fd7b2b5b",
                         "title": "Ftxui Render Call",
-                        "content": "Ftxui Render Call\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Command](_Command_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [Variables](_Variables_)",
+                        "content": "Ftxui Render Call\n\nSignature: ftxui::Element OnRender() override\nMethod: OnRender\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Ftxui Render Call](_Ftxui Render Call_)",
                         "children": [],
                         "expanded": false
                       },
@@ -4372,7 +4372,7 @@
                   {
                     "id": "f0d4ed9e",
                     "title": "Ensure Rows",
-                    "content": "Ensure Rows\n\nSignature: void EnsureRows()\nMethod: EnsureRows\nReturns: void\nCalled By:\n    [OnEvent](_Ftxui Event Call_)\n    [Render](_Ftxui Render Call_)\n\nRebuild the rows after any change that affects the forest (filter,\nfold state, first open).",
+                    "content": "Ensure Rows\n\nSignature: void EnsureRows()\nMethod: EnsureRows\nReturns: void\nCalled By:\n    [OnEvent](_Ftxui Event Call_)\n    [OnRender](_Ftxui Render Call_)\n\nRebuild the rows after any change that affects the forest (filter,\nfold state, first open).",
                     "children": [],
                     "expanded": false
                   },
@@ -4393,7 +4393,7 @@
                   {
                     "id": "4bf5e83a",
                     "title": "Ftxui Render Call",
-                    "content": "Ftxui Render Call\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Command](_Command_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [Variables](_Variables_)",
+                    "content": "Ftxui Render Call\n\nSignature: ftxui::Element OnRender() override\nMethod: OnRender\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Ftxui Render Call](_Ftxui Render Call_)",
                     "children": [],
                     "expanded": false
                   },
@@ -4456,7 +4456,7 @@
                   {
                     "id": "94a3fb6a",
                     "title": "Reset",
-                    "content": "Reset\n\nSignature: void Reset()\nMethod: Reset\nReturns: void\nCalled By:\n    [Close](_Close_)\n    [Render](_Ftxui Render Call_)\n\nStart a fresh dialog each time it is opened.",
+                    "content": "Reset\n\nSignature: void Reset()\nMethod: Reset\nReturns: void\nCalled By:\n    [Close](_Close_)\n    [OnRender](_Ftxui Render Call_)\n\nStart a fresh dialog each time it is opened.",
                     "children": [],
                     "expanded": false
                   },
@@ -4567,7 +4567,7 @@
               {
                 "id": "33648a43",
                 "title": "Variables",
-                "content": "Variables\nConstructs the persistent editor state as well as the editor and treeview elements.\n\n--------------------------------------------------------------------------------\n\nauto version = \"1.2.0\";\n\nauto state = std::make_shared<EditorState>();\n\nauto editor_comp = scribbolyth::editor::MakeEditor(state);\nauto treeview_comp = scribbolyth::treeview::MakeTreeView(state);\n\nstate->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };\nstate->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };\n\nauto treeview_wrap = treeview_comp;\nauto editor_wrap = editor_comp;\n\nauto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);\n\n// 'N' in TREE mode hides the tree pane; render the editor on its own in\n// that case instead of the split, so the editor gets the full width.\nauto main_view = Renderer(main_split, [state, main_split, editor_wrap]\n{\n    if (state->treeview_visible)\n    {\n        return main_split->Render();\n    }\n    return editor_wrap->Render();\n});\n\nauto screen = ScreenInteractive::Fullscreen();\nauto quit = screen.ExitLoopClosure();\n\n--------------------------------------------------------------------------------",
+                "content": "Variables\nConstructs the persistent editor state as well as the editor and treeview elements.\n\n--------------------------------------------------------------------------------\n\nauto version = \"1.2.0\";\n\nauto state = std::make_shared<EditorState>();\n\nauto editor_comp = scribbolyth::editor::MakeEditor(state);\nauto treeview_comp = scribbolyth::treeview::MakeTreeView(state);\n\nstate->focus_editor = [editor_comp] { editor_comp->TakeFocus(); };\nstate->focus_treeview = [treeview_comp] { treeview_comp->TakeFocus(); };\n\nauto treeview_wrap = treeview_comp;\nauto editor_wrap = editor_comp;\n\nauto main_split = ResizableSplitLeft(treeview_wrap, editor_wrap, &state->treeview_width);\n\n// 'N' in TREE mode hides the tree pane; render the editor on its own in\n// that case instead of the split, so the editor gets the full width.\nauto main_view = Renderer(main_split, [state, main_split, editor_wrap]\n{\n    if (state->treeview_visible)\n    {\n        return main_split->Render();\n    }\n    return editor_wrap->Render();\n});\n\nauto screen = App::Fullscreen();\nauto quit = screen.ExitLoopClosure();\n\n--------------------------------------------------------------------------------",
                 "children": [],
                 "expanded": false
               },
@@ -4814,14 +4814,14 @@
                       {
                         "id": "0b4e1a42",
                         "title": "Filtered Indices",
-                        "content": "Filtered Indices\n\nSignature: std::vector<std::size_t> Matches() const\nMethod: Matches\nReturns: std::vector<std::size_t>\nQualifiers: const\nCalled By:\n    [ClampToFilter](_Clamp Selection to Filter_)\n    [Render](_Ftxui Render Method_)\n    [MoveEntry](_Move Selected Entry_)\n    [MoveToEnd](_Move Selection to Bottom_)\n    [MoveSelection](_Move Selection Up / Down_)\n    [Open](_Open Recent Dialog_)\n    [RemoveSelected](_Remove Selected Item_)",
+                        "content": "Filtered Indices\n\nSignature: std::vector<std::size_t> Matches() const\nMethod: Matches\nReturns: std::vector<std::size_t>\nQualifiers: const\nCalled By:\n    [ClampToFilter](_Clamp Selection to Filter_)\n    [OnRender](_Ftxui Render Method_)\n    [MoveEntry](_Move Selected Entry_)\n    [MoveToEnd](_Move Selection to Bottom_)\n    [MoveSelection](_Move Selection Up / Down_)\n    [Open](_Open Recent Dialog_)\n    [RemoveSelected](_Remove Selected Item_)",
                         "children": [],
                         "expanded": false
                       },
                       {
                         "id": "d2071eda",
                         "title": "Force Flag",
-                        "content": "Force Flag\n\nSignature: void PickupForce()\nMethod: PickupForce\nReturns: void\nCalled By:\n    [OnEvent](_Ftxui Event Handler_)\n    [Render](_Ftxui Render Method_)",
+                        "content": "Force Flag\n\nSignature: void PickupForce()\nMethod: PickupForce\nReturns: void\nCalled By:\n    [OnEvent](_Ftxui Event Handler_)\n    [OnRender](_Ftxui Render Method_)",
                         "children": [],
                         "expanded": false
                       },
@@ -4899,7 +4899,7 @@
                       {
                         "id": "68fb1c62",
                         "title": "Ftxui Render Method",
-                        "content": "Ftxui Render Method\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Command](_Command_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [Variables](_Variables_)",
+                        "content": "Ftxui Render Method\n\nSignature: ftxui::Element OnRender() override\nMethod: OnRender\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Ftxui Render Call](_Ftxui Render Call_)",
                         "children": [],
                         "expanded": false
                       },
@@ -4989,14 +4989,14 @@
                       {
                         "id": "366e97ca",
                         "title": "Filtered",
-                        "content": "Filtered\n\nSignature: std::vector<int> Filtered() const\nMethod: Filtered\nReturns: std::vector<int>\nQualifiers: const\nCalled By:\n    [End](_End_)\n    [Filtered Vector](_Filtered Vector_)\n    [Render](_Ftxui Render_)\n    [Home](_Home_)\n    [MaxTop](_Max Top_)\n    [MoveSelection](_Move Selection Up / Down_)\n    [OpenTopic](_Open Topic_)\n    [Render](_Render the Help Dialog_)",
+                        "content": "Filtered\n\nSignature: std::vector<int> Filtered() const\nMethod: Filtered\nReturns: std::vector<int>\nQualifiers: const\nCalled By:\n    [End](_End_)\n    [Filtered Vector](_Filtered Vector_)\n    [OnRender](_Ftxui Render_)\n    [Home](_Home_)\n    [MaxTop](_Max Top_)\n    [MoveSelection](_Move Selection Up / Down_)\n    [OpenTopic](_Open Topic_)\n    [OnRender](_Render the Help Dialog_)",
                         "children": [],
                         "expanded": false
                       },
                       {
                         "id": "91af28a5",
                         "title": "Max Top",
-                        "content": "Max Top\n\nSignature: int MaxTop() const\nMethod: MaxTop\nReturns: int\nQualifiers: const\nCalled By:\n    [OnEvent](_Ftxui Event Handler_)\n    [Render](_Ftxui Render_)",
+                        "content": "Max Top\n\nSignature: int MaxTop() const\nMethod: MaxTop\nReturns: int\nQualifiers: const\nCalled By:\n    [OnEvent](_Ftxui Event Handler_)\n    [OnRender](_Ftxui Render_)",
                         "children": [],
                         "expanded": false
                       },
@@ -5025,7 +5025,7 @@
                       {
                         "id": "6d8fcc14",
                         "title": "Ftxui Render",
-                        "content": "Ftxui Render\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Command](_Command_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [Variables](_Variables_)",
+                        "content": "Ftxui Render\n\nSignature: ftxui::Element OnRender() override\nMethod: OnRender\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Ftxui Render Call](_Ftxui Render Call_)",
                         "children": [],
                         "expanded": false
                       },
@@ -5167,7 +5167,7 @@
               {
                 "id": "6f6ee854",
                 "title": "Find Line Matches",
-                "content": "Find Line Matches\n\nSignature: std::vector<std::pair<int, int>> FindLineMatches(const std::string& line, const std::string& raw_query)\nMethod: FindLineMatches\nReturns: std::vector<std::pair<int, int>>\nParameters:\n    line      const std::string&\n    raw_query const std::string&\nCalled By:\n    [Render](_Render the Editor_)\n    [StepSearchOccurrence](_Search Results Navigation_)\n    [JumpToFirstSearchMatch](_Select First Search Match_)",
+                "content": "Find Line Matches\n\nSignature: std::vector<std::pair<int, int>> FindLineMatches(const std::string& line, const std::string& raw_query)\nMethod: FindLineMatches\nReturns: std::vector<std::pair<int, int>>\nParameters:\n    line      const std::string&\n    raw_query const std::string&\nCalled By:\n    [OnRender](_Render the Editor_)\n    [StepSearchOccurrence](_Search Results Navigation_)\n    [JumpToFirstSearchMatch](_Select First Search Match_)",
                 "children": [],
                 "expanded": false
               },
@@ -5195,7 +5195,7 @@
               {
                 "id": "b749e04c",
                 "title": "Is Regex Filter",
-                "content": "Is Regex Filter\n\nSignature: bool IsRegexFilter(const std::string& raw)\nMethod: IsRegexFilter\nReturns: bool\nParameters:\n    raw const std::string&\nCalled By:\n    [OnEvent](_Ftxui Event Method_)\n    [Render](_Ftxui Render Method_)\n    Recompute from state_ (Recompute)\n\nWhether the filter runs a regex-based match (\"r:\" regex or\n\"+:\" all-words). These are deferred until Return is pressed so\nthat typing stays responsive instead of re-scanning the tree\n(and re-compiling a regex) on every keystroke.",
+                "content": "Is Regex Filter\n\nSignature: bool IsRegexFilter(const std::string& raw)\nMethod: IsRegexFilter\nReturns: bool\nParameters:\n    raw const std::string&\nCalled By:\n    [OnEvent](_Ftxui Event Method_)\n    [OnRender](_Ftxui Render Method_)\n    Recompute from state_ (Recompute)\n\nWhether the filter runs a regex-based match (\"r:\" regex or\n\"+:\" all-words). These are deferred until Return is pressed so\nthat typing stays responsive instead of re-scanning the tree\n(and re-compiling a regex) on every keystroke.",
                 "children": [],
                 "expanded": false
               },
@@ -5247,7 +5247,7 @@
                       {
                         "id": "417566b2",
                         "title": "Recompute from state_",
-                        "content": "Recompute from state_\n\nSignature: void Recompute(bool force = false)\nMethod: Recompute\nReturns: void\nParameters:\n    force bool\nCalled By:\n    [OnEvent](_Ftxui Event Method_)\n    [Render](_Ftxui Render Method_)",
+                        "content": "Recompute from state_\n\nSignature: void Recompute(bool force = false)\nMethod: Recompute\nReturns: void\nParameters:\n    force bool\nCalled By:\n    [OnEvent](_Ftxui Event Method_)\n    [OnRender](_Ftxui Render Method_)",
                         "children": [],
                         "expanded": false
                       },
@@ -5283,7 +5283,7 @@
                       {
                         "id": "3da861ca",
                         "title": "Ftxui Render Method",
-                        "content": "Ftxui Render Method\n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Command](_Command_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [Variables](_Variables_)",
+                        "content": "Ftxui Render Method\n\nSignature: ftxui::Element OnRender() override\nMethod: OnRender\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Ftxui Render Call](_Ftxui Render Call_)",
                         "children": [],
                         "expanded": false
                       },
@@ -5398,7 +5398,7 @@
               {
                 "id": "7f201a0f",
                 "title": "Pad Right",
-                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t\nCalled By:\n    [bookmarks.cpp:41](_bookmarks.cpp_)\n    [brokelinks.cpp:34](_brokelinks.cpp_)\n    [browser.cpp:57](_browser.cpp_)\n    [Render](_Ftxui Render_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [Render](_Ftxui Render Call_)\n    [Render](_Ftxui Render Method_)\n    [help.cpp:219](_help.cpp_)\n    [history.cpp:49](_history.cpp_)\n    [links.cpp:34](_links.cpp_)\n    [linktree.cpp:42](_linktree.cpp_)\n    [ParseEntries](_Parse Entries_)\n    [recent.cpp:30](_recent.cpp_)\n    [regex.cpp:61](_regex.cpp_)\n    [Render](_Render Browser Dialog_)\n    [Render](_Render the Bookmarks Dialog_)\n    [Render](_Render the Help Dialog_)\n    [Render](_Render the History Dialog_)\n    [RenderTopic](_Render Topic_)\n    [search.cpp:45](_search.cpp_)\n\nThis is a shared helper method\n\n#helper",
+                "content": "Pad Right\n\nSignature: std::string PadRight(const std::string& s, std::size_t width)\nMethod: PadRight\nReturns: std::string\nParameters:\n    s     const std::string&\n    width std::size_t\nCalled By:\n    [bookmarks.cpp:41](_bookmarks.cpp_)\n    [brokelinks.cpp:34](_brokelinks.cpp_)\n    [browser.cpp:57](_browser.cpp_)\n    [OnRender](_Ftxui Render_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [OnRender](_Ftxui Render Call_)\n    [OnRender](_Ftxui Render Method_)\n    [help.cpp:219](_help.cpp_)\n    [history.cpp:49](_history.cpp_)\n    [links.cpp:34](_links.cpp_)\n    [linktree.cpp:42](_linktree.cpp_)\n    [ParseEntries](_Parse Entries_)\n    [recent.cpp:30](_recent.cpp_)\n    [regex.cpp:61](_regex.cpp_)\n    [OnRender](_Render Browser Dialog_)\n    [OnRender](_Render the Bookmarks Dialog_)\n    [OnRender](_Render the Help Dialog_)\n    [OnRender](_Render the History Dialog_)\n    [RenderTopic](_Render Topic_)\n    [search.cpp:45](_search.cpp_)\n\nThis is a shared helper method\n\n#helper",
                 "children": [],
                 "expanded": false
               },
@@ -5850,14 +5850,14 @@
               {
                 "id": "2b21b64e",
                 "title": "Render Node",
-                "content": "Render Node \n\nSignature: void RenderNode(const TreeNode& node, int depth, const TreeNode* selected, const std::set<const TreeNode*>* matches, ftxui::Elements& rows)\nMethod: RenderNode\nReturns: void\nParameters:\nnode     const TreeNode&\ndepth    int\nselected const TreeNode*\nmatches  const std::set<const TreeNode*>*\nrows     ftxui::Elements&\nCalled By:\n    [RenderNode](_Render Node_)\n    [Render](_Render the Treeview_)\n\nRender one node as a row (indented by depth, \u25b8/\u25be folder marker) and\nrecurse into its expanded children. Yellow = search match, inverted =\nthis node is selected.",
+                "content": "Render Node \n\nSignature: void RenderNode(const TreeNode& node, int depth, const TreeNode* selected, const std::set<const TreeNode*>* matches, ftxui::Elements& rows)\nMethod: RenderNode\nReturns: void\nParameters:\nnode     const TreeNode&\ndepth    int\nselected const TreeNode*\nmatches  const std::set<const TreeNode*>*\nrows     ftxui::Elements&\nCalled By:\n    [RenderNode](_Render Node_)\n    [OnRender](_Render the Treeview_)\n\nRender one node as a row (indented by depth, \u25b8/\u25be folder marker) and\nrecurse into its expanded children. Yellow = search match, inverted =\nthis node is selected.",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "733bb665",
                 "title": "Render the Treeview",
-                "content": "Render the Treeview \n\nSignature: ftxui::Element TreeView::Render()\nMethod: Render\nReturns: ftxui::Element TreeView\nCalled By:\n    [Command](_Command_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [TreeView Component Class](_TreeView Component Class_)\n    [Variables](_Variables_)\n\nCompose the full tree pane: all root rows in a scrollable, flexible\nvertical box.",
+                "content": "Render the Treeview \n\nSignature: ftxui::Element TreeView::OnRender()\nMethod: OnRender\nReturns: ftxui::Element TreeView\nCalled By:\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [TreeView Component Class](_TreeView Component Class_)\n\nCompose the full tree pane: all root rows in a scrollable, flexible\nvertical box.",
                 "children": [],
                 "expanded": false
               }
@@ -5902,7 +5902,7 @@
               {
                 "id": "1b7dd36e",
                 "title": "Diff Marks",
-                "content": "Diff Marks \n\nSignature: std::vector<int> DiffMark(const std::vector<std::string>& snap, const std::vector<std::string>& cur)\nMethod: DiffMark\nReturns: std::vector<int>\nParameters:\n    snap const std::vector<std::string>&\n    cur  const std::vector<std::string>&\nCalled By:\n    [Render](_Render_)\n\n\nDiff markers for the preview pane: 0 = unchanged, 1 = changed,\n2 = first changed line.",
+                "content": "Diff Marks \n\nSignature: std::vector<int> DiffMark(const std::vector<std::string>& snap, const std::vector<std::string>& cur)\nMethod: DiffMark\nReturns: std::vector<int>\nParameters:\n    snap const std::vector<std::string>&\n    cur  const std::vector<std::string>&\nCalled By:\n    [OnRender](_Render_)\n\n\nDiff markers for the preview pane: 0 = unchanged, 1 = changed,\n2 = first changed line.",
                 "children": [],
                 "expanded": false
               },
@@ -5923,21 +5923,21 @@
               {
                 "id": "bfd98d6e",
                 "title": "Node Text Doc",
-                "content": "Node Text Doc \n\nSignature: std::vector<std::string> NodeTextDoc(const std::string& json, const std::string& id)\nMethod: NodeTextDoc\nReturns: std::vector<std::string>\nParameters:\n    json const std::string&\n    id   const std::string&\nCalled By:\n    [Render](_Render_)\n\nText lines of the node `id` inside a serialized snapshot. The undo\ndialog shows only the currently active note, so this pulls that one\nnode's text out of the snapshot rather than rendering the whole\ndocument.",
+                "content": "Node Text Doc \n\nSignature: std::vector<std::string> NodeTextDoc(const std::string& json, const std::string& id)\nMethod: NodeTextDoc\nReturns: std::vector<std::string>\nParameters:\n    json const std::string&\n    id   const std::string&\nCalled By:\n    [OnRender](_Render_)\n\nText lines of the node `id` inside a serialized snapshot. The undo\ndialog shows only the currently active note, so this pulls that one\nnode's text out of the snapshot rather than rendering the whole\ndocument.",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "8b50bd27",
                 "title": "Split Lines",
-                "content": "Split Lines \n\nSignature: std::vector<std::string> SplitLines(const std::string& text)\nMethod: SplitLines\nReturns: std::vector<std::string>\nParameters:\n    text const std::string&\nCalled By:\n    [NodeTextDoc](_Node Text Doc_)\n    [Render](_Render_)",
+                "content": "Split Lines \n\nSignature: std::vector<std::string> SplitLines(const std::string& text)\nMethod: SplitLines\nReturns: std::vector<std::string>\nParameters:\n    text const std::string&\nCalled By:\n    [NodeTextDoc](_Node Text Doc_)\n    [OnRender](_Render_)",
                 "children": [],
                 "expanded": false
               },
               {
                 "id": "0809980f",
                 "title": "Trunc",
-                "content": "Trunc \n\nSignature: std::string Trunc(std::string s, std::size_t width)\nMethod: Trunc\nReturns: std::string\nParameters:\n    s     std::string\n    width std::size_t\nCalled By:\n    [Render](_Render_)",
+                "content": "Trunc \n\nSignature: std::string Trunc(std::string s, std::size_t width)\nMethod: Trunc\nReturns: std::string\nParameters:\n    s     std::string\n    width std::size_t\nCalled By:\n    [OnRender](_Render_)",
                 "children": [],
                 "expanded": false
               },
@@ -5997,7 +5997,7 @@
                       {
                         "id": "f0b577b3",
                         "title": "Render",
-                        "content": "Render \n\nSignature: ftxui::Element Render() override\nMethod: Render\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Command](_Command_)\n    [Ftxui Render Call](_Ftxui Render Call_)\n    [Variables](_Variables_)",
+                        "content": "Render \n\nSignature: ftxui::Element OnRender() override\nMethod: OnRender\nReturns: ftxui::Element\nQualifiers: override\nCalled By:\n    [Ftxui Render Call](_Ftxui Render Call_)",
                         "children": [],
                         "expanded": false
                       },
